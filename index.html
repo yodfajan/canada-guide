@@ -114,6 +114,28 @@
   .b-red{background:var(--red-soft);color:var(--red)}
   .b-blue{background:var(--blue-soft);color:var(--blue)}
   .b-gray{background:var(--gray-soft);color:var(--ink2)}
+  /* Citations */
+  sup.cite{font-size:.68em;line-height:0;vertical-align:super;margin-left:1px;white-space:nowrap}
+  sup.cite a{color:var(--blue);font-weight:600;text-decoration:none;padding:0 2px;border-radius:4px;font-variant-numeric:tabular-nums}
+  sup.cite a:hover{background:var(--blue-soft)}
+  sup.cite a::before{content:'['}sup.cite a::after{content:']'}
+  .reflist{counter-reset:none;list-style:none;margin:0;padding:0}
+  .reflist li{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px;scroll-margin-top:80px;scroll-margin-bottom:110px;border-radius:8px;transition:background .6s}
+  .reflist li.flash{background:var(--blue-soft)}
+  .reflist .rn{color:var(--blue);font-weight:600;min-width:2.2em;font-variant-numeric:tabular-nums}
+  .reflist a{color:var(--blue)}
+  .reflist a:hover{text-decoration:underline}
+  /* NOC chips */
+  .noc{display:inline-flex;align-items:baseline;gap:6px;padding:5px 10px;border-radius:10px;background:var(--gray-soft);color:var(--ink);font-size:13.5px;line-height:1.35;text-decoration:none}
+  .noc:hover{background:var(--blue-soft)}
+  .noc b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:600}
+  .noc i{font-style:normal;color:var(--ink3);font-size:12px}
+  /* Field cards */
+  details.fcard>summary{list-style:none;cursor:pointer}
+  details.fcard>summary::-webkit-details-marker{display:none}
+  details.fcard .chev{transition:transform .2s;color:var(--ink3)}
+  details.fcard[open] .chev{transform:rotate(90deg)}
+  .grp-h{font-size:13px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;margin:26px 0 10px}
   .icon{width:18px;height:18px;flex:none} .icon-sm{width:14px;height:14px;flex:none}
   .tile{width:36px;height:36px;border-radius:11px;box-shadow:var(--specular);display:flex;align-items:center;justify-content:center;flex:none}
   ul.clean{list-style:none;margin:0;padding:0}
@@ -291,6 +313,7 @@
     </header>
     <main id="app" class="wrap"></main>
     <footer class="wrap" style="padding-top:0">
+      <div id="refs" class="card mb-5"></div>
       <div id="links" class="card mb-5"></div>
       <p id="disclaimer" class="faint text-[13px]" style="max-width:78ch"></p>
     </footer>
@@ -302,7 +325,7 @@
 /* ============================== STATE ============================== */
 const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
-  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', scenario:'safe',
+  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', open:{}, scenario:'safe',
   sim:{ type:'public', tuition:21000, living:'shared', hours:20, coopHours:40, wage:18.5, rate:24, rateAuto:true, proof:23448 },
   fx:{ rate:null, date:null, day:null, src:'' }
 };
@@ -352,7 +375,7 @@ const LINKS = {
     {u:IRCC+'study-canada/work/work-off-campus.html', l:{en:'Working off campus: weekly hour limit', th:'การทำงานนอกสถาบัน: จำนวนชั่วโมงต่อสัปดาห์'}},
     {u:IRCC+'study-canada/work/intern.html', l:{en:'Co-op work permit (student work placement)', th:'Co-op Work Permit (การฝึกงานของนักศึกษา)'}},
     {u:IRCC+'immigrate-canada/express-entry/rounds-invitations.html', l:{en:'Express Entry: latest draws and CRS cut-offs', th:'Express Entry: รอบคัดเลือกล่าสุดและคะแนน CRS'}},
-    {u:IRCC+'immigrate-canada/express-entry/rounds-invitations/category-based-selection.html', l:{en:'Express Entry: category-based selection (Healthcare, STEM)', th:'Express Entry: รอบเฉพาะหมวด (Healthcare, STEM)'}},
+    {u:IRCC+'immigrate-canada/express-entry/submit-profile/rounds-invitations/category-based-selection.html', l:{en:'Express Entry: category-based selection (Healthcare, STEM)', th:'Express Entry: รอบเฉพาะหมวด (Healthcare, STEM)'}},
     {u:IRCC+'immigrate-canada/express-entry/check-score.html', l:{en:'CRS score calculator', th:'เครื่องคำนวณคะแนน CRS'}},
     {u:IRCC+'immigrate-canada/provincial-nominees.html', l:{en:'Provincial Nominee Program', th:'Provincial Nominee Program'}},
     {u:'https://ircc.canada.ca/english/information/fees/fees.asp', l:{en:'IRCC fee list: every application fee', th:'รายการค่าธรรมเนียม IRCC: ค่าธรรมเนียมทุกประเภท'}},
@@ -360,6 +383,42 @@ const LINKS = {
     {u:IRCC+'study-canada/study-permit/prepare-arrival.html', l:{en:'Prepare for arrival in Canada', th:'การเตรียมตัวก่อนเดินทางถึงแคนาดา'}},
     {u:'https://www.canada.ca/en/employment-social-development/services/sin.html', l:{en:'Social Insurance Number (SIN)', th:'Social Insurance Number (SIN)'}}
   ]
+};
+/* Citation sources. Put [[key]] at the end of any text to cite it; numbers are assigned per page. */
+const GC = {en:'Government of Canada', th:'รัฐบาลแคนาดา'}, IRCCN = {en:'IRCC', th:'IRCC'};
+const SRC = {
+  sp:{u:IRCC+'study-canada/study-permit.html', o:IRCCN, l:{en:'Study permit: who can apply and how', th:'Study Permit: ผู้มีสิทธิ์และวิธียื่น'}},
+  docs:{u:IRCC+'study-canada/study-permit/get-documents.html', o:IRCCN, l:{en:'Study permit: documents you need', th:'Study Permit: เอกสารที่ต้องใช้'}},
+  funds:{u:IRCC+'study-canada/study-permit/get-documents/financial-support.html', o:IRCCN, l:{en:'Proof of financial support', th:'หลักฐานการเงิน (Proof of Financial Support)'}},
+  pal:{u:IRCC+'study-canada/study-permit/get-documents/provincial-attestation-letter.html', o:IRCCN, l:{en:'Provincial Attestation Letter (PAL)', th:'Provincial Attestation Letter (PAL)'}},
+  dli:{u:IRCC+'study-canada/study-permit/prepare/designated-learning-institutions-list.html', o:IRCCN, l:{en:'Designated Learning Institutions list', th:'รายชื่อ Designated Learning Institutions'}},
+  offc:{u:IRCC+'study-canada/work/work-off-campus.html', o:IRCCN, l:{en:'Work off campus as an international student', th:'การทำงานนอกสถาบันของนักศึกษาต่างชาติ'}},
+  coop:{u:IRCC+'study-canada/work/intern.html', o:IRCCN, l:{en:'Co-op and internship work permits', th:'Work Permit สำหรับ Co-op และฝึกงาน'}},
+  arrive:{u:IRCC+'study-canada/study-permit/prepare-arrival.html', o:IRCCN, l:{en:'Prepare for arrival', th:'การเตรียมตัวก่อนเดินทางถึง'}},
+  pgwp:{u:IRCC+'study-canada/work/after-graduation/eligibility.html', o:IRCCN, l:{en:'Post-Graduation Work Permit: eligibility, language and field of study', th:'PGWP: คุณสมบัติ ภาษา และสาขาวิชา'}},
+  pgwpfos:{u:IRCC+'study-canada/work/after-graduation/eligibility/field-of-study.html', o:IRCCN, l:{en:'PGWP: eligible fields of study (CIP codes)', th:'PGWP: รายการสาขาวิชาที่มีสิทธิ์ (รหัส CIP)'}},
+  cip:{u:'https://www.statcan.gc.ca/en/subjects/standard/cip/2021/index', o:{en:'Statistics Canada', th:'Statistics Canada'}, l:{en:'Classification of Instructional Programs (CIP) 2021', th:'ระบบจัดรหัสหลักสูตร CIP 2021'}},
+  noc:{u:'https://noc.esdc.gc.ca/', o:{en:'ESDC and Statistics Canada', th:'ESDC และ Statistics Canada'}, l:{en:'National Occupational Classification (NOC) 2021: search occupations, duties and TEER', th:'National Occupational Classification (NOC) 2021: ค้นหาอาชีพ หน้าที่ และระดับ TEER'}},
+  findnoc:{u:IRCC+'immigrate-canada/find-national-occupation-code.html', o:IRCCN, l:{en:'Find your NOC code and TEER category', th:'วิธีหารหัส NOC และหมวด TEER ของคุณ'}},
+  eecat:{u:IRCC+'immigrate-canada/express-entry/submit-profile/rounds-invitations/category-based-selection.html', o:IRCCN, l:{en:'Express Entry: category-based selection and eligible occupations', th:'Express Entry: รอบเฉพาะหมวดและรายชื่ออาชีพที่เข้าเกณฑ์'}},
+  draws:{u:IRCC+'immigrate-canada/express-entry/rounds-invitations.html', o:IRCCN, l:{en:'Express Entry: rounds of invitations and CRS cut-offs', th:'Express Entry: รอบเชิญและคะแนน CRS ขั้นต่ำ'}},
+  cec:{u:IRCC+'immigrate-canada/express-entry/who-can-apply/canadian-experience-class.html', o:IRCCN, l:{en:'Canadian Experience Class: who can apply', th:'Canadian Experience Class: ผู้มีสิทธิ์ยื่น'}},
+  crs:{u:IRCC+'immigrate-canada/express-entry/check-score.html', o:IRCCN, l:{en:'Comprehensive Ranking System (CRS) calculator', th:'เครื่องคำนวณคะแนน CRS'}},
+  lang:{u:IRCC+'immigrate-canada/express-entry/documents/language-test.html', o:IRCCN, l:{en:'Express Entry: approved language tests', th:'Express Entry: ข้อสอบภาษาที่ได้รับการรับรอง'}},
+  eca:{u:IRCC+'immigrate-canada/express-entry/documents/education-assessment.html', o:IRCCN, l:{en:'Educational Credential Assessment (ECA)', th:'Educational Credential Assessment (ECA)'}},
+  pnp:{u:IRCC+'immigrate-canada/provincial-nominees.html', o:IRCCN, l:{en:'Provincial Nominee Program', th:'Provincial Nominee Program'}},
+  fees:{u:'https://ircc.canada.ca/english/information/fees/fees.asp', o:IRCCN, l:{en:'IRCC fee list', th:'รายการค่าธรรมเนียม IRCC'}},
+  proc:{u:IRCC+'application/check-processing-times.html', o:IRCCN, l:{en:'Check processing times', th:'ตรวจสอบระยะเวลาดำเนินการ'}},
+  med:{u:IRCC+'application/medical-police/medical-exams/requirements-temporary-residents.html', o:IRCCN, l:{en:'Medical exams for visitors, students and workers', th:'การตรวจสุขภาพสำหรับผู้เยี่ยมเยือน นักศึกษา และแรงงาน'}},
+  sin:{u:'https://www.canada.ca/en/employment-social-development/services/sin.html', o:{en:'Service Canada', th:'Service Canada'}, l:{en:'Social Insurance Number (SIN)', th:'Social Insurance Number (SIN)'}},
+  wages:{u:'https://www.jobbank.gc.ca/trend-analysis/search-wages', o:{en:'Job Bank', th:'Job Bank'}, l:{en:'Wages by occupation and region', th:'ค่าจ้างตามอาชีพและพื้นที่'}},
+  minw:{u:'https://minwage-salairemin.service.canada.ca/en/general.html', o:GC, l:{en:'Minimum wage by province and territory', th:'ค่าแรงขั้นต่ำแยกตามมณฑล'}}
+};
+const REF_UI = {
+  title:{en:'References on this page', th:'แหล่งอ้างอิงในหน้านี้'},
+  sub:{en:'Numbers in square brackets in the text link here. Each source opens the official page.', th:'ตัวเลขในวงเล็บเหลี่ยมในเนื้อหาจะลิงก์มาที่นี่ ทุกแหล่งเปิดหน้าเว็บทางการ'},
+  none:{en:'This page has no cited figures.', th:'หน้านี้ไม่มีตัวเลขที่ต้องอ้างอิง'},
+  checked:{en:'Checked', th:'ตรวจสอบเมื่อ'}
 };
 const FX_UI = {
   live:{en:'Live rate, updated', th:'อัตราล่าสุด อัปเดตเมื่อ'},
@@ -411,13 +470,13 @@ const OPTIONS = [
    ],
    pros:[
      {en:'Low tuition and fast entry, often with an in-house English test instead of IELTS', th:'ค่าเล่าเรียนต่ำ เข้าเรียนได้เร็ว หลายแห่งใช้ข้อสอบภาษาอังกฤษของสถาบันแทน IELTS ได้'},
-     {en:'Part-time work during the study term (IRCC currently allows up to 24 hours per week off campus)', th:'ทำงานพาร์ตไทม์ระหว่างเทอมเรียนได้ (ปัจจุบัน IRCC อนุญาตสูงสุด 24 ชั่วโมงต่อสัปดาห์นอกสถาบัน)'},
+     {en:'Part-time work during the study term (IRCC currently allows up to 24 hours per week off campus) [[offc]]', th:'ทำงานพาร์ตไทม์ระหว่างเทอมเรียนได้ (ปัจจุบัน IRCC อนุญาตสูงสุด 24 ชั่วโมงต่อสัปดาห์นอกสถาบัน) [[offc]]'},
      {en:'Full-time paid work during the Co-op term', th:'ทำงานเต็มเวลาแบบได้ค่าจ้างในช่วงเทอม Co-op'}
    ],
    cons:[
-     {en:'No Post-Graduation Work Permit. When the program ends, your right to stay and work ends too.', th:'ไม่มีสิทธิ์ขอ Post-Graduation Work Permit เมื่อจบหลักสูตร สิทธิ์อยู่ต่อและทำงานก็สิ้นสุดด้วย'},
+     {en:'No Post-Graduation Work Permit. When the program ends, your right to stay and work ends too. [[pgwp]]', th:'ไม่มีสิทธิ์ขอ Post-Graduation Work Permit เมื่อจบหลักสูตร สิทธิ์อยู่ต่อและทำงานก็สิ้นสุดด้วย [[pgwp]]'},
      {en:'Co-op jobs are mostly service or entry-level (cafes, retail, hotels), not corporate Data or BI roles.', th:'งาน Co-op ส่วนใหญ่เป็นงานบริการหรือระดับเริ่มต้น (ร้านกาแฟ ค้าปลีก โรงแรม) ไม่ใช่งานสาย Data หรือ BI ในองค์กร'},
-     {en:'Needs a Bridge Strategy: to stay for PR you must move to a public college or university, which now requires a new study permit, a new attestation letter, and fresh proof of funds.', th:'ต้องมี Bridge Strategy: ถ้าจะอยู่ต่อเพื่อ PR ต้องย้ายไปเรียนสถาบันรัฐ ซึ่งปัจจุบันต้องขอ Study Permit ใหม่ ขอหนังสือรับรองจากมณฑลใหม่ และแสดงหลักฐานการเงินรอบใหม่'}
+     {en:'Needs a Bridge Strategy: to stay for PR you must move to a public college or university, which now requires a new study permit, a new attestation letter, and fresh proof of funds. [[pal]]', th:'ต้องมี Bridge Strategy: ถ้าจะอยู่ต่อเพื่อ PR ต้องย้ายไปเรียนสถาบันรัฐ ซึ่งปัจจุบันต้องขอ Study Permit ใหม่ ขอหนังสือรับรองจากมณฑลใหม่ และแสดงหลักฐานการเงินรอบใหม่ [[pal]]'}
    ]},
   {key:'B', icon:'landmark', tint:'var(--green-soft)', color:'var(--green)',
    t:{en:'Option B: Public College Post-Graduate Diploma with Co-op', th:'ทางเลือก B: Post-Graduate Diploma พร้อม Co-op ที่วิทยาลัยรัฐ'},
@@ -431,13 +490,13 @@ const OPTIONS = [
    ],
    pros:[
      {en:'Corporate and technical Co-op placements: hospitals, tech firms, banks', th:'ที่ฝึกงาน Co-op เป็นงานองค์กรและงานเทคนิค เช่น โรงพยาบาล บริษัทเทค ธนาคาร'},
-     {en:'PGWP eligible when the program matches an IRCC-eligible CIP code (STEM or Healthcare)', th:'มีสิทธิ์ PGWP เมื่อหลักสูตรตรงกับรหัส CIP ที่ IRCC กำหนด (STEM หรือ Healthcare)'},
+     {en:'PGWP eligible when the program matches an IRCC-eligible CIP code (STEM or Healthcare) [[pgwpfos]]', th:'มีสิทธิ์ PGWP เมื่อหลักสูตรตรงกับรหัส CIP ที่ IRCC กำหนด (STEM หรือ Healthcare) [[pgwpfos]]'},
      {en:'Direct pathway to PR with no second study permit', th:'เป็นเส้นทางตรงสู่ PR โดยไม่ต้องขอ Study Permit รอบสอง'}
    ],
    cons:[
      {en:'Higher tuition and a larger proof-of-funds amount', th:'ค่าเล่าเรียนสูงกว่า และต้องแสดงเงินในบัญชีมากกว่า'},
      {en:'Usually requires IELTS Academic 6.5 overall', th:'โดยทั่วไปต้องใช้ IELTS Academic รวม 6.5'},
-     {en:'PGWP length follows program length: a 1-year diploma gives roughly a 1-year permit, while a 2-year program gives 3 years.', th:'อายุ PGWP ขึ้นกับความยาวหลักสูตร: Diploma 1 ปีได้ใบอนุญาตประมาณ 1 ปี ส่วนหลักสูตร 2 ปีได้ 3 ปี'}
+     {en:'PGWP length follows program length: a 1-year diploma gives roughly a 1-year permit, while a 2-year program gives 3 years. [[pgwp]]', th:'อายุ PGWP ขึ้นกับความยาวหลักสูตร: Diploma 1 ปีได้ใบอนุญาตประมาณ 1 ปี ส่วนหลักสูตร 2 ปีได้ 3 ปี [[pgwp]]'}
    ]}
 ];
 
@@ -489,7 +548,7 @@ const QUIZ = [
    o:[
      {a:3,b:0,l:{en:'Fine. A slow, gentle start matters more to me.', th:'ไม่เป็นไร การเริ่มต้นแบบค่อยเป็นค่อยไปสำคัญกว่า'}},
      {a:1,b:1,l:{en:'Neutral', th:'เฉย ๆ'}},
-     {a:0,b:3,l:{en:'I want the fastest route. Age points in Express Entry drop every year after 29.', th:'อยากได้เส้นทางเร็วที่สุด เพราะคะแนนอายุใน Express Entry ลดลงทุกปีหลังอายุ 29'}}
+     {a:0,b:3,l:{en:'I want the fastest route. Age points in Express Entry drop every year after 29. [[crs]]', th:'อยากได้เส้นทางเร็วที่สุด เพราะคะแนนอายุใน Express Entry ลดลงทุกปีหลังอายุ 29 [[crs]]'}}
    ]},
   {id:'winter', icon:'snowflake', cat:{en:'Weather', th:'สภาพอากาศ'}, city:true,
    q:{en:'How do you feel about winter?', th:'รู้สึกอย่างไรกับฤดูหนาว'},
@@ -525,82 +584,305 @@ const QUIZ_UI = {
   go:{en:'See the matching roadmap', th:'ดูแผนเส้นทางที่ตรงกัน'}
 };
 
+/* NOC 2021 Version 1.0 titles, checked on noc.esdc.gc.ca on 18 November 2026. TEER is the second digit of the code. */
+const NOCT = {
+  '10022':{en:'Advertising, marketing and public relations managers', th:'ผู้จัดการฝ่ายโฆษณา การตลาด และประชาสัมพันธ์'},
+  '11100':{en:'Financial auditors and accountants', th:'ผู้สอบบัญชีและนักบัญชี'},
+  '11101':{en:'Financial and investment analysts', th:'นักวิเคราะห์การเงินและการลงทุน'},
+  '11102':{en:'Financial advisors', th:'ที่ปรึกษาทางการเงิน'},
+  '11200':{en:'Human resources professionals', th:'ผู้เชี่ยวชาญด้านทรัพยากรบุคคล'},
+  '11201':{en:'Professional occupations in business management consulting', th:'ที่ปรึกษาและนักวิเคราะห์การจัดการธุรกิจ'},
+  '11202':{en:'Professional occupations in advertising, marketing and public relations', th:'ผู้เชี่ยวชาญด้านโฆษณา การตลาด และประชาสัมพันธ์'},
+  '12013':{en:'Supervisors, supply chain, tracking and scheduling coordination occupations', th:'หัวหน้างานซัพพลายเชน การติดตาม และการจัดตาราง'},
+  '12102':{en:'Procurement and purchasing agents and officers', th:'เจ้าหน้าที่จัดซื้อจัดจ้าง'},
+  '12111':{en:'Health information management occupations', th:'งานบริหารข้อมูลสุขภาพ'},
+  '12200':{en:'Accounting technicians and bookkeepers', th:'เจ้าหน้าที่บัญชีและผู้ทำบัญชี'},
+  '13100':{en:'Administrative officers', th:'เจ้าหน้าที่บริหารงานทั่วไป'},
+  '13201':{en:'Production and transportation logistics coordinators', th:'ผู้ประสานงานโลจิสติกส์การผลิตและการขนส่ง'},
+  '21210':{en:'Mathematicians, statisticians and actuaries', th:'นักคณิตศาสตร์ นักสถิติ และนักคณิตศาสตร์ประกันภัย'},
+  '21211':{en:'Data scientists', th:'นักวิทยาศาสตร์ข้อมูล (รวมถึง Data Engineer)'},
+  '21220':{en:'Cybersecurity specialists', th:'ผู้เชี่ยวชาญความปลอดภัยไซเบอร์'},
+  '21221':{en:'Business systems specialists', th:'ผู้เชี่ยวชาญระบบธุรกิจ (รวมถึง Business Systems Analyst)'},
+  '21222':{en:'Information systems specialists', th:'ผู้เชี่ยวชาญระบบสารสนเทศ'},
+  '21223':{en:'Database analysts and data administrators', th:'นักวิเคราะห์ฐานข้อมูลและผู้ดูแลข้อมูล'},
+  '21231':{en:'Software engineers and designers', th:'วิศวกรและนักออกแบบซอฟต์แวร์ (รวมถึง Cloud Engineer)'},
+  '21232':{en:'Software developers and programmers', th:'นักพัฒนาซอฟต์แวร์และโปรแกรมเมอร์'},
+  '21234':{en:'Web developers and programmers', th:'นักพัฒนาเว็บและโปรแกรมเมอร์'},
+  '21300':{en:'Civil engineers', th:'วิศวกรโยธา'},
+  '21301':{en:'Mechanical engineers', th:'วิศวกรเครื่องกล'},
+  '21310':{en:'Electrical and electronics engineers', th:'วิศวกรไฟฟ้าและอิเล็กทรอนิกส์'},
+  '21321':{en:'Industrial and manufacturing engineers', th:'วิศวกรอุตสาหการและการผลิต'},
+  '22220':{en:'Computer network and web technicians', th:'ช่างเทคนิคเครือข่ายคอมพิวเตอร์และเว็บ'},
+  '22221':{en:'User support technicians', th:'เจ้าหน้าที่สนับสนุนผู้ใช้ (IT Support)'},
+  '22300':{en:'Civil engineering technologists and technicians', th:'นักเทคโนโลยีและช่างเทคนิควิศวกรรมโยธา'},
+  '22301':{en:'Mechanical engineering technologists and technicians', th:'นักเทคโนโลยีและช่างเทคนิควิศวกรรมเครื่องกล'},
+  '22310':{en:'Electrical and electronics engineering technologists and technicians', th:'นักเทคโนโลยีและช่างเทคนิควิศวกรรมไฟฟ้าและอิเล็กทรอนิกส์'},
+  '31301':{en:'Registered nurses and registered psychiatric nurses', th:'พยาบาลวิชาชีพและพยาบาลจิตเวช'},
+  '32101':{en:'Licensed practical nurses', th:'พยาบาลเทคนิค (Licensed Practical Nurse)'},
+  '32120':{en:'Medical laboratory technologists', th:'นักเทคนิคการแพทย์'},
+  '33102':{en:'Nurse aides, orderlies and patient service associates', th:'ผู้ช่วยพยาบาลและผู้ดูแลผู้ป่วย'},
+  '42201':{en:'Social and community service workers', th:'เจ้าหน้าที่บริการสังคมและชุมชน'},
+  '42202':{en:'Early childhood educators and assistants', th:'ครูและผู้ช่วยครูปฐมวัย'},
+  '52120':{en:'Graphic designers and illustrators', th:'นักออกแบบกราฟิกและนักวาดภาพประกอบ'},
+  '62200':{en:'Chefs', th:'เชฟ'},
+  '63200':{en:'Cooks', th:'พ่อครัวแม่ครัว'},
+  '72106':{en:'Welders and related machine operators', th:'ช่างเชื่อมและผู้ควบคุมเครื่องที่เกี่ยวข้อง'},
+  '72200':{en:'Electricians (except industrial and power system)', th:'ช่างไฟฟ้า (ยกเว้นระบบอุตสาหกรรมและระบบกำลัง)'},
+  '72300':{en:'Plumbers', th:'ช่างประปา'},
+  '72310':{en:'Carpenters', th:'ช่างไม้'},
+  '72410':{en:'Automotive service technicians, truck and bus mechanics and mechanical repairers', th:'ช่างซ่อมบำรุงรถยนต์ รถบรรทุก และรถโดยสาร'}
+};
+const nocUrl = c => `https://noc.esdc.gc.ca/Structure/NOCProfile?GocTemplateCulture=en-CA&code=${c}&version=2021.0`;
+
+/* Express Entry 2026 categories, checked on the IRCC category page (dated 16 Oct 2026) on 18 Nov 2026 */
+const CATS = {
+  hc:{en:'Healthcare and social services', th:'สุขภาพและบริการสังคม'},
+  stem:{en:'STEM', th:'STEM'},
+  trade:{en:'Trades', th:'งานช่าง (Trades)'},
+  edu:{en:'Education', th:'การศึกษา'},
+  tr:{en:'Transport', th:'การขนส่ง'}
+};
+const GROUPS = [
+  {id:'tech', icon:'cpu', l:{en:'Tech & Data', th:'เทคโนโลยีและดาต้า'}},
+  {id:'health', icon:'heart-pulse', l:{en:'Health & Social', th:'สุขภาพและสังคม'}},
+  {id:'biz', icon:'briefcase-business', l:{en:'Business & Finance', th:'ธุรกิจและการเงิน'}},
+  {id:'eng', icon:'hard-hat', l:{en:'Engineering & Trades', th:'วิศวกรรมและงานช่าง'}},
+  {id:'edu', icon:'school', l:{en:'Education', th:'การศึกษา'}},
+  {id:'creative', icon:'palette', l:{en:'Creative & Hospitality', th:'สร้างสรรค์และบริการ'}}
+];
 const FILTERS = [
   {id:'all', l:{en:'All fields', th:'ทุกสาขา'}},
-  {id:'pgwp', l:{en:'PGWP eligible', th:'มีสิทธิ์ PGWP'}},
-  {id:'health', l:{en:'Healthcare draw', th:'รอบ Healthcare'}},
-  {id:'stem', l:{en:'STEM', th:'STEM'}},
+  ...GROUPS.map(g => ({id:g.id, l:g.l})),
+  {id:'pgwp', l:{en:'PGWP list (college)', th:'อยู่ในรายการ PGWP (วิทยาลัย)'}},
+  {id:'cat', l:{en:'Has a 2026 category draw', th:'มีรอบเฉพาะหมวด 2026'}},
   {id:'warn', l:{en:'Warnings', th:'ข้อควรระวัง'}}
 ];
+const PG = {
+  yes:{c:'b-green', l:{en:'CIP on the PGWP list', th:'รหัส CIP อยู่ในรายการ PGWP'}},
+  dep:{c:'b-amber', l:{en:'Depends on the CIP code', th:'ขึ้นกับรหัส CIP'}},
+  no:{c:'b-red', l:{en:'College diploma not on the list', th:'Diploma วิทยาลัยไม่อยู่ในรายการ'}}
+};
 
 const FIELDS = [
-  {id:'hi', icon:'stethoscope', tags:['pgwp','health','stem'], top:true,
-   t:{en:'Medical / Health Informatics', th:'Medical / Health Informatics'},
-   why:{en:'Combines Data and BI skills with Healthcare. It can qualify for a PGWP and gives you two possible Express Entry category routes, Healthcare and STEM, which often have lower CRS cut-offs than general draws.',
-        th:'ผสานทักษะ Data และ BI เข้ากับสายสุขภาพ มีสิทธิ์ PGWP และเปิดโอกาสรอบคัดเลือกเฉพาะหมวดของ Express Entry ได้สองทาง คือ Healthcare และ STEM ซึ่งมักมีคะแนน CRS ต่ำกว่ารอบทั่วไป'},
-   schools:'George Brown (Health Informatics PG), BCIT, McMaster (MSc eHealth Co-op), UVic',
-   coop:{en:'Hospital and health-authority data teams, EHR and EMR support, clinical reporting analyst, health records analyst.', th:'ทีมข้อมูลของโรงพยาบาลและหน่วยงานสาธารณสุข งานสนับสนุนระบบ EHR และ EMR นักวิเคราะห์รายงานทางคลินิก นักวิเคราะห์เวชระเบียน'},
-   pgwp:{c:'b-green', l:{en:'Eligible (Healthcare / STEM CIP)', th:'มีสิทธิ์ (CIP สาย Healthcare / STEM)'}},
-   pr:{en:'Express Entry Healthcare or STEM category, CEC, PNP health streams', th:'Express Entry หมวด Healthcare หรือ STEM, CEC, PNP สายสุขภาพ'},
-   noc:'NOC 12111, 21211, 21221',
-   note:{en:'Category draws are based on your occupation (NOC), not your diploma. Check that your target job title sits on the current category list.', th:'รอบเฉพาะหมวดดูจากอาชีพ (NOC) ไม่ใช่ชื่อวุฒิ ควรตรวจว่าตำแหน่งงานเป้าหมายอยู่ในรายการหมวดปัจจุบัน'}},
-  {id:'da', icon:'chart-column', tags:['pgwp','stem'],
+  /* ---------- Tech & Data ---------- */
+  {id:'da', g:'tech', icon:'chart-column', pg:'yes', cip:'30.7101', noc:['21223','21211','21221'],
    t:{en:'Data Analytics & Business Intelligence', th:'Data Analytics และ Business Intelligence'},
-   why:{en:'A direct match for SQL, Power BI, Python, and Excel skills. Co-op demand is high in operations, supply chain, and finance. Eligible under STEM CIP codes.',
-        th:'ตรงกับทักษะ SQL, Power BI, Python และ Excel โดยตรง ความต้องการ Co-op สูงในสายปฏิบัติการ ซัพพลายเชน และการเงิน มีสิทธิ์ภายใต้รหัส CIP สาย STEM'},
-   schools:'Langara (Data Analytics Post-Degree Co-op), Douglas, Conestoga, SFU, Northeastern Vancouver',
-   coop:{en:'Junior data analyst, BI developer, reporting analyst, operations analyst at banks, retailers, logistics firms, and government.', th:'Junior Data Analyst, BI Developer, Reporting Analyst, Operations Analyst ในธนาคาร ค้าปลีก โลจิสติกส์ และหน่วยงานรัฐ'},
-   pgwp:{c:'b-green', l:{en:'Eligible (STEM CIP)', th:'มีสิทธิ์ (CIP สาย STEM)'}},
-   pr:{en:'CEC, STEM category when the NOC is listed, PNP tech streams', th:'CEC, หมวด STEM เมื่อ NOC อยู่ในรายการ, PNP สายเทค'},
-   noc:'NOC 21211, 21223, 21221',
-   note:{en:'Confirm the exact CIP code with the school in writing. Two programs with similar names can have different codes.', th:'ขอให้สถาบันยืนยันรหัส CIP เป็นลายลักษณ์อักษร หลักสูตรชื่อคล้ายกันอาจมีรหัสต่างกัน'}},
-  {id:'ai', icon:'brain', tags:['pgwp','stem'],
+   why:{en:'A direct match for SQL, Power BI, Python and Excel skills. Data analytics (CIP 30.7101) is on the PGWP list.', th:'ตรงกับทักษะ SQL, Power BI, Python และ Excel โดยตรง สาขา Data Analytics (CIP 30.7101) อยู่ในรายการ PGWP'},
+   coop:{en:'Junior data analyst, BI developer, reporting analyst, operations analyst at banks, retailers, logistics firms and government.', th:'Junior Data Analyst, BI Developer, Reporting Analyst, Operations Analyst ในธนาคาร ค้าปลีก โลจิสติกส์ และหน่วยงานรัฐ'},
+   schools:'Langara, Douglas, Conestoga, Seneca, SFU',
+   pr:{en:'CEC general draws, provincial tech streams (PNP). No 2026 category draw for data occupations.', th:'CEC รอบทั่วไป และ PNP สายเทค ปี 2026 ไม่มีรอบเฉพาะหมวดสำหรับอาชีพสายดาต้า'}},
+  {id:'ds', g:'tech', icon:'sigma', pg:'yes', cip:'30.7001', noc:['21211','21210'],
+   t:{en:'Data Science', th:'Data Science (วิทยาศาสตร์ข้อมูล)'},
+   why:{en:'Statistics, machine learning and Python on real data. Data science (CIP 30.7001) is on the PGWP list. Employers often prefer a degree, so a master\'s is the stronger route.', th:'สถิติ Machine Learning และ Python กับข้อมูลจริง สาขา Data Science (CIP 30.7001) อยู่ในรายการ PGWP นายจ้างมักต้องการผู้มีปริญญา เส้นทางปริญญาโทจึงแข็งกว่า'},
+   coop:{en:'Data science intern, analytics intern, research assistant. Competitive: build a portfolio of projects.', th:'Data Science Intern, Analytics Intern, ผู้ช่วยวิจัย การแข่งขันสูง ควรมีพอร์ตโฟลิโอโปรเจกต์'},
+   schools:'UBC (MDS), SFU, Waterloo, Toronto Metropolitan, Humber, Langara',
+   pr:{en:'CEC general draws, PNP tech streams. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP สายเทค ปี 2026 ไม่มีรอบเฉพาะหมวด'}},
+  {id:'de', g:'tech', icon:'database', pg:'yes', cip:'30.7001, 11.0701', noc:['21211','21223'],
+   t:{en:'Data Engineering', th:'Data Engineering (วิศวกรรมข้อมูล)'},
+   why:{en:'Builds the pipelines, warehouses and cloud systems that analysts use. In NOC 2021, "Data engineer" sits inside 21211 Data scientists.', th:'สร้าง Pipeline คลังข้อมูล และระบบคลาวด์ที่นักวิเคราะห์ใช้งาน ใน NOC 2021 ตำแหน่ง "Data engineer" อยู่ในรหัส 21211 Data scientists'},
+   coop:{en:'Junior data engineer, ETL developer, database administrator assistant, cloud data intern.', th:'Junior Data Engineer, ETL Developer, ผู้ช่วย Database Administrator, Cloud Data Intern'},
+   schools:'BCIT, Seneca, Conestoga, Lambton, Waterloo',
+   pr:{en:'CEC general draws, PNP tech streams. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP สายเทค ปี 2026 ไม่มีรอบเฉพาะหมวด'}},
+  {id:'ai', g:'tech', icon:'brain', pg:'yes', cip:'11.0701, 30.7001', noc:['21211','21231'],
    t:{en:'Artificial Intelligence & Machine Learning', th:'Artificial Intelligence และ Machine Learning'},
-   why:{en:'Strong alignment with provincial tech pathways such as BC PNP Tech and OINP tech draws.',
-        th:'สอดคล้องกับเส้นทางสายเทคของมณฑล เช่น BC PNP Tech และรอบ Tech ของ OINP'},
+   why:{en:'Strong alignment with provincial tech pathways such as BC PNP Tech and Ontario tech draws.', th:'สอดคล้องกับเส้นทางสายเทคของมณฑล เช่น BC PNP Tech และรอบ Tech ของออนแทรีโอ'},
+   coop:{en:'ML engineer intern, data scientist intern, AI analyst, automation developer. Employers expect a portfolio and solid Python.', th:'ML Engineer Intern, Data Scientist Intern, AI Analyst, Automation Developer นายจ้างคาดหวังพอร์ตโฟลิโอและ Python ที่แน่น'},
    schools:'Humber, Centennial, SFU, Waterloo',
-   coop:{en:'ML engineer intern, data scientist intern, AI analyst, automation developer. Competitive: employers expect a portfolio and solid Python.', th:'ML Engineer Intern, Data Scientist Intern, AI Analyst, Automation Developer การแข่งขันสูง นายจ้างคาดหวังพอร์ตโฟลิโอและ Python ที่แน่น'},
-   pgwp:{c:'b-green', l:{en:'Eligible (STEM CIP)', th:'มีสิทธิ์ (CIP สาย STEM)'}},
-   pr:{en:'BC PNP Tech, OINP tech draws, CEC', th:'BC PNP Tech, รอบ Tech ของ OINP, CEC'},
-   noc:'NOC 21211, 21231, 21232',
-   note:{en:'Provincial nominee quotas and tech draw rules shift from year to year. Check the province page in the year you apply.', th:'โควตาและกฎรอบ Tech ของแต่ละมณฑลเปลี่ยนทุกปี ควรตรวจหน้าเว็บของมณฑลในปีที่ยื่น'}},
-  {id:'dt', icon:'workflow', tags:['pgwp','stem'],
+   pr:{en:'BC PNP Tech, Ontario tech draws, CEC. No 2026 category draw.', th:'BC PNP Tech, รอบ Tech ของออนแทรีโอ, CEC ปี 2026 ไม่มีรอบเฉพาะหมวด'},
+   note:{en:'Provincial quotas and tech draw rules change from year to year. Check the province page in the year you apply. [[pnp]]', th:'โควตาและกฎรอบ Tech ของแต่ละมณฑลเปลี่ยนทุกปี ควรตรวจหน้าเว็บของมณฑลในปีที่ยื่น [[pnp]]'}},
+  {id:'sd', g:'tech', icon:'code', pg:'yes', cip:'11.0201, 11.0701', noc:['21232','21231','21234'],
+   t:{en:'Software & Web Development', th:'การพัฒนาซอฟต์แวร์และเว็บ'},
+   why:{en:'Programming and computer science (CIP 11.0201, 11.0701) are on the PGWP list, and Co-op terms are common.', th:'สาขาโปรแกรมมิงและวิทยาการคอมพิวเตอร์ (CIP 11.0201, 11.0701) อยู่ในรายการ PGWP และมีเทอม Co-op แพร่หลาย'},
+   coop:{en:'Junior developer, QA tester, web developer, mobile developer intern.', th:'Junior Developer, QA Tester, Web Developer, Mobile Developer Intern'},
+   schools:'BCIT, Conestoga, Sheridan, Seneca, Waterloo, SFU',
+   pr:{en:'CEC general draws, PNP tech streams. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP สายเทค ปี 2026 ไม่มีรอบเฉพาะหมวด'}},
+  {id:'cy', g:'tech', icon:'shield-check', pg:'yes', cip:'11.1003', noc:['21220','22220'], cat:'stem',
+   t:{en:'Cybersecurity', th:'ความปลอดภัยไซเบอร์ (Cybersecurity)'},
+   why:{en:'The only IT occupation on the 2026 STEM category list (NOC 21220). Computer and information systems security (CIP 11.1003) is on the PGWP list.', th:'เป็นอาชีพไอทีเพียงอาชีพเดียวในรายการหมวด STEM ปี 2026 (NOC 21220) และสาขา Computer and Information Systems Security (CIP 11.1003) อยู่ในรายการ PGWP'},
+   coop:{en:'SOC analyst intern, IT security support, network security technician.', th:'SOC Analyst Intern, IT Security Support, Network Security Technician'},
+   schools:'Fanshawe, Algonquin, Seneca, BCIT, Durham',
+   pr:{en:'Express Entry STEM category, CEC, PNP tech streams.', th:'Express Entry หมวด STEM, CEC, PNP สายเทค'},
+   note:{en:'Category eligibility follows the job you do, not your diploma. You usually need 6 months of work in NOC 21220 to qualify for the STEM draw. [[eecat]]', th:'สิทธิ์รอบเฉพาะหมวดดูจากงานที่ทำ ไม่ใช่วุฒิ โดยทั่วไปต้องทำงานในรหัส NOC 21220 อย่างน้อย 6 เดือนจึงเข้ารอบ STEM ได้ [[eecat]]'}},
+  {id:'cl', g:'tech', icon:'cloud', pg:'yes', cip:'11.0901', noc:['21231','22220','22221'],
+   t:{en:'Cloud, Networking & IT Infrastructure', th:'คลาวด์ เครือข่าย และโครงสร้างพื้นฐานไอที'},
+   why:{en:'Computer systems networking (CIP 11.0901) is on the PGWP list. Entry jobs in IT support are easier to land than developer roles.', th:'สาขา Computer Systems Networking (CIP 11.0901) อยู่ในรายการ PGWP งานระดับเริ่มต้นด้าน IT Support หาได้ง่ายกว่างานนักพัฒนา'},
+   coop:{en:'IT support technician, help desk, junior network administrator, cloud support associate.', th:'IT Support Technician, Help Desk, Junior Network Administrator, Cloud Support Associate'},
+   schools:'BCIT, Sheridan, Humber, Georgian, Red River',
+   pr:{en:'CEC general draws, PNP tech streams. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP สายเทค ปี 2026 ไม่มีรอบเฉพาะหมวด'},
+   note:{en:'User support technicians (22221) are TEER 2, which still counts as skilled work for CEC.', th:'User Support Technician (22221) อยู่ใน TEER 2 ซึ่งยังนับเป็นงานทักษะสำหรับ CEC [[cec]]'}},
+  {id:'ba', g:'tech', icon:'presentation', pg:'dep', cip:'52.1201', noc:['21221','11201'],
+   t:{en:'Business Analysis', th:'Business Analyst (นักวิเคราะห์ธุรกิจ)'},
+   why:{en:'Bridges business and IT. Programs coded as Management Information Systems (CIP 52.1201) are on the PGWP list, but many "business analysis" certificates are coded as general business, which is not.', th:'เชื่อมระหว่างธุรกิจกับไอที หลักสูตรที่มีรหัส Management Information Systems (CIP 52.1201) อยู่ในรายการ PGWP แต่หลักสูตร "Business Analysis" จำนวนมากถูกจัดเป็นธุรกิจทั่วไปซึ่งไม่อยู่ในรายการ'},
+   coop:{en:'Junior business analyst, business systems analyst, requirements analyst, reporting analyst.', th:'Junior Business Analyst, Business Systems Analyst, Requirements Analyst, Reporting Analyst'},
+   schools:'Seneca, Humber, Conestoga, Douglas, Toronto Metropolitan',
+   pr:{en:'CEC general draws, PNP. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP ปี 2026 ไม่มีรอบเฉพาะหมวด'},
+   note:{en:'IT business analysts are NOC 21221. Business or management analysts outside IT are NOC 11201. Both are TEER 1.', th:'Business Analyst สายไอทีคือ NOC 21221 ส่วนนักวิเคราะห์ธุรกิจหรือการจัดการนอกสายไอทีคือ NOC 11201 ทั้งคู่อยู่ใน TEER 1'}},
+  {id:'dt', g:'tech', icon:'workflow', pg:'dep', cip:'52.1201, 11.0401', noc:['21221','21222'],
    t:{en:'Digital Transformation & IT Systems', th:'Digital Transformation และ IT Systems'},
-   why:{en:'Focuses on business process automation, ERP, and cloud systems. A good fit for Business Systems Analyst roles (NOC 21221), especially with prior business or accounting experience.',
-        th:'เน้นการทำระบบอัตโนมัติของกระบวนการธุรกิจ ERP และระบบคลาวด์ เหมาะกับตำแหน่ง Business Systems Analyst (NOC 21221) โดยเฉพาะผู้ที่มีประสบการณ์ธุรกิจหรือบัญชีมาก่อน'},
-   schools:'BCIT, Seneca, Conestoga, Douglas',
+   why:{en:'Business process automation, ERP and cloud systems. A good fit for business systems roles, especially with prior business or accounting experience.', th:'การทำระบบอัตโนมัติของกระบวนการธุรกิจ ERP และระบบคลาวด์ เหมาะกับงานระบบธุรกิจ โดยเฉพาะผู้มีประสบการณ์ธุรกิจหรือบัญชีมาก่อน'},
    coop:{en:'Business systems analyst, ERP support analyst, process automation analyst, IT project coordinator.', th:'Business Systems Analyst, ERP Support Analyst, Process Automation Analyst, IT Project Coordinator'},
-   pgwp:{c:'b-amber', l:{en:'Eligible only if the CIP code is IT / STEM', th:'มีสิทธิ์เฉพาะเมื่อรหัส CIP เป็น IT / STEM'}},
-   pr:{en:'CEC, PNP tech streams', th:'CEC, PNP สายเทค'},
-   noc:'NOC 21221, 21222, 22220',
+   schools:'BCIT, Seneca, Conestoga, Douglas',
+   pr:{en:'CEC general draws, PNP tech streams. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP สายเทค ปี 2026 ไม่มีรอบเฉพาะหมวด'},
    note:{en:'Programs marketed as "Digital Transformation" are sometimes coded as business. Ask for the CIP code before applying.', th:'หลักสูตรที่ใช้ชื่อ "Digital Transformation" บางครั้งถูกจัดรหัสเป็นสายธุรกิจ ควรถามรหัส CIP ก่อนสมัคร'}},
-  {id:'mg', icon:'triangle-alert', tags:['warn'], warn:true,
-   t:{en:'Management / Business', th:'Management / Business'},
-   why:{en:'Familiar and easy to enter, and useful as a career skill, but weak as an immigration strategy at the college level.',
-        th:'คุ้นเคยและเข้าเรียนง่าย มีประโยชน์ในฐานะทักษะอาชีพ แต่อ่อนในแง่กลยุทธ์ย้ายถิ่นฐานเมื่อเรียนระดับวิทยาลัย'},
-   schools:{en:'University master\'s programs only: MBA, MMA, MSc Management (for example SFU, UVic, McMaster)', th:'เฉพาะปริญญาโทของมหาวิทยาลัย: MBA, MMA, MSc Management (เช่น SFU, UVic, McMaster)'},
+
+  /* ---------- Health & Social ---------- */
+  {id:'hi', g:'health', icon:'stethoscope', pg:'dep', cip:'51.0706, 51.0707', noc:['12111','21221','21211'], warn:true,
+   t:{en:'Medical / Health Informatics', th:'Medical / Health Informatics'},
+   why:{en:'Combines data skills with healthcare. Strong as a career, but the immigration picture changed: see the warning.', th:'ผสานทักษะดาต้าเข้ากับสายสุขภาพ เป็นอาชีพที่ดี แต่ภาพด้านการย้ายถิ่นฐานเปลี่ยนไปแล้ว ดูคำเตือน'},
+   coop:{en:'Hospital and health-authority data teams, EHR and EMR support, clinical reporting analyst, health records analyst.', th:'ทีมข้อมูลของโรงพยาบาลและหน่วยงานสาธารณสุข งานสนับสนุนระบบ EHR และ EMR นักวิเคราะห์รายงานทางคลินิก นักวิเคราะห์เวชระเบียน'},
+   schools:'George Brown, BCIT, McMaster (MSc eHealth), UVic',
+   pr:{en:'CEC general draws, PNP health or tech streams. No 2026 category draw for 12111.', th:'CEC รอบทั่วไป, PNP สายสุขภาพหรือเทค ปี 2026 ไม่มีรอบเฉพาะหมวดสำหรับ 12111'},
+   alert:{en:'Updated November 2026: Health information management and health information technology (CIP 51.0706 and 51.0707) are not on the PGWP field-of-study list, so a college diploma coded this way gives no PGWP. Health information management (NOC 12111) is also no longer in the Healthcare category. Safer forms: a university master\'s degree (exempt from the field rule), or a college program coded under an eligible STEM CIP such as data analytics. [[pgwpfos]] [[eecat]]',
+          th:'อัปเดตพฤศจิกายน 2026: สาขา Health Information Management และ Health Information Technology (CIP 51.0706 และ 51.0707) ไม่อยู่ในรายการสาขาวิชาของ PGWP ดังนั้น Diploma วิทยาลัยที่ใช้รหัสนี้จะไม่ได้ PGWP และอาชีพ Health Information Management (NOC 12111) ก็ไม่อยู่ในหมวด Healthcare แล้ว รูปแบบที่ปลอดภัยกว่าคือปริญญาโทของมหาวิทยาลัย (ได้รับยกเว้นกฎสาขาวิชา) หรือหลักสูตรวิทยาลัยที่ใช้รหัส CIP สาย STEM ที่มีสิทธิ์ เช่น Data Analytics [[pgwpfos]] [[eecat]]'}},
+  {id:'rn', g:'health', icon:'syringe', pg:'yes', cip:'51.3801, 51.3901', noc:['31301','32101'], cat:'hc',
+   t:{en:'Nursing (RN and Practical Nursing)', th:'พยาบาล (RN และ Practical Nursing)'},
+   why:{en:'Registered and practical nursing (CIP 51.3801, 51.3901) are on the PGWP list, and both occupations are in the Healthcare category.', th:'สาขาพยาบาลวิชาชีพและพยาบาลเทคนิค (CIP 51.3801, 51.3901) อยู่ในรายการ PGWP และทั้งสองอาชีพอยู่ในหมวด Healthcare'},
+   coop:{en:'Clinical placements are part of the program. Part-time work as a health care aide is common.', th:'การฝึกปฏิบัติในคลินิกเป็นส่วนหนึ่งของหลักสูตร ระหว่างเรียนนิยมทำงานพาร์ตไทม์เป็นผู้ช่วยดูแลผู้ป่วย'},
+   schools:'Practical nursing: Conestoga, Bow Valley, Saskatchewan Polytechnic. RN: university BScN programs',
+   pr:{en:'Express Entry Healthcare category, CEC, PNP health streams.', th:'Express Entry หมวด Healthcare, CEC, PNP สายสุขภาพ'},
+   note:{en:'To work as a nurse you must register with the nursing regulator of your province. Thai nurses may have a separate licensing route: check with the regulator first.', th:'การทำงานเป็นพยาบาลต้องขึ้นทะเบียนกับสภาการพยาบาลของมณฑล พยาบาลจากไทยอาจมีเส้นทางขอใบอนุญาตแยกต่างหาก ควรตรวจกับหน่วยงานกำกับก่อน'}},
+  {id:'psw', g:'health', icon:'hand-heart', pg:'yes', cip:'51.2601', noc:['33102'], cat:'hc',
+   t:{en:'Personal Support Worker / Health Care Aide', th:'Personal Support Worker / ผู้ช่วยดูแลผู้ป่วย'},
+   why:{en:'Short programs, steady demand in long-term care and home care. Health aide (CIP 51.2601) is on the PGWP list and NOC 33102 is in the Healthcare category.', th:'หลักสูตรสั้น ความต้องการสูงในสถานดูแลระยะยาวและการดูแลที่บ้าน สาขา Health Aide (CIP 51.2601) อยู่ในรายการ PGWP และ NOC 33102 อยู่ในหมวด Healthcare'},
+   coop:{en:'Placements in long-term care homes, hospitals and home care agencies.', th:'ฝึกงานในสถานดูแลผู้สูงอายุ โรงพยาบาล และบริษัทดูแลที่บ้าน'},
+   schools:'Conestoga, Fanshawe, Vancouver Community College, Bow Valley',
+   pr:{en:'Express Entry Healthcare category, CEC, PNP and federal caregiver programs.', th:'Express Entry หมวด Healthcare, CEC, PNP และโครงการผู้ดูแลของรัฐบาลกลาง'},
+   note:{en:'NOC 33102 is TEER 3. Programs are often under 2 years, so the PGWP is shorter.', th:'NOC 33102 อยู่ใน TEER 3 หลักสูตรมักสั้นกว่า 2 ปี PGWP จึงสั้นตาม [[pgwp]]'}},
+  {id:'mlt', g:'health', icon:'microscope', pg:'yes', cip:'51.1004', noc:['32120'], cat:'hc',
+   t:{en:'Medical Laboratory Science', th:'เทคนิคการแพทย์ (Medical Laboratory)'},
+   why:{en:'Medical laboratory technician (CIP 51.1004) is on the PGWP list and NOC 32120 is in the Healthcare category.', th:'สาขา Medical Laboratory Technician (CIP 51.1004) อยู่ในรายการ PGWP และ NOC 32120 อยู่ในหมวด Healthcare'},
+   coop:{en:'Clinical lab placements in hospitals and private labs.', th:'ฝึกงานในห้องปฏิบัติการของโรงพยาบาลและแล็บเอกชน'},
+   schools:'BCIT, Michener (UHN), NAIT, Saskatchewan Polytechnic',
+   pr:{en:'Express Entry Healthcare category, CEC, PNP health streams.', th:'Express Entry หมวด Healthcare, CEC, PNP สายสุขภาพ'},
+   note:{en:'Practising usually needs national certification and provincial registration.', th:'การทำงานจริงโดยทั่วไปต้องสอบใบรับรองระดับประเทศและขึ้นทะเบียนกับมณฑล'}},
+  {id:'ss', g:'health', icon:'users', pg:'yes', cip:'44.0000, 44.0701', noc:['42201'], cat:'hc',
+   t:{en:'Social & Community Services', th:'งานบริการสังคมและชุมชน'},
+   why:{en:'Human services (CIP 44.0000) is on the PGWP list, and NOC 42201 is in the Healthcare and social services category.', th:'สาขา Human Services (CIP 44.0000) อยู่ในรายการ PGWP และ NOC 42201 อยู่ในหมวดสุขภาพและบริการสังคม'},
+   coop:{en:'Community agencies, shelters, settlement services, youth and disability support.', th:'องค์กรชุมชน บ้านพักพิง บริการช่วยเหลือผู้ย้ายถิ่น งานสนับสนุนเยาวชนและผู้พิการ'},
+   schools:'George Brown, Humber, Douglas, Bow Valley',
+   pr:{en:'Express Entry Healthcare and social services category, CEC, PNP.', th:'Express Entry หมวดสุขภาพและบริการสังคม, CEC, PNP'},
+   note:{en:'Social work (CIP 44.0701) is eligible only for permits applied for before 1 Nov 2024 or after 25 Jun 2025. Check the dates on the list. [[pgwpfos]]', th:'สาขา Social Work (CIP 44.0701) มีสิทธิ์เฉพาะผู้ยื่น Study Permit ก่อน 1 พ.ย. 2024 หรือหลัง 25 มิ.ย. 2025 ตรวจวันที่ในรายการ [[pgwpfos]]'}},
+
+  /* ---------- Business & Finance ---------- */
+  {id:'sc', g:'biz', icon:'truck', pg:'yes', cip:'52.0203', noc:['13201','12013','12102','11201'],
+   t:{en:'Supply Chain & Logistics', th:'ซัพพลายเชนและโลจิสติกส์'},
+   why:{en:'One of the few business fields on the PGWP list: logistics and supply chain (CIP 52.0203) sits under the Transport area.', th:'หนึ่งในไม่กี่สาขาธุรกิจที่อยู่ในรายการ PGWP สาขา Logistics and Supply Chain (CIP 52.0203) อยู่ในกลุ่มการขนส่ง'},
+   coop:{en:'Logistics coordinator, purchasing assistant, inventory analyst, supply chain analyst at retailers, ports and distributors.', th:'Logistics Coordinator, ผู้ช่วยจัดซื้อ, Inventory Analyst, Supply Chain Analyst ในค้าปลีก ท่าเรือ และผู้กระจายสินค้า'},
+   schools:'Seneca, Humber, George Brown, Conestoga, BCIT, Douglas',
+   pr:{en:'CEC general draws, PNP. Check whether your job is on the 2026 Transport category list.', th:'CEC รอบทั่วไป, PNP ตรวจว่างานของคุณอยู่ในรายการหมวด Transport ปี 2026 หรือไม่'},
+   note:{en:'A supply chain analyst is usually NOC 11201; a logistics analyst or coordinator is 13201.', th:'Supply Chain Analyst โดยทั่วไปคือ NOC 11201 ส่วน Logistics Analyst หรือ Coordinator คือ 13201'}},
+  {id:'fin', g:'biz', icon:'landmark', pg:'no', cip:'52.0301, 52.0801', noc:['11101','11100','12200','11102'], warn:true,
+   t:{en:'Finance & Accounting', th:'การเงินและการบัญชี'},
+   why:{en:'Familiar to many Thai graduates and well paid, but college accounting and finance (CIP 52.0301, 52.0801) are not on the PGWP list.', th:'คุ้นเคยสำหรับผู้จบจากไทยหลายคนและรายได้ดี แต่สาขาบัญชีและการเงินระดับวิทยาลัย (CIP 52.0301, 52.0801) ไม่อยู่ในรายการ PGWP'},
+   coop:{en:'Accounting assistant, accounts payable clerk, junior financial analyst, bank operations.', th:'ผู้ช่วยนักบัญชี เจ้าหน้าที่บัญชีเจ้าหนี้ Junior Financial Analyst งานปฏิบัติการธนาคาร'},
+   schools:{en:'University master\'s: MFin, MPAcc, MBA (for example SFU, UBC, Waterloo, Toronto Metropolitan)', th:'ปริญญาโทของมหาวิทยาลัย: MFin, MPAcc, MBA (เช่น SFU, UBC, Waterloo, Toronto Metropolitan)'},
+   pr:{en:'CEC general draws, PNP. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP ปี 2026 ไม่มีรอบเฉพาะหมวด'},
+   alert:{en:'Take this field as a university degree (exempt from the field rule) or as a STEM program such as data analytics with a finance focus. Accountant titles need the CPA designation. [[pgwpfos]]', th:'ควรเรียนสาขานี้ในระดับปริญญาของมหาวิทยาลัย (ได้รับยกเว้นกฎสาขาวิชา) หรือเรียนสาย STEM เช่น Data Analytics ที่เน้นการเงิน ตำแหน่งนักบัญชีต้องมีคุณวุฒิ CPA [[pgwpfos]]'}},
+  {id:'pm', g:'biz', icon:'kanban', pg:'no', cip:'52.0211', noc:['11201','13100','21222'], warn:true,
+   t:{en:'Project Management', th:'การบริหารโครงการ'},
+   why:{en:'Popular 1-year post-graduate certificates, but project management (CIP 52.0211) is not on the PGWP list.', th:'หลักสูตร Post-Graduate Certificate 1 ปีเป็นที่นิยม แต่สาขา Project Management (CIP 52.0211) ไม่อยู่ในรายการ PGWP'},
+   coop:{en:'Project coordinator, project administrator, PMO assistant.', th:'Project Coordinator, Project Administrator, ผู้ช่วย PMO'},
+   schools:{en:'Better as a university master\'s, or add PMP later on top of a STEM program', th:'ควรเรียนเป็นปริญญาโทของมหาวิทยาลัย หรือสอบ PMP เพิ่มภายหลังควบคู่กับหลักสูตรสาย STEM'},
+   pr:{en:'CEC general draws, PNP. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP ปี 2026 ไม่มีรอบเฉพาะหมวด'},
+   note:{en:'An IT project manager is NOC 21222; a non-technical project manager is 13100.', th:'IT Project Manager คือ NOC 21222 ส่วน Project Manager ที่ไม่ใช่สายเทคนิคคือ 13100'}},
+  {id:'mk', g:'biz', icon:'megaphone', pg:'dep', cip:'52.1404', noc:['11202','10022'],
+   t:{en:'Marketing & Digital Marketing', th:'การตลาดและการตลาดดิจิทัล'},
+   why:{en:'General marketing (CIP 52.1401) is not on the PGWP list, but digital marketing (CIP 52.1404) is. The exact code decides it.', th:'การตลาดทั่วไป (CIP 52.1401) ไม่อยู่ในรายการ PGWP แต่การตลาดดิจิทัล (CIP 52.1404) อยู่ในรายการ รหัสที่แน่นอนจึงเป็นตัวตัดสิน'},
+   coop:{en:'Marketing coordinator, social media assistant, SEO and ads analyst, e-commerce assistant.', th:'Marketing Coordinator, ผู้ช่วยโซเชียลมีเดีย, SEO and Ads Analyst, ผู้ช่วยอีคอมเมิร์ซ'},
+   schools:'Humber, Seneca, Conestoga, Douglas',
+   pr:{en:'CEC general draws, PNP. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP ปี 2026 ไม่มีรอบเฉพาะหมวด'}},
+  {id:'hr', g:'biz', icon:'id-card', pg:'no', cip:'52.1001', noc:['11200','13100'], warn:true,
+   t:{en:'Human Resources', th:'ทรัพยากรบุคคล (HR)'},
+   why:{en:'Human resources (CIP 52.1001) is not on the PGWP list. Entry HR jobs also favour local experience and the CHRP designation.', th:'สาขาทรัพยากรบุคคล (CIP 52.1001) ไม่อยู่ในรายการ PGWP และงาน HR ระดับเริ่มต้นมักต้องการประสบการณ์ในแคนาดาและคุณวุฒิ CHRP'},
+   coop:{en:'HR assistant, recruitment coordinator, payroll assistant.', th:'ผู้ช่วย HR, Recruitment Coordinator, ผู้ช่วย Payroll'},
+   schools:{en:'Safer as a university degree or master\'s', th:'ปลอดภัยกว่าถ้าเรียนในระดับปริญญาหรือปริญญาโท'},
+   pr:{en:'CEC general draws, PNP. No 2026 category draw.', th:'CEC รอบทั่วไป, PNP ปี 2026 ไม่มีรอบเฉพาะหมวด'}},
+  {id:'mg', g:'biz', icon:'triangle-alert', pg:'no', cip:'52.0201', noc:['11201','13100'], warn:true,
+   t:{en:'Management / Business Administration', th:'Management / Business Administration'},
+   why:{en:'Familiar and easy to enter, and useful as a career skill, but weak as an immigration strategy at the college level.', th:'คุ้นเคยและเข้าเรียนง่าย มีประโยชน์ในฐานะทักษะอาชีพ แต่อ่อนในแง่กลยุทธ์ย้ายถิ่นฐานเมื่อเรียนระดับวิทยาลัย'},
    coop:{en:'Office administration, sales coordination, customer service. Rarely a skilled NOC without prior experience.', th:'งานธุรการ ประสานงานขาย บริการลูกค้า ยากที่จะได้ NOC ระดับทักษะหากไม่มีประสบการณ์เดิม'},
-   pgwp:{c:'b-red', l:{en:'College diplomas largely excluded', th:'Diploma ระดับวิทยาลัยส่วนใหญ่ไม่มีสิทธิ์'}},
+   schools:{en:'University master\'s programs only: MBA, MMA, MSc Management (for example SFU, UVic, McMaster)', th:'เฉพาะปริญญาโทของมหาวิทยาลัย: MBA, MMA, MSc Management (เช่น SFU, UVic, McMaster)'},
    pr:{en:'CEC general draws only (highest CRS cut-offs)', th:'เฉพาะ CEC รอบทั่วไป (คะแนน CRS สูงที่สุด)'},
-   noc:'NOC 11200, 13100, 10022',
-   alert:{en:'Critical warning: general Management and Business diplomas at colleges are largely excluded from the PGWP under IRCC\'s field-of-study rules. The safe forms are a university master\'s degree (degree graduates are exempt from the field-of-study rule) or a program paired with an eligible STEM or Healthcare CIP code.',
-          th:'คำเตือนสำคัญ: Diploma สาย Management และ Business ทั่วไปของวิทยาลัยส่วนใหญ่ไม่มีสิทธิ์ PGWP ตามกฎสาขาวิชาของ IRCC รูปแบบที่ปลอดภัยคือปริญญาโทของมหาวิทยาลัย (ผู้จบระดับปริญญาได้รับยกเว้นกฎสาขาวิชา) หรือหลักสูตรที่จับคู่กับรหัส CIP สาย STEM หรือ Healthcare ที่มีสิทธิ์'}}
+   alert:{en:'Critical warning: business administration (CIP 52.0201) is not on the PGWP list, so college Management and Business diplomas give no PGWP. The safe forms are a university master\'s degree (exempt from the field-of-study rule) or a program with an eligible STEM or Healthcare CIP code. [[pgwpfos]]',
+          th:'คำเตือนสำคัญ: สาขา Business Administration (CIP 52.0201) ไม่อยู่ในรายการ PGWP ดังนั้น Diploma สาย Management และ Business ของวิทยาลัยจะไม่ได้ PGWP รูปแบบที่ปลอดภัยคือปริญญาโทของมหาวิทยาลัย (ได้รับยกเว้นกฎสาขาวิชา) หรือหลักสูตรที่มีรหัส CIP สาย STEM หรือ Healthcare ที่มีสิทธิ์ [[pgwpfos]]'}},
+
+  /* ---------- Engineering & Trades ---------- */
+  {id:'et', g:'eng', icon:'ruler', pg:'yes', cip:'15.0201, 15.0303, 15.0805', noc:['22300','22301','22310'], cat:'stem',
+   t:{en:'Engineering Technology (civil, mechanical, electrical)', th:'เทคโนโลยีวิศวกรรม (โยธา เครื่องกล ไฟฟ้า)'},
+   why:{en:'College engineering technology (CIP 15.0201, 15.0303, 15.0805) is on the PGWP list, and the matching technologist occupations are in the 2026 STEM category.', th:'สาขาเทคโนโลยีวิศวกรรมของวิทยาลัย (CIP 15.0201, 15.0303, 15.0805) อยู่ในรายการ PGWP และอาชีพนักเทคโนโลยีที่ตรงกันอยู่ในหมวด STEM ปี 2026'},
+   coop:{en:'Drafting technician, site technician, quality control, field technician for utilities and construction.', th:'ช่างเขียนแบบ ช่างเทคนิคหน้างาน ฝ่ายควบคุมคุณภาพ ช่างเทคนิคภาคสนามของสาธารณูปโภคและก่อสร้าง'},
+   schools:'BCIT, SAIT, NAIT, Conestoga, Mohawk, Sheridan',
+   pr:{en:'Express Entry STEM category, CEC, PNP.', th:'Express Entry หมวด STEM, CEC, PNP'}},
+  {id:'eng', g:'eng', icon:'cog', pg:'yes', cip:{en:'Degree route', th:'เส้นทางปริญญา'}, noc:['21300','21301','21310','21321'], cat:'stem', degree:true,
+   t:{en:'Professional Engineering (master\'s)', th:'วิศวกรรมศาสตร์ (ปริญญาโท)'},
+   why:{en:'For Thai engineering graduates: a Canadian master\'s (MEng) is exempt from the field rule, and civil, mechanical, electrical and industrial engineers are all in the 2026 STEM category.', th:'สำหรับผู้จบวิศวกรรมจากไทย ปริญญาโทของแคนาดา (MEng) ได้รับยกเว้นกฎสาขาวิชา และวิศวกรโยธา เครื่องกล ไฟฟ้า และอุตสาหการ อยู่ในหมวด STEM ปี 2026 ทั้งหมด'},
+   coop:{en:'Engineering intern or EIT (engineer in training) in consulting, utilities, manufacturing.', th:'Engineering Intern หรือ EIT (วิศวกรฝึกหัด) ในบริษัทที่ปรึกษา สาธารณูปโภค และการผลิต'},
+   schools:'Waterloo, UBC, Toronto Metropolitan, Concordia, Ottawa, Windsor',
+   pr:{en:'Express Entry STEM category, CEC, PNP.', th:'Express Entry หมวด STEM, CEC, PNP'},
+   note:{en:'Using the title "Engineer" needs a licence (P.Eng.) from the provincial engineering regulator.', th:'การใช้ตำแหน่ง "Engineer" ต้องมีใบอนุญาต P.Eng. จากสภาวิศวกรของมณฑล'}},
+  {id:'tr', g:'eng', icon:'wrench', pg:'yes', cip:'46.0302, 48.0508, 46.0201', noc:['72200','72106','72310','72300'], cat:'trade',
+   t:{en:'Skilled Trades (electrician, welder, carpenter, plumber)', th:'งานช่างฝีมือ (ช่างไฟ ช่างเชื่อม ช่างไม้ ช่างประปา)'},
+   why:{en:'Electrician, welding and carpentry programs (CIP 46.0302, 48.0508, 46.0201) are on the PGWP list, and these trades are in the 2026 Trades category.', th:'หลักสูตรช่างไฟฟ้า ช่างเชื่อม และช่างไม้ (CIP 46.0302, 48.0508, 46.0201) อยู่ในรายการ PGWP และอาชีพเหล่านี้อยู่ในหมวด Trades ปี 2026'},
+   coop:{en:'Apprentice placements with contractors, shops and builders.', th:'ฝึกงานแบบ Apprentice กับผู้รับเหมา โรงงาน และบริษัทก่อสร้าง'},
+   schools:'SAIT, NAIT, BCIT, Red River, Conestoga, Fanshawe',
+   pr:{en:'Express Entry Trades category, Federal Skilled Trades, CEC, PNP.', th:'Express Entry หมวด Trades, Federal Skilled Trades, CEC, PNP'},
+   note:{en:'Most trades need provincial apprenticeship hours and a certificate of qualification before you work on your own.', th:'งานช่างส่วนใหญ่ต้องสะสมชั่วโมง Apprenticeship และได้ใบรับรองคุณสมบัติของมณฑลก่อนทำงานได้ด้วยตนเอง'}},
+  {id:'au', g:'eng', icon:'car', pg:'dep', cip:'47.0617', noc:['72410'], cat:'tr',
+   t:{en:'Automotive Service Technician', th:'ช่างซ่อมบำรุงรถยนต์'},
+   why:{en:'NOC 72410 is in the 2026 Transport category. On the PGWP list, the general automotive code (47.0604) is missing but 47.0617 is listed, so the exact code matters.', th:'NOC 72410 อยู่ในหมวด Transport ปี 2026 ในรายการ PGWP รหัสช่างยนต์ทั่วไป (47.0604) ไม่อยู่ในรายการ แต่ 47.0617 อยู่ในรายการ รหัสที่แน่นอนจึงสำคัญ'},
+   coop:{en:'Apprentice technician at dealerships and repair shops.', th:'ช่างฝึกหัดในศูนย์บริการและอู่ซ่อมรถ'},
+   schools:'Centennial, Fanshawe, SAIT, BCIT',
+   pr:{en:'Express Entry Transport category, CEC, PNP.', th:'Express Entry หมวด Transport, CEC, PNP'}},
+
+  /* ---------- Education ---------- */
+  {id:'ece', g:'edu', icon:'baby', pg:'yes', cip:'13.1210', noc:['42202'], cat:'edu',
+   t:{en:'Early Childhood Education', th:'การศึกษาปฐมวัย (ECE)'},
+   why:{en:'Early childhood education (CIP 13.1210) is on the PGWP list and NOC 42202 is in the Education category. Demand is high across Canada.', th:'สาขาการศึกษาปฐมวัย (CIP 13.1210) อยู่ในรายการ PGWP และ NOC 42202 อยู่ในหมวด Education ความต้องการสูงทั่วแคนาดา'},
+   coop:{en:'Placements in licensed child care centres and kindergartens.', th:'ฝึกงานในศูนย์เด็กเล็กที่ได้รับใบอนุญาตและโรงเรียนอนุบาล'},
+   schools:'George Brown, Humber, Douglas, Bow Valley, Red River',
+   pr:{en:'Express Entry Education category, CEC, PNP.', th:'Express Entry หมวด Education, CEC, PNP'},
+   note:{en:'Eligible only for permits applied for before 1 Nov 2024 or after 17 Dec 2024, and you need provincial ECE certification to work. [[pgwpfos]]', th:'มีสิทธิ์เฉพาะผู้ยื่น Study Permit ก่อน 1 พ.ย. 2024 หรือหลัง 17 ธ.ค. 2024 และต้องได้ใบรับรอง ECE ของมณฑลจึงทำงานได้ [[pgwpfos]]'}},
+
+  /* ---------- Creative & Hospitality ---------- */
+  {id:'gd', g:'creative', icon:'pen-tool', pg:'yes', cip:'50.0409', noc:['52120'],
+   t:{en:'Graphic & Digital Design', th:'การออกแบบกราฟิกและดิจิทัล'},
+   why:{en:'Graphic design (CIP 50.0409) is on the PGWP list under the STEM area. The occupation itself has no category draw.', th:'สาขาออกแบบกราฟิก (CIP 50.0409) อยู่ในรายการ PGWP ภายใต้กลุ่ม STEM แต่ตัวอาชีพไม่มีรอบเฉพาะหมวด'},
+   coop:{en:'Junior designer, production artist, UI design intern.', th:'Junior Designer, Production Artist, UI Design Intern'},
+   schools:'Sheridan, Humber, George Brown, Emily Carr',
+   pr:{en:'CEC general draws, PNP.', th:'CEC รอบทั่วไป, PNP'}},
+  {id:'cu', g:'creative', icon:'chef-hat', pg:'dep', cip:'12.0500, 12.0505', noc:['63200','62200'],
+   t:{en:'Culinary Arts', th:'การประกอบอาหาร (Culinary)'},
+   why:{en:'Culinary arts (CIP 12.0503) is not on the PGWP list, but 12.0500 and 12.0505 are, with date conditions. The exact code decides it.', th:'สาขา Culinary Arts (CIP 12.0503) ไม่อยู่ในรายการ PGWP แต่ 12.0500 และ 12.0505 อยู่ในรายการโดยมีเงื่อนไขเรื่องวันที่ รหัสที่แน่นอนจึงเป็นตัวตัดสิน'},
+   coop:{en:'Line cook, prep cook, kitchen placements in hotels and restaurants.', th:'Line Cook, Prep Cook ฝึกงานในครัวโรงแรมและร้านอาหาร'},
+   schools:'George Brown, Humber, Vancouver Community College, SAIT',
+   pr:{en:'CEC general draws, PNP. Cooks (63200) are TEER 3.', th:'CEC รอบทั่วไป, PNP อาชีพ Cook (63200) อยู่ใน TEER 3'}},
+  {id:'hosp', g:'creative', icon:'hotel', pg:'no', cip:'52.0901', noc:[], warn:true,
+   t:{en:'Hospitality & Tourism Management', th:'การจัดการการโรงแรมและการท่องเที่ยว'},
+   why:{en:'Common in private Co-op programs and easy to enter, but hospitality (CIP 52.0901) is not on the PGWP list.', th:'พบมากในหลักสูตร Co-op เอกชนและเข้าเรียนง่าย แต่สาขา Hospitality (CIP 52.0901) ไม่อยู่ในรายการ PGWP'},
+   coop:{en:'Front desk, food and beverage service, guest services. Mostly TEER 4 to 5, which does not count for CEC.', th:'แผนกต้อนรับ บริการอาหารและเครื่องดื่ม บริการลูกค้า ส่วนใหญ่เป็น TEER 4 ถึง 5 ซึ่งไม่นับสำหรับ CEC [[cec]]'},
+   schools:{en:'Fine for an Option A trial year; not a PR plan on its own', th:'เหมาะกับปีทดลองแบบทางเลือก A แต่ไม่ใช่แผน PR ในตัวเอง'},
+   pr:{en:'Weak: CEC needs TEER 0 to 3 work.', th:'อ่อน: CEC ต้องเป็นงาน TEER 0 ถึง 3'}}
 ];
 
 const FIELD_UI = {
   title:{en:'Target Study Fields & PR Eligibility Matrix', th:'สาขาเป้าหมายและตารางสิทธิ์ PR'},
-  sub:{en:'Five fields compared on Co-op job reality, PGWP eligibility under the current field-of-study rules, and the PR draw category each one feeds.', th:'เปรียบเทียบ 5 สาขา ทั้งงาน Co-op ที่ได้จริง สิทธิ์ PGWP ตามกฎสาขาวิชาปัจจุบัน และหมวดรอบ PR ที่แต่ละสาขาต่อยอดได้'},
-  top:{en:'Top strategic pick', th:'ตัวเลือกเชิงกลยุทธ์อันดับหนึ่ง'},
-  why:{en:'Why it works', th:'ทำไมจึงได้ผล'}, schools:{en:'Sample schools', th:'ตัวอย่างสถาบัน'},
+  sub:{en:'fields compared on Co-op job reality, PGWP eligibility (CIP code), the occupations you can work in (NOC) and the 2026 Express Entry category each one feeds. Tap a field to open it.', th:'สาขา เปรียบเทียบงาน Co-op ที่ได้จริง สิทธิ์ PGWP (รหัส CIP) อาชีพที่ทำได้ (NOC) และหมวด Express Entry ปี 2026 ที่แต่ละสาขาต่อยอดได้ แตะสาขาเพื่อเปิดดู'},
+  checked:{en:'PGWP list, NOC titles and 2026 categories checked on official pages on 18 November 2026. [[pgwpfos]] [[cip]] [[noc]] [[eecat]] [[dli]]', th:'รายการ PGWP ชื่ออาชีพ NOC และหมวดปี 2026 ตรวจกับหน้าเว็บทางการเมื่อ 18 พฤศจิกายน 2026 [[pgwpfos]] [[cip]] [[noc]] [[eecat]] [[dli]]'},
+  why:{en:'Why it works', th:'ทำไมจึงน่าสนใจ'}, schools:{en:'Example schools to research', th:'ตัวอย่างสถาบันที่ควรศึกษา'},
   coop:{en:'Co-op job reality', th:'งาน Co-op ที่ได้จริง'}, pgwp:{en:'PGWP', th:'PGWP'},
-  pr:{en:'PR draw category', th:'หมวดรอบ PR'}, noc:{en:'Typical occupations', th:'อาชีพที่เกี่ยวข้อง'},
+  pr:{en:'PR pathway', th:'เส้นทาง PR'}, noc:{en:'NOC occupations (tap for the official profile)', th:'อาชีพตามรหัส NOC (แตะเพื่อดูหน้าทางการ)'},
+  cip:{en:'CIP code to ask the school for', th:'รหัส CIP ที่ควรถามสถาบัน'},
+  cat:{en:'2026 category', th:'หมวดปี 2026'}, noCat:{en:'No category draw', th:'ไม่มีรอบเฉพาะหมวด'},
+  degree:{en:'Any field studied as a bachelor\'s, master\'s or doctoral degree is exempt from the field-of-study rule. Badges show the college diploma route.', th:'ทุกสาขาที่เรียนในระดับปริญญาตรี โท หรือเอก ได้รับยกเว้นกฎสาขาวิชา ป้ายสีแสดงสถานะของเส้นทาง Diploma วิทยาลัย [[pgwp]]'},
+  nocNone:{en:'Service roles here are mostly TEER 4 to 5. Search the NOC site for your exact job.', th:'งานบริการในสายนี้ส่วนใหญ่เป็น TEER 4 ถึง 5 ค้นหางานที่ตรงกับคุณในเว็บไซต์ NOC'},
   none:{en:'No field matches this filter.', th:'ไม่มีสาขาที่ตรงกับตัวกรองนี้'},
-  rules:{en:'How the PGWP rules work', th:'กฎ PGWP ทำงานอย่างไร'},
+  rules:{en:'How the PGWP and PR rules work', th:'กฎ PGWP และ PR ทำงานอย่างไร'},
   rulesList:[
-    {en:'College diploma and certificate graduates must study in a field on IRCC\'s eligible list, identified by CIP code. Bachelor\'s, master\'s, and doctoral graduates are exempt from this field-of-study rule.', th:'ผู้จบ Diploma และ Certificate ของวิทยาลัยต้องเรียนในสาขาที่อยู่ในรายการของ IRCC ซึ่งระบุด้วยรหัส CIP ส่วนผู้จบปริญญาตรี โท และเอกได้รับยกเว้นกฎสาขาวิชานี้'},
-    {en:'You need a language test result when you apply for the PGWP: CLB 5 for college graduates and CLB 7 for university graduates.', th:'ต้องมีผลสอบภาษาตอนยื่นขอ PGWP: CLB 5 สำหรับผู้จบวิทยาลัย และ CLB 7 สำหรับผู้จบมหาวิทยาลัย'},
-    {en:'Permit length follows program length. Programs of 2 years or more and all master\'s degrees give 3 years. Shorter programs give a permit about as long as the program.', th:'อายุใบอนุญาตขึ้นกับความยาวหลักสูตร หลักสูตร 2 ปีขึ้นไปและปริญญาโททุกหลักสูตรได้ 3 ปี หลักสูตรที่สั้นกว่าได้ใบอนุญาตยาวประมาณเท่ากับหลักสูตร'},
-    {en:'Private career colleges generally do not qualify at all.', th:'วิทยาลัยอาชีพเอกชนโดยทั่วไปไม่มีสิทธิ์เลย'}
+    {en:'College diploma and certificate graduates must study in a field on IRCC\'s eligible list, identified by CIP code. Bachelor\'s, master\'s and doctoral graduates are exempt. IRCC says the list will not change during 2026. [[pgwpfos]]', th:'ผู้จบ Diploma และ Certificate ของวิทยาลัยต้องเรียนในสาขาที่อยู่ในรายการของ IRCC ซึ่งระบุด้วยรหัส CIP ส่วนผู้จบปริญญาตรี โท และเอกได้รับยกเว้น IRCC ระบุว่าจะไม่เพิ่มหรือลดสาขาในรายการตลอดปี 2026 [[pgwpfos]]'},
+    {en:'You need a language test result when you apply for the PGWP: CLB 5 for college graduates and CLB 7 for university graduates, in all four skills. [[pgwp]]', th:'ต้องมีผลสอบภาษาตอนยื่นขอ PGWP: CLB 5 สำหรับผู้จบวิทยาลัย และ CLB 7 สำหรับผู้จบมหาวิทยาลัย ครบทั้ง 4 ทักษะ [[pgwp]]'},
+    {en:'Permit length follows program length. Programs of 2 years or more and all master\'s degrees give 3 years. Private career colleges generally do not qualify at all. [[pgwp]] [[dli]]', th:'อายุใบอนุญาตขึ้นกับความยาวหลักสูตร หลักสูตร 2 ปีขึ้นไปและปริญญาโททุกหลักสูตรได้ 3 ปี วิทยาลัยอาชีพเอกชนโดยทั่วไปไม่มีสิทธิ์เลย [[pgwp]] [[dli]]'},
+    {en:'Express Entry category draws are based on the job you do (NOC), not your diploma, and usually need 6 months of work in that occupation. 2026 categories include Healthcare and social services, STEM, Trades, Education and Transport. No software, data or IT occupation is in any category except Cybersecurity (21220). [[eecat]]', th:'รอบเฉพาะหมวดของ Express Entry ดูจากงานที่คุณทำ (NOC) ไม่ใช่วุฒิ และโดยทั่วไปต้องทำงานในอาชีพนั้นอย่างน้อย 6 เดือน หมวดปี 2026 ได้แก่ สุขภาพและบริการสังคม STEM งานช่าง การศึกษา และการขนส่ง อาชีพซอฟต์แวร์ ดาต้า และไอทีไม่อยู่ในหมวดใดเลย ยกเว้น Cybersecurity (21220) [[eecat]]'},
+    {en:'For the Canadian Experience Class, your Canadian work must be in TEER 0, 1, 2 or 3. The TEER level is the second digit of the NOC code. [[findnoc]] [[cec]]', th:'สำหรับ Canadian Experience Class งานในแคนาดาต้องอยู่ใน TEER 0, 1, 2 หรือ 3 ระดับ TEER คือตัวเลขหลักที่สองของรหัส NOC [[findnoc]] [[cec]]'}
   ]
 };
 
@@ -621,13 +903,13 @@ const ROAD = {
         {y:{en:'Year 1 · 2027 to 2028', th:'ปีที่ 1 · 2027 ถึง 2028'}, t:{en:'Private Co-op: study term, then work term', th:'Co-op เอกชน: เทอมเรียน แล้วต่อด้วยเทอมทำงาน'},
          d:{en:'Six months of classes with part-time work, then six months of full-time paid Co-op. Use this year to adapt, save from your wages, build a Canadian resume and references, and sit IELTS Academic for 6.5.', th:'เรียน 6 เดือนพร้อมทำงานพาร์ตไทม์ แล้วทำ Co-op เต็มเวลาแบบได้ค่าจ้างอีก 6 เดือน ใช้ปีนี้ปรับตัว เก็บเงินจากค่าจ้าง สร้างเรซูเม่และผู้รับรองในแคนาดา และสอบ IELTS Academic ให้ได้ 6.5'}},
         {y:{en:'Decision point · mid 2028', th:'จุดตัดสินใจ · กลางปี 2028'}, risk:true, t:{en:'The Bridge: stay or go home', th:'Bridge: อยู่ต่อหรือกลับบ้าน'},
-         d:{en:'If you stay, apply to a public college or university in an eligible STEM or Healthcare field at least 8 months before your permit expires. Changing schools now requires a new study permit, usually a new provincial attestation letter, and fresh proof of funds. If you go home, your total loss is one year of low tuition.', th:'ถ้าอยู่ต่อ ให้สมัครสถาบันรัฐในสาขา STEM หรือ Healthcare ที่มีสิทธิ์ อย่างน้อย 8 เดือนก่อน Permit หมดอายุ ปัจจุบันการย้ายสถาบันต้องขอ Study Permit ใหม่ โดยทั่วไปต้องมีหนังสือรับรองจากมณฑลฉบับใหม่ และหลักฐานการเงินรอบใหม่ ถ้ากลับบ้าน สิ่งที่เสียทั้งหมดคือค่าเล่าเรียนราคาต่ำ 1 ปี'}},
+         d:{en:'If you stay, apply to a public college or university in an eligible STEM or Healthcare field at least 8 months before your permit expires. Changing schools now requires a new study permit, usually a new provincial attestation letter, and fresh proof of funds. If you go home, your total loss is one year of low tuition. [[pal]]', th:'ถ้าอยู่ต่อ ให้สมัครสถาบันรัฐในสาขา STEM หรือ Healthcare ที่มีสิทธิ์ อย่างน้อย 8 เดือนก่อน Permit หมดอายุ ปัจจุบันการย้ายสถาบันต้องขอ Study Permit ใหม่ โดยทั่วไปต้องมีหนังสือรับรองจากมณฑลฉบับใหม่ และหลักฐานการเงินรอบใหม่ ถ้ากลับบ้าน สิ่งที่เสียทั้งหมดคือค่าเล่าเรียนราคาต่ำ 1 ปี [[pal]]'}},
         {y:{en:'Years 2 to 3 · 2028 to 2030', th:'ปีที่ 2 ถึง 3 · 2028 ถึง 2030'}, t:{en:'Public PG diploma or master\'s with Co-op', th:'PG Diploma หรือปริญญาโทพร้อม Co-op ที่สถาบันรัฐ'},
          d:{en:'Study Health Informatics, Data Analytics, BI, or AI. Aim for a corporate or hospital Co-op placement that can turn into a job offer. A 2-year program unlocks the 3-year PGWP.', th:'เรียน Health Informatics, Data Analytics, BI หรือ AI ตั้งเป้าได้ที่ฝึก Co-op ในองค์กรหรือโรงพยาบาลที่ต่อยอดเป็นข้อเสนองานได้ หลักสูตร 2 ปีจะปลดล็อก PGWP 3 ปี'}},
         {y:{en:'Years 4 to 5 · 2030 onward', th:'ปีที่ 4 ถึง 5 · 2030 เป็นต้นไป'}, t:{en:'PGWP and skilled work', th:'PGWP และงานทักษะ'},
-         d:{en:'Work full time in a skilled occupation (TEER 0 to 3). One year of this work makes you eligible for the Canadian Experience Class.', th:'ทำงานเต็มเวลาในอาชีพทักษะ (TEER 0 ถึง 3) ทำครบ 1 ปีจะมีสิทธิ์ยื่น Canadian Experience Class'}},
+         d:{en:'Work full time in a skilled occupation (TEER 0 to 3). One year of this work makes you eligible for the Canadian Experience Class. [[findnoc]] [[cec]]', th:'ทำงานเต็มเวลาในอาชีพทักษะ (TEER 0 ถึง 3) ทำครบ 1 ปีจะมีสิทธิ์ยื่น Canadian Experience Class [[findnoc]] [[cec]]'}},
         {y:{en:'Goal', th:'เป้าหมาย'}, goal:true, t:{en:'Permanent Residency', th:'Permanent Residency'},
-         d:{en:'Apply through Express Entry (CEC, or a Healthcare or STEM category draw) or a Provincial Nominee Program. Note that the private Co-op year does not add Canadian study points beyond what the public credential gives, and you are one year older in the CRS.', th:'ยื่นผ่าน Express Entry (CEC หรือรอบเฉพาะหมวด Healthcare หรือ STEM) หรือ Provincial Nominee Program ทั้งนี้ปี Co-op เอกชนไม่ได้เพิ่มคะแนนการศึกษาในแคนาดาเกินกว่าที่วุฒิจากสถาบันรัฐให้ และคุณจะอายุมากขึ้น 1 ปีในการคิดคะแนน CRS'}}
+         d:{en:'Apply through Express Entry (CEC, or a category draw if your job is on a 2026 category list) or a Provincial Nominee Program. Note that the private Co-op year does not add Canadian study points beyond what the public credential gives, and you are one year older in the CRS. [[eecat]] [[pnp]]', th:'ยื่นผ่าน Express Entry (CEC หรือรอบเฉพาะหมวด หากงานของคุณอยู่ในรายการหมวดปี 2026) หรือ Provincial Nominee Program ทั้งนี้ปี Co-op เอกชนไม่ได้เพิ่มคะแนนการศึกษาในแคนาดาเกินกว่าที่วุฒิจากสถาบันรัฐให้ และคุณจะอายุมากขึ้น 1 ปีในการคิดคะแนน CRS [[eecat]] [[pnp]]'}}
       ]},
     one:{
       l:{en:'Scenario 2: One-Shot', th:'สถานการณ์ 2: One-Shot'},
@@ -640,11 +922,11 @@ const ROAD = {
         {y:{en:'Years 1 to 2 · 2027 to 2029', th:'ปีที่ 1 ถึง 2 · 2027 ถึง 2029'}, t:{en:'Public PG diploma or master\'s with Co-op', th:'PG Diploma หรือปริญญาโทพร้อม Co-op ที่สถาบันรัฐ'},
          d:{en:'Study terms with part-time work, plus one or two paid Co-op terms in a hospital, bank, or tech firm. You test daily life in Canada in the same year that counts toward the PGWP.', th:'เทอมเรียนพร้อมงานพาร์ตไทม์ และ Co-op แบบได้ค่าจ้าง 1 ถึง 2 เทอมในโรงพยาบาล ธนาคาร หรือบริษัทเทค คุณได้ทดลองใช้ชีวิตในแคนาดาในปีเดียวกับที่นับต่อยอดสู่ PGWP'}},
         {y:{en:'Graduation · 2029', th:'จบการศึกษา · 2029'}, t:{en:'Apply for the PGWP', th:'ยื่นขอ PGWP'},
-         d:{en:'Apply within 180 days of your final marks with a valid language test. A 2-year program or a master\'s gives a 3-year open work permit.', th:'ยื่นภายใน 180 วันหลังผลการเรียนสุดท้ายออก พร้อมผลสอบภาษาที่ยังไม่หมดอายุ หลักสูตร 2 ปีหรือปริญญาโทได้ Open Work Permit 3 ปี'}},
+         d:{en:'Apply within 180 days of your final marks with a valid language test. A 2-year program or a master\'s gives a 3-year open work permit. [[pgwp]]', th:'ยื่นภายใน 180 วันหลังผลการเรียนสุดท้ายออก พร้อมผลสอบภาษาที่ยังไม่หมดอายุ หลักสูตร 2 ปีหรือปริญญาโทได้ Open Work Permit 3 ปี [[pgwp]]'}},
         {y:{en:'Year 3 · 2029 to 2030', th:'ปีที่ 3 · 2029 ถึง 2030'}, t:{en:'One year of skilled Canadian work', th:'ทำงานทักษะในแคนาดา 1 ปี'},
-         d:{en:'Twelve months in a TEER 0 to 3 job qualifies you for CEC. Combined with your Thai work experience, it also adds skill-transferability points to your CRS score.', th:'ทำงาน 12 เดือนในตำแหน่ง TEER 0 ถึง 3 จะมีสิทธิ์ CEC และเมื่อรวมกับประสบการณ์ทำงานที่ไทย จะได้คะแนน Skill Transferability เพิ่มใน CRS ด้วย'}},
+         d:{en:'Twelve months in a TEER 0 to 3 job qualifies you for CEC. Combined with your Thai work experience, it also adds skill-transferability points to your CRS score. [[cec]] [[crs]]', th:'ทำงาน 12 เดือนในตำแหน่ง TEER 0 ถึง 3 จะมีสิทธิ์ CEC และเมื่อรวมกับประสบการณ์ทำงานที่ไทย จะได้คะแนน Skill Transferability เพิ่มใน CRS ด้วย [[cec]] [[crs]]'}},
         {y:{en:'Goal', th:'เป้าหมาย'}, goal:true, t:{en:'Permanent Residency', th:'Permanent Residency'},
-         d:{en:'Enter the Express Entry pool for CEC and category draws, and watch PNP streams in parallel. You save one year of tuition and living costs and keep one more year of age points.', th:'เข้า Pool ของ Express Entry สำหรับ CEC และรอบเฉพาะหมวด พร้อมติดตาม PNP ควบคู่ไปด้วย ประหยัดค่าเล่าเรียนและค่าครองชีพ 1 ปี และรักษาคะแนนอายุไว้ได้อีก 1 ปี'}}
+         d:{en:'Enter the Express Entry pool for CEC and category draws, and watch PNP streams in parallel. You save one year of tuition and living costs and keep one more year of age points. [[eecat]] [[pnp]]', th:'เข้า Pool ของ Express Entry สำหรับ CEC และรอบเฉพาะหมวด พร้อมติดตาม PNP ควบคู่ไปด้วย ประหยัดค่าเล่าเรียนและค่าครองชีพ 1 ปี และรักษาคะแนนอายุไว้ได้อีก 1 ปี [[eecat]] [[pnp]]'}}
       ]}
   }
 };
@@ -658,14 +940,14 @@ const CHECK = {
       {id:'transcript', t:{en:'Academic transcripts and degree certificate', th:'Transcript และใบปริญญา'}, d:{en:'Official English copies from your university. Some schools also ask for a credential evaluation such as WES.', th:'ฉบับภาษาอังกฤษอย่างเป็นทางการจากมหาวิทยาลัย บางสถาบันขอผลประเมินวุฒิ เช่น WES ด้วย'}},
       {id:'resume', t:{en:'Resume in Canadian format', th:'เรซูเม่รูปแบบแคนาดา'}, d:{en:'One to two pages, impact-focused bullet points with numbers. No photo, age, or marital status.', th:'ยาว 1 ถึง 2 หน้า เน้นผลลัพธ์เป็นข้อ ๆ พร้อมตัวเลข ไม่ใส่รูป อายุ หรือสถานภาพสมรส'}},
       {id:'sop', t:{en:'Study plan / letter of explanation', th:'Study Plan / Letter of Explanation'}, d:{en:'Explain why this program, how it fits your career, and your ties to Thailand.', th:'อธิบายว่าทำไมเลือกหลักสูตรนี้ เชื่อมกับอาชีพอย่างไร และความผูกพันกับประเทศไทย'}},
-      {id:'funds', t:{en:'Sponsor financial proof', th:'หลักฐานการเงินของสปอนเซอร์'}, d:{en:'First-year tuition plus the IRCC living-cost minimum (CAD 23,448 for one person if you apply on or after 1 September 2026). Include a sponsor letter and proof of relationship.', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC (CAD 23,448 สำหรับ 1 คน หากยื่นตั้งแต่ 1 กันยายน 2026 เป็นต้นไป) พร้อมจดหมายสปอนเซอร์และหลักฐานความสัมพันธ์'}},
+      {id:'funds', t:{en:'Sponsor financial proof', th:'หลักฐานการเงินของสปอนเซอร์'}, d:{en:'First-year tuition plus the IRCC living-cost minimum (CAD 23,448 for one person if you apply on or after 1 September 2026). Include a sponsor letter and proof of relationship. [[funds]]', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC (CAD 23,448 สำหรับ 1 คน หากยื่นตั้งแต่ 1 กันยายน 2026 เป็นต้นไป) พร้อมจดหมายสปอนเซอร์และหลักฐานความสัมพันธ์ [[funds]]'}},
       {id:'season', t:{en:'Bank statement seasoning', th:'เดินบัญชีให้นิ่ง'}, d:{en:'Keep the funds in the account for 4 to 6 months. Avoid large unexplained deposits.', th:'คงเงินไว้ในบัญชี 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่ที่อธิบายที่มาไม่ได้'}}
     ]},
     {icon:'plane', t:{en:'Visa & Logistics', th:'วีซ่าและการเดินทาง'}, items:[
       {id:'loa', t:{en:'Letter of Acceptance and tuition deposit', th:'Letter of Acceptance และเงินมัดจำค่าเรียน'}, d:{en:'From a Designated Learning Institution. Check the refund policy for a refused permit.', th:'จากสถาบันที่เป็น Designated Learning Institution ตรวจนโยบายคืนเงินกรณี Permit ถูกปฏิเสธ'}},
-      {id:'pal', t:{en:'PAL (Provincial Attestation Letter)', th:'PAL (Provincial Attestation Letter)'}, d:{en:'Issued through your school after the deposit. Master\'s and doctoral students at public institutions may be exempt; confirm with the school.', th:'ออกผ่านสถาบันหลังจ่ายมัดจำ นักศึกษาปริญญาโทและเอกของสถาบันรัฐอาจได้รับยกเว้น ควรยืนยันกับสถาบัน'}},
-      {id:'permit', t:{en:'Study permit + Co-op work permit application', th:'ยื่น Study Permit + Co-op Work Permit'}, d:{en:'Apply online and submit both together. The Co-op must be a required part of the program.', th:'ยื่นออนไลน์และยื่นทั้งสองอย่างพร้อมกัน Co-op ต้องเป็นส่วนบังคับของหลักสูตร'}},
-      {id:'medical', t:{en:'Upfront medical exam (IOM Bangkok)', th:'ตรวจสุขภาพล่วงหน้า (IOM กรุงเทพฯ)'}, d:{en:'Book with an IRCC panel physician. Results are valid for 12 months.', th:'จองกับแพทย์ที่ IRCC รับรอง ผลตรวจมีอายุ 12 เดือน'}},
+      {id:'pal', t:{en:'PAL (Provincial Attestation Letter)', th:'PAL (Provincial Attestation Letter)'}, d:{en:'Issued through your school after the deposit. Master\'s and doctoral students at public institutions may be exempt; confirm with the school. [[pal]]', th:'ออกผ่านสถาบันหลังจ่ายมัดจำ นักศึกษาปริญญาโทและเอกของสถาบันรัฐอาจได้รับยกเว้น ควรยืนยันกับสถาบัน [[pal]]'}},
+      {id:'permit', t:{en:'Study permit + Co-op work permit application', th:'ยื่น Study Permit + Co-op Work Permit'}, d:{en:'Apply online and submit both together. The Co-op must be a required part of the program. [[coop]]', th:'ยื่นออนไลน์และยื่นทั้งสองอย่างพร้อมกัน Co-op ต้องเป็นส่วนบังคับของหลักสูตร [[coop]]'}},
+      {id:'medical', t:{en:'Upfront medical exam (IOM Bangkok)', th:'ตรวจสุขภาพล่วงหน้า (IOM กรุงเทพฯ)'}, d:{en:'Book with an IRCC panel physician. Results are valid for 12 months. [[med]]', th:'จองกับแพทย์ที่ IRCC รับรอง ผลตรวจมีอายุ 12 เดือน [[med]]'}},
       {id:'bio', t:{en:'Biometrics', th:'Biometrics'}, d:{en:'Fingerprints and photo at the visa application centre after you receive the instruction letter.', th:'เก็บลายนิ้วมือและถ่ายรูปที่ศูนย์รับคำร้องวีซ่า หลังได้รับจดหมายแจ้ง'}},
       {id:'arrive', t:{en:'Housing, flight, and insurance', th:'ที่พัก ตั๋วเครื่องบิน และประกัน'}, d:{en:'Book the first month of housing, buy the flight after approval, and arrange health insurance for the provincial waiting period.', th:'จองที่พักเดือนแรก ซื้อตั๋วหลังได้รับอนุมัติ และทำประกันสุขภาพสำหรับช่วงรอสิทธิ์ของมณฑล'}}
     ]}
@@ -681,9 +963,9 @@ const IELTSQ = {
     {c:'b-gray', s:{en:'Not fixed, but helps', th:'ไม่บังคับตายตัว แต่ช่วยได้'}, t:{en:'2. Study permit', th:'2. Study Permit'},
      d:{en:'IRCC does not set a fixed language score for the regular stream, but a test result makes the application stronger.', th:'IRCC ไม่ได้กำหนดคะแนนภาษาตายตัวสำหรับช่องทางปกติ แต่การมีผลสอบทำให้คำร้องน่าเชื่อถือขึ้น'}},
     {c:'b-red', s:{en:'Required', th:'ต้องมี'}, t:{en:'3. PGWP', th:'3. PGWP'},
-     d:{en:'A language test is required, with no exemption for English-medium study: CLB 5 for college graduates, CLB 7 for university graduates. The result must be less than 2 years old.', th:'ต้องมีผลสอบภาษา ไม่มีข้อยกเว้นสำหรับผู้ที่เรียนเป็นภาษาอังกฤษ: CLB 5 สำหรับผู้จบวิทยาลัย และ CLB 7 สำหรับผู้จบมหาวิทยาลัย ผลสอบต้องมีอายุไม่เกิน 2 ปี'}},
+     d:{en:'A language test is required, with no exemption for English-medium study: CLB 5 for college graduates, CLB 7 for university graduates. The result must be less than 2 years old. [[pgwp]]', th:'ต้องมีผลสอบภาษา ไม่มีข้อยกเว้นสำหรับผู้ที่เรียนเป็นภาษาอังกฤษ: CLB 5 สำหรับผู้จบวิทยาลัย และ CLB 7 สำหรับผู้จบมหาวิทยาลัย ผลสอบต้องมีอายุไม่เกิน 2 ปี [[pgwp]]'}},
     {c:'b-red', s:{en:'Required', th:'ต้องมี'}, t:{en:'4. PR through Express Entry', th:'4. PR ผ่าน Express Entry'},
-     d:{en:'An approved test is mandatory for everyone: IELTS General Training, CELPIP-General, or PTE Core. Your score also drives a large share of your CRS points.', th:'ทุกคนต้องมีผลสอบที่ได้รับการรับรอง: IELTS General Training, CELPIP-General หรือ PTE Core และคะแนนนี้ยังมีผลต่อคะแนน CRS เป็นสัดส่วนใหญ่'}}
+     d:{en:'An approved test is mandatory for everyone: IELTS General Training, CELPIP-General, or PTE Core. Your score also drives a large share of your CRS points. [[lang]]', th:'ทุกคนต้องมีผลสอบที่ได้รับการรับรอง: IELTS General Training, CELPIP-General หรือ PTE Core และคะแนนนี้ยังมีผลต่อคะแนน CRS เป็นสัดส่วนใหญ่ [[lang]]'}}
   ],
   tip:{en:'Admission usually asks for IELTS Academic while PR needs General Training, so you may take both types over the journey. Ask each school in writing whether your degree qualifies for a waiver.', th:'การสมัครเรียนมักใช้ IELTS Academic ส่วน PR ต้องใช้ General Training จึงอาจต้องสอบทั้งสองแบบตลอดเส้นทาง ควรสอบถามแต่ละสถาบันเป็นลายลักษณ์อักษรว่าปริญญาของคุณเข้าเกณฑ์ยกเว้นหรือไม่'}
 };
@@ -705,13 +987,13 @@ const SIM_UI = {
   sub:{en:'Adjust the inputs to see how much money you must show up front and whether your wages cover living costs.', th:'ปรับค่าเพื่อดูว่าต้องแสดงเงินล่วงหน้าเท่าไร และค่าจ้างพอค่าครองชีพหรือไม่'},
   type:{en:'Tuition type', th:'ประเภทค่าเล่าเรียน'}, tuition:{en:'First-year tuition', th:'ค่าเล่าเรียนปีแรก'},
   living:{en:'Living style', th:'รูปแบบที่พัก'},
-  hours:{en:'Study-term work hours', th:'ชั่วโมงทำงานช่วงเทอมเรียน'}, hoursNote:{en:'IRCC limit: 24 hours per week off campus', th:'ขีดจำกัดของ IRCC: 24 ชั่วโมงต่อสัปดาห์นอกสถาบัน'},
+  hours:{en:'Study-term work hours', th:'ชั่วโมงทำงานช่วงเทอมเรียน'}, hoursNote:{en:'IRCC limit: 24 hours per week off campus [[offc]]', th:'ขีดจำกัดของ IRCC: 24 ชั่วโมงต่อสัปดาห์นอกสถาบัน [[offc]]'},
   coopHours:{en:'Co-op term work hours', th:'ชั่วโมงทำงานช่วงเทอม Co-op'},
   wage:{en:'Hourly wage', th:'ค่าจ้างต่อชั่วโมง'}, rate:{en:'Exchange rate (THB per CAD)', th:'อัตราแลกเปลี่ยน (บาทต่อ CAD)'},
   proof:{en:'IRCC living-cost proof (CAD)', th:'ค่าครองชีพที่ IRCC กำหนดให้แสดง (CAD)'},
   wk:{en:'hrs/wk', th:'ชม./สัปดาห์'}, mo:{en:'/month', th:'/เดือน'}, hr:{en:'/hr', th:'/ชม.'},
   show:{en:'Initial show money required', th:'เงินที่ต้องแสดงเริ่มต้น'},
-  showNote:{en:'First-year tuition plus the IRCC living-cost minimum', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC'},
+  showNote:{en:'First-year tuition plus the IRCC living-cost minimum [[funds]]', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC [[funds]]'},
   lTuition:{en:'First-year tuition', th:'ค่าเล่าเรียนปีแรก'}, lProof:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'},
   lSetup:{en:'Recommended extra for flight, deposit, and setup', th:'เงินสำรองแนะนำสำหรับตั๋ว เงินประกันที่พัก และการตั้งตัว'},
   lTotal:{en:'Cash to have ready', th:'เงินสดที่ควรเตรียม'},
@@ -757,7 +1039,7 @@ const START = {
         {en:'Pick a target intake: January, May, or September of 2027 or 2028.', th:'เลือกรอบเปิดเรียนเป้าหมาย: มกราคม พฤษภาคม หรือกันยายน ของปี 2027 หรือ 2028'}],
      c:{en:'Free', th:'ไม่มีค่าใช้จ่าย'}, go:{tab:'ready', l:{en:'Take the quiz', th:'ทำแบบประเมิน'}}},
     {id:'s2', icon:'wallet', m:{en:'12 months or more', th:'12 เดือนขึ้นไป'}, t:{en:'Check your money and start seasoning the bank account', th:'ตรวจสอบเงินทุน และเริ่มเดินบัญชีให้นิ่ง'},
-     d:[{en:'Use the simulator to find how much you must show: first-year tuition plus the IRCC living-cost minimum.', th:'ใช้เครื่องจำลองเพื่อดูว่าต้องแสดงเงินเท่าไร: ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC'},
+     d:[{en:'Use the simulator to find how much you must show: first-year tuition plus the IRCC living-cost minimum. [[funds]]', th:'ใช้เครื่องจำลองเพื่อดูว่าต้องแสดงเงินเท่าไร: ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC [[funds]]'},
         {en:'Decide who the sponsor is (you, parents, or both) and put the money in one account.', th:'ตกลงว่าใครเป็นสปอนเซอร์ (ตัวเอง พ่อแม่ หรือทั้งคู่) และรวมเงินไว้ในบัญชีเดียว'},
         {en:'Leave it untouched for 4 to 6 months. Avoid sudden large deposits you cannot explain.', th:'คงเงินไว้ไม่แตะต้อง 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่กะทันหันที่อธิบายที่มาไม่ได้'}],
      c:() => T({en:'Money to show: ', th:'เงินที่ต้องแสดง: '}) + inline(S.sim.tuition + S.sim.proof), go:{tab:'prep', l:{en:'Open the simulator', th:'เปิดเครื่องจำลอง'}}},
@@ -768,8 +1050,8 @@ const START = {
      c:() => T({en:'About THB 7,500 to 8,800 per attempt', th:'ประมาณ 7,500 ถึง 8,800 บาทต่อครั้ง'})},
     {id:'s4', icon:'graduation-cap', m:{en:'10 to 12 months', th:'10 ถึง 12 เดือน'}, t:{en:'Choose the school and program', th:'เลือกสถาบันและหลักสูตร'},
      d:[{en:'Shortlist 3 to 5 programs from the Fields tab.', th:'คัดหลักสูตร 3 ถึง 5 แห่งจากแท็บสาขาเรียน'},
-        {en:'Check that each school is on the official DLI list, and whether the list marks it as PGWP eligible.', th:'ตรวจว่าแต่ละสถาบันอยู่ในรายชื่อ DLI ทางการ และรายชื่อระบุว่ามีสิทธิ์ PGWP หรือไม่'},
-        {en:'Email the school and ask for the program\'s CIP code and whether Co-op is a required part of the program.', th:'อีเมลถามสถาบันเรื่องรหัส CIP ของหลักสูตร และ Co-op เป็นส่วนบังคับของหลักสูตรหรือไม่'}],
+        {en:'Check that each school is on the official DLI list, and whether the list marks it as PGWP eligible. [[dli]]', th:'ตรวจว่าแต่ละสถาบันอยู่ในรายชื่อ DLI ทางการ และรายชื่อระบุว่ามีสิทธิ์ PGWP หรือไม่ [[dli]]'},
+        {en:'Email the school and ask for the program\'s CIP code and whether Co-op is a required part of the program. [[pgwpfos]] [[cip]]', th:'อีเมลถามสถาบันเรื่องรหัส CIP ของหลักสูตร และ Co-op เป็นส่วนบังคับของหลักสูตรหรือไม่ [[pgwpfos]] [[cip]]'}],
      c:{en:'Free', th:'ไม่มีค่าใช้จ่าย'}, go:{tab:'fields', l:{en:'Compare fields', th:'เปรียบเทียบสาขา'}}, link:IRCC+'study-canada/study-permit/prepare/designated-learning-institutions-list.html'},
     {id:'s5', icon:'send', m:{en:'8 to 12 months', th:'8 ถึง 12 เดือน'}, t:{en:'Apply to the school', th:'สมัครเรียน'},
      d:[{en:'Apply on the school website, or through an authorized agent in Thailand (agents are usually free for students).', th:'สมัครผ่านเว็บไซต์ของสถาบัน หรือผ่านเอเจนต์ที่ได้รับอนุญาตในไทย (โดยทั่วไปเอเจนต์ไม่คิดค่าบริการกับนักเรียน)'},
@@ -779,16 +1061,16 @@ const START = {
     {id:'s6', icon:'file-check', m:{en:'6 to 8 months', th:'6 ถึง 8 เดือน'}, t:{en:'Pay the deposit and receive the LOA and PAL', th:'จ่ายมัดจำ และรับ LOA กับ PAL'},
      d:[{en:'Accept the offer and pay the tuition deposit. Read the refund policy for a refused study permit first.', th:'ตอบรับข้อเสนอและจ่ายมัดจำค่าเรียน อ่านนโยบายคืนเงินกรณี Study Permit ถูกปฏิเสธก่อนจ่าย'},
         {en:'The school sends your Letter of Acceptance (LOA) and requests the Provincial Attestation Letter (PAL) for you.', th:'สถาบันจะส่ง Letter of Acceptance (LOA) และยื่นขอ Provincial Attestation Letter (PAL) ให้คุณ'},
-        {en:'Master\'s and doctoral students at public schools do not need a PAL.', th:'นักศึกษาปริญญาโทและเอกของสถาบันรัฐไม่ต้องใช้ PAL'}],
+        {en:'Master\'s and doctoral students at public schools do not need a PAL. [[pal]]', th:'นักศึกษาปริญญาโทและเอกของสถาบันรัฐไม่ต้องใช้ PAL [[pal]]'}],
      c:() => T({en:'Deposit ', th:'มัดจำ '}) + inline(2000,10000) + T({en:', counted toward tuition', th:' นับเป็นส่วนหนึ่งของค่าเล่าเรียน'}), link:IRCC+'study-canada/study-permit/get-documents/provincial-attestation-letter.html'},
     {id:'s7', icon:'folder-open', m:{en:'5 to 6 months', th:'5 ถึง 6 เดือน'}, t:{en:'Gather the study permit documents', th:'รวบรวมเอกสารขอ Study Permit'},
      d:[{en:'Proof of funds: bank statements for 4 to 6 months, a bank letter, the sponsor\'s letter, proof of relationship, and the sponsor\'s income proof.', th:'หลักฐานการเงิน: Statement ย้อนหลัง 4 ถึง 6 เดือน หนังสือรับรองจากธนาคาร จดหมายสปอนเซอร์ หลักฐานความสัมพันธ์ และหลักฐานรายได้ของสปอนเซอร์'},
         {en:'Letter of explanation: why this program, how it fits your career, and why you will follow the rules of your stay.', th:'Letter of Explanation: ทำไมเลือกหลักสูตรนี้ เชื่อมกับอาชีพอย่างไร และเหตุผลที่จะปฏิบัติตามเงื่อนไขการพำนัก'},
-        {en:'Upfront medical exam with an IRCC panel physician (IOM Bangkok), digital photo, and English translations of Thai documents.', th:'ตรวจสุขภาพล่วงหน้ากับแพทย์ที่ IRCC รับรอง (IOM กรุงเทพฯ) รูปถ่ายดิจิทัล และคำแปลภาษาอังกฤษของเอกสารภาษาไทย'}],
+        {en:'Upfront medical exam with an IRCC panel physician (IOM Bangkok), digital photo, and English translations of Thai documents. [[docs]] [[med]]', th:'ตรวจสุขภาพล่วงหน้ากับแพทย์ที่ IRCC รับรอง (IOM กรุงเทพฯ) รูปถ่ายดิจิทัล และคำแปลภาษาอังกฤษของเอกสารภาษาไทย [[docs]] [[med]]'}],
      c:() => T({en:'Medical about THB 5,000 to 8,000; translations THB 1,000 to 5,000', th:'ตรวจสุขภาพประมาณ 5,000 ถึง 8,000 บาท ค่าแปลเอกสาร 1,000 ถึง 5,000 บาท'}), go:{tab:'prep', l:{en:'Open the checklist', th:'เปิดเช็กลิสต์'}}, link:IRCC+'study-canada/study-permit/get-documents.html'},
     {id:'s8', icon:'stamp', m:{en:'4 to 6 months', th:'4 ถึง 6 เดือน'}, t:{en:'Apply online for the study permit and Co-op work permit', th:'ยื่นขอ Study Permit และ Co-op Work Permit ออนไลน์'},
      d:[{en:'Create an IRCC secure account, answer the questionnaire, upload everything, and pay online.', th:'สร้างบัญชี IRCC ตอบแบบสอบถาม อัปโหลดเอกสารทั้งหมด และชำระเงินออนไลน์'},
-        {en:'Tick the option for a Co-op work permit in the same application. It has no extra fee.', th:'เลือกขอ Co-op Work Permit ในคำร้องเดียวกัน ไม่มีค่าธรรมเนียมเพิ่ม'},
+        {en:'Tick the option for a Co-op work permit in the same application. It has no extra fee. [[coop]] [[fees]]', th:'เลือกขอ Co-op Work Permit ในคำร้องเดียวกัน ไม่มีค่าธรรมเนียมเพิ่ม [[coop]] [[fees]]'},
         {en:'When the biometrics letter arrives, book the visa application centre in Bangkok and go within 30 days.', th:'เมื่อได้รับจดหมายแจ้งเก็บ Biometrics ให้จองคิวศูนย์รับคำร้องวีซ่าในกรุงเทพฯ และไปภายใน 30 วัน'}],
      c:() => T({en:'Study permit ', th:'Study Permit '}) + inline(150) + T({en:' plus biometrics ', th:' บวก Biometrics '}) + inline(85), link:IRCC+'study-canada/study-permit.html'},
     {id:'s9', icon:'badge-check', m:{en:'2 to 3 months', th:'2 ถึง 3 เดือน'}, t:{en:'Get approved, then book everything', th:'ได้รับอนุมัติ แล้วจองทุกอย่าง'},
@@ -798,26 +1080,26 @@ const START = {
      c:() => T({en:'One-way flight about THB 25,000 to 45,000', th:'ตั๋วเที่ยวเดียวประมาณ 25,000 ถึง 45,000 บาท'}), link:IRCC+'application/check-processing-times.html'},
     {id:'s10', icon:'plane', m:{en:'Travel day', th:'วันเดินทาง'}, t:{en:'Pack, fly, and get your permits at the airport', th:'จัดกระเป๋า เดินทาง และรับใบอนุญาตที่สนามบิน'},
      d:[{en:'Carry in your hand luggage: passport, Letter of Introduction, LOA, PAL, proof of funds, tuition receipt, and your Canadian address.', th:'พกในกระเป๋าถือขึ้นเครื่อง: พาสปอร์ต Letter of Introduction, LOA, PAL หลักฐานการเงิน ใบเสร็จค่าเรียน และที่อยู่ในแคนาดา'},
-        {en:'At immigration the officer prints your study permit and Co-op work permit.', th:'ที่ด่านตรวจคนเข้าเมือง เจ้าหน้าที่จะพิมพ์ Study Permit และ Co-op Work Permit ให้'},
+        {en:'At immigration the officer prints your study permit and Co-op work permit. [[arrive]]', th:'ที่ด่านตรวจคนเข้าเมือง เจ้าหน้าที่จะพิมพ์ Study Permit และ Co-op Work Permit ให้ [[arrive]]'},
         {en:'Before leaving the counter, check your name, the expiry date, and that the study permit says you may work off campus.', th:'ก่อนออกจากเคาน์เตอร์ ตรวจชื่อ วันหมดอายุ และดูว่า Study Permit ระบุว่าทำงานนอกสถาบันได้'}],
      c:() => T({en:'Bring some cash or a card for the first week: ', th:'เตรียมเงินสดหรือบัตรสำหรับสัปดาห์แรก: '}) + inline(500,1000), link:IRCC+'study-canada/study-permit/prepare-arrival.html'},
     {id:'s11', icon:'home', m:{en:'First 2 weeks', th:'2 สัปดาห์แรก'}, t:{en:'Set up your life in Canada', th:'ตั้งหลักชีวิตในแคนาดา'},
-     d:[{en:'Get a SIN at a Service Canada office (free, same day) with your passport and study permit.', th:'ขอ SIN ที่สำนักงาน Service Canada (ฟรี ได้ภายในวันเดียว) โดยใช้พาสปอร์ตและ Study Permit'},
+     d:[{en:'Get a SIN at a Service Canada office (free, same day) with your passport and study permit. [[sin]]', th:'ขอ SIN ที่สำนักงาน Service Canada (ฟรี ได้ภายในวันเดียว) โดยใช้พาสปอร์ตและ Study Permit [[sin]]'},
         {en:'Open a bank account, get a phone plan, and buy a transit card.', th:'เปิดบัญชีธนาคาร สมัครแพ็กเกจโทรศัพท์ และซื้อบัตรโดยสาร'},
         {en:'Register for provincial health coverage where available, and attend school orientation.', th:'ลงทะเบียนสิทธิ์ประกันสุขภาพของมณฑล (ถ้ามี) และเข้าร่วมปฐมนิเทศของสถาบัน'}],
      c:() => T({en:'First month rent and deposit ', th:'ค่าเช่าเดือนแรกและเงินประกัน '}) + inline(1400,3200), link:'https://www.canada.ca/en/employment-social-development/services/sin.html'},
     {id:'s12', icon:'briefcase', m:{en:'After classes begin', th:'หลังเปิดเรียน'}, t:{en:'Start working part-time', th:'เริ่มทำงานพาร์ตไทม์'},
-     d:[{en:'You may start working only after your program has begun, up to 24 hours per week during terms.', th:'เริ่มทำงานได้หลังจากหลักสูตรเปิดเรียนแล้วเท่านั้น สูงสุด 24 ชั่วโมงต่อสัปดาห์ในช่วงเทอม'},
+     d:[{en:'You may start working only after your program has begun, up to 24 hours per week during terms. [[offc]]', th:'เริ่มทำงานได้หลังจากหลักสูตรเปิดเรียนแล้วเท่านั้น สูงสุด 24 ชั่วโมงต่อสัปดาห์ในช่วงเทอม [[offc]]'},
         {en:'Write a one-page Canadian resume and apply through the school career centre, job sites, and walk-ins.', th:'เขียนเรซูเม่รูปแบบแคนาดา 1 หน้า และสมัครผ่านศูนย์อาชีพของสถาบัน เว็บหางาน และการเดินสมัครหน้าร้าน'},
         {en:'From day one, plan the next move: the Co-op placement, and for a private college, the bridge to a public program.', th:'ตั้งแต่วันแรก วางแผนก้าวถัดไป: ที่ฝึกงาน Co-op และสำหรับวิทยาลัยเอกชน คือ Bridge ไปยังหลักสูตรของสถาบันรัฐ'}],
-     c:() => T({en:'You earn about CAD 17.50 to 22 per hour', th:'รายได้ประมาณ CAD 17.50 ถึง 22 ต่อชั่วโมง'}), go:{tab:'roadmap', l:{en:'See the roadmap to PR', th:'ดูแผนเส้นทางสู่ PR'}}, link:IRCC+'study-canada/work/work-off-campus.html'}
+     c:() => T({en:'You earn about CAD 17.50 to 22 per hour [[minw]] [[wages]]', th:'รายได้ประมาณ CAD 17.50 ถึง 22 ต่อชั่วโมง [[minw]] [[wages]]'}), go:{tab:'roadmap', l:{en:'See the roadmap to PR', th:'ดูแผนเส้นทางสู่ PR'}}, link:IRCC+'study-canada/work/work-off-campus.html'}
   ]
 };
 
 const FEES_URL = 'https://ircc.canada.ca/english/information/fees/fees.asp';
 const COSTS = {
   h1:{en:'Every cost, in CAD and THB', th:'ค่าใช้จ่ายทุกรายการ ทั้ง CAD และบาท'},
-  lead:{en:'All amounts convert at today\'s live exchange rate. Official fees were checked against the IRCC website on 14 November 2026; other lines are estimates.', th:'ทุกยอดแปลงด้วยอัตราแลกเปลี่ยนล่าสุดของวันนี้ ค่าธรรมเนียมทางการตรวจสอบกับเว็บไซต์ IRCC เมื่อ 14 พฤศจิกายน 2026 ส่วนรายการอื่นเป็นค่าประมาณ'},
+  lead:{en:'All amounts convert at today\'s live exchange rate. Official fees were checked against the IRCC website on 14 November 2026; other lines are estimates. [[fees]] [[funds]]', th:'ทุกยอดแปลงด้วยอัตราแลกเปลี่ยนล่าสุดของวันนี้ ค่าธรรมเนียมทางการตรวจสอบกับเว็บไซต์ IRCC เมื่อ 14 พฤศจิกายน 2026 ส่วนรายการอื่นเป็นค่าประมาณ [[fees]] [[funds]]'},
   conv:{en:'Currency converter', th:'เครื่องแปลงสกุลเงิน'},
   item:{en:'Item', th:'รายการ'}, off:{en:'Official fee', th:'ค่าธรรมเนียมทางการ'}, est:{en:'Estimate', th:'ค่าประมาณ'},
   sub:{en:'Subtotal', th:'รวมย่อย'}, verify:{en:'Verify', th:'ตรวจสอบ'},
@@ -839,7 +1121,7 @@ const COSTS = {
       {t:{en:'Study permit fee', th:'ค่าธรรมเนียม Study Permit'}, cad:[150,150], off:true, u:FEES_URL},
       {t:{en:'Biometrics', th:'ค่า Biometrics'}, cad:[85,85], off:true, u:FEES_URL},
       {t:{en:'Co-op work permit', th:'Co-op Work Permit'}, cad:[0,0], n:{en:'No fee when applied for with the study permit', th:'ไม่มีค่าธรรมเนียมเมื่อยื่นพร้อม Study Permit'}, u:IRCC+'study-canada/work/intern.html'},
-      {t:{en:'Upfront medical exam (IOM Bangkok)', th:'ตรวจสุขภาพล่วงหน้า (IOM กรุงเทพฯ)'}, thb:[5000,8000]},
+      {t:{en:'Upfront medical exam (IOM Bangkok)', th:'ตรวจสุขภาพล่วงหน้า (IOM กรุงเทพฯ)'}, thb:[5000,8000], r:'med'},
       {t:{en:'Visa centre service and courier', th:'ค่าบริการศูนย์รับคำร้องและค่าจัดส่ง'}, thb:[500,1500]}
     ]},
     {sum:true, t:{en:'3. Before you fly', th:'3. ก่อนเดินทาง'}, items:[
@@ -858,8 +1140,8 @@ const COSTS = {
     ]},
     {t:{en:'5. Later: PGWP and PR', th:'5. ภายหลัง: PGWP และ PR'}, items:[
       {t:{en:'PGWP application', th:'ค่ายื่น PGWP'}, cad:[255,255], off:true, n:{en:'Work permit 155 plus open work permit holder fee 100', th:'ค่า Work Permit 155 บวกค่า Open Work Permit Holder 100'}, u:FEES_URL},
-      {t:{en:'Language test for PGWP and PR', th:'ค่าสอบภาษาสำหรับ PGWP และ PR'}, cad:[290,340], n:{en:'CELPIP or IELTS General Training in Canada', th:'CELPIP หรือ IELTS General Training สอบในแคนาดา'}},
-      {t:{en:'Educational Credential Assessment (for your Thai degree)', th:'Educational Credential Assessment (สำหรับปริญญาจากไทย)'}, cad:[250,300]},
+      {t:{en:'Language test for PGWP and PR', th:'ค่าสอบภาษาสำหรับ PGWP และ PR'}, cad:[290,340], n:{en:'CELPIP or IELTS General Training in Canada', th:'CELPIP หรือ IELTS General Training สอบในแคนาดา'}, r:'lang'},
+      {t:{en:'Educational Credential Assessment (for your Thai degree)', th:'Educational Credential Assessment (สำหรับปริญญาจากไทย)'}, cad:[250,300], r:'eca'},
       {t:{en:'PR application through Express Entry', th:'ค่ายื่น PR ผ่าน Express Entry'}, cad:[1590,1590], off:true, n:{en:'Processing fee plus right of permanent residence fee', th:'ค่าดำเนินการ บวกค่า Right of Permanent Residence'}, u:FEES_URL},
       {t:{en:'PR medical exam and police certificates', th:'ตรวจสุขภาพและใบรับรองความประพฤติสำหรับ PR'}, cad:[300,500]}
     ]}
@@ -918,7 +1200,7 @@ function viewCosts(){
       return `
         <div class="trow">
           <div>
-            <div class="font-medium text-[15px]">${T(it.t)}</div>
+            <div class="font-medium text-[15px]">${T(it.t)}${it.r ? ` [[${it.r}]]` : (it.u ? (k => k ? ` [[${k}]]` : '')(Object.keys(SRC).find(k => SRC[k].u === it.u)) : '')}</div>
             <div class="flex flex-wrap items-center gap-2 mt-1">
               <span class="badge ${it.off?'b-green':'b-gray'}">${T(it.off?C.off:C.est)}</span>
               ${it.n?`<span class="faint text-[13px]">${T(it.n)}</span>`:''}
@@ -1070,36 +1352,52 @@ function viewQuiz(){
 
 function viewFields(){
   const F = FIELD_UI;
-  const list = FIELDS.filter(f => S.filter==='all' || f.tags.includes(S.filter));
-  const cards = list.map(f => `
-    <article class="card flex flex-col gap-4">
-      <div class="flex items-start gap-3">
-        <span class="tile" style="background:${f.warn?'var(--red-soft)':'var(--blue-soft)'};color:${f.warn?'var(--red)':'var(--blue)'}">${ic(f.icon)}</span>
-        <div>
-          <h3 class="text-[19px] font-semibold">${T(f.t)}</h3>
+  if (!FILTERS.some(x => x.id === S.filter)) S.filter = 'all';
+  const match = f => S.filter==='all' || f.g===S.filter || (S.filter==='pgwp' && f.pg==='yes') || (S.filter==='cat' && f.cat) || (S.filter==='warn' && (f.warn || f.pg==='no'));
+  const list = FIELDS.filter(match);
+  const card = f => {
+    const pg = PG[f.pg], tint = f.warn ? 'red' : 'blue';
+    const nocs = f.noc.length ? f.noc.map(c => `<a class="noc" href="${nocUrl(c)}" target="_blank" rel="noopener noreferrer"><b>${c}</b><span>${T(NOCT[c])}</span><i>TEER ${c[1]}</i></a>`).join('')
+      : `<p class="text-[14.5px] muted">${T(F.nocNone)} [[noc]]</p>`;
+    return `
+    <details class="card fcard" ${S.open && S.open[f.id] ? 'open' : ''} data-field="${f.id}">
+      <summary class="flex items-start gap-3">
+        <span class="tile" style="background:var(--${tint}-soft);color:var(--${tint})">${ic(f.icon)}</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-[17.5px] font-semibold">${T(f.t)}</h3>
           <div class="flex flex-wrap gap-2 mt-2">
-            ${f.top?`<span class="badge b-blue">${ic('star','icon-sm')}${T(F.top)}</span>`:''}
-            <span class="badge ${f.pgwp.c}">PGWP: ${T(f.pgwp.l)}</span>
+            <span class="badge ${pg.c}">PGWP: ${T(pg.l)}</span>
+            ${f.cat ? `<span class="badge b-blue">${ic('award','icon-sm')}${T(CATS[f.cat])}</span>` : ''}
           </div>
         </div>
-      </div>
-      ${f.alert?`<div class="text-[14.5px] flex gap-2" style="background:var(--red-soft);color:var(--red);border-radius:8px;padding:10px 12px">${ic('octagon-alert','icon-sm')}<span>${T(f.alert)}</span></div>`:''}
-      <div><div class="eyebrow">${T(F.why)}</div><p class="text-[15px] mt-1">${T(f.why)}</p></div>
-      <div><div class="eyebrow">${T(F.coop)}</div><p class="text-[15px] mt-1">${T(f.coop)}</p></div>
-      <div><div class="eyebrow">${T(F.schools)}</div><p class="text-[15px] mt-1">${T(f.schools)}</p></div>
-      <div class="grid sm:grid-cols-2 gap-3">
+        <span class="chev mt-1">${ic('chevron-right')}</span>
+      </summary>
+      <div class="flex flex-col gap-4 mt-4">
+        ${f.alert?`<div class="text-[14.5px] flex gap-2" style="background:var(--red-soft);color:var(--red);border-radius:8px;padding:10px 12px">${ic('octagon-alert','icon-sm')}<span>${T(f.alert)}</span></div>`:''}
+        <div><div class="eyebrow">${T(F.why)}</div><p class="text-[15px] mt-1">${T(f.why)}</p></div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><div class="eyebrow">${T(F.cip)}</div><p class="text-[15px] mt-1 num">${T(f.cip)}</p></div>
+          <div><div class="eyebrow">${T(F.cat)}</div><p class="text-[15px] mt-1">${f.cat ? T(CATS[f.cat]) : T(F.noCat)}</p></div>
+        </div>
+        <div><div class="eyebrow mb-2">${T(F.noc)}</div><div class="flex flex-wrap gap-2">${nocs}</div></div>
+        <div><div class="eyebrow">${T(F.coop)}</div><p class="text-[15px] mt-1">${T(f.coop)}</p></div>
         <div><div class="eyebrow">${T(F.pr)}</div><p class="text-[15px] mt-1">${T(f.pr)}</p></div>
-        <div><div class="eyebrow">${T(F.noc)}</div><p class="text-[15px] mt-1 num">${f.noc}</p></div>
+        <div><div class="eyebrow">${T(F.schools)}</div><p class="text-[15px] mt-1">${T(f.schools)}</p></div>
+        ${f.note?`<p class="faint text-[13.5px] flex gap-2">${ic('info','icon-sm')}<span>${T(f.note)}</span></p>`:''}
       </div>
-      ${f.note?`<p class="faint text-[13.5px] flex gap-2">${ic('info','icon-sm')}<span>${T(f.note)}</span></p>`:''}
-    </article>`).join('');
+    </details>`; };
+  const body = GROUPS.map(g => { const fs = list.filter(f => f.g === g.id); if (!fs.length) return '';
+    return `<h2 class="grp-h flex items-center gap-2">${ic(g.icon,'icon-sm')}${T(g.l)} <span class="num">(${fs.length})</span></h2>
+      <div class="grid md:grid-cols-2 gap-4 items-start">${fs.map(card).join('')}</div>`; }).join('');
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(F.title)}</h1>
-      <p class="muted mt-3 text-[17px]">${T(F.sub)}</p>
+      <p class="muted mt-3 text-[17px]"><span class="num">${FIELDS.length}</span> ${T(F.sub)}</p>
+      <p class="faint text-[13.5px] mt-2 flex gap-2">${ic('badge-check','icon-sm')}<span>${T(F.checked)}</span></p>
     </section>
-    <div class="seg mb-6" role="group">${FILTERS.map(x => `<button class="${S.filter===x.id?'on':''}" data-act="filter" data-v="${x.id}">${T(x.l)}</button>`).join('')}</div>
-    <div class="grid md:grid-cols-2 gap-4 mb-8">${cards || `<p class="muted">${T(F.none)}</p>`}</div>
+    <div class="seg mb-3" role="group">${FILTERS.map(x => `<button class="${S.filter===x.id?'on':''}" data-act="filter" data-v="${x.id}">${T(x.l)}</button>`).join('')}</div>
+    <p class="text-[14px] muted mb-2 flex gap-2">${ic('graduation-cap','icon-sm')}<span>${T(F.degree)}</span></p>
+    <div class="mb-8">${body || `<p class="muted mt-6">${T(F.none)}</p>`}</div>
     <div class="card">
       <h2 class="text-[20px] font-semibold mb-2">${T(F.rules)}</h2>
       <ul class="clean">${F.rulesList.map(x => `<li><span style="color:var(--blue)">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
@@ -1281,7 +1579,7 @@ function renderSimOut(){
         <div class="big num">${cad(c.show)}</div>
         <div class="text-[19px] font-semibold muted num">${thb(c.show*s.rate)}</div>
       </div>
-      <div class="faint text-[13.5px] mb-3">${T(M.showNote)}</div>
+      <div class="faint text-[13.5px] mb-3">${cites(T(M.showNote)).html}</div>
       <div class="row"><span class="muted">${T(M.lTuition)}</span><span class="num">${cad(s.tuition)}</span></div>
       <div class="row"><span class="muted">${T(M.lProof)}</span><span class="num">${cad(s.proof)}</span></div>
       <div class="row"><span class="muted">${T(M.lSetup)}</span><span class="num">${cad(SIMC.setup)}</span></div>
@@ -1313,6 +1611,26 @@ function updateChip(){
   if (c) c.innerHTML = '<span class="tb-full">1 CAD =&nbsp;</span>' + Number(S.sim.rate).toFixed(2) + ' THB';
 }
 function icons(){ if (window.lucide) lucide.createIcons(); }
+/* Turn [[key]] tokens into numbered citations; returns {html, used} */
+let PAGE_USED = [];
+function updateRefs(){ const rf = document.getElementById('refs'); if (!rf) return; rf.innerHTML = refsHtml(PAGE_USED); rf.hidden = !PAGE_USED.length; }
+function cites(html, used = PAGE_USED){
+  html = html.replace(/\s?\[\[([a-z0-9_]+)\]\]/gi, (m, k) => {
+    const s = SRC[k]; if (!s) return '';
+    let n = used.indexOf(k); if (n < 0) { used.push(k); n = used.length - 1; }
+    return `<sup class="cite"><a href="#ref-${n+1}" data-cite="${n+1}" title="${esc(T(s.l))}">${n+1}</a></sup>`;
+  });
+  return {html, used};
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function refsHtml(used){
+  if (!used.length) return '';
+  return `
+    <h2 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('library')}</span>${T(REF_UI.title)}</h2>
+    <p class="muted text-[14px] mt-1 mb-2">${T(REF_UI.sub)}</p>
+    <ol class="reflist">${used.map((k,i) => { const s = SRC[k], host = new URL(s.u).hostname.replace(/^www\./,'');
+      return `<li id="ref-${i+1}"><span class="rn">[${i+1}]</span><span><a href="${s.u}" target="_blank" rel="noopener noreferrer">${T(s.l)}</a><span class="faint">. ${T(s.o)}, ${host}</span> <span style="color:var(--blue)">${ic('external-link','icon-sm')}</span></span></li>`; }).join('')}</ol>`;
+}
 function render(keepScroll){
   if (!VIEWS[S.tab]) S.tab = 'ready';
   document.documentElement.lang = S.lang;
@@ -1337,14 +1655,23 @@ function render(keepScroll){
     <div class="grid sm:grid-cols-2 gap-x-8">${LINKS.items.map(x => `<a href="${x.u}" target="_blank" rel="noopener noreferrer" class="tap flex items-start gap-2 py-3 text-[15px] hover:underline" style="color:var(--blue);border-top:1px solid var(--line);align-items:flex-start">${ic('external-link','icon-sm')}<span style="margin-top:-3px">${T(x.l)}</span></a>`).join('')}</div>`;
   const y = window.scrollY;
   const app = document.getElementById('app');
-  app.innerHTML = VIEWS[S.tab]();
-  renderSimOut(); updateChip();
+  PAGE_USED = [];
+  app.innerHTML = cites(VIEWS[S.tab]()).html;
+  renderSimOut(); updateChip(); updateRefs();
   icons();
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
   save();
 }
 
 document.addEventListener('click', e => {
+  const c = e.target.closest('[data-cite]');
+  if (c) {
+    e.preventDefault();
+    const li = document.getElementById('ref-' + c.dataset.cite); if (!li) return;
+    li.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'});
+    li.classList.add('flash'); setTimeout(() => li.classList.remove('flash'), 1600);
+    return;
+  }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, v = b.dataset.v;
   if (act === 'lang') { S.lang = v; render(true); }
@@ -1373,6 +1700,10 @@ document.addEventListener('input', e => {
   if (k === 'cad') document.getElementById('conv-thb').value = Math.round(v * r);
   else document.getElementById('conv-cad').value = Math.round(v / r * 100) / 100;
 });
+document.addEventListener('toggle', e => {
+  const d = e.target; if (!d.dataset || !d.dataset.field) return;
+  S.open = S.open || {}; S.open[d.dataset.field] = d.open; save();
+}, true);
 document.addEventListener('change', e => {
   if (e.target.dataset.step) { S.steps[e.target.dataset.step] = e.target.checked; render(true); return; }
   const id = e.target.dataset.check; if (!id) return;
