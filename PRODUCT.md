@@ -38,11 +38,15 @@ Confirmed functionality (all in `index.html`):
 
 - Start from Zero: a 12-step guide from choosing a path to starting part-time work, with timing, actions, costs, progress ticks, and a glossary.
 - Am I Ready?: comparison of private career college Co-op (no PGWP) against public college post-graduate diploma with Co-op (PGWP eligible), plus an 8-question fit quiz.
-- Fields & PR Matrix: five target fields with filters, PGWP eligibility, PR draw category, and a warning on Management/Business diplomas.
+- Fields & PR Matrix: 28 fields in six groups (Tech & Data, Health & Social, Business & Finance, Engineering & Trades, Education, Creative & Hospitality) with filters, the CIP code to ask for, PGWP list status, 2026 Express Entry category, and NOC 2021 occupations linked to their official profiles.
+- Cities & Map: interactive Leaflet map (Esri gray tiles, needs internet) of 11 study cities, with per-city rent (CMHC Oct 2025), minimum wage, hours of work to pay rent, January temperature, student health cover, provincial PR program, a comparison table, and the Thai embassy and consulate.
+- Citations: any text can cite a source with a [[key]] token; each page shows numbered markers and a "References on this page" list linking to official pages.
 - Bridge Roadmap: two selectable scenarios (Safe Test, One-Shot) from Year 0 to PR.
 - All Costs: itemized costs in CAD and THB with subtotals and a currency converter.
-- Checklist & Budget: preparation checklist, IELTS guidance for international-program graduates, and a cost versus income simulator.
-- Live CAD to THB rate fetched once per day, with manual override.
+- Am I Ready? also covers Option C, a university master's degree (with or without Co-op), with a 10-question quiz that scores all three options.
+- Budget Simulator (own tab): cash to prepare, a plain-language analysis with a verdict, a 12-month living-money chart, pay vs living-cost bars, and a first-year spending split.
+- Preparation Checklist: 15 ordered steps in 5 phases with a "do this next" card, English test prices and booking links, IELTS guidance, and how to check an agent (no named agents are endorsed).
+- Live data fetched once per day: CAD and USD to THB rates, IRCC study permit processing time for Thailand, and the latest Express Entry draws (IRCC JSON feeds).
 - Links to official sources on every tab.
 
 Constraints the user confirmed must always hold:
@@ -66,7 +70,8 @@ Undecided: whether and where the app will be published online.
 ## Evidence on Hand
 
 - Official IRCC fees and the proof-of-funds amount were checked against the IRCC website on 14 November 2026 (study permit CAD 150, biometrics CAD 85, PGWP CAD 255, PR via Express Entry CAD 1,590, living-cost proof CAD 23,448 for one person applying on or after 1 September 2026).
-- All other costs (IELTS, medical exam, flights, rent, living costs, tuition ranges) are estimates and are labelled as such.
+- Checked 19 November 2026: since 1 April 2026 post-secondary students need no separate Co-op work permit (a school letter instead); IELTS in Thailand is computer-only since 22 March 2026 at THB 8,860; CELPIP-General is offered in Thailand (THB 7,000); PTE Core and PTE Academic USD 224; TOEFL iBT USD 230; Duolingo USD 70. IRCC accepts only IELTS General Training, CELPIP-General, PTE Core (and TEF/TCF) for the PGWP and Express Entry. Master's of 8 months or more can give a 3-year PGWP; spouse open work permit needs a master's of 16 months or more.
+- All other costs (medical exam, flights, rent, living costs, tuition ranges) are estimates and are labelled as such.
 - There are no testimonials, user numbers, partner schools, or endorsements. Future work must not invent any.
 - The app is planning information only, not legal or immigration advice, and says so.
 
