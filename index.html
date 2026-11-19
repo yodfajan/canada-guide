@@ -249,8 +249,8 @@
   .bnav svg{width:22px;height:22px}
   @media (max-width:400px){.bnav button{font-size:10.5px}.bnav svg{width:21px;height:21px}}
   /* ---------- Budget charts (dataviz reference palette, validated on the card surfaces) ---------- */
-  :root{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--grid:rgba(0,0,0,.08);--axis:rgba(0,0,0,.22);--crit:#d03b3b;--warn:#b26b00;--good:#1D7A33}
-  :root[data-theme="dark"]{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--grid:rgba(255,255,255,.08);--axis:rgba(255,255,255,.22);--crit:#ff6f66;--warn:#ffa826;--good:#32d74b}
+  :root{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--grid:rgba(0,0,0,.08);--axis:rgba(0,0,0,.22);--crit:#d03b3b;--warn:#b26b00;--good:#1D7A33}
+  :root[data-theme="dark"]{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#0ca30c;--grid:rgba(255,255,255,.08);--axis:rgba(255,255,255,.22);--crit:#ff6f66;--warn:#ffa826;--good:#32d74b}
   .hero{font-size:44px;font-weight:700;letter-spacing:-0.02em;line-height:1.1}
   @media (max-width:640px){.hero{font-size:34px}}
   .viz figcaption{margin-bottom:8px}
@@ -272,7 +272,7 @@
   .vlegend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:13px;color:var(--ink2)}
   .vlegend span{display:inline-flex;align-items:center;gap:6px}
   .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
-  .sw.s1,.segbar .s1{background:var(--s1)} .sw.s2,.segbar .s2{background:var(--s2)} .sw.s3,.segbar .s3{background:var(--s3)} .sw.s4,.segbar .s4{background:var(--s4)} .sw.s5,.segbar .s5{background:var(--s5)}
+  .sw.s1,.segbar .s1{background:var(--s1)} .sw.s2,.segbar .s2{background:var(--s2)} .sw.s3,.segbar .s3{background:var(--s3)} .sw.s4,.segbar .s4{background:var(--s4)} .sw.s5,.segbar .s5{background:var(--s5)} .sw.s6,.segbar .s6{background:var(--s6)}
   .segbar{display:flex;gap:2px;height:28px}
   .segbar>div{border-radius:4px;min-width:3px;color:#fff;font-size:12.5px;font-weight:600;display:flex;align-items:center;padding-left:6px;font-variant-numeric:tabular-nums;cursor:default}
   .segbar>.s4{color:#0b0b0b}
@@ -281,8 +281,9 @@
   .tline>div{border-radius:4px;min-width:4px;display:flex;align-items:center;padding-left:6px;font-size:12.5px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap;cursor:default}
   .tline .ph-S,.sw.ph-S{background:var(--s1)} .tline .ph-C,.sw.ph-C{background:var(--s3)} .tline .ph-B,.sw.ph-B{background:var(--s4)}
   .tline .ph-B{color:#0b0b0b}
+  .tline .ph-G,.sw.ph-G{background:var(--s5)}
   .tline>div.hov{filter:brightness(1.08)}
-  .viz .band-C{fill:var(--s3);opacity:.12} .viz .band-B{fill:var(--s4);opacity:.14}
+  .viz .band-C{fill:var(--s3);opacity:.12} .viz .band-B{fill:var(--s4);opacity:.14} .viz .band-G{fill:var(--s5);opacity:.12}
   .viz .neg-zone{fill:var(--crit);opacity:.06}
   .viz .y2{stroke:var(--ink3);stroke-width:1;opacity:.6}
   #viz-tip{position:fixed;z-index:200;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--glass-strong);color:var(--ink);border:1px solid var(--glass-border);
@@ -420,7 +421,7 @@
 const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
   lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', open:{}, scenario:'safe',
-  sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37 },
+  sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0 },
   fx:{ rate:null, date:null, day:null, src:'' }
 };
 let S = JSON.parse(JSON.stringify(DEFAULTS));
@@ -567,7 +568,7 @@ const OPTIONS = [
    pros:[
      {en:'Low tuition and fast entry, often with an in-house English test instead of IELTS', th:'ค่าเล่าเรียนต่ำ เข้าเรียนได้เร็ว หลายแห่งใช้ข้อสอบภาษาอังกฤษของสถาบันแทน IELTS ได้'},
      {en:'Part-time work during the study term (IRCC currently allows up to 24 hours per week off campus) [[offc]]', th:'ทำงานพาร์ตไทม์ระหว่างเทอมเรียนได้ (ปัจจุบัน IRCC อนุญาตสูงสุด 24 ชั่วโมงต่อสัปดาห์นอกสถาบัน) [[offc]]'},
-     {en:'A paid Co-op term after the study months, usually entry-level and often part time (about 17 to 20 hours a week). In Ontario a private college placement may even be unpaid. [[sprott]]', th:'มีเทอม Co-op แบบได้ค่าจ้างหลังช่วงเรียน ส่วนใหญ่เป็นงานระดับเริ่มต้นและมักเป็นพาร์ตไทม์ (ประมาณ 17 ถึง 20 ชั่วโมงต่อสัปดาห์) ในออนแทรีโอ การฝึกงานของวิทยาลัยเอกชนอาจไม่ได้รับค่าจ้างด้วย [[sprott]]'}
+     {en:'A paid Co-op term after the study months. IRCC sets no weekly hour limit, so you can work full time (35 to 40 hours) if the employer offers it, though many schools only require about 20 hours a week. You may also keep a separate part-time job of up to 24 hours a week. Jobs are usually entry-level; in Ontario a placement may even be unpaid. [[coop]] [[ciccc]] [[tsom]]', th:'มีเทอม Co-op แบบได้ค่าจ้างหลังช่วงเรียน IRCC ไม่จำกัดชั่วโมงต่อสัปดาห์ จึงทำเต็มเวลา (35 ถึง 40 ชั่วโมง) ได้ถ้านายจ้างให้ แม้หลายโรงเรียนกำหนดขั้นต่ำแค่ประมาณ 20 ชั่วโมงต่อสัปดาห์ และยังทำงานพาร์ตไทม์แยกอีกงานได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ งานส่วนใหญ่เป็นระดับเริ่มต้น และในออนแทรีโออาจไม่ได้รับค่าจ้าง [[coop]] [[ciccc]] [[tsom]]'}
    ],
    cons:[
      {en:'No Post-Graduation Work Permit. When the program ends, your right to stay and work ends too. [[pgwp]]', th:'ไม่มีสิทธิ์ขอ Post-Graduation Work Permit เมื่อจบหลักสูตร สิทธิ์อยู่ต่อและทำงานก็สิ้นสุดด้วย [[pgwp]]'},
@@ -1051,7 +1052,7 @@ const ROAD = {
         
         {y:{en:'Year 1 · 2027 to 2028', th:'ปีที่ 1 · 2027 ถึง 2028'}, t:{en:'Private Co-op: study term, then work term', th:'Co-op เอกชน: เทอมเรียน แล้วต่อด้วยเทอมทำงาน'},
         
-         d:{en:'Six months of classes with part-time work, then six months of paid Co-op, often entry-level and about 20 hours a week. Use this year to adapt, build a Canadian resume and references, and sit IELTS Academic for 6.5. Do not count on saving much from Co-op pay.', th:'เรียน 6 เดือนพร้อมทำงานพาร์ตไทม์ แล้วทำ Co-op แบบได้ค่าจ้างอีก 6 เดือน ซึ่งมักเป็นงานระดับเริ่มต้นประมาณ 20 ชั่วโมงต่อสัปดาห์ ใช้ปีนี้ปรับตัว สร้างเรซูเม่และผู้รับรองในแคนาดา และสอบ IELTS Academic ให้ได้ 6.5 ไม่ควรหวังเก็บเงินได้มากจากค่าจ้าง Co-op'}},
+         d:{en:'Six months of classes with part-time work, then six months of paid Co-op. You may work full time in the Co-op if the employer offers it, but many schools only require about 20 hours a week, so confirm the hours before counting on the income. Use this year to adapt, build a Canadian resume and references, and sit IELTS Academic for 6.5.', th:'เรียน 6 เดือนพร้อมทำงานพาร์ตไทม์ แล้วทำ Co-op แบบได้ค่าจ้างอีก 6 เดือน ช่วง Co-op ทำงานเต็มเวลาได้ถ้านายจ้างให้ แต่หลายโรงเรียนกำหนดขั้นต่ำแค่ประมาณ 20 ชั่วโมงต่อสัปดาห์ จึงควรยืนยันชั่วโมงก่อนนับเป็นรายได้ ใช้ปีนี้ปรับตัว สร้างเรซูเม่และผู้รับรองในแคนาดา และสอบ IELTS Academic ให้ได้ 6.5'}},
         
         {y:{en:'Decision point · mid 2028', th:'จุดตัดสินใจ · กลางปี 2028'}, risk:true, t:{en:'The Bridge: stay or go home', th:'Bridge: อยู่ต่อหรือกลับบ้าน'},
         
@@ -1181,27 +1182,27 @@ const IELTSQ = {
 const SIMC = {
   base:2026, intakes:[2027, 2028],
   types:{
-    private:{l:{en:'Private Work & Study', th:'Work & Study เอกชน'}, min:6000, max:18000, def:12000, coopWage:18.25, coopH:20,
+    private:{l:{en:'Private Work & Study', th:'Work & Study เอกชน'}, min:6000, max:18000, def:12000, coopWage:18.25, coopH:35, fees:500,
       cwNote:{en:'Private Co-op jobs are entry-level or service work. Schools publish no wage data, so minimum wage is a safe estimate. Some placements in Ontario can be unpaid. [[minw]]', th:'งาน Co-op ของหลักสูตรเอกชนเป็นงานระดับเริ่มต้นหรืองานบริการ สถาบันไม่เผยแพร่ข้อมูลค่าจ้าง จึงควรประมาณด้วยค่าแรงขั้นต่ำ บางที่ในออนแทรีโออาจไม่ได้รับค่าจ้าง [[minw]]'},
       desc:{en:'Private career college: study months first, then an equal number of paid Co-op months. No PGWP.', th:'วิทยาลัยอาชีพเอกชน: เรียนก่อน แล้วต่อด้วยเทอม Co-op แบบได้ค่าจ้างจำนวนเดือนเท่ากัน ไม่มีสิทธิ์ PGWP'},
       tuNote:{en:'Tuition per year. Private programs often quote one price for the whole program: divide it by the number of years.', th:'ค่าเล่าเรียนต่อปี หลักสูตรเอกชนมักบอกราคาทั้งหลักสูตร ให้หารด้วยจำนวนปี'}},
-    public:{l:{en:'Public college', th:'วิทยาลัยรัฐ'}, min:15000, max:26000, def:20000, coopWage:21, coopH:37,
+    public:{l:{en:'Public college', th:'วิทยาลัยรัฐ'}, min:15000, max:26000, def:20000, coopWage:21, coopH:37, fees:2000,
       cwNote:{en:'Conestoga posts college Co-op jobs at about CAD 18 to 32 an hour (Winter 2027). [[conestogacoop]]', th:'Conestoga ประกาศงาน Co-op ระดับวิทยาลัยที่ค่าจ้างประมาณ CAD 18 ถึง 32 ต่อชั่วโมง (รอบ Winter 2027) [[conestogacoop]]'},
       desc:{en:'Post-graduate diploma or diploma: two 4-month study terms a year. Co-op is optional depending on the program. PGWP eligible if the CIP code is on the list.', th:'Post-Graduate Diploma หรือ Diploma: ปีละ 2 เทอม เทอมละ 4 เดือน Co-op มีหรือไม่มีแล้วแต่หลักสูตร มีสิทธิ์ PGWP ถ้ารหัส CIP อยู่ในรายการ'},
       tuNote:{en:'Tuition per year for international students.', th:'ค่าเล่าเรียนต่อปีสำหรับนักศึกษาต่างชาติ'}},
-    masters:{l:{en:'Master\'s degree', th:'ปริญญาโท'}, min:20000, max:60000, def:35000, coopWage:27, coopH:37,
+    masters:{l:{en:'Master\'s degree', th:'ปริญญาโท'}, min:20000, max:80000, def:35000, coopWage:27, coopH:37, fees:1500,
       cwNote:{en:'UBC Applied Science master\'s Co-op students averaged CAD 5,066 a month in 2025, about CAD 29 an hour. [[ubccoop]]', th:'นักศึกษาปริญญาโท Co-op ของ UBC Applied Science ได้ค่าจ้างเฉลี่ย CAD 5,066 ต่อเดือนในปี 2025 หรือประมาณ CAD 29 ต่อชั่วโมง [[ubccoop]]'},
       desc:{en:'University master\'s: course-based programs often have an optional paid Co-op term. 3-year PGWP in any field.', th:'ปริญญาโทมหาวิทยาลัย: หลักสูตรแบบเรียนรายวิชามักมีเทอม Co-op ให้เลือก ได้ PGWP 3 ปีทุกสาขา'},
       tuNote:{en:'Tuition per year for international students.', th:'ค่าเล่าเรียนต่อปีสำหรับนักศึกษาต่างชาติ'}}
   },
   living:{
     shared:{l:{en:'Shared room', th:'ห้องแชร์'}, rent:1150, food:450, other:360,
-      note:{en:'Rent CAD 1,150 (a room in shared housing averages CAD 1,146 to 1,220 in Toronto in 2026), food 450, transit, phone and personal 360 a month. [[uoft]]', th:'ค่าเช่า CAD 1,150 (ห้องในบ้านแชร์ในโตรอนโตปี 2026 เฉลี่ย CAD 1,146 ถึง 1,220) ค่าอาหาร 450 ค่าเดินทาง โทรศัพท์ และของใช้ส่วนตัว 360 ต่อเดือน [[uoft]]'}},
+      note:{en:'Rent CAD 1,150 (a room in shared housing averages CAD 1,146 to 1,220 in Toronto in 2026), food 450, transit, phone and personal 360, health insurance 80 a month. [[uoft]]', th:'ค่าเช่า CAD 1,150 (ห้องในบ้านแชร์ในโตรอนโตปี 2026 เฉลี่ย CAD 1,146 ถึง 1,220) ค่าอาหาร 450 ค่าเดินทาง โทรศัพท์ และของใช้ส่วนตัว 360 ประกันสุขภาพ 80 ต่อเดือน [[uoft]]'}},
     studio:{l:{en:'Own studio', th:'สตูดิโอของตัวเอง'}, rent:1850, food:450, other:420,
-      note:{en:'Rent CAD 1,850: what a new tenant pays for a vacant studio (CMHC, October 2025: Vancouver 1,988, Toronto 1,689). Plus food 450 and other costs including internet 420 a month. [[cmhc]]', th:'ค่าเช่า CAD 1,850 คือราคาที่ผู้เช่าใหม่จ่ายสำหรับห้องสตูดิโอว่าง (CMHC ตุลาคม 2025: แวนคูเวอร์ 1,988 โตรอนโต 1,689) บวกค่าอาหาร 450 และค่าใช้จ่ายอื่นรวมอินเทอร์เน็ต 420 ต่อเดือน [[cmhc]]'}}
+      note:{en:'Rent CAD 1,850: what a new tenant pays for a vacant studio (CMHC, October 2025: Vancouver 1,988, Toronto 1,689). Plus food 450, other costs including internet 420, and health insurance 80 a month. [[cmhc]]', th:'ค่าเช่า CAD 1,850 คือราคาที่ผู้เช่าใหม่จ่ายสำหรับห้องสตูดิโอว่าง (CMHC ตุลาคม 2025: แวนคูเวอร์ 1,988 โตรอนโต 1,689) บวกค่าอาหาร 450 ค่าใช้จ่ายอื่นรวมอินเทอร์เน็ต 420 และประกันสุขภาพ 80 ต่อเดือน [[cmhc]]'}}
   },
-  growth:{tuition:0.04, rent:0.025, cpi:0.02, wage:0.02, proof:0.024},
-  setup:3500, studyTax:0.93, ftTax:0.85, weeks:4.33
+  growth:{tuition:0.04, rent:0.025, cpi:0.02, wage:0.02, proof:0.024, health:0.05},
+  setup:2000, travel:2500, health:80, weeks:4.33
 };
 const SIM_UI = {
   title:{en:'Budget Simulator', th:'เครื่องจำลองงบประมาณ'},
@@ -1297,6 +1298,64 @@ const SIM_UI = {
   reset:{en:'Reset simulator', th:'รีเซ็ตเครื่องจำลอง'}
 };
 
+/* Simulator text, revised 19 Nov 2026 after an audit against IRCC, CRA and school pages. */
+Object.assign(SIM_UI, {
+  lTuitionFees:{en:'Tuition and compulsory fees, year 1', th:'ค่าเล่าเรียนและค่าธรรมเนียมบังคับ ปีแรก'},
+  feesL:{en:'Compulsory school fees per year (today)', th:'ค่าธรรมเนียมบังคับของสถาบันต่อปี (ปัจจุบัน)'},
+  feesNote:{en:'Student, technology and other fees charged on top of tuition. Check the amount on your Letter of Acceptance. Public colleges often charge CAD 1,500 to 2,700 a year. If your school bundles health insurance or a transit pass, lower this so it is not counted twice.', th:'ค่าธรรมเนียมนักศึกษา ค่าเทคโนโลยี และค่าอื่น ๆ ที่เก็บเพิ่มจากค่าเล่าเรียน ตรวจยอดใน Letter of Acceptance วิทยาลัยรัฐมักเก็บปีละ CAD 1,500 ถึง 2,700 ถ้าสถาบันรวมประกันสุขภาพหรือบัตรโดยสารไว้แล้ว ให้ลดยอดนี้เพื่อไม่ให้นับซ้ำ'},
+  lTravel:{en:'Travel to and from Canada', th:'ค่าเดินทางไปและกลับแคนาดา'},
+  lShow:{en:'Money to show IRCC', th:'เงินที่ต้องแสดงต่อ IRCC'},
+  lSetup:{en:'Setup reserve: rent deposit, first purchases', th:'เงินสำรองตั้งตัว: เงินประกันห้อง ของใช้ช่วงแรก'},
+  lTravelSetup:{en:'Travel and setup', th:'ค่าเดินทางและตั้งตัว'},
+  health:{en:'Health insurance', th:'ประกันสุขภาพ'},
+  showNote:{en:'IRCC asks for proof of first-year tuition, living costs and travel to and from Canada. The total also adds a setup reserve. [[funds]]', th:'IRCC ขอหลักฐานว่ามีเงินค่าเล่าเรียนปีแรก ค่าครองชีพ และค่าเดินทางไปและกลับแคนาดา ยอดรวมนี้บวกเงินสำรองตั้งตัวด้วย [[funds]]'},
+  brk:{en:'Scheduled break', th:'ปิดเทอมตามตาราง'}, brkS:{en:'Break', th:'ปิดเทอม'},
+  grad:{en:'After graduation (while waiting for a PGWP)', th:'หลังเรียนจบ (ระหว่างรอผล PGWP)'}, gradS:{en:'After graduation', th:'หลังเรียนจบ'},
+  pgwpQ:{en:'After graduation, will you apply for a PGWP before your study permit expires?', th:'หลังเรียนจบ จะยื่นขอ PGWP ก่อน Study Permit หมดอายุไหม'},
+  pgwpYes:{en:'Yes, keep working', th:'ยื่น ทำงานต่อได้'}, pgwpNo:{en:'No, stop working', th:'ไม่ยื่น หยุดทำงาน'},
+  pgwpNotePub:{en:'You may keep working full time only while a PGWP application made before your study permit expired is pending. College programs must also be on the PGWP field-of-study list, and you need CLB 5. [[offc]] [[pgwp]]', th:'ทำงานเต็มเวลาต่อได้เฉพาะระหว่างรอผล PGWP ที่ยื่นก่อน Study Permit หมดอายุ หลักสูตรวิทยาลัยต้องอยู่ในรายการสาขาของ PGWP และต้องมีผลภาษา CLB 5 ด้วย [[offc]] [[pgwp]]'},
+  pgwpNoteMa:{en:'You may keep working full time only while a PGWP application made before your study permit expired is pending. Master\'s graduates need CLB 7. [[offc]] [[pgwp]]', th:'ทำงานเต็มเวลาต่อได้เฉพาะระหว่างรอผล PGWP ที่ยื่นก่อน Study Permit หมดอายุ ผู้จบปริญญาโทต้องมีผลภาษา CLB 7 [[offc]] [[pgwp]]'},
+  c1s:{en:'Starts at the IRCC living-cost amount after first-year tuition and travel are paid. It falls when pay is less than living costs, rises when you earn more, and drops at the start of month 13 if you pay a second year of tuition. Below zero means you need extra money.', th:'เริ่มจากยอดค่าครองชีพของ IRCC หลังจ่ายค่าเล่าเรียนปีแรกและค่าเดินทางแล้ว เส้นจะลดลงเมื่อรายได้น้อยกว่าค่าครองชีพ เพิ่มขึ้นเมื่อรายได้มากกว่า และลดลงตอนต้นเดือนที่ 13 ถ้าต้องจ่ายค่าเล่าเรียนปีที่ 2 ถ้าต่ำกว่าศูนย์แปลว่าต้องหาเงินเพิ่ม'},
+  whySame:{en:'Study-month + and − numbers are the same for every program type, because they depend only on your part-time hours, wage and housing. The type changes the tuition, the money to show, the Co-op hours and wage, and how many months are study, Co-op, break or after graduation.', th:'ตัวเลข + และ − ของเดือนที่เรียนเท่ากันทุกประเภทหลักสูตร เพราะขึ้นกับชั่วโมงทำงานพาร์ตไทม์ ค่าจ้าง และที่พักเท่านั้น ส่วนประเภทหลักสูตรเปลี่ยนค่าเล่าเรียน เงินที่ต้องแสดง ชั่วโมงและค่าจ้าง Co-op และจำนวนเดือนเรียน Co-op ปิดเทอม หรือหลังเรียนจบ'},
+  cmpSub:{en:'Same start year, length, housing, part-time hours and wage. Each type uses its own typical tuition, fees, Co-op hours and Co-op wage.', th:'ใช้ปีที่เริ่มเรียน ระยะเวลา ที่พัก ชั่วโมงทำงานพาร์ตไทม์ และค่าจ้างเดียวกัน แต่ละประเภทใช้ค่าเล่าเรียน ค่าธรรมเนียม ชั่วโมง Co-op และค่าจ้าง Co-op ทั่วไปของตัวเอง'},
+  cMonths:{en:'Months: study / Co-op / break or after graduation', th:'เดือน: เรียน / Co-op / ปิดเทอมหรือหลังจบ'},
+  cNote:{en:'The study-month number is the same for all three because it depends only on part-time work and housing. The differences come from tuition, fees, and the Co-op and break months.', th:'ตัวเลขของเดือนที่เรียนเท่ากันทั้ง 3 ประเภท เพราะขึ้นกับงานพาร์ตไทม์และที่พักเท่านั้น ส่วนที่ต่างกันมาจากค่าเล่าเรียน ค่าธรรมเนียม และเดือน Co-op หรือปิดเทอม'},
+  a1:{en:(show, tu, pr, tr) => `<b>Money to show:</b> your bank must show ${show} before you apply: ${tu} for first-year tuition and fees, ${pr} for living costs (the IRCC amount), and about ${tr} for travel to and from Canada. It is not all spent at once.`,
+      th:(show, tu, pr, tr) => `<b>เงินที่ต้องแสดง:</b> บัญชีต้องมี ${show} ก่อนยื่นขอวีซ่า ได้แก่ ${tu} สำหรับค่าเล่าเรียนและค่าธรรมเนียมปีแรก ${pr} สำหรับค่าครองชีพ (ยอดของ IRCC) และประมาณ ${tr} สำหรับค่าเดินทางไปและกลับแคนาดา เงินนี้ไม่ได้ใช้หมดทีเดียว`},
+  a4ok:{en:(m, v, w, h) => `<b>Co-op months (${m}):</b> working ${h} hours a week at about CAD ${w} an hour lets you save about ${v} a month.`, th:(m, v, w, h) => `<b>เดือนที่ทำ Co-op (${m} เดือน):</b> ทำงาน ${h} ชั่วโมงต่อสัปดาห์ ค่าจ้างประมาณ CAD ${w} ต่อชั่วโมง เก็บเงินได้ประมาณเดือนละ ${v}`},
+  a4short:{en:(m, v, w, h) => `<b>Co-op months (${m}):</b> working ${h} hours a week at CAD ${w} an hour still leaves you ${v} short each month. Check the hours, wage or housing.`, th:(m, v, w, h) => `<b>เดือนที่ทำ Co-op (${m} เดือน):</b> ทำงาน ${h} ชั่วโมงต่อสัปดาห์ ค่าจ้าง CAD ${w} ต่อชั่วโมง ยังขาดเดือนละ ${v} ควรตรวจชั่วโมง ค่าจ้าง หรือที่พัก`},
+  a8ok:{en:(m, v, h) => `<b>Scheduled break months (${m}):</b> if you find ${h} hours a week at your part-time wage, you save about ${v} a month. Full-time hours are not guaranteed.`, th:(m, v, h) => `<b>เดือนปิดเทอม (${m} เดือน):</b> ถ้าได้ทำงาน ${h} ชั่วโมงต่อสัปดาห์ที่ค่าจ้างงานพาร์ตไทม์ จะเก็บเงินได้ประมาณเดือนละ ${v} แต่ไม่แน่ว่าจะได้ชั่วโมงเต็มเวลา`},
+  a8short:{en:(m, v, h) => `<b>Full-time months (${m}):</b> even ${h} hours a week at your part-time wage leaves you ${v} short each month.`, th:(m, v, h) => `<b>เดือนที่ทำงานเต็มเวลา (${m} เดือน):</b> แม้ทำงาน ${h} ชั่วโมงต่อสัปดาห์ที่ค่าจ้างงานพาร์ตไทม์ ยังขาดเดือนละ ${v}`},
+  a9ok:{en:(m, v, h) => `<b>After graduation (${m} months):</b> while your PGWP application is pending you may work full time; at ${h} hours a week you save about ${v} a month.`, th:(m, v, h) => `<b>หลังเรียนจบ (${m} เดือน):</b> ระหว่างรอผล PGWP ทำงานเต็มเวลาได้ ถ้าทำ ${h} ชั่วโมงต่อสัปดาห์ จะเก็บเงินได้ประมาณเดือนละ ${v}`},
+  a9off:{en:(m, v) => `<b>After graduation (${m} months):</b> without a pending PGWP application you may not work, so you spend ${v} a month from savings.`, th:(m, v) => `<b>หลังเรียนจบ (${m} เดือน):</b> ถ้าไม่ได้ยื่น PGWP จะทำงานไม่ได้ ต้องใช้เงินเก็บเดือนละ ${v}`},
+  a5up:{en:(n, st, en) => `<b>After ${n} months:</b> your money never drops below the starting ${st} and ends at ${en}.`, th:(n, st, en) => `<b>ครบ ${n} เดือน:</b> เงินไม่เคยต่ำกว่ายอดเริ่มต้น ${st} และจบที่ ${en}`},
+  a6:{en:(tu, x) => `<b>Year two:</b> second-year tuition and fees of about ${tu} are due at the start of month 13. IRCC also asks how you will pay for the rest of a program longer than one year.${x ? ' After paying it you need about ' + x + ' extra.' : ' Your remaining money covers it.'}`, th:(tu, x) => `<b>ปีที่สอง:</b> ต้องจ่ายค่าเล่าเรียนและค่าธรรมเนียมปีที่ 2 ประมาณ ${tu} ตอนต้นเดือนที่ 13 และ IRCC จะถามด้วยว่าจะจ่ายค่าเรียนส่วนที่เหลือของหลักสูตรที่ยาวกว่า 1 ปีอย่างไร${x ? ' หลังจ่ายแล้วต้องหาเงินเพิ่มประมาณ ' + x : ' เงินที่เหลืออยู่พอจ่าย'}`}
+});
+SIM_UI.gloss[0] = {k:{en:'Money to show', th:'เงินที่ต้องแสดง'}, v:{en:'What must be in the bank when you apply for the study permit: first-year tuition and fees, the IRCC living-cost amount, and travel to and from Canada.', th:'ยอดเงินที่ต้องมีในบัญชีตอนยื่นขอ Study Permit คือค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC และค่าเดินทางไปและกลับแคนาดา'}};
+SIM_UI.gloss.push({k:{en:'Health insurance', th:'ประกันสุขภาพ'}, v:{en:'Included at CAD 80 a month. BC charges students CAD 75 a month for MSP after a waiting period; Ontario schools charge about CAD 935 to 950 a year (Seneca, UHIP). [[h_BC]] [[uhip]]', th:'รวมไว้ที่เดือนละ CAD 80 บริติชโคลัมเบียเก็บค่า MSP นักศึกษาเดือนละ CAD 75 หลังช่วงรอสิทธิ์ ส่วนสถาบันในออนแทรีโอเก็บประมาณปีละ CAD 935 ถึง 950 (Seneca, UHIP) [[h_BC]] [[uhip]]'}});
+SIM_UI.assume = {en:'Assumptions: 4.33 weeks per month. Take-home pay falls as monthly pay rises: 93% up to CAD 1,700 a month, 89% up to 2,400, 84% up to 3,000, 82% up to 3,600 and 80% above (CPP 5.95%, EI 1.63% and income tax withheld at 2026 rates; part may be refunded at tax time). Pay in month 1 is halved for getting a SIN and finding a job. Living costs include health insurance (CAD 80 a month). Travel to and from Canada is estimated at CAD 2,500. Yearly increases for later start years: tuition and fees 4%, rent 2.5%, other costs 2%, health insurance 5%, wages 2%; the IRCC amount is raised from 2028 because applications for a 2027 start use today\'s amount. Finding a job is not guaranteed, so do not count wages as proof of funds. [[payroll]] [[statcantu]] [[boc]] [[cmhc]] [[funds]]',
+  th:'สมมติฐาน: เดือนละ 4.33 สัปดาห์ สัดส่วนรายได้สุทธิลดลงเมื่อรายได้ต่อเดือนสูงขึ้น: 93% ถ้าไม่เกิน CAD 1,700 ต่อเดือน 89% ถ้าไม่เกิน 2,400 84% ถ้าไม่เกิน 3,000 82% ถ้าไม่เกิน 3,600 และ 80% ถ้าสูงกว่านั้น (หัก CPP 5.95% EI 1.63% และภาษีเงินได้ตามอัตราปี 2026 บางส่วนอาจได้คืนตอนยื่นภาษี) รายได้เดือนแรกคิดครึ่งเดียว เพราะต้องขอ SIN และหางาน ค่าครองชีพรวมประกันสุขภาพ (เดือนละ CAD 80) ค่าเดินทางไปและกลับแคนาดาประมาณ CAD 2,500 อัตราเพิ่มรายปีสำหรับปีเริ่มเรียนถัดไป: ค่าเล่าเรียนและค่าธรรมเนียม 4% ค่าเช่า 2.5% ค่าใช้จ่ายอื่น 2% ประกันสุขภาพ 5% ค่าจ้าง 2% ส่วนยอดของ IRCC เริ่มปรับตั้งแต่ปี 2028 เพราะการยื่นสำหรับเริ่มเรียนปี 2027 ใช้ยอดปัจจุบัน การหางานได้ไม่ใช่เรื่องแน่นอน จึงไม่ควรนับค่าจ้างเป็นหลักฐานการเงิน [[payroll]] [[statcantu]] [[boc]] [[cmhc]] [[funds]]'};
+Object.assign(SRC, {
+  uhip:{u:'https://uhip.ca/get-started/', o:{en:'UHIP (Ontario universities)', th:'UHIP (มหาวิทยาลัยในออนแทรีโอ)'}, l:{en:'University Health Insurance Plan rates 2026 to 2027', th:'อัตราประกันสุขภาพ UHIP ปี 2026 ถึง 2027'}}
+});
+
+/* Co-op hours, revised 19 Nov 2026: IRCC sets no weekly limit on required work placements; schools often require about 20 h/week but allow full time. */
+Object.assign(SRC, {
+  ciccc:{u:'https://ciccc.ca/en/international-students-services', o:{en:'Cornerstone International Community College of Canada', th:'Cornerstone International Community College of Canada'}, l:{en:'International student services: work up to 40 hours a week in Co-op', th:'บริการนักศึกษาต่างชาติ: ทำงานได้ถึง 40 ชั่วโมงต่อสัปดาห์ช่วง Co-op'}},
+  vanwest:{u:'https://vanwest.com/vcp/', o:{en:'VanWest College', th:'VanWest College'}, l:{en:'Co-op program: full-time placements allowed', th:'โปรแกรม Co-op: ทำงานเต็มเวลาได้'}},
+  tsom:{u:'https://www.torontosom.ca/programs/business/diploma-in-business-administration-co-op', o:{en:'Toronto School of Management', th:'Toronto School of Management'}, l:{en:'Business Administration Co-op: 24 weeks at 20 hours a week', th:'Business Administration Co-op: 24 สัปดาห์ สัปดาห์ละ 20 ชั่วโมง'}}
+});
+Object.assign(SIM_UI, {
+  coopHours:{en:'Work hours in Co-op, break or after-graduation months', th:'ชั่วโมงทำงานช่วง Co-op ปิดเทอม หรือหลังเรียนจบ'},
+  ftNote:{en:'IRCC sets no weekly hour limit on a required Co-op placement, so full time (35 to 40 hours) is allowed. College and university Co-ops are usually full time. Scheduled breaks of 7 days or more also allow full time, up to 180 days a year. [[coop]] [[offcbrk]]', th:'IRCC ไม่จำกัดชั่วโมงต่อสัปดาห์ของงาน Co-op ที่เป็นส่วนบังคับของหลักสูตร จึงทำเต็มเวลา (35 ถึง 40 ชั่วโมง) ได้ Co-op ของวิทยาลัยรัฐและมหาวิทยาลัยมักเป็นเต็มเวลา ช่วงปิดเทอมตามตารางที่ยาว 7 วันขึ้นไปก็ทำเต็มเวลาได้ สูงสุด 180 วันต่อปี [[coop]] [[offcbrk]]'},
+  ftNotePriv:{en:'IRCC sets no weekly hour limit on a required Co-op placement, so you may work 35 to 40 hours if the employer offers it; some schools say so directly (up to 40 hours). But many schools only require about 20 hours a week (for example 480 hours over 24 weeks), so full-time hours are possible, not guaranteed. Get the expected hours in writing from the school and employer, and try 20 to see the cautious case. [[coop]] [[ciccc]] [[vanwest]] [[tsom]]', th:'IRCC ไม่จำกัดชั่วโมงต่อสัปดาห์ของงาน Co-op ที่เป็นส่วนบังคับของหลักสูตร จึงทำได้ 35 ถึง 40 ชั่วโมงถ้านายจ้างให้ บางโรงเรียนระบุไว้ชัดว่าทำได้ถึง 40 ชั่วโมง แต่หลายโรงเรียนกำหนดขั้นต่ำแค่ประมาณ 20 ชั่วโมงต่อสัปดาห์ (เช่น 480 ชั่วโมงใน 24 สัปดาห์) การได้ชั่วโมงเต็มเวลาจึงเป็นไปได้ แต่ไม่รับประกัน ควรขอให้โรงเรียนและนายจ้างยืนยันชั่วโมงทำงานเป็นลายลักษณ์อักษร และลองตั้ง 20 เพื่อดูกรณีระมัดระวัง [[coop]] [[ciccc]] [[vanwest]] [[tsom]]'},
+  sideL:{en:'Extra part-time job in Co-op months', th:'งานพาร์ตไทม์เสริมในเดือน Co-op'},
+  sideNote:{en:'Besides the Co-op job you may hold a separate off-campus job, up to 24 hours a week, at your part-time wage. Most students do not need one if the Co-op is full time. [[offc]]', th:'นอกจากงาน Co-op แล้ว ทำงานนอกสถาบันอีกงานได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ ที่ค่าจ้างงานพาร์ตไทม์ ถ้างาน Co-op เป็นเต็มเวลาแล้ว ส่วนใหญ่ไม่จำเป็นต้องทำเพิ่ม [[offc]]'},
+  aSide:{en:h => `<b>Extra job:</b> the Co-op months also include ${h} hours a week from a separate part-time job (allowed up to 24 hours a week off campus).`, th:h => `<b>งานเสริม:</b> เดือน Co-op รวมรายได้จากงานพาร์ตไทม์อีก ${h} ชั่วโมงต่อสัปดาห์ด้วย (ทำงานนอกสถาบันได้สูงสุด 24 ชั่วโมงต่อสัปดาห์)`},
+  a4alt:{en:(h, v) => `<b>If you only get 20 hours a week:</b> many private Co-ops require about 20 hours, so check the cautious case too. At 20 hours instead of ${h}, each Co-op month would be ${v}.`, th:(h, v) => `<b>ถ้าได้ทำแค่ 20 ชั่วโมงต่อสัปดาห์:</b> Co-op เอกชนหลายแห่งกำหนดประมาณ 20 ชั่วโมง จึงควรดูกรณีระมัดระวังด้วย ถ้าได้ 20 ชั่วโมงแทน ${h} ชั่วโมง แต่ละเดือน Co-op จะเป็น ${v}`}
+});
+SIMC.types.private.desc = {en:'Private career college: study months first, then an equal number of paid Co-op months (up to 50% of the program). You may work full time in the Co-op if the employer offers it. No PGWP.', th:'วิทยาลัยอาชีพเอกชน: เรียนก่อน แล้วต่อด้วยเทอม Co-op แบบได้ค่าจ้างจำนวนเดือนเท่ากัน (ไม่เกิน 50% ของหลักสูตร) ช่วง Co-op ทำงานเต็มเวลาได้ถ้านายจ้างให้ ไม่มีสิทธิ์ PGWP'};
+
 const READY_UI = {
   h1:{en:'Test the waters in Canada, then decide how far to go.', th:'ลองใช้ชีวิตที่แคนาดาก่อน แล้วค่อยตัดสินใจว่าจะไปไกลแค่ไหน'},
   lead:{en:'An interactive guide for Thai professionals: compare private Co-op, public college Co-op and a master\'s degree, pick a field that still leads to PR, and check the budget before you commit.', th:'คู่มือแบบอินเทอร์แอกทีฟสำหรับคนทำงานชาวไทย: เปรียบเทียบ Co-op เอกชน Co-op วิทยาลัยรัฐ และปริญญาโท เลือกสาขาที่ยังต่อยอดสู่ PR ได้ และตรวจงบประมาณก่อนตัดสินใจ'},
@@ -1333,7 +1392,7 @@ const START = {
         {en:'Decide who the sponsor is (you, parents, or both) and put the money in one account.', th:'ตกลงว่าใครเป็นสปอนเซอร์ (ตัวเอง พ่อแม่ หรือทั้งคู่) และรวมเงินไว้ในบัญชีเดียว'},
         
         {en:'Leave it untouched for 4 to 6 months. Avoid sudden large deposits you cannot explain.', th:'คงเงินไว้ไม่แตะต้อง 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่กะทันหันที่อธิบายที่มาไม่ได้'}],
-     c:() => T({en:'Money to show: ', th:'เงินที่ต้องแสดง: '}) + inline(S.sim.tuition + S.sim.proof), go:{tab:'budget', l:{en:'Open the budget simulator', th:'เปิดเครื่องจำลองงบประมาณ'}}},
+     c:() => T({en:'Money to show: ', th:'เงินที่ต้องแสดง: '}) + inline(Math.round(simCalc().show)) + T({en:' (start ' + S.sim.intake + ')', th:' (เริ่มเรียน ' + S.sim.intake + ')'}), go:{tab:'budget', l:{en:'Open the budget simulator', th:'เปิดเครื่องจำลองงบประมาณ'}}},
     {id:'s3', icon:'languages', m:{en:'10 to 12 months', th:'10 ถึง 12 เดือน'}, t:{en:'Take the English test', th:'สอบภาษาอังกฤษ'},
      d:[{en:'Book IELTS Academic with IDP or the British Council in Thailand. Target 6.5 overall with no band under 6.0 for public programs.', th:'จองสอบ IELTS Academic กับ IDP หรือ British Council ในไทย ตั้งเป้ารวม 6.5 ไม่มีทักษะใดต่ำกว่า 6.0 สำหรับสถาบันรัฐ'},
         
@@ -1676,7 +1735,7 @@ const COSTS = {
   totalT:{en:'Cash you spend before the first day of class', th:'เงินสดที่ต้องใช้จริงก่อนวันเปิดเรียน'},
   totalN:{en:'Sections 1 to 4, not counting tuition or the money you must show in the bank.', th:'รวมหมวด 1 ถึง 4 ไม่นับค่าเล่าเรียนและเงินที่ต้องแสดงในบัญชี'},
   showT:{en:'Money you must show in the bank', th:'เงินที่ต้องแสดงในบัญชี'},
-  showN:{en:'First-year tuition plus the IRCC living-cost minimum, from the simulator.', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC ตามเครื่องจำลอง'},
+  showN:{en:'First-year tuition and fees, the IRCC living-cost amount, and travel to and from Canada, from the budget simulator.', th:'ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC และค่าเดินทางไปและกลับแคนาดา ตามเครื่องจำลองงบประมาณ'},
   open:{en:'Adjust in the simulator', th:'ปรับค่าในเครื่องจำลอง'},
   note:{en:'What updates automatically: the exchange rate refreshes every day, so every THB figure moves with it. Government fees and school prices cannot be read automatically, so each official line has a Verify link to the live source page.', th:'สิ่งที่อัปเดตอัตโนมัติ: อัตราแลกเปลี่ยนอัปเดตทุกวัน ตัวเลขเงินบาททุกรายการจึงปรับตาม ส่วนค่าธรรมเนียมรัฐและราคาของสถาบันไม่สามารถดึงมาอัตโนมัติได้ รายการทางการแต่ละรายการจึงมีลิงก์ "ตรวจสอบ" ไปยังหน้าเว็บต้นทาง'},
   secs:[
@@ -1838,7 +1897,7 @@ function viewCosts(){
         </div>
       </section>`;
   }).join('');
-  const tot = money(rnd(tMin,10), rnd(tMax,10), 'cad'), show = S.sim.tuition + S.sim.proof;
+  const tot = money(rnd(tMin,10), rnd(tMax,10), 'cad'), show = simCalc().show;
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(C.h1)}</h1>
@@ -2261,63 +2320,74 @@ function viewAgents(){
 }
 
 /* ============================== BUDGET SIMULATOR ============================== */
-/* Month plan per program: S = study term (max 24 h/week off campus), C = paid Co-op term (full time),
-   B = scheduled break or after graduation (full time allowed). */
+/* Month plan: S = study term (max 24 h/week off campus), C = paid Co-op term (no weekly limit),
+   B = scheduled break between years (full time allowed), G = after graduation (full time only while a PGWP application is pending). */
 function planOf(s){
   const P = [], add = (k, n) => { for (let i = 0; i < n; i++) P.push(k); };
   const yrs = s.years === 2 ? 2 : 1;
   if (s.type === 'private') { add('S', 6 * yrs); add('C', 6 * yrs); return P; }
   const coop = s.hasCoop !== false;
-  for (let y = 0; y < yrs; y++) { add('S', 8); add(coop && y === 0 ? 'C' : 'B', 4); }
+  if (yrs === 1) { add('S', 8); add(coop ? 'C' : 'G', 4); }
+  else { add('S', 8); add(coop ? 'C' : 'B', 4); add('S', 8); add('G', 4); }
   return P;
 }
-const PH = {S:'study', C:'coop', B:'brk'};
+/* Share of gross pay that reaches the bank after CPP, EI and income tax withheld (2026 rates, by monthly gross). */
+const takeHome = g => g <= 1700 ? 0.93 : g <= 2400 ? 0.89 : g <= 3000 ? 0.84 : g <= 3600 ? 0.82 : 0.80;
+const val = (v, d) => (v === undefined || v === null || v === '' || isNaN(v)) ? d : +v;
 function simCalc(o){
   const s = Object.assign({}, S.sim, o || {}), ty = SIMC.types[s.type], G = SIMC.growth;
   if (s.type === 'private') s.hasCoop = true;
   const n = Math.max(0, (s.intake || SIMC.base + 1) - SIMC.base), f = k => Math.pow(1 + G[k], n);
   const L0 = SIMC.living[s.living];
-  const lv = {rent:L0.rent * f('rent'), food:L0.food * f('cpi'), other:L0.other * f('cpi')};
-  const exp = lv.rent + lv.food + lv.other, wage = s.wage * f('wage');
-  const tu1 = s.tuition * f('tuition'), tu2 = tu1 * (1 + G.tuition), proof = s.proof * f('proof');
-  const incS = s.hours * wage * SIMC.weeks * SIMC.studyTax;
-  const cw = (s.coopWage || ty.coopWage) * f('wage');
-  const incC = s.coopHours * cw * SIMC.weeks * SIMC.ftTax, incB = s.coopHours * wage * SIMC.weeks * SIMC.ftTax;
+  const lv = {rent:L0.rent * f('rent'), food:L0.food * f('cpi'), other:L0.other * f('cpi'), health:SIMC.health * f('health')};
+  const exp = lv.rent + lv.food + lv.other + lv.health, wage = s.wage * f('wage');
+  const fees = val(s.fees, ty.fees) * f('tuition');
+  const tu1 = s.tuition * f('tuition') + fees;
+  const tu2 = s.type === 'private' ? tu1 : tu1 * (1 + G.tuition);
+  const proof = s.proof * Math.pow(1 + G.proof, Math.max(0, n - 1));
+  const travel = SIMC.travel * f('cpi');
+  const cw = val(s.coopWage, ty.coopWage) * f('wage'), ftH = val(s.coopHours, ty.coopH);
+  const net = g => g * takeHome(g);
+  const side = val(s.side, 0);
+  const gS = s.hours * wage * SIMC.weeks, gC = (ftH * cw + side * wage) * SIMC.weeks, gB = ftH * wage * SIMC.weeks, gG = s.pgwp === false ? 0 : gB;
+  const netC20 = net((20 * cw + side * wage) * SIMC.weeks);
+  const incS = net(gS), incC = net(gC), incB = net(gB), incG = net(gG);
   const plan = planOf(s), N = plan.length;
   const months = []; let bal = proof, low = {v:bal, m:0}, runOut = 0;
   plan.forEach((ph, i) => {
     const m = i + 1; let paid = 0;
     if (m === 13) { paid = tu2; bal -= tu2; }
-    const inc = ph === 'S' ? incS : (ph === 'C' ? incC : incB);
+    let inc = ph === 'S' ? incS : ph === 'C' ? incC : ph === 'B' ? incB : incG;
+    if (m === 1 && ph === 'S') inc *= 0.5;          /* first month: getting a SIN and finding a job */
     bal += inc - exp; months.push({m, bal, inc, ph, paid});
     if (bal < low.v) low = {v:bal, m};
     if (bal < 0 && !runOut) runOut = m;
   });
   const cnt = k => plan.filter(p => p === k).length;
-  const show = tu1 + proof, years = N / 12;
-  return {s, ty, n, lv, exp, wage, cw, tu1, tu2, proof, incS, incC, incB, plan, N, years, months, end:bal, low, runOut,
-    runOutY1: runOut && runOut <= 12 ? runOut : 0, extra:Math.max(0, -low.v),
-    mS:cnt('S'), mC:cnt('C'), mB:cnt('B'), netS:incS - exp, netC:incC - exp, netB:incB - exp, show, total:show + SIMC.setup,
-    breakEvenHrs:exp / (wage * SIMC.weeks * SIMC.studyTax), cover:Math.round(incS / exp * 100),
+  const show = tu1 + proof + travel;
+  return {s, ty, n, lv, exp, wage, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), fees, tu1, tu2, proof, travel, incS, incC, incB, incG, plan, N, years:N / 12, months,
+    end:bal, low, runOut, runOutY1: runOut && runOut <= 12 ? runOut : 0, extra:Math.max(0, -low.v),
+    mS:cnt('S'), mC:cnt('C'), mB:cnt('B'), mG:cnt('G'), netS:incS - exp, netC:incC - exp, netB:incB - exp, netG:incG - exp,
+    show, total:show + SIMC.setup,
+    breakEvenHrs:exp / (wage * SIMC.weeks * 0.93), cover:Math.round(incS / exp * 100),
     tuTotal:tu1 + (N > 12 ? tu2 : 0)};
 }
 
 function viewBudget(){
   const M = SIM_UI, s = S.sim, ty = SIMC.types[s.type], priv = s.type === 'private';
   const segB = (act, cur, items) => `<div class="seg">${items.map(([v, l]) => `<button class="${String(cur)===String(v)?'on':''}" data-act="${act}" data-v="${v}">${T(l)}</button>`).join('')}</div>`;
-  const slider = (key, label, min, max, step, note) => `
+  const slider = (key, label, min, max, step, note, def) => `
     <div>
       <div class="flex justify-between items-baseline gap-3"><label for="sim-${key}" class="font-medium text-[15px]">${label}</label><span id="lab-${key}" class="num font-semibold text-[15px]"></span></div>
-      <input type="range" id="sim-${key}" data-sim="${key}" min="${min}" max="${max}" step="${step}" value="${s[key]}">
-      ${note?`<div class="faint text-[13px] mt-1">${note}</div>`:''}
+      <input type="range" id="sim-${key}" data-sim="${key}" min="${min}" max="${max}" step="${step}" value="${val(s[key], def)}">
+      ${note ? `<div class="faint text-[13px] mt-1">${note}</div>` : ''}
     </div>`;
-  const plan = planOf(s), hasFT = plan.some(p => p !== 'S');
+  const field = (label, body, note) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? `<div class="faint text-[13px] mt-2">${note}</div>` : ''}</div>`;
+  const plan = planOf(s), hasFT = plan.some(p => p !== 'S'), hasC = plan.includes('C'), hasG = plan.includes('G');
   return `
     <section class="mb-6" style="max-width:820px">
       <div class="flex flex-wrap items-end justify-between gap-3">
-        
         <h1 class="text-[30px] sm:text-[38px] font-bold">${T(M.title)}</h1>
-        
         <button class="btn btn-ghost" data-act="simreset">${ic('rotate-ccw','icon-sm')}${T(M.reset)}</button>
       </div>
       <p class="muted mt-3 text-[17px]">${T(M.sub)}</p>
@@ -2325,50 +2395,27 @@ function viewBudget(){
     <div id="sim-mini" class="sim-mini" aria-live="polite"></div>
     <div class="grid lg:grid-cols-5 gap-4 items-start">
       <div class="card lg:col-span-2 grid gap-6 lg:sticky" style="top:72px">
-        
-        <div><div class="font-medium text-[15px] mb-2">${T(M.type)}</div>${segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l]))}
-        
-          <div class="faint text-[13px] mt-2">${T(ty.desc)}</div></div>
-        
-        <div><div class="font-medium text-[15px] mb-2">${T(M.intakeQ)}</div>${segB('sim-intake', s.intake, SIMC.intakes.map(y => [y, String(y)]))}
-        
-          <div class="faint text-[13px] mt-2">${T(M.intakeNote)}</div></div>
-        
-        <div><div class="font-medium text-[15px] mb-2">${T(M.lenQ)}</div>${segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]])}</div>
-        
-        <div><div class="font-medium text-[15px] mb-2">${T(M.coopQ)}</div>
-        
-          ${priv ? `<div class="text-[14px] flex gap-2" style="background:var(--blue-soft);border-radius:10px;padding:8px 12px">${ic('lock','icon-sm')}<span>${T(M.coopFixed)}</span></div>`
-        
-                
-         : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]])}</div>
-        
+        ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l])), T(ty.desc))}
+        ${field(T(M.intakeQ), segB('sim-intake', s.intake, SIMC.intakes.map(y => [y, String(y)])), T(M.intakeNote))}
+        ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]]))}
+        ${field(T(M.coopQ), priv ? `<div class="text-[14px] flex gap-2" style="background:var(--blue-soft);border-radius:10px;padding:8px 12px">${ic('lock','icon-sm')}<span>${T(M.coopFixed)}</span></div>`
+                                 : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]]))}
         ${slider('tuition', T(M.tuition), ty.min, ty.max, 500, T(ty.tuNote))}
-        
-        <div><div class="font-medium text-[15px] mb-2">${T(M.living)}</div>${segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l]))}
-        
-          <div class="faint text-[13px] mt-2">${T(SIMC.living[s.living].note)}</div></div>
-        
+        ${slider('fees', T(M.feesL), 0, 4000, 100, T(M.feesNote), ty.fees)}
+        ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l])), T(SIMC.living[s.living].note))}
         ${slider('hours', T(M.hours), 0, 24, 1, T(M.hoursNote))}
-        
-        ${hasFT ? slider('coopHours', T(M.coopHours), 10, 40, 1, T(M.ftNote)) : ''}
-        
         ${slider('wage', T(M.wage), 15, 25, 0.25, T(M.wageNote))}
-        
+        ${hasFT ? slider('coopHours', T(M.coopHours), 10, 40, 1, T(priv ? M.ftNotePriv : M.ftNote), ty.coopH) : ''}
+        ${hasC ? slider('coopWage', T(M.coopWage), 0, 40, 0.25, T(ty.cwNote), ty.coopWage) : ''}
+        ${hasC ? slider('side', T(M.sideL), 0, 24, 1, T(M.sideNote), 0) : ''}
+        ${hasG ? field(T(M.pgwpQ), segB('sim-pgwp', s.pgwp === false ? 'no' : 'yes', [['yes', M.pgwpYes], ['no', M.pgwpNo]]), T(s.type === 'public' ? M.pgwpNotePub : M.pgwpNoteMa)) : ''}
         <div>
-        
           <div class="flex justify-between items-center gap-3"><label for="sim-rate" class="font-medium text-[15px]">${T(M.rate)}</label><input class="numin num" type="number" id="sim-rate" data-sim="rate" min="15" max="40" step="0.01" value="${s.rate}"></div>
-        
           <div id="fx-status" class="faint text-[13px] mt-2" aria-live="polite"></div>
-        
         </div>
-        
         <div>
-        
           <div class="flex justify-between items-center gap-3"><label for="sim-proof" class="font-medium text-[15px]">${T(M.proof)}</label><input class="numin num" type="number" id="sim-proof" data-sim="proof" min="10000" max="40000" step="5" value="${s.proof}"></div>
-        
           <div class="faint text-[13px] mt-1">${T(M.proofNote)}</div>
-        
         </div>
       </div>
       <div class="lg:col-span-3 grid gap-4" id="sim-out"></div>
@@ -2386,13 +2433,13 @@ const niceMin = v => v >= 0 ? 0 : -niceMax(-v);
 const kfmt = v => Math.abs(v) >= 1000 ? (v/1000).toFixed(Math.abs(v) >= 10000 ? 0 : 1).replace('.0','') + 'K' : String(Math.round(v));
 function timeline(c){
   const M = SIM_UI;
-  const lab = {S:T(M.study), C:T(M.coop), B:T(M.brk)};
+  const lab = {S:T(M.study), C:T(M.coop), B:T(M.brk), G:T(M.grad)};
   const segs = []; c.plan.forEach((p, i) => { const last = segs[segs.length-1]; if (last && last.p === p) last.n++; else segs.push({p, n:1, from:i+1}); });
   return `
   <div>
     <div class="eyebrow mb-2">${T(M.tlT)} · <span class="num">${c.N}</span> ${T(M.months)}</div>
     <div class="tline">${segs.map(g => `<div class="ph-${g.p}" style="flex:${g.n}" data-tip="${esc(lab[g.p] + ': ' + T(M.monthN) + ' ' + g.from + (g.n > 1 ? (S.lang === 'th' ? ' ถึง ' : ' to ') + (g.from + g.n - 1) : '') + ' (' + g.n + ' ' + T(M.months) + ')')}"><span>${g.n >= 3 ? lab[g.p] + ' ' + g.n : g.n}</span></div>`).join('')}</div>
-    <div class="vlegend">${['S','C','B'].filter(k => c.plan.includes(k)).map(k => `<span><i class="sw ph-${k}"></i>${lab[k]}</span>`).join('')}</div>
+    <div class="vlegend">${['S','C','B','G'].filter(k => c.plan.includes(k)).map(k => `<span><i class="sw ph-${k}"></i>${lab[k]}</span>`).join('')}</div>
   </div>`;
 }
 function chartBalance(c){
@@ -2404,7 +2451,7 @@ function chartBalance(c){
   const line = pts.map((p,i) => `${i?'L':'M'}${x(p.m).toFixed(1)},${y(p.bal).toFixed(1)}`).join('');
   const area = line + `L${x(N)},${y(0)}L${x(0)},${y(0)}Z`;
   const bands = []; c.plan.forEach((p, i) => { if (p === 'S') return; const last = bands[bands.length-1]; if (last && last.p === p && last.to === i) last.to = i + 1; else bands.push({p, from:i, to:i + 1}); });
-  const lab = {C:T(M.coop), B:T(M.brk)};
+  const lab = {C:T(M.coop), B:T(M.brkS), G:T(M.gradS)};
   const last = pts[pts.length-1];
   const tip = p => `${T(M.monthN)} ${p.m}: ${T(M.left)} CAD ${fmt(p.bal)} (${p.bal < 0 ? '-' : ''}${thb(Math.abs(p.bal)*s.rate)})${p.paid ? ' · ' + T(M.paidY2) + ' CAD ' + fmt(p.paid) : ''}`;
   const step = N > 12 ? 6 : 3;
@@ -2430,6 +2477,7 @@ function chartTerms(c){
   const M = SIM_UI, rows = [[T(M.study), c.incS, c.exp]];
   if (c.mC) rows.push([T(M.coop), c.incC, c.exp]);
   if (c.mB) rows.push([T(M.brkS), c.incB, c.exp]);
+  if (c.mG) rows.push([T(M.gradS), c.incG, c.exp]);
   const W = 600, H = 60 + rows.length * 74, L = 120, R = 70, Tp = 10;
   const mx = niceMax(Math.max(...rows.flatMap(r => [r[1], r[2]])) * 1.05);
   const x = v => L + (W - L - R) * v / mx;
@@ -2448,7 +2496,7 @@ function chartTerms(c){
 }
 function chartSplit(c){
   const M = SIM_UI, s = S.sim, N = c.N;
-  const parts = [[T(M.lTuition), c.tuTotal, 's1'], [T(M.rent), c.lv.rent*N, 's2'], [T(M.food), c.lv.food*N, 's3'], [T(M.other), c.lv.other*N, 's4'], [T(M.lSetup), SIMC.setup, 's5']];
+  const parts = [[T(M.lTuitionFees), c.tuTotal, 's1'], [T(M.rent), c.lv.rent*N, 's2'], [T(M.food), c.lv.food*N, 's3'], [T(M.other), c.lv.other*N, 's4'], [T(M.health), c.lv.health*N, 's5'], [T(M.lTravelSetup), SIMC.setup + c.travel, 's6']];
   const tot = parts.reduce((a, p) => a + p[1], 0);
   return `
   <figure class="viz">
@@ -2465,7 +2513,7 @@ function chartSplit(c){
 function compareTypes(){
   const M = SIM_UI, s = S.sim;
   const rows = Object.keys(SIMC.types).map(k => {
-    const c = simCalc({type:k, tuition:SIMC.types[k].def, coopWage:SIMC.types[k].coopWage, hasCoop:k === 'private' ? true : s.hasCoop});
+    const ty = SIMC.types[k], c = simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop});
     return {k, c};
   });
   const sg = v => (v < 0 ? '-' : '+') + 'CAD ' + fmt(Math.abs(v));
@@ -2476,7 +2524,7 @@ function compareTypes(){
     <div class="hscroll"><table class="ctbl" style="min-width:560px"><thead><tr><th></th>${rows.map(r => `<th style="text-align:right">${T(SIMC.types[r.k].l)}${r.k === s.type ? ' ●' : ''}</th>`).join('')}</tr></thead><tbody>
       <tr style="cursor:default"><td>${T(M.cTu)}</td>${rows.map(r => `<td style="text-align:right">CAD ${fmt(r.c.tu1)}</td>`).join('')}</tr>
       <tr style="cursor:default"><td>${T(M.cShow)}</td>${rows.map(r => `<td style="text-align:right"><strong>CAD ${fmt(r.c.show)}</strong><div class="faint text-[12px]">${thb(r.c.show*s.rate)}</div></td>`).join('')}</tr>
-      <tr style="cursor:default"><td>${T(M.cMonths)}</td>${rows.map(r => `<td style="text-align:right">${r.c.mS} / ${r.c.mC} / ${r.c.mB}</td>`).join('')}</tr>
+      <tr style="cursor:default"><td>${T(M.cMonths)}</td>${rows.map(r => `<td style="text-align:right">${r.c.mS} / ${r.c.mC} / ${r.c.mB + r.c.mG}</td>`).join('')}</tr>
       <tr style="cursor:default"><td>${T(M.cCw)}</td>${rows.map(r => `<td style="text-align:right">${r.c.mC ? 'CAD ' + r.c.cw.toFixed(2) : '-'}</td>`).join('')}</tr>
       <tr style="cursor:default"><td>${T(M.cNetS)}</td>${rows.map(r => `<td style="text-align:right" class="${r.c.netS<0?'neg':'pos'}">${sg(r.c.netS)}</td>`).join('')}</tr>
       <tr style="cursor:default"><td>${T(M.cEnd)}</td>${rows.map(r => `<td style="text-align:right" class="${r.c.end<0?'neg':''}">${sg(r.c.end)}</td>`).join('')}</tr>
@@ -2491,14 +2539,17 @@ function analysis(c){
   const level = c.runOutY1 ? 'crit' : (c.extra > 0 ? 'need' : (c.end < c.proof ? 'warn' : 'good'));
   const V = M.verdict[level];
   const pts = [];
-  pts.push(T(M.a1)(C(c.show), C(c.tu1), C(c.proof)));
+  pts.push(T(M.a1)(C(c.show), C(c.tu1), C(c.proof), C(c.travel)));
   pts.push(T(M.aWhy));
   pts.push(c.netS >= 0 ? T(M.a2ok)(c.mS, c.cover, C(c.netS)) : T(M.a2short)(c.mS, c.cover, C(c.netS)));
   pts.push(c.breakEvenHrs <= 24 ? T(M.a3ok)(Math.ceil(c.breakEvenHrs), s.hours) : T(M.a3no)(Math.ceil(c.breakEvenHrs)));
-  if (c.mC) pts.push(c.netC >= 0 ? T(M.a4ok)(c.mC, C(c.netC), c.cw.toFixed(2)) : T(M.a4short)(c.mC, C(c.netC), c.cw.toFixed(2)));
-  if (c.mB) pts.push(c.netB >= 0 ? T(M.a8ok)(c.mB, C(c.netB)) : T(M.a8short)(c.mB, C(c.netB)));
+  if (c.mC) pts.push(c.netC >= 0 ? T(M.a4ok)(c.mC, C(c.netC), c.cw.toFixed(2), c.ftH) : T(M.a4short)(c.mC, C(c.netC), c.cw.toFixed(2), c.ftH));
+  if (c.mC && c.side > 0) pts.push(T(M.aSide)(c.side));
+  if (c.mC && s.type === 'private' && c.ftH > 20) pts.push(T(M.a4alt)(c.ftH, (c.netC20 < 0 ? '-' : '+') + 'CAD ' + fmt(Math.abs(c.netC20))));
+  if (c.mB) pts.push(c.netB >= 0 ? T(M.a8ok)(c.mB, C(c.netB), c.ftH) : T(M.a8short)(c.mB, C(c.netB), c.ftH));
+  if (c.mG) pts.push(s.pgwp === false ? T(M.a9off)(c.mG, C(c.netG)) : (c.netG >= 0 ? T(M.a9ok)(c.mG, C(c.netG), c.ftH) : T(M.a8short)(c.mG, C(c.netG), c.ftH)));
   if (c.N > 12) pts.push(T(M.a6)(C(c.tu2), c.extra > 0 ? C(c.extra) : ''));
-  pts.push(c.runOut ? T(M.a5out)(c.runOut, C(c.extra)) : T(M.a5)(c.N, C(c.proof), C(c.end), c.low.m, C(c.low.v)));
+  pts.push(c.runOut ? T(M.a5out)(c.runOut, C(c.extra)) : (c.low.m === 0 ? T(M.a5up)(c.N, C(c.proof), C(c.end)) : T(M.a5)(c.N, C(c.proof), C(c.end), c.low.m, C(c.low.v))));
   if (c.n > 0) pts.push(T(M.a7)(s.intake, c.n));
   return `
   <div class="card verdict v-${level}">
@@ -2610,9 +2661,11 @@ function renderSimOut(){
   const set =(id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   set('lab-tuition', cad(s.tuition));
   set('lab-hours', s.hours + ' ' + T(M.wk));
-  set('lab-coopHours', s.coopHours + ' ' + T(M.wk));
+  set('lab-coopHours', c.ftH + ' ' + T(M.wk));
+  set('lab-side', c.side + ' ' + T(M.wk));
+  set('lab-fees', cad(c.s.fees === undefined ? SIMC.types[s.type].fees : c.s.fees));
   set('lab-wage', 'CAD ' + Number(s.wage).toFixed(2) + T(M.hr));
-  set('lab-coopWage', 'CAD ' + Number(s.coopWage || SIMC.types[s.type].coopWage).toFixed(2) + T(M.hr));
+  set('lab-coopWage', 'CAD ' + val(s.coopWage, SIMC.types[s.type].coopWage).toFixed(2) + T(M.hr));
   const sign = n => (n >= 0 ? '+' : '-') + 'CAD ' + fmt(Math.abs(n));
   const mini = document.getElementById('sim-mini');
   if (mini) mini.innerHTML = `<div><small>${T(M.lTotal)}</small><b>${thb(c.total*s.rate)}</b></div><div style="text-align:right"><small>${T(M.study)} ${T(M.mo)}</small><b class="${c.netS>=0?'pos':'neg'}">${sign(c.netS)}</b></div>`;
@@ -2631,12 +2684,14 @@ function renderSimOut(){
         <div class="text-[18px] font-semibold muted num">CAD ${fmt(c.total)}</div>
       </div>
       <div class="faint text-[13.5px] mb-3">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
-      <div class="row"><span class="muted">${T(M.lTuition)}</span><span class="num">${cad(c.tu1)}</span></div>
+      <div class="row"><span class="muted">${T(M.lTuitionFees)}</span><span class="num">${cad(c.tu1)}</span></div>
       <div class="row"><span class="muted">${T(M.lProof)}</span><span class="num">${cad(c.proof)}</span></div>
+      <div class="row"><span class="muted">${T(M.lTravel)}</span><span class="num">${cad(c.travel)}</span></div>
+      <div class="row font-semibold"><span>${T(M.lShow)}</span><span class="num">${cad(c.show)}</span></div>
       <div class="row"><span class="muted">${T(M.lSetup)}</span><span class="num">${cad(SIMC.setup)}</span></div>
       ${c.extra > 0 ? `<div class="row font-semibold neg"><span>${T(M.lExtra)}</span><span class="num">${cad(c.extra)} · ${thb(c.extra*s.rate)}</span></div>` : ''}
       <div class="mt-4">${timeline(c)}</div>
-      <div class="grid gap-3 mt-4 ${[c.mS, c.mC, c.mB].filter(Boolean).length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}">${term(T(M.study), c.mS, c.netS, c.incS)}${c.mC ? term(T(M.coop), c.mC, c.netC, c.incC) : ''}${c.mB ? term(T(M.brk), c.mB, c.netB, c.incB) : ''}</div>
+      <div class="grid gap-3 mt-4 ${[c.mS, c.mC, c.mB, c.mG].filter(Boolean).length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}">${term(T(M.study), c.mS, c.netS, c.incS)}${c.mC ? term(T(M.coop), c.mC, c.netC, c.incC) : ''}${c.mB ? term(T(M.brkS), c.mB, c.netB, c.incB) : ''}${c.mG ? term(T(M.gradS), c.mG, c.netG, c.incG) : ''}</div>
       <p class="faint text-[13px] mt-3 flex gap-2">${ic('info','icon-sm')}<span>${T(M.whySame)}</span></p>
     </div>
     ${analysis(c)}
@@ -2884,9 +2939,10 @@ document.addEventListener('click', e => {
   else if (act === 'city') { selectCity(v, b.dataset.fly === '1'); }
   else if (act === 'csort') { S.csort = v; render(true); }
   else if (act === 'scenario') { S.scenario = v; render(true); }
-  else if (act === 'sim-type') { S.sim.type = v; S.sim.tuition = SIMC.types[v].def; S.sim.coopWage = SIMC.types[v].coopWage; S.sim.coopHours = SIMC.types[v].coopH; if (v === 'private') S.sim.hasCoop = true; render(true); }
+  else if (act === 'sim-type') { S.sim.type = v; S.sim.tuition = SIMC.types[v].def; S.sim.coopWage = SIMC.types[v].coopWage; S.sim.coopHours = SIMC.types[v].coopH; S.sim.fees = SIMC.types[v].fees; if (v === 'private') S.sim.hasCoop = true; render(true); }
   else if (act === 'sim-intake') { S.sim.intake = +v; render(true); }
   else if (act === 'sim-years') { S.sim.years = +v; render(true); }
+  else if (act === 'sim-pgwp') { S.sim.pgwp = v === 'yes'; render(true); }
   else if (act === 'sim-coop') { S.sim.hasCoop = v === 'yes'; render(true); }
   else if (act === 'ckdone') { S.check[v] = true; render(true); }
   else if (act === 'jump') { const t = document.getElementById(v); if (t) t.scrollIntoView({behavior:'smooth', block:'start'}); }
@@ -2897,7 +2953,7 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const k = e.target.dataset.sim; if (!k) return;
   const v = parseFloat(e.target.value);
-  if (!isFinite(v) || v <= 0 && k !== 'hours') return;
+  if (!isFinite(v) || v < 0 || (v === 0 && !['hours','coopWage','fees'].includes(k))) return;
   S.sim[k] = v; if (k === 'rate') S.sim.rateAuto = false;
   save(); renderSimOut(); icons();
 });
