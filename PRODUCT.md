@@ -44,7 +44,8 @@ Confirmed functionality (all in `index.html`):
 - Bridge Roadmap: two selectable scenarios (Safe Test, One-Shot) from Year 0 to PR.
 - All Costs: itemized costs in CAD and THB with subtotals and a currency converter.
 - Am I Ready? also covers Option C, a university master's degree (with or without Co-op), with a 10-question quiz that scores all three options.
-- Budget Simulator (own tab): cash to prepare, a plain-language analysis with a verdict, a 12-month living-money chart, pay vs living-cost bars, and a first-year spending split.
+- Budget Simulator (own tab): program type (private Work & Study always has Co-op; public college and master's with or without Co-op), start year 2027 or 2028 (projected with sourced yearly increases), length 1 or 2 years, a month-by-month plan of study, Co-op and break months with separate pay rules, a plain-language analysis with a verdict, a money chart over the whole program including year-2 tuition, a comparison of the three types, pay vs living-cost bars, and a spending split.
+- Checked 19 November 2026: ILAC and Tamwood closed (September 2026), CCTB takes no 2026 intakes, Cornerstone was suspended in 2026; private Co-ops are often about 20 hours a week near minimum wage. Take-home pay about 93% at part-time pay (CPP 5.95%, EI 1.63%, 2026 rates). Shared room in Toronto about CAD 1,150 (U of T 2026).
 - Preparation Checklist: 15 ordered steps in 5 phases with a "do this next" card, English test prices and booking links, IELTS guidance, and how to check an agent (no named agents are endorsed).
 - Live data fetched once per day: CAD and USD to THB rates, IRCC study permit processing time for Thailand, and the latest Express Entry draws (IRCC JSON feeds).
 - Links to official sources on every tab.
