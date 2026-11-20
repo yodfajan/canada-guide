@@ -322,6 +322,22 @@
   .stat{background:var(--bg);border-radius:12px;padding:12px 14px}
   .stat .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.25}
   .stat .s{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .msub{display:block;font-size:12.5px;font-weight:400;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .msub-i{font-weight:400;color:var(--ink2);font-size:.92em}
+  .row .num{text-align:right}
+  .erow{align-items:center}
+  .amt-in{display:inline-flex;align-items:center;gap:6px;flex:none}
+  .amt-in .numin{width:118px}
+  .linkbtn{all:unset;cursor:pointer;color:var(--blue);font-weight:500}
+  .linkbtn:hover{text-decoration:underline}
+  .linkbtn:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+  .mline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding:8px 0;border-top:1px solid var(--line);font-size:14.5px}
+  .mline:first-child{border-top:0}
+  .mline .f{color:var(--ink2);font-variant-numeric:tabular-nums}
+  .why h4{font-size:15px;font-weight:600;margin:14px 0 4px}
+  summary svg{display:inline-block;vertical-align:-2px}
+  .autoline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;color:var(--ink2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .ctbl th.cur-col,.ctbl td.cur-col{background:var(--blue-soft)}
   .ctbl{width:100%;border-collapse:collapse;font-size:14.5px;min-width:640px}
   .ctbl th{text-align:left;font-size:12px;font-weight:600;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
   .ctbl td{padding:9px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -421,7 +437,8 @@
 const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
   lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', open:{}, scenario:'safe',
-  sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0 },
+  sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0,
+        cur:'both', proofAuto:true, travel:2500, setup:2000, rentC:null, foodC:null, otherC:null, healthC:null },
   fx:{ rate:null, date:null, day:null, src:'' }
 };
 let S = JSON.parse(JSON.stringify(DEFAULTS));
@@ -431,6 +448,8 @@ try {
 } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 if (S.sim.proof === 22895) S.sim.proof = 23448;
+/* Older saves: a proof amount the user typed (not an IRCC figure) stays manual */
+try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o && o.sim && o.sim.proofAuto === undefined && o.sim.proof && ![22895, 23448].includes(o.sim.proof)) S.sim.proofAuto = false; } catch (e) {}
 if (!S.steps) S.steps = {};
 const T = o => (o == null ? '' : (typeof o === 'function' ? T(o()) : (typeof o === 'string' ? o : (o[S.lang] ?? o.en))));
 const rnd = (n, to) => Math.round(n / to) * to;
@@ -454,7 +473,17 @@ function inline(a, b){
 const fmt = n => Math.round(n).toLocaleString('en-US');
 const cad = n => 'CAD ' + fmt(n);
 const thb = n => 'THB ' + fmt(n);
-const ic = (n, c='icon') => `<i data-lucide="${n}" class="${c}"></i>`;
+/* Simulator display currency, chosen by the user: 'thb', 'cad' or 'both'. Values are always stored in CAD. */
+const curOf = () => (['thb','cad','both'].includes(S.sim.cur) ? S.sim.cur : 'both');
+function mny(v, o = {}){
+  const r = S.sim.rate || 24, cu = o.cur || curOf(), a = Math.abs(v);
+  const sg = o.sign ? (v < 0 ? '-' : '+') : (v < 0 ? '-' : '');
+  const C = sg + 'CAD ' + (o.dec ? a.toFixed(2) : fmt(a)), B = sg + 'THB ' + fmt(a * r);
+  if (cu === 'cad') return C;
+  if (cu === 'thb') return B;
+  return o.stack ? `${C}<span class="msub">${B}</span>` : `${C} <span class="msub-i">(${B})</span>`;
+}
+const ic =(n, c='icon') => `<i data-lucide="${n}" class="${c}"></i>`;
 
 /* ============================== CONTENT ============================== */
 const IRCC = 'https://www.canada.ca/en/immigration-refugees-citizenship/services/';
@@ -1356,6 +1385,54 @@ Object.assign(SIM_UI, {
 });
 SIMC.types.private.desc = {en:'Private career college: study months first, then an equal number of paid Co-op months (up to 50% of the program). You may work full time in the Co-op if the employer offers it. No PGWP.', th:'วิทยาลัยอาชีพเอกชน: เรียนก่อน แล้วต่อด้วยเทอม Co-op แบบได้ค่าจ้างจำนวนเดือนเท่ากัน (ไม่เกิน 50% ของหลักสูตร) ช่วง Co-op ทำงานเต็มเวลาได้ถ้านายจ้างให้ ไม่มีสิทธิ์ PGWP'};
 
+/* Simulator text, 19 Nov 2026 (round 3): currency choice, your own amounts, live IRCC amount, where monthly numbers come from. */
+Object.assign(SIM_UI, {
+  curL:{en:'Show amounts in', th:'แสดงเป็น'},
+  curTHB:{en:'THB', th:'บาท'}, curCAD:{en:'CAD', th:'CAD'}, curBoth:{en:'Both', th:'ทั้งสอง'},
+  lTuY:{en:'Tuition, year 1', th:'ค่าเล่าเรียนปีแรก'},
+  lFeesY:{en:'Compulsory school fees, year 1', th:'ค่าธรรมเนียมบังคับของสถาบัน ปีแรก'},
+  editL:{en:'Enter my own amounts', th:'ใส่ยอดเอง'}, editDone:{en:'Done', th:'เสร็จ'},
+  editHint:{en:'Type the amounts you were actually quoted (for example on your Letter of Acceptance or a flight quote), for your start year. Lines you leave alone keep the estimate.', th:'พิมพ์ยอดจริงที่คุณได้รับ (เช่น จาก Letter of Acceptance หรือราคาตั๋วเครื่องบิน) เป็นยอดของปีที่เริ่มเรียน รายการที่ไม่แก้จะใช้ค่าประมาณเดิม'},
+  defIs:{en:'Default', th:'ค่าเริ่มต้น'}, useDef:{en:'Use default', th:'ใช้ค่าเริ่มต้น'},
+  mine:{en:'Your amount', th:'ยอดที่คุณใส่'},
+  liveB:{en:'Live from IRCC', th:'อัปเดตอัตโนมัติจาก IRCC'},
+  autoT:{en:'Updates automatically:', th:'อัปเดตอัตโนมัติ:'},
+  autoFunds:{en:(d) => `IRCC living-cost amount read from the IRCC page (for applications from ${d})`, th:(d) => `ยอดค่าครองชีพของ IRCC อ่านจากเว็บ IRCC (ใช้เมื่อยื่นตั้งแต่ ${d})`},
+  autoFx:{en:(r, d) => `exchange rate 1 CAD = ${r} THB (${d})`, th:(r, d) => `อัตราแลกเปลี่ยน 1 CAD = ${r} บาท (${d})`},
+  autoManual:{en:'IRCC amount: you typed your own', th:'ยอด IRCC: คุณใส่ยอดเอง'},
+  autoOwn:{en:'Tuition, fees and travel cannot be read automatically because they differ by school and date, so enter your own.', th:'ค่าเล่าเรียน ค่าธรรมเนียม และค่าเดินทางดึงอัตโนมัติไม่ได้ เพราะต่างกันตามสถาบันและช่วงเวลา จึงให้ใส่ยอดเอง'},
+  checkedAt:{en:'checked', th:'ตรวจล่าสุด'}, refresh:{en:'Check now', th:'อัปเดตตอนนี้'}, refreshing:{en:'Checking...', th:'กำลังตรวจ...'},
+  proofNoteLive:{en:(a, d) => `IRCC amount for one person: CAD ${a} a year for applications from ${d}. The app reads it from the IRCC page automatically every day.`, th:(a, d) => `ยอดของ IRCC สำหรับ 1 คน: CAD ${a} ต่อปี เมื่อยื่นตั้งแต่ ${d} แอปอ่านยอดนี้จากเว็บ IRCC อัตโนมัติทุกวัน`},
+  proofManual:{en:'You typed your own amount, so it no longer updates.', th:'คุณใส่ยอดเอง ยอดนี้จึงไม่อัปเดตอัตโนมัติ'},
+  proofUse:{en:'Use the IRCC amount', th:'ใช้ยอดล่าสุดของ IRCC'},
+  proofProj:{en:y => `For a ${y} start you will likely apply after IRCC's next yearly update, so the result adds about 2.4% a year.`, th:y => `ถ้าเริ่มเรียนปี ${y} มีแนวโน้มว่าจะยื่นหลัง IRCC ปรับยอดรอบถัดไป ผลลัพธ์จึงบวกเพิ่มประมาณ 2.4% ต่อปี`},
+  whyT:{en:'Where do these monthly numbers come from, and can I change them?', th:'ตัวเลขต่อเดือนมาจากไหน และเปลี่ยนเองได้ไหม'},
+  whyIncT:{en:'1. Take-home pay per month', th:'1. รายได้สุทธิต่อเดือน'},
+  whyInc:{en:'Hours a week × hourly wage × 4.33 weeks = pay before deductions. CPP, EI and income tax are then taken off, so only part reaches your bank. The share kept falls as pay rises (93% down to 80%). [[payroll]]', th:'ชั่วโมงต่อสัปดาห์ × ค่าจ้างต่อชั่วโมง × 4.33 สัปดาห์ = รายได้ก่อนหัก จากนั้นหัก CPP EI และภาษีเงินได้ เงินที่เข้าบัญชีจึงเหลือเพียงบางส่วน สัดส่วนนี้ลดลงเมื่อรายได้สูงขึ้น (93% ลดลงถึง 80%) [[payroll]]'},
+  beforeDed:{en:'before deductions', th:'ก่อนหัก'}, kept:{en:'you keep', th:'ได้รับจริง'},
+  wkU:{en:'h/wk', th:'ชม./สัปดาห์'}, weeksU:{en:'weeks', th:'สัปดาห์'}, sideU:{en:'extra job', th:'งานเสริม'},
+  incEdit:{en:'Change these with the sliders:', th:'เปลี่ยนตัวเลขเหล่านี้ได้ที่แถบเลื่อน:'},
+  goHours:{en:'Study-term hours', th:'ชั่วโมงช่วงเรียน'}, goWage:{en:'Part-time wage', th:'ค่าจ้างพาร์ตไทม์'},
+  goCoopH:{en:'Co-op or full-time hours', th:'ชั่วโมง Co-op หรือเต็มเวลา'}, goCoopW:{en:'Co-op wage', th:'ค่าจ้าง Co-op'},
+  wageProj:{en:(y, a, b) => `Wages for a ${y} start: today's CAD ${a} an hour plus about 2% a year, so CAD ${b}.`, th:(y, a, b) => `ค่าจ้างสำหรับเริ่มเรียนปี ${y}: ค่าจ้างวันนี้ CAD ${a} ต่อชั่วโมง บวกประมาณ 2% ต่อปี จึงเป็น CAD ${b}`},
+  m1Half:{en:'Month 1 counts half pay while you get a SIN and find a job.', th:'เดือนแรกคิดรายได้ครึ่งเดียว เพราะต้องขอ SIN และหางาน'},
+  noPay:{en:'no work allowed', th:'ทำงานไม่ได้'},
+  whyExpT:{en:'2. Living costs per month (type your own)', th:'2. ค่าครองชีพต่อเดือน (พิมพ์ยอดเองได้)'},
+  whyExp:{en:'Defaults come from your housing choice, using Toronto and Vancouver figures raised to your start year. Type what you expect to pay in your city. Picking a housing option again puts its defaults back.', th:'ค่าเริ่มต้นมาจากตัวเลือกที่พัก ใช้ตัวเลขของโตรอนโตและแวนคูเวอร์ ปรับเป็นราคาของปีที่เริ่มเรียนแล้ว พิมพ์ยอดที่คาดว่าจะจ่ายจริงในเมืองของคุณได้เลย ถ้ากดเลือกที่พักใหม่ ค่าจะกลับเป็นค่าเริ่มต้นของที่พักนั้น'},
+  sumExp:{en:'Living costs per month', th:'ค่าครองชีพต่อเดือน'},
+  resetAll:{en:'Use all defaults', th:'ใช้ค่าเริ่มต้นทั้งหมด'},
+  whyNetT:{en:'3. What is left each month', th:'3. เงินคงเหลือแต่ละเดือน'},
+  whyNet:{en:'Take-home pay minus living costs. A plus means you save that month; a minus means you use savings.', th:'รายได้สุทธิ ลบ ค่าครองชีพ ถ้าเป็นบวกแปลว่าเดือนนั้นเก็บเงินได้ ถ้าเป็นลบแปลว่าต้องใช้เงินเก็บ'},
+  cmpSub:{en:'The column marked ● is your current choice and uses every setting you made, so it matches the results above. The other two use their own typical tuition, fees, Co-op hours and Co-op wage; everything else (start year, length, housing and living costs, part-time work, travel, setup reserve, IRCC amount, exchange rate) is the same as yours.', th:'คอลัมน์ที่มี ● คือประเภทที่เลือกอยู่ ใช้ทุกค่าที่คุณตั้ง จึงตรงกับผลลัพธ์ด้านบน อีก 2 ประเภทใช้ค่าเล่าเรียน ค่าธรรมเนียม ชั่วโมง Co-op และค่าจ้าง Co-op ทั่วไปของประเภทนั้น ส่วนค่าอื่นทั้งหมด (ปีที่เริ่มเรียน ระยะเวลา ที่พักและค่าครองชีพ งานพาร์ตไทม์ ค่าเดินทาง เงินสำรอง ยอดของ IRCC อัตราแลกเปลี่ยน) ใช้ค่าเดียวกับของคุณ'},
+  cMine:{en:'your settings', th:'ค่าที่คุณตั้ง'}, cTyp:{en:'typical values', th:'ค่าทั่วไป'}, cTry:{en:'Try this type', th:'ลองประเภทนี้'},
+  cTuY:{en:'Tuition, year 1', th:'ค่าเล่าเรียนปีแรก'}, cFeesY:{en:'School fees, year 1', th:'ค่าธรรมเนียมปีแรก'},
+  cTotal:{en:'Cash to have ready', th:'เงินสดที่ต้องเตรียมก่อนไป'},
+  cCoopHW:{en:'Co-op hours and wage', th:'ชั่วโมงและค่าจ้าง Co-op'},
+  cNetC:{en:'Per month in Co-op terms', th:'ต่อเดือนช่วง Co-op'},
+  cNote:{en:'Study-month numbers match across types because they depend only on part-time work and living costs. The differences come from tuition, fees, Co-op hours and wage, and the number of Co-op, break and after-graduation months.', th:'ตัวเลขของเดือนที่เรียนเท่ากันทุกประเภท เพราะขึ้นกับงานพาร์ตไทม์และค่าครองชีพเท่านั้น ส่วนที่ต่างกันมาจากค่าเล่าเรียน ค่าธรรมเนียม ชั่วโมงและค่าจ้าง Co-op และจำนวนเดือน Co-op ปิดเทอม หรือหลังเรียนจบ'}
+});
+SIM_UI.gloss[1] = {k:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'}, v:() => ({en:`A fixed amount set by the government and updated every year (now CAD ${fmt(fundsAmt())} for one person, read live from the IRCC page). It is proof you can live a year, not a spending budget.`, th:`ยอดที่รัฐบาลกำหนดและปรับทุกปี (ปัจจุบัน CAD ${fmt(fundsAmt())} สำหรับ 1 คน อ่านจากเว็บ IRCC อัตโนมัติ) เป็นหลักฐานว่าอยู่ได้ 1 ปี ไม่ใช่งบที่ต้องใช้จริง`})};
+
 const READY_UI = {
   h1:{en:'Test the waters in Canada, then decide how far to go.', th:'ลองใช้ชีวิตที่แคนาดาก่อน แล้วค่อยตัดสินใจว่าจะไปไกลแค่ไหน'},
   lead:{en:'An interactive guide for Thai professionals: compare private Co-op, public college Co-op and a master\'s degree, pick a field that still leads to PR, and check the budget before you commit.', th:'คู่มือแบบอินเทอร์แอกทีฟสำหรับคนทำงานชาวไทย: เปรียบเทียบ Co-op เอกชน Co-op วิทยาลัยรัฐ และปริญญาโท เลือกสาขาที่ยังต่อยอดสู่ PR ได้ และตรวจงบประมาณก่อนตัดสินใจ'},
@@ -1737,7 +1814,8 @@ const COSTS = {
   showT:{en:'Money you must show in the bank', th:'เงินที่ต้องแสดงในบัญชี'},
   showN:{en:'First-year tuition and fees, the IRCC living-cost amount, and travel to and from Canada, from the budget simulator.', th:'ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC และค่าเดินทางไปและกลับแคนาดา ตามเครื่องจำลองงบประมาณ'},
   open:{en:'Adjust in the simulator', th:'ปรับค่าในเครื่องจำลอง'},
-  note:{en:'What updates automatically: the exchange rate refreshes every day, so every THB figure moves with it. Government fees and school prices cannot be read automatically, so each official line has a Verify link to the live source page.', th:'สิ่งที่อัปเดตอัตโนมัติ: อัตราแลกเปลี่ยนอัปเดตทุกวัน ตัวเลขเงินบาททุกรายการจึงปรับตาม ส่วนค่าธรรมเนียมรัฐและราคาของสถาบันไม่สามารถดึงมาอัตโนมัติได้ รายการทางการแต่ละรายการจึงมีลิงก์ "ตรวจสอบ" ไปยังหน้าเว็บต้นทาง'},
+  note:{en:'What updates automatically: the exchange rate and the IRCC living-cost amount are read every day (and again when you tap Check now), so every THB figure and the money to show move with them. The IRCC fee list and school prices block automatic reading, so each official line has a Verify link to the live source page.', th:'สิ่งที่อัปเดตอัตโนมัติ: อัตราแลกเปลี่ยนและยอดค่าครองชีพของ IRCC ถูกอ่านใหม่ทุกวัน (และทุกครั้งที่กด "อัปเดตตอนนี้") ตัวเลขเงินบาททุกรายการและเงินที่ต้องแสดงจึงปรับตาม ส่วนรายการค่าธรรมเนียมของ IRCC และราคาของสถาบันไม่เปิดให้ดึงข้อมูลอัตโนมัติ รายการทางการแต่ละรายการจึงมีลิงก์ "ตรวจสอบ" ไปยังหน้าเว็บต้นทาง'},
+  showLive:{en:a => `Includes the IRCC living-cost amount of CAD ${a}, read from the IRCC page automatically.`, th:a => `รวมยอดค่าครองชีพของ IRCC CAD ${a} ที่อ่านจากเว็บ IRCC อัตโนมัติ`},
   secs:[
     {sum:true, t:{en:'1. Preparing in Thailand', th:'1. เตรียมตัวที่ไทย'}, items:[
       {t:{en:'IELTS Academic test (computer)', th:'ค่าสอบ IELTS Academic (คอมพิวเตอร์)'}, thb:[8860,8860], n:{en:'Per attempt, IDP and British Council Thailand, checked 19 Nov 2026', th:'ต่อครั้ง IDP และ British Council ประเทศไทย ตรวจสอบเมื่อ 19 พ.ย. 2026'}, r:'idp'},
@@ -1932,8 +2010,8 @@ function viewCosts(){
         
         <div class="muted num">${cad(show)}</div>
         
-        <p class="faint text-[13px] mt-2">${T(C.showN)}</p>
-        
+        <p class="faint text-[13px] mt-2">${T(C.showN)} ${S.sim.proofAuto !== false && LIVE.funds ? T(C.showLive)(fmt(fundsAmt())) : ''}</p>
+
         <button class="btn btn-ghost mt-1" style="padding:4px 8px;font-size:14px" data-act="tab" data-v="budget">${T(C.open)}${ic('arrow-right','icon-sm')}</button>
       </div>
     </div>
@@ -2331,6 +2409,39 @@ function planOf(s){
   else { add('S', 8); add(coop ? 'C' : 'B', 4); add('S', 8); add('G', 4); }
   return P;
 }
+/* IRCC living-cost amount: read live from the IRCC page (LIVE.funds), else the last known figure. */
+const FUNDS_DEF = {amt:23448, eff:'2026-09-01'};
+const fundsAmt = () => (LIVE.funds && LIVE.funds.amt) || FUNDS_DEF.amt;
+const fundsEff = () => (LIVE.funds && LIVE.funds.eff) || FUNDS_DEF.eff;
+/* Yearly IRCC updates expected between the amount's start date and an application in April of the start year */
+function proofYears(intake){
+  const eff = new Date(fundsEff() + 'T00:00:00'), app = new Date((intake || 2027) + '-04-01T00:00:00');
+  return Math.max(0, Math.floor((app - eff) / (365.25 * 864e5)));
+}
+/* Amounts the user can type in the results: stored as today's price, shown for the start year (value × factor). */
+function amtMeta(k, c){
+  const s = c.s, ty = c.ty, L0 = SIMC.living[s.living] || SIMC.living.shared, F = c.fac;
+  return ({
+    tuition:{fac:F.tuition, def:ty.def, v:s.tuition},
+    fees:{fac:F.tuition, def:ty.fees, v:val(s.fees, ty.fees)},
+    proof:{fac:F.proof, def:fundsAmt(), v:val(s.proof, fundsAmt())},
+    travel:{fac:F.cpi, def:SIMC.travel, v:val(s.travel, SIMC.travel)},
+    setup:{fac:1, def:SIMC.setup, v:val(s.setup, SIMC.setup)},
+    rentC:{fac:F.rent, def:L0.rent, v:val(s.rentC, L0.rent)},
+    foodC:{fac:F.cpi, def:L0.food, v:val(s.foodC, L0.food)},
+    otherC:{fac:F.cpi, def:L0.other, v:val(s.otherC, L0.other)},
+    healthC:{fac:F.health, def:SIMC.health, v:val(s.healthC, SIMC.health)}
+  })[k];
+}
+function amtDefault(k){
+  const ty = SIMC.types[S.sim.type];
+  if (k === 'tuition') S.sim.tuition = ty.def;
+  else if (k === 'fees') S.sim.fees = ty.fees;
+  else if (k === 'proof') { S.sim.proofAuto = true; S.sim.proof = fundsAmt(); }
+  else if (k === 'travel') S.sim.travel = SIMC.travel;
+  else if (k === 'setup') S.sim.setup = SIMC.setup;
+  else S.sim[k] = null;
+}
 /* Share of gross pay that reaches the bank after CPP, EI and income tax withheld (2026 rates, by monthly gross). */
 const takeHome = g => g <= 1700 ? 0.93 : g <= 2400 ? 0.89 : g <= 3000 ? 0.84 : g <= 3600 ? 0.82 : 0.80;
 const val = (v, d) => (v === undefined || v === null || v === '' || isNaN(v)) ? d : +v;
@@ -2338,14 +2449,16 @@ function simCalc(o){
   const s = Object.assign({}, S.sim, o || {}), ty = SIMC.types[s.type], G = SIMC.growth;
   if (s.type === 'private') s.hasCoop = true;
   const n = Math.max(0, (s.intake || SIMC.base + 1) - SIMC.base), f = k => Math.pow(1 + G[k], n);
-  const L0 = SIMC.living[s.living];
-  const lv = {rent:L0.rent * f('rent'), food:L0.food * f('cpi'), other:L0.other * f('cpi'), health:SIMC.health * f('health')};
+  const L0 = SIMC.living[s.living] || SIMC.living.shared;
+  /* Living costs: your own amounts (rentC, foodC, otherC, healthC) replace the housing defaults when set */
+  const lv = {rent:val(s.rentC, L0.rent) * f('rent'), food:val(s.foodC, L0.food) * f('cpi'), other:val(s.otherC, L0.other) * f('cpi'), health:val(s.healthC, SIMC.health) * f('health')};
   const exp = lv.rent + lv.food + lv.other + lv.health, wage = s.wage * f('wage');
-  const fees = val(s.fees, ty.fees) * f('tuition');
-  const tu1 = s.tuition * f('tuition') + fees;
+  const tuY = s.tuition * f('tuition'), fees = val(s.fees, ty.fees) * f('tuition');
+  const tu1 = tuY + fees;
   const tu2 = s.type === 'private' ? tu1 : tu1 * (1 + G.tuition);
-  const proof = s.proof * Math.pow(1 + G.proof, Math.max(0, n - 1));
-  const travel = SIMC.travel * f('cpi');
+  const pY = proofYears(s.intake), proofF = Math.pow(1 + G.proof, pY);
+  const proof = val(s.proof, fundsAmt()) * proofF;
+  const travel = val(s.travel, SIMC.travel) * f('cpi'), setup = val(s.setup, SIMC.setup);
   const cw = val(s.coopWage, ty.coopWage) * f('wage'), ftH = val(s.coopHours, ty.coopH);
   const net = g => g * takeHome(g);
   const side = val(s.side, 0);
@@ -2365,10 +2478,11 @@ function simCalc(o){
   });
   const cnt = k => plan.filter(p => p === k).length;
   const show = tu1 + proof + travel;
-  return {s, ty, n, lv, exp, wage, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), fees, tu1, tu2, proof, travel, incS, incC, incB, incG, plan, N, years:N / 12, months,
+  return {s, ty, n, lv, exp, wage, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), tuY, fees, tu1, tu2, proof, pY, travel, setup, incS, incC, incB, incG, plan, N, years:N / 12, months,
+    gS, gC, gB, gG, fac:{tuition:f('tuition'), rent:f('rent'), cpi:f('cpi'), health:f('health'), wage:f('wage'), proof:proofF},
     end:bal, low, runOut, runOutY1: runOut && runOut <= 12 ? runOut : 0, extra:Math.max(0, -low.v),
     mS:cnt('S'), mC:cnt('C'), mB:cnt('B'), mG:cnt('G'), netS:incS - exp, netC:incC - exp, netB:incB - exp, netG:incG - exp,
-    show, total:show + SIMC.setup,
+    show, total:show + setup,
     breakEvenHrs:exp / (wage * SIMC.weeks * 0.93), cover:Math.round(incS / exp * 100),
     tuTotal:tu1 + (N > 12 ? tu2 : 0)};
 }
@@ -2400,8 +2514,8 @@ function viewBudget(){
         ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]]))}
         ${field(T(M.coopQ), priv ? `<div class="text-[14px] flex gap-2" style="background:var(--blue-soft);border-radius:10px;padding:8px 12px">${ic('lock','icon-sm')}<span>${T(M.coopFixed)}</span></div>`
                                  : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]]))}
-        ${slider('tuition', T(M.tuition), ty.min, ty.max, 500, T(ty.tuNote))}
-        ${slider('fees', T(M.feesL), 0, 4000, 100, T(M.feesNote), ty.fees)}
+        ${slider('tuition', T(M.tuition), Math.min(ty.min, Math.floor(s.tuition)), Math.max(ty.max, Math.ceil(s.tuition)), 500, T(ty.tuNote))}
+        ${slider('fees', T(M.feesL), 0, Math.max(4000, Math.ceil(val(s.fees, ty.fees))), 100, T(M.feesNote), ty.fees)}
         ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l])), T(SIMC.living[s.living].note))}
         ${slider('hours', T(M.hours), 0, 24, 1, T(M.hoursNote))}
         ${slider('wage', T(M.wage), 15, 25, 0.25, T(M.wageNote))}
@@ -2414,8 +2528,8 @@ function viewBudget(){
           <div id="fx-status" class="faint text-[13px] mt-2" aria-live="polite"></div>
         </div>
         <div>
-          <div class="flex justify-between items-center gap-3"><label for="sim-proof" class="font-medium text-[15px]">${T(M.proof)}</label><input class="numin num" type="number" id="sim-proof" data-sim="proof" min="10000" max="40000" step="5" value="${s.proof}"></div>
-          <div class="faint text-[13px] mt-1">${T(M.proofNote)}</div>
+          <div class="flex justify-between items-center gap-3"><label for="sim-proof" class="font-medium text-[15px]">${T(M.proof)}</label><input class="numin num" type="number" id="sim-proof" data-sim="proof" min="10000" max="60000" step="1" value="${Math.round(val(s.proof, fundsAmt()))}"></div>
+          <div class="faint text-[13px] mt-1" id="proof-status">${proofStatusHtml()}</div>
         </div>
       </div>
       <div class="lg:col-span-3 grid gap-4" id="sim-out"></div>
@@ -2496,7 +2610,7 @@ function chartTerms(c){
 }
 function chartSplit(c){
   const M = SIM_UI, s = S.sim, N = c.N;
-  const parts = [[T(M.lTuitionFees), c.tuTotal, 's1'], [T(M.rent), c.lv.rent*N, 's2'], [T(M.food), c.lv.food*N, 's3'], [T(M.other), c.lv.other*N, 's4'], [T(M.health), c.lv.health*N, 's5'], [T(M.lTravelSetup), SIMC.setup + c.travel, 's6']];
+  const parts = [[T(M.lTuitionFees), c.tuTotal, 's1'], [T(M.rent), c.lv.rent*N, 's2'], [T(M.food), c.lv.food*N, 's3'], [T(M.other), c.lv.other*N, 's4'], [T(M.health), c.lv.health*N, 's5'], [T(M.lTravelSetup), c.setup + c.travel, 's6']];
   const tot = parts.reduce((a, p) => a + p[1], 0);
   return `
   <figure class="viz">
@@ -2510,25 +2624,32 @@ function chartSplit(c){
     </details>
   </figure>`;
 }
-function compareTypes(){
+/* Three program types side by side. The selected type is exactly your simulation; the others swap in their
+   own typical tuition, fees, Co-op hours and Co-op wage and keep everything else you set. */
+function compareTypes(cur){
   const M = SIM_UI, s = S.sim;
   const rows = Object.keys(SIMC.types).map(k => {
-    const ty = SIMC.types[k], c = simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop});
-    return {k, c};
+    if (k === s.type) return {k, c:cur, mine:true};
+    const ty = SIMC.types[k];
+    return {k, mine:false, c:simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop})};
   });
-  const sg = v => (v < 0 ? '-' : '+') + 'CAD ' + fmt(Math.abs(v));
+  const td = (r, html, cls) => `<td style="text-align:right" class="${r.mine ? 'cur-col ' : ''}${cls || ''}">${html}</td>`;
+  const tr = (label, f) => `<tr style="cursor:default"><td style="white-space:normal;min-width:150px">${label}</td>${rows.map(f).join('')}</tr>`;
   return `
   <div class="card">
     <h3 class="text-[17px] font-semibold">${T(M.cmpT)}</h3>
     <p class="muted text-[14px] mt-1 mb-3">${T(M.cmpSub)}</p>
-    <div class="hscroll"><table class="ctbl" style="min-width:560px"><thead><tr><th></th>${rows.map(r => `<th style="text-align:right">${T(SIMC.types[r.k].l)}${r.k === s.type ? ' ●' : ''}</th>`).join('')}</tr></thead><tbody>
-      <tr style="cursor:default"><td>${T(M.cTu)}</td>${rows.map(r => `<td style="text-align:right">CAD ${fmt(r.c.tu1)}</td>`).join('')}</tr>
-      <tr style="cursor:default"><td>${T(M.cShow)}</td>${rows.map(r => `<td style="text-align:right"><strong>CAD ${fmt(r.c.show)}</strong><div class="faint text-[12px]">${thb(r.c.show*s.rate)}</div></td>`).join('')}</tr>
-      <tr style="cursor:default"><td>${T(M.cMonths)}</td>${rows.map(r => `<td style="text-align:right">${r.c.mS} / ${r.c.mC} / ${r.c.mB + r.c.mG}</td>`).join('')}</tr>
-      <tr style="cursor:default"><td>${T(M.cCw)}</td>${rows.map(r => `<td style="text-align:right">${r.c.mC ? 'CAD ' + r.c.cw.toFixed(2) : '-'}</td>`).join('')}</tr>
-      <tr style="cursor:default"><td>${T(M.cNetS)}</td>${rows.map(r => `<td style="text-align:right" class="${r.c.netS<0?'neg':'pos'}">${sg(r.c.netS)}</td>`).join('')}</tr>
-      <tr style="cursor:default"><td>${T(M.cEnd)}</td>${rows.map(r => `<td style="text-align:right" class="${r.c.end<0?'neg':''}">${sg(r.c.end)}</td>`).join('')}</tr>
-      <tr style="cursor:default"><td>${T(M.cExtra)}</td>${rows.map(r => `<td style="text-align:right" class="${r.c.extra>0?'neg':''}">${r.c.extra > 0 ? 'CAD ' + fmt(r.c.extra) : '0'}</td>`).join('')}</tr>
+    <div class="hscroll"><table class="ctbl" style="min-width:600px"><thead><tr><th></th>${rows.map(r => `<th style="text-align:right;white-space:normal" class="${r.mine ? 'cur-col' : ''}">${T(SIMC.types[r.k].l)}${r.mine ? ' ●' : ''}<div class="faint" style="font-weight:400">${T(r.mine ? M.cMine : M.cTyp)}</div>${r.mine ? '' : `<button class="linkbtn" style="font-size:12.5px" data-act="sim-type" data-v="${r.k}">${T(M.cTry)}</button>`}</th>`).join('')}</tr></thead><tbody>
+      ${tr(T(M.cTuY), r => td(r, mny(r.c.tuY, {stack:true})))}
+      ${tr(T(M.cFeesY), r => td(r, mny(r.c.fees, {stack:true})))}
+      ${tr(T(M.cShow), r => td(r, `<strong>${mny(r.c.show, {stack:true})}</strong>`))}
+      ${tr(T(M.cTotal), r => td(r, `<strong>${mny(r.c.total, {stack:true})}</strong>`))}
+      ${tr(T(M.cMonths), r => td(r, `${r.c.mS} / ${r.c.mC} / ${r.c.mB + r.c.mG}`))}
+      ${tr(T(M.cCoopHW), r => td(r, r.c.mC ? `${r.c.ftH} ${T(M.wkU)}<span class="msub">× ${mny(r.c.cw, {dec:true, cur:curOf() === 'thb' ? 'thb' : 'cad'})}${T(M.hr)}</span>` : '-'))}
+      ${tr(T(M.cNetS), r => td(r, mny(r.c.netS, {sign:true, stack:true}), r.c.netS < 0 ? 'neg' : 'pos'))}
+      ${tr(T(M.cNetC), r => td(r, r.c.mC ? mny(r.c.netC, {sign:true, stack:true}) : '-', r.c.mC ? (r.c.netC < 0 ? 'neg' : 'pos') : ''))}
+      ${tr(T(M.cEnd), r => td(r, mny(r.c.end, {sign:true, stack:true}), r.c.end < 0 ? 'neg' : ''))}
+      ${tr(T(M.cExtra), r => td(r, r.c.extra > 0 ? mny(r.c.extra, {stack:true}) : '0', r.c.extra > 0 ? 'neg' : ''))}
     </tbody></table></div>
     <p class="faint text-[13px] mt-2">${T(M.cNote)}</p>
   </div>`;
@@ -2573,32 +2694,63 @@ const LIVE_UI = {
   draw:{en:'Latest Express Entry draw', th:'รอบคัดเลือก Express Entry ล่าสุด'},
   drawsT:{en:'Latest Express Entry draws (live from IRCC)', th:'รอบคัดเลือก Express Entry ล่าสุด (ข้อมูลสดจาก IRCC)'},
   drawsSub:{en:'The minimum CRS is the lowest score that received an invitation in that round. Category rounds (for example Healthcare or Trades) usually need fewer points than general rounds.', th:'CRS ขั้นต่ำคือคะแนนต่ำสุดที่ได้รับคำเชิญในรอบนั้น รอบเฉพาะหมวด (เช่น Healthcare หรือ Trades) มักใช้คะแนนน้อยกว่ารอบทั่วไป'},
+  funds:{en:'IRCC living-cost amount (1 person, per year)', th:'ค่าครองชีพขั้นต่ำของ IRCC (1 คน ต่อปี)'},
+  fundsSub:{en:d => `For study permit applications from ${d}. Not including tuition and travel.`, th:d => `ใช้กับการยื่น Study Permit ตั้งแต่ ${d} ไม่รวมค่าเล่าเรียนและค่าเดินทาง`},
   date:{en:'Date', th:'วันที่'}, prog:{en:'Round type', th:'ประเภทรอบ'}, inv:{en:'Invitations', th:'จำนวนคำเชิญ'}, crs:{en:'Minimum CRS', th:'CRS ขั้นต่ำ'},
   loading:{en:'Loading live data...', th:'กำลังโหลดข้อมูลสด...'},
   fail:{en:'Live data could not be loaded (offline?). Open the official page instead.', th:'โหลดข้อมูลสดไม่ได้ (ออฟไลน์อยู่หรือไม่) เปิดหน้าเว็บทางการแทน'},
   more:{en:'See all recent draws', th:'ดูรอบล่าสุดทั้งหมด'}
 };
-async function loadLive(){
-  if (LIVE.day === today() && LIVE.ee) return;
-  liveState = 'loading';
+/* IRCC proof-of-funds page: pick the newest "If you apply on or after <date>" table and read the 1-person amount
+   (all provinces except Quebec). The page allows cross-site reads (Access-Control-Allow-Origin: *). */
+const FUNDS_URL = IRCC + 'study-canada/study-permit/get-documents/financial-support.html';
+const MONTHS_EN = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+function parseFunds(html){
+  if (!html) return null;
+  const d = new DOMParser().parseFromString(html, 'text/html'); let best = null;
+  d.querySelectorAll('details').forEach(x => {
+    const sm = x.querySelector('summary'); if (!sm) return;
+    const m = sm.textContent.replace(/\s+/g, ' ').match(/on or after ([A-Za-z]+) (\d{1,2}), (\d{4})/i); if (!m) return;
+    const mi = MONTHS_EN.indexOf(m[1].toLowerCase()); if (mi < 0) return;
+    const row = [...x.querySelectorAll('table tbody tr')].find(tr => tr.cells[0] && tr.cells[0].textContent.trim() === '1');
+    if (!row || !row.cells[1]) return;
+    const amt = +row.cells[1].textContent.replace(/[^\d]/g, '');
+    if (!(amt > 10000 && amt < 60000)) return;
+    const eff = `${m[3]}-${String(mi + 1).padStart(2, '0')}-${String(+m[2]).padStart(2, '0')}`;
+    if (!best || eff > best.eff) best = {amt, eff};
+  });
+  return best;
+}
+function applyFunds(){ if (S.sim.proofAuto !== false && LIVE.funds) S.sim.proof = LIVE.funds.amt; }
+async function loadLive(force){
+  if (!force && LIVE.day === today() && LIVE.ee && LIVE.funds) return;
+  liveState = 'loading'; renderSimOut(); icons();
   try {
     const base = 'https://www.canada.ca/content/dam/ircc/documents/json/';
-    const [ee, pt] = await Promise.all([
+    const [ee, pt, fu] = await Promise.all([
       fetch(base + 'ee_rounds_123_en.json', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch(base + 'data-ptime-en.json', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch(base + 'data-ptime-en.json', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(FUNDS_URL, {cache:'no-store'}).then(r => r.ok ? r.text() : null).then(parseFunds).catch(() => null)
     ]);
-    if (!ee && !pt) throw new Error('none');
-    const next = {day:today()};
+    if (!ee && !pt && !fu) throw new Error('none');
+    const next = {day:today(), at:Date.now()};
     if (ee && ee.rounds) next.ee = ee.rounds.slice(0, 10).map(r => ({n:r.drawNumber, d:r.drawDate, name:r.drawName, size:r.drawSize, crs:r.drawCRS}));
     else if (LIVE.ee) next.ee = LIVE.ee;
     if (pt && pt.study) next.pt = {study:pt.study.TH, work:pt.work && pt.work.TH, upd:pt.study.lastupdated || ''};
     else if (LIVE.pt) next.pt = LIVE.pt;
+    if (fu) next.funds = fu; else if (LIVE.funds) next.funds = LIVE.funds;
     LIVE = next; liveState = 'ok';
     try { localStorage.setItem(LIVE_KEY, JSON.stringify(LIVE)); } catch (e) {}
+    applyFunds(); save();
   } catch (e) { liveState = 'fail'; }
-  if (['start','roadmap','prep'].includes(S.tab)) render(true);
+  if (['start','roadmap','prep','budget','costs'].includes(S.tab)) render(true);
 }
-const fdate = d => { const t = new Date(d); return isNaN(t) ? d : t.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB', {day:'numeric', month:'short', year:'numeric'}); };
+/* Keep data fresh without wasting requests: check when the app comes back into view and every 30 minutes,
+   but only fetch again once the day has changed (sources update daily or less often). */
+function autoRefresh(){ if (S.fx.day !== today()) loadFx(); if (LIVE.day !== today()) loadLive(); }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) autoRefresh(); });
+setInterval(autoRefresh, 30 * 60 * 1000);
+const fdate = d => { const t = new Date(d); return isNaN(t) ? d : t.toLocaleDateString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', year:'numeric'}); };
 function liveCard(){
   const U = LIVE_UI, e = LIVE.ee && LIVE.ee[0], p = LIVE.pt;
   const msg = liveState === 'fail' && !e ? T(U.fail) : T(U.loading);
@@ -2608,8 +2760,13 @@ function liveCard(){
     <p class="muted text-[13.5px] mb-1">${T(U.sub)}</p>
     ${row('banknote', T(U.fx), `1 CAD = ${Number(S.sim.rate).toFixed(2)} THB`, S.fx.date ? fdate(S.fx.date) + ' · ' + S.fx.src : T(FX_UI.loading), '')}
     ${p ? row('timer', T(U.proc), p.study, T(U.asOf) + ' ' + p.upd, 'proc') : row('timer', T(U.proc), '...', msg, 'proc')}
+    ${row('wallet', T(U.funds), `CAD ${fmt(fundsAmt())} <span class="muted text-[14px] font-medium">(${thb(fundsAmt() * (S.sim.rate || 24))})</span>`, (LIVE.funds ? '' : msg + ' · ') + T(U.fundsSub)(fdate(fundsEff() + 'T00:00:00')), 'funds')}
     ${e ? row('trophy', T(U.draw), `CRS ${e.crs} · ${fmt(+String(e.size).replace(/,/g,''))} ${T(U.inv)}`, fdate(e.d) + ' · ' + esc(e.name), 'draws') : row('trophy', T(U.draw), '...', msg, 'draws')}
-    <button class="btn btn-ghost mt-2" style="font-size:14px" data-act="tab" data-v="roadmap">${T(U.more)}${ic('arrow-right','icon-sm')}</button>`;
+    <div class="flex flex-wrap items-center gap-2 mt-2">
+      <button class="btn btn-ghost" style="font-size:14px" data-act="tab" data-v="roadmap">${T(U.more)}${ic('arrow-right','icon-sm')}</button>
+      <button class="btn btn-ghost" style="font-size:14px" data-act="refresh">${ic('refresh-cw','icon-sm')}${T(liveState === 'loading' ? SIM_UI.refreshing : SIM_UI.refresh)}</button>
+      ${LIVE.at ? `<span class="faint text-[13px]">${T(SIM_UI.checkedAt)} ${new Date(LIVE.at).toLocaleString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</span>` : ''}
+    </div>`;
 }
 function drawsTable(){
   const U = LIVE_UI, list = LIVE.ee || [];
@@ -2623,7 +2780,7 @@ const today = () => new Date().toLocaleDateString('en-CA');
 function fxStatusHtml(){
   const f = S.fx;
   if (!f.rate) return fxState === 'fail' ? T(FX_UI.fail) : T(FX_UI.loading);
-  const d = new Date(f.date).toLocaleDateString(S.lang==='th'?'th-TH':'en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const d = new Date(f.date).toLocaleDateString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', year:'numeric'});
   const stale = fxState === 'fail' ? ' ' + T(FX_UI.fail) : '';
   if (S.sim.rateAuto) return `<span class="dot" aria-hidden="true"></span>${T(FX_UI.live)} ${d} (${f.src}). ${T(FX_UI.auto)}${stale}`;
   return `${T(FX_UI.manual)} <span class="num">${f.rate.toFixed(2)}</span> (${d}). <button class="btn btn-ghost" style="padding:2px 8px;font-size:13px" data-act="fxlive">${T(FX_UI.use)}</button>`;
@@ -2632,8 +2789,8 @@ function applyFx(){
   if (S.sim.rateAuto && S.fx.rate) S.sim.rate = +S.fx.rate.toFixed(2);
   render(true);
 }
-async function loadFx(){
-  if (S.fx.rate && S.fx.usd && S.fx.day === today()) { applyFx(); return; }
+async function loadFx(force){
+  if (!force && S.fx.rate && S.fx.usd && S.fx.day === today()) { applyFx(); return; }
   fxState = 'loading';
   const sources = [
     {n:'open.er-api.com', u:'https://open.er-api.com/v6/latest/CAD', p:j => ({rate:j.rates.THB, usd:j.rates.THB / j.rates.USD, date:j.time_last_update_utc})},
@@ -2652,10 +2809,114 @@ async function loadFx(){
   fxState = 'fail'; renderSimOut();
 }
 
+/* ---------- simulator helpers: typed amounts, live status, where the monthly numbers come from ---------- */
+let LIST_EDIT = false;
+function amtRow(k, label, c, unit){
+  const M = SIM_UI, m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5, r = S.sim.rate || 24;
+  const shown = Math.round(m.v * m.fac * (unit === 'thb' ? r : 1));
+  return `<div class="row erow"><div class="min-w-0"><label for="amt-${k}">${label}</label><div class="faint text-[12.5px]">${T(M.defIs)} ${mny(m.def * m.fac, {cur:unit})}${custom ? ` · <button class="linkbtn" data-act="amtdef" data-v="${k}">${T(M.useDef)}</button>` : ''}</div></div>
+    <span class="amt-in"><span class="faint text-[12px]">${unit.toUpperCase()}</span><input class="numin num" id="amt-${k}" type="number" inputmode="decimal" min="0" step="any" data-amt="${k}" data-unit="${unit}" value="${shown}"></span></div>`;
+}
+function proofStatusHtml(){
+  const M = SIM_UI, s = S.sim, a = fmt(fundsAmt()), d = fdate(fundsEff() + 'T00:00:00');
+  let h = s.proofAuto !== false
+    ? `${LIVE.funds ? '<span class="dot" aria-hidden="true"></span>' : ''}${T(M.proofNoteLive)(a, d)}`
+    : `${T(M.proofManual)} ${T(M.proofNoteLive)(a, d)} <button class="btn btn-ghost" style="padding:2px 8px;font-size:13px" data-act="proofauto">${T(M.proofUse)}</button>`;
+  if (proofYears(s.intake) > 0) h += ' ' + T(M.proofProj)(s.intake);
+  return cites(h + ' [[funds]]').html;
+}
+function autoLineHtml(){
+  const M = SIM_UI, s = S.sim, parts = [];
+  if (s.proofAuto === false) parts.push(T(M.autoManual));
+  else if (LIVE.funds) parts.push(T(M.autoFunds)(fdate(LIVE.funds.eff + 'T00:00:00')));
+  if (S.fx.rate && s.rateAuto) parts.push(T(M.autoFx)(Number(s.rate).toFixed(2), fdate(S.fx.date)));
+  const busy = liveState === 'loading' || fxState === 'loading';
+  const at = LIVE.at ? new Date(LIVE.at).toLocaleString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+  return `<span class="dot" aria-hidden="true"></span><span class="min-w-0" style="flex:1 1 240px"><b>${T(M.autoT)}</b> ${parts.length ? parts.join('; ') + '.' : T(LIVE_UI.loading)}${at ? ' ' + T(M.checkedAt) + ' ' + at + '.' : ''} ${T(M.autoOwn)} [[funds]]</span>
+    <button class="linkbtn inline-flex items-center gap-1" data-act="refresh" ${busy ? 'aria-busy="true"' : ''}>${ic('refresh-cw','icon-sm')}${T(busy ? M.refreshing : M.refresh)}</button>`;
+}
+function whyPanel(c, one, unit){
+  const M = SIM_UI, s = c.s, wk = SIMC.weeks;
+  const pct = g => Math.round(takeHome(g) * 100);
+  const res = (g, inc) => g > 0 ? ` = ${one(g)} ${T(M.beforeDed)}<br>${T(M.kept)} ${pct(g)}% = <b class="num">${one(inc)}</b>` : ` = <b class="num">${one(0)}</b>`;
+  const inc = [];
+  inc.push([T(M.study), `${s.hours} ${T(M.wkU)} × ${one(c.wage, {dec:true})}${T(M.hr)} × ${wk} ${T(M.weeksU)}` + res(c.gS, c.incS)]);
+  if (c.mC) inc.push([T(M.coop), `(${c.ftH} ${T(M.wkU)} × ${one(c.cw, {dec:true})}${T(M.hr)}${c.side ? ` + ${c.side} ${T(M.wkU)} ${T(M.sideU)} × ${one(c.wage, {dec:true})}` : ''}) × ${wk} ${T(M.weeksU)}` + res(c.gC, c.incC)]);
+  if (c.mB) inc.push([T(M.brkS), `${c.ftH} ${T(M.wkU)} × ${one(c.wage, {dec:true})}${T(M.hr)} × ${wk} ${T(M.weeksU)}` + res(c.gB, c.incB)]);
+  if (c.mG) inc.push([T(M.gradS), s.pgwp === false ? `${T(M.noPay)}` + res(0, 0) : `${c.ftH} ${T(M.wkU)} × ${one(c.wage, {dec:true})}${T(M.hr)} × ${wk} ${T(M.weeksU)}` + res(c.gG, c.incG)]);
+  const go = (id, l) => `<button class="btn btn-ghost" style="padding:3px 10px;font-size:13.5px" data-act="focus" data-v="${id}">${ic('sliders-horizontal','icon-sm')}${T(l)}</button>`;
+  const lc = [['rentC', M.rent], ['foodC', M.food], ['otherC', M.other], ['healthC', M.health]];
+  const anyLc = lc.some(([k]) => S.sim[k] != null);
+  const nets = [[T(M.study), c.incS, c.netS]];
+  if (c.mC) nets.push([T(M.coop), c.incC, c.netC]);
+  if (c.mB) nets.push([T(M.brkS), c.incB, c.netB]);
+  if (c.mG) nets.push([T(M.gradS), c.incG, c.netG]);
+  return `
+  <details class="why mt-4" id="sim-why" data-field="simWhy" ${S.open && S.open.simWhy ? 'open' : ''}>
+    <summary class="font-semibold text-[15px] cursor-pointer" style="color:var(--blue)">${ic('calculator','icon-sm')} ${T(M.whyT)}</summary>
+    <h4>${T(M.whyIncT)}</h4>
+    <p class="muted text-[13.5px]">${T(M.whyInc)}</p>
+    <div class="mt-1">${inc.map(([l, f]) => `<div class="mline"><span class="font-medium">${l}</span><span class="f" style="text-align:right">${f}</span></div>`).join('')}</div>
+    <div class="faint text-[13px] mt-1">${T(M.m1Half)}${c.n ? ' ' + T(M.wageProj)(s.intake, Number(s.wage).toFixed(2), c.wage.toFixed(2)) : ''}</div>
+    <div class="flex flex-wrap items-center gap-2 mt-2"><span class="text-[13.5px] muted">${T(M.incEdit)}</span>${go('sim-hours', M.goHours)}${go('sim-wage', M.goWage)}${c.plan.some(p => p !== 'S') ? go('sim-coopHours', M.goCoopH) : ''}${c.mC ? go('sim-coopWage', M.goCoopW) : ''}</div>
+    <h4>${T(M.whyExpT)}</h4>
+    <p class="muted text-[13.5px] mb-1">${T(M.whyExp)}</p>
+    ${lc.map(([k, l]) => amtRow(k, T(l), c, unit)).join('')}
+    <div class="row font-semibold"><span>${T(M.sumExp)}</span><span class="num">${one(c.exp)}</span></div>
+    ${anyLc ? `<button class="linkbtn text-[13.5px] mt-1" data-act="lcreset">${T(M.resetAll)}</button>` : ''}
+    <h4>${T(M.whyNetT)}</h4>
+    <p class="muted text-[13.5px]">${T(M.whyNet)}</p>
+    ${nets.map(([l, i, n]) => `<div class="mline"><span class="font-medium">${l}</span><span class="f">${one(i)} − ${one(c.exp)} = <b class="${n < 0 ? 'neg' : 'pos'}">${one(n, {sign:true})}</b> ${T(M.mo)}</span></div>`).join('')}
+  </details>`;
+}
+/* Commit an amount typed in the results; keep focus on whatever field the user moved to. */
+let ptrDown = false, simPending = false;
+document.addEventListener('pointerdown', () => { ptrDown = true; }, true);
+document.addEventListener('pointerup', () => { ptrDown = false; if (simPending) setTimeout(flushSim, 0); }, true);
+function flushSim(){
+  simPending = false;
+  const a = document.activeElement, k = a && a.dataset && a.dataset.amt;
+  renderSimOut(); icons(); save();
+  if (k) { const n = document.querySelector(`[data-amt="${k}"]`); if (n) { n.focus({preventScroll:true}); try { n.select(); } catch (e) {} } }
+}
+function queueFlush(){ if (ptrDown) simPending = true; else setTimeout(flushSim, 0); }
+document.addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.amt; if (!k) return;
+  let v = parseFloat(e.target.value);
+  if (!isFinite(v) || v < 0 || (v === 0 && ['tuition','proof','rentC','foodC'].includes(k))) { queueFlush(); return; }
+  if (e.target.dataset.unit === 'thb') v = v / (S.sim.rate || 24);
+  const m = amtMeta(k, simCalc());
+  S.sim[k] = v / m.fac;
+  if (k === 'proof') S.sim.proofAuto = false;
+  queueFlush();
+});
+document.addEventListener('keydown', e => {
+  if (!e.target.dataset || !e.target.dataset.amt) return;
+  if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+  else if (e.key === 'Escape' && LIST_EDIT) { LIST_EDIT = false; renderSimOut(); icons(); }
+});
+/* Smooth sliders: draw at most once per frame, save shortly after the last change. */
+let simRaf = 0, saveT = 0;
+function queueSim(){
+  if (simRaf) return;
+  let done = false;
+  const run = () => { if (done) return; done = true; simRaf = 0; renderSimOut(); icons(); };
+  simRaf = requestAnimationFrame(run); setTimeout(run, 120);   /* timer fallback when frames are paused */
+}
+function saveSoon(){ clearTimeout(saveT); saveT = setTimeout(save, 300); }
+
 function renderSimOut(){
   const fxEl = document.getElementById('fx-status'); if (fxEl) fxEl.innerHTML = fxStatusHtml();
   const out = document.getElementById('sim-out'); if (!out) return;
   updateChip();
+  const pst = document.getElementById('proof-status'); if (pst) pst.innerHTML = proofStatusHtml();
+  /* keep the controls in step with amounts typed in the results (or loaded live) */
+  document.querySelectorAll('input[data-sim]').forEach(el => {
+    if (el === document.activeElement) return;
+    const v = S.sim[el.dataset.sim]; if (v == null || v === '' || isNaN(v)) return;
+    if (el.type === 'range') { if (+v > +el.max) el.max = Math.ceil(v); if (+v < +el.min) el.min = Math.floor(v); }
+    if (Math.abs(+el.value - v) > (el.type === 'range' ? +el.step / 2 : 0.004)) el.value = el.type === 'range' ? v : Math.round(v * 100) / 100;
+  });
   document.querySelectorAll('input[type=range]').forEach(r => r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'));
   const M = SIM_UI, s = S.sim, c = simCalc();
   const set =(id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
@@ -2666,45 +2927,66 @@ function renderSimOut(){
   set('lab-fees', cad(c.s.fees === undefined ? SIMC.types[s.type].fees : c.s.fees));
   set('lab-wage', 'CAD ' + Number(s.wage).toFixed(2) + T(M.hr));
   set('lab-coopWage', 'CAD ' + val(s.coopWage, SIMC.types[s.type].coopWage).toFixed(2) + T(M.hr));
-  const sign = n => (n >= 0 ? '+' : '-') + 'CAD ' + fmt(Math.abs(n));
+  const cu = curOf(), r = s.rate || 24;
+  /* one currency for short lines: THB when the user picked THB, otherwise CAD */
+  const one = (v, o = {}) => mny(v, Object.assign({cur:cu === 'thb' ? 'thb' : 'cad'}, o));
   const mini = document.getElementById('sim-mini');
-  if (mini) mini.innerHTML = `<div><small>${T(M.lTotal)}</small><b>${thb(c.total*s.rate)}</b></div><div style="text-align:right"><small>${T(M.study)} ${T(M.mo)}</small><b class="${c.netS>=0?'pos':'neg'}">${sign(c.netS)}</b></div>`;
+  if (mini) mini.innerHTML = `<div><small>${T(M.lTotal)}</small><b>${cu === 'cad' ? cad(c.total) : thb(c.total*r)}</b></div><div style="text-align:right"><small>${T(M.study)} ${T(M.mo)}</small><b class="${c.netS>=0?'pos':'neg'}">${one(c.netS, {sign:true})}</b></div>`;
   const term = (label, months, net, inc) => `
     <div class="stat"><div class="eyebrow">${label} · <span class="num">${months}</span> ${T(M.months)}</div>
-      <div class="v ${net>=0?'pos':'neg'}">${sign(net)}<span class="text-[14px] font-medium muted">${T(M.mo)}</span></div>
-      <div class="s">${T(M.income)} ${fmt(inc)} − ${T(M.exp)} ${fmt(c.exp)}</div>
-      <div class="s">${(net>=0?'+':'-') + thb(Math.abs(net)*s.rate)} ${T(M.mo)}</div></div>`;
+      <div class="v ${net>=0?'pos':'neg'}">${one(net, {sign:true})}<span class="text-[14px] font-medium muted">${T(M.mo)}</span></div>
+      <div class="s">${T(M.income)} ${one(inc)} − ${T(M.exp)} ${one(c.exp)}</div>
+      ${cu === 'both' ? `<div class="s">${mny(net, {sign:true, cur:'thb'})} ${T(M.mo)}</div>` : ''}</div>`;
+  /* cash list: each line can be typed over in edit mode */
+  const unit = cu === 'thb' ? 'thb' : 'cad';
+  const line = (k, label, amount, badge) => {
+    const m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5;
+    if (!LIST_EDIT) return `<div class="row"><span class="muted min-w-0">${label}${custom ? ` <span class="badge b-blue">${T(M.mine)}</span>` : (badge || '')}</span><span class="num">${mny(amount, {stack:true})}</span></div>`;
+    return amtRow(k, label, c, unit);
+  };
+  const liveBadge = s.proofAuto !== false && LIVE.funds ? ` <span class="badge b-green">${ic('radio','icon-sm')}${T(M.liveB)}</span>` : '';
   out.innerHTML = cites(`
     <div class="card">
-      <div class="eyebrow">${T(M.lTotal)}</div>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="eyebrow">${T(M.lTotal)}</div>
+        <div class="flex items-center gap-2"><span class="faint text-[13px]">${T(M.curL)}</span><div class="seg" role="group" aria-label="${esc(T(M.curL))}">${[['thb', M.curTHB], ['cad', M.curCAD], ['both', M.curBoth]].map(([v, l]) => `<button class="${cu === v ? 'on' : ''}" aria-pressed="${cu === v}" data-act="sim-cur" data-v="${v}">${T(l)}</button>`).join('')}</div></div>
+      </div>
       <div class="flex flex-wrap items-baseline gap-x-4 mt-1">
-        
-        <div class="hero num">${thb(c.total*s.rate)}</div>
-        
-        <div class="text-[18px] font-semibold muted num">CAD ${fmt(c.total)}</div>
+        <div class="hero num">${cu === 'cad' ? cad(c.total) : thb(c.total*r)}</div>
+        ${cu === 'both' ? `<div class="text-[18px] font-semibold muted num">${cad(c.total)}</div>` : ''}
       </div>
       <div class="faint text-[13.5px] mb-3">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
-      <div class="row"><span class="muted">${T(M.lTuitionFees)}</span><span class="num">${cad(c.tu1)}</span></div>
-      <div class="row"><span class="muted">${T(M.lProof)}</span><span class="num">${cad(c.proof)}</span></div>
-      <div class="row"><span class="muted">${T(M.lTravel)}</span><span class="num">${cad(c.travel)}</span></div>
-      <div class="row font-semibold"><span>${T(M.lShow)}</span><span class="num">${cad(c.show)}</span></div>
-      <div class="row"><span class="muted">${T(M.lSetup)}</span><span class="num">${cad(SIMC.setup)}</span></div>
-      ${c.extra > 0 ? `<div class="row font-semibold neg"><span>${T(M.lExtra)}</span><span class="num">${cad(c.extra)} · ${thb(c.extra*s.rate)}</span></div>` : ''}
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+        ${LIST_EDIT ? `<p class="text-[13.5px] muted" style="max-width:52ch">${T(M.editHint)}</p>` : '<span></span>'}
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:14px" data-act="listedit" aria-pressed="${LIST_EDIT}">${ic(LIST_EDIT ? 'check' : 'pencil','icon-sm')}${T(LIST_EDIT ? M.editDone : M.editL)}</button>
+      </div>
+      ${line('tuition', T(M.lTuY), c.tuY)}
+      ${line('fees', T(M.lFeesY), c.fees)}
+      ${line('proof', T(M.lProof), c.proof, liveBadge)}
+      ${line('travel', T(M.lTravel), c.travel)}
+      <div class="row font-semibold"><span>${T(M.lShow)}</span><span class="num">${mny(c.show, {stack:true})}</span></div>
+      ${line('setup', T(M.lSetup), c.setup)}
+      ${c.extra > 0 ? `<div class="row font-semibold neg"><span>${T(M.lExtra)}</span><span class="num">${mny(c.extra, {stack:true})}</span></div>` : ''}
+      <div class="autoline" id="auto-line">${autoLineHtml()}</div>
       <div class="mt-4">${timeline(c)}</div>
       <div class="grid gap-3 mt-4 ${[c.mS, c.mC, c.mB, c.mG].filter(Boolean).length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}">${term(T(M.study), c.mS, c.netS, c.incS)}${c.mC ? term(T(M.coop), c.mC, c.netC, c.incC) : ''}${c.mB ? term(T(M.brkS), c.mB, c.netB, c.incB) : ''}${c.mG ? term(T(M.gradS), c.mG, c.netG, c.incG) : ''}</div>
+      ${whyPanel(c, one, unit)}
       <p class="faint text-[13px] mt-3 flex gap-2">${ic('info','icon-sm')}<span>${T(M.whySame)}</span></p>
     </div>
     ${analysis(c)}
     <div class="card">${chartBalance(c)}</div>
-    ${compareTypes()}
+    ${compareTypes(c)}
     <div class="card">${chartTerms(c)}</div>
     <div class="card">${chartSplit(c)}</div>`).html;
+  updateRefs();
   bindTips(out);
   /* Timeline labels: never clip. Fall back to the month count, then to nothing (legend and tooltip carry it). */
-  out.querySelectorAll('.tline>div').forEach(d => {
-    const sp = d.querySelector('span'); if (!sp) return;
-    if (sp.offsetWidth > d.clientWidth - 8) { sp.textContent = sp.textContent.replace(/\D+/g, '').trim(); }
-    if (sp.offsetWidth > d.clientWidth - 8) sp.textContent = '';
+  /* Read every size first, then write, so the page is laid out once instead of once per segment. */
+  const segs = [...out.querySelectorAll('.tline>div')].map(d => { const sp = d.querySelector('span'); return sp ? {sp, w:sp.offsetWidth, room:d.clientWidth - 8} : null; }).filter(Boolean);
+  segs.forEach(({sp, w, room}) => {
+    if (w <= room) return;
+    const txt = sp.textContent, short = txt.replace(/\D+/g, '').trim();
+    sp.textContent = short && w * short.length / Math.max(1, txt.length) <= room ? short : '';
   });
 }
 function bindTips(root){
@@ -2946,16 +3228,23 @@ document.addEventListener('click', e => {
   else if (act === 'sim-coop') { S.sim.hasCoop = v === 'yes'; render(true); }
   else if (act === 'ckdone') { S.check[v] = true; render(true); }
   else if (act === 'jump') { const t = document.getElementById(v); if (t) t.scrollIntoView({behavior:'smooth', block:'start'}); }
-  else if (act === 'sim-living') { S.sim.living = v; render(true); }
-  else if (act === 'simreset') { S.sim = Object.assign({}, DEFAULTS.sim); if (S.fx.rate) S.sim.rate = +S.fx.rate.toFixed(2); render(true); }
+  else if (act === 'sim-living') { S.sim.living = v; S.sim.rentC = S.sim.foodC = S.sim.otherC = null; render(true); }
+  else if (act === 'simreset') { S.sim = Object.assign({}, DEFAULTS.sim); LIST_EDIT = false; if (S.fx.rate) S.sim.rate = +S.fx.rate.toFixed(2); applyFunds(); render(true); }
   else if (act === 'fxlive') { S.sim.rateAuto = true; applyFx(); }
+  else if (act === 'proofauto') { S.sim.proofAuto = true; S.sim.proof = fundsAmt(); render(true); }
+  else if (act === 'sim-cur') { S.sim.cur = v; renderSimOut(); icons(); save(); }
+  else if (act === 'listedit') { LIST_EDIT = !LIST_EDIT; renderSimOut(); icons(); if (LIST_EDIT) { const f = document.getElementById('amt-tuition'); if (f) f.focus({preventScroll:true}); } }
+  else if (act === 'amtdef') { amtDefault(v); queueFlush(); }
+  else if (act === 'lcreset') { ['rentC','foodC','otherC','healthC'].forEach(k => { S.sim[k] = null; }); queueFlush(); }
+  else if (act === 'refresh') { loadFx(true); loadLive(true); }
+  else if (act === 'focus') { const el = document.getElementById(v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.focus({preventScroll:true}); } }
 });
 document.addEventListener('input', e => {
   const k = e.target.dataset.sim; if (!k) return;
   const v = parseFloat(e.target.value);
   if (!isFinite(v) || v < 0 || (v === 0 && !['hours','coopWage','fees'].includes(k))) return;
-  S.sim[k] = v; if (k === 'rate') S.sim.rateAuto = false;
-  save(); renderSimOut(); icons();
+  S.sim[k] = v; if (k === 'rate') S.sim.rateAuto = false; if (k === 'proof') S.sim.proofAuto = false;
+  saveSoon(); queueSim();
 });
 document.addEventListener('input', e => {
   const k = e.target.dataset.conv; if (!k) return;
@@ -2973,6 +3262,7 @@ document.addEventListener('change', e => {
   S.check[id] = e.target.checked; render(true);
 });
 
+applyFunds();
 render(false);
 loadFx();
 loadLive();
