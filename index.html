@@ -338,6 +338,9 @@
   summary svg{display:inline-block;vertical-align:-2px}
   .amt-col{display:flex;flex-direction:column;align-items:flex-end;flex:none}
   .inbox{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .howlist{margin:6px 0 2px;padding-left:20px;list-style:decimal;font-size:14px;color:var(--ink2)}
+  .howlist li{margin:4px 0;padding-left:2px}
+  .howlist li::marker{color:var(--ink3);font-variant-numeric:tabular-nums}
   /* glossary: tappable terms, popover and full sheet */
   .term{all:unset;cursor:pointer;color:inherit;text-decoration:underline dotted;text-decoration-color:var(--blue);text-decoration-thickness:1.5px;text-underline-offset:3px;border-radius:3px}
   @media (hover:hover){.term:hover{background:var(--blue-soft)}}
@@ -359,6 +362,7 @@
   .gl-item{padding:10px 8px;margin:0 -8px;border-top:1px solid var(--line);border-radius:10px;transition:background .3s}
   .gl-item.flash{background:var(--blue-soft)}
   .gl-item a{color:var(--blue)}
+  .gl-item mark{background:rgba(255,204,0,.42);color:inherit;border-radius:3px;padding:0 1px}
   @media (max-width:640px){dialog#gloss-dlg{width:100vw;height:100dvh;border-radius:0;margin:0}}
   .autoline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;color:var(--ink2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
   .ctbl th.cur-col,.ctbl td.cur-col{background:var(--blue-soft)}
@@ -1123,7 +1127,7 @@ const ROAD = {
         
         {y:{en:'Goal', th:'เป้าหมาย'}, goal:true, t:{en:'Permanent Residency', th:'Permanent Residency'},
         
-         d:{en:'Apply through Express Entry (CEC, or a category draw if your job is on a 2026 category list) or a Provincial Nominee Program. Note that the private Co-op year does not add Canadian study points beyond what the public credential gives, and you are one year older in the CRS. [[eecat]] [[pnp]]', th:'ยื่นผ่าน Express Entry (CEC หรือรอบเฉพาะหมวด หากงานของคุณอยู่ในรายการหมวดปี 2026) หรือ Provincial Nominee Program ทั้งนี้ปี Co-op เอกชนไม่ได้เพิ่มคะแนนการศึกษาในแคนาดาเกินกว่าที่วุฒิจากสถาบันรัฐให้ และคุณจะอายุมากขึ้น 1 ปีในการคิดคะแนน CRS [[eecat]] [[pnp]]'}}
+         d:{en:'Apply through Express Entry (CEC, or a category draw if your job is on a 2026 category list) or a Provincial Nominee Program. Note that the private Co-op year does not add Canadian study points beyond what the public credential gives, and you are one year older in the CRS. [[eecat]] [[pnp]] Once your profile is in the pool, request the Thai police certificate (15 to 25 working days); after the invitation, do the PR medical exam with a panel physician in Canada and give new biometrics. See All Costs for the steps. [[pccee]] [[medpr]]', th:'ยื่นผ่าน Express Entry (CEC หรือรอบเฉพาะหมวด หากงานของคุณอยู่ในรายการหมวดปี 2026) หรือ Provincial Nominee Program ทั้งนี้ปี Co-op เอกชนไม่ได้เพิ่มคะแนนการศึกษาในแคนาดาเกินกว่าที่วุฒิจากสถาบันรัฐให้ และคุณจะอายุมากขึ้น 1 ปีในการคิดคะแนน CRS [[eecat]] [[pnp]] เมื่อโปรไฟล์อยู่ใน Pool แล้ว ให้ขอใบรับรองความประพฤติจากตำรวจไทยทันที (ใช้เวลา 15 ถึง 25 วันทำการ) หลังได้คำเชิญ ให้ตรวจสุขภาพกับแพทย์ที่ IRCC รับรองในแคนาดาและเก็บ Biometrics ใหม่ ดูขั้นตอนในหน้าค่าใช้จ่าย [[pccee]] [[medpr]]'}}
       ]},
     one:{
       l:{en:'Scenario 2: One-Shot', th:'สถานการณ์ 2: One-Shot'},
@@ -1150,7 +1154,7 @@ const ROAD = {
         
         {y:{en:'Goal', th:'เป้าหมาย'}, goal:true, t:{en:'Permanent Residency', th:'Permanent Residency'},
         
-         d:{en:'Enter the Express Entry pool for CEC and category draws, and watch PNP streams in parallel. You save one year of tuition and living costs and keep one more year of age points. [[eecat]] [[pnp]]', th:'เข้า Pool ของ Express Entry สำหรับ CEC และรอบเฉพาะหมวด พร้อมติดตาม PNP ควบคู่ไปด้วย ประหยัดค่าเล่าเรียนและค่าครองชีพ 1 ปี และรักษาคะแนนอายุไว้ได้อีก 1 ปี [[eecat]] [[pnp]]'}}
+         d:{en:'Enter the Express Entry pool for CEC and category draws, and watch PNP streams in parallel. You save one year of tuition and living costs and keep one more year of age points. [[eecat]] [[pnp]] Once your profile is in the pool, request the Thai police certificate (15 to 25 working days); after the invitation, do the PR medical exam with a panel physician in Canada and give new biometrics. See All Costs for the steps. [[pccee]] [[medpr]]', th:'เข้า Pool ของ Express Entry สำหรับ CEC และรอบเฉพาะหมวด พร้อมติดตาม PNP ควบคู่ไปด้วย ประหยัดค่าเล่าเรียนและค่าครองชีพ 1 ปี และรักษาคะแนนอายุไว้ได้อีก 1 ปี [[eecat]] [[pnp]] เมื่อโปรไฟล์อยู่ใน Pool แล้ว ให้ขอใบรับรองความประพฤติจากตำรวจไทยทันที (ใช้เวลา 15 ถึง 25 วันทำการ) หลังได้คำเชิญ ให้ตรวจสุขภาพกับแพทย์ที่ IRCC รับรองในแคนาดาและเก็บ Biometrics ใหม่ ดูขั้นตอนในหน้าค่าใช้จ่าย [[pccee]] [[medpr]]'}}
       ]}
   }
 };
@@ -1200,6 +1204,9 @@ const CHECK = {
     {id:'funds', ph:3, t:{en:'Collect the proof-of-funds documents', th:'รวบรวมเอกสารหลักฐานการเงิน'},
      d:{en:'Bank statements for 4 to 6 months, a bank letter, the sponsor letter, proof of relationship and the sponsor\'s income proof. [[funds]]', th:'Statement ย้อนหลัง 4 ถึง 6 เดือน หนังสือรับรองจากธนาคาร จดหมายสปอนเซอร์ หลักฐานความสัมพันธ์ และหลักฐานรายได้ของสปอนเซอร์ [[funds]]'},
      why:{en:'Statements must be recent when you apply, so collect them now, not earlier.', th:'Statement ต้องเป็นฉบับล่าสุดตอนยื่น จึงควรขอตอนนี้ ไม่ใช่ก่อนหน้านี้'}},
+    {id:'translate', ph:3, t:{en:'Translate Thai documents into English', th:'แปลเอกสารภาษาไทยเป็นภาษาอังกฤษ'},
+     d:{en:'Birth certificate, name-change papers, employer letters, tax forms and passbooks. Each needs a copy of the original, the translation and the translator\'s affidavit; you and your family may not translate. Ask the district office and bank for English versions first. [[trguide]] [[imm5819]]', th:'สูติบัตร ใบเปลี่ยนชื่อ หนังสือรับรองการทำงาน เอกสารภาษี และสมุดบัญชี แต่ละฉบับต้องมีสำเนาต้นฉบับ คำแปล และคำให้การของผู้แปล ห้ามแปลเองหรือให้ครอบครัวแปล ลองขอฉบับภาษาอังกฤษจากสำนักงานเขตและธนาคารก่อน [[trguide]] [[imm5819]]'},
+     why:{en:'Missing or self-made translations are a common reason for delays and refusals. The All Costs page explains each route and price.', th:'คำแปลที่ขาดหรือแปลเองเป็นสาเหตุที่พบบ่อยของความล่าช้าและการถูกปฏิเสธ หน้าค่าใช้จ่ายอธิบายแต่ละวิธีและราคาไว้'}},
     {id:'sop', ph:3, t:{en:'Write the study plan (letter of explanation)', th:'เขียน Study Plan (Letter of Explanation)'},
      d:{en:'Why this program, how it fits your career, and why you will follow the conditions of your stay.', th:'ทำไมเลือกหลักสูตรนี้ เชื่อมกับอาชีพอย่างไร และเหตุผลที่จะปฏิบัติตามเงื่อนไขการพำนัก'},
      why:{en:'It explains anything the officer might doubt, such as a career change or a gap year.', th:'ช่วยอธิบายจุดที่เจ้าหน้าที่อาจสงสัย เช่น การเปลี่ยนสายอาชีพหรือช่วงว่างงาน'}},
@@ -1771,7 +1778,8 @@ const GLOSS = [
 const GLOSS_UI = {
   title:{en:'Terms and abbreviations', th:'คำศัพท์และคำย่อ'},
   sub:{en:n => `${n} terms used in this guide, in plain words. Tap any underlined word on a page to see its meaning there.`, th:n => `${n} คำที่ใช้ในคู่มือนี้ อธิบายแบบเข้าใจง่าย แตะคำที่มีเส้นประใต้คำในหน้าไหนก็ได้เพื่อดูความหมายตรงนั้นเลย`},
-  search:{en:'Search, for example PGWP or tax', th:'ค้นหา เช่น PGWP หรือ ภาษี'},
+  search:{en:'Type part of a word: pg, tax, ielts, work*', th:'พิมพ์แค่บางส่วนก็ได้ เช่น pg ภาษ ielts work*'},
+  found:{en:n => `${n} found, best match first. Part of a word, letters in order, a small typo, or * and ? all work.`, th:n => `พบ ${n} คำ เรียงจากที่ตรงที่สุด พิมพ์บางส่วนของคำ ตัวอักษรเรียงกัน สะกดผิดเล็กน้อย หรือใช้ * และ ? ก็ได้`},
   all:{en:'All', th:'ทั้งหมด'}, none:{en:'No term matches. Try another word.', th:'ไม่พบคำที่ค้นหา ลองคำอื่น'},
   open:{en:'All terms', th:'คำศัพท์ทั้งหมด'}, close:{en:'Close', th:'ปิด'},
   official:{en:'Official page', th:'หน้าเว็บทางการ'},
@@ -1801,6 +1809,69 @@ SIMC.living.studio.note = {en:'Rent CAD 1,850: what a new tenant pays for a vaca
 GLOSS.push({k:{en:'Tips', th:'ทิป'}, c:'money', s:'tipscra', m:['ทิป','tips','Tips'],
   th:'เงินที่ลูกค้าให้พนักงานเพิ่มจากค่าอาหาร พบบ่อยในร้านอาหาร บาร์ และร้านกาแฟ ลูกค้ามักให้ประมาณ 15 ถึง 20% ของบิล แต่ที่พนักงานได้จริงต่างกันมาก ทิปเป็นรายได้ที่ต้องแจ้งและเสียภาษี',
   en:'Money customers add for service, common in restaurants, bars and cafés (often about 15 to 20% of the bill). What staff actually receive varies a lot. Tips are taxable income you must report.'});
+
+/* Visa centre, PR medical exam and police certificates: checked 20 Nov 2026 against IRCC, VFS Global Thailand and Royal Thai Police pages. */
+Object.assign(SRC, {
+  vac:{u:'https://www.canada.ca/en/immigration-refugees-citizenship/corporate/contact-ircc/offices/find-visa-application-centre.html', o:IRCCN, l:{en:'Find a visa application centre', th:'ค้นหาศูนย์รับคำร้องวีซ่า (VAC)'}},
+  vfsfees:{u:'https://visa.vfsglobal.com/tha/en/can/service-charges', o:{en:'VFS Global, Canada VAC Thailand', th:'VFS Global ศูนย์รับคำร้องวีซ่าแคนาดาในไทย'}, l:{en:'Service charges from 1 November 2026', th:'ค่าบริการ มีผลตั้งแต่ 1 พฤศจิกายน 2026'}},
+  vfspass:{u:'https://visa.vfsglobal.com/tha/en/can/passport-submission', o:{en:'VFS Global, Canada VAC Thailand', th:'VFS Global ศูนย์รับคำร้องวีซ่าแคนาดาในไทย'}, l:{en:'Passport submission after approval', th:'การยื่นพาสปอร์ตหลังได้รับอนุมัติ'}},
+  biovalid:{u:IRCC+'biometrics/when-to-give-temporary-residence.html', o:IRCCN, l:{en:'Biometrics are valid for 10 years (temporary residence)', th:'Biometrics ใช้ได้ 10 ปี (วีซ่าและใบอนุญาตชั่วคราว)'}},
+  biopr:{u:IRCC+'biometrics/when-to-give-permanent-residence.html', o:IRCCN, l:{en:'Biometrics every time you apply for PR', th:'ต้องเก็บ Biometrics ทุกครั้งที่ยื่น PR'}},
+  medpr:{u:IRCC+'application/medical-police/medical-exams/requirements-permanent-residents.html', o:IRCCN, l:{en:'Medical exam for permanent residents', th:'การตรวจสุขภาพสำหรับผู้ยื่น PR'}},
+  eepr:{u:IRCC+'immigrate-canada/express-entry/apply-permanent-residence.html', o:IRCCN, l:{en:'Express Entry: apply for PR after an invitation', th:'Express Entry: ยื่น PR หลังได้คำเชิญ'}},
+  panel:{u:'https://secure.cic.gc.ca/PanelPhysicianMedecinDesigne/en/Home', o:IRCCN, l:{en:'Find a panel physician', th:'ค้นหาแพทย์ที่ IRCC รับรอง'}},
+  panelguide:{u:'https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/panel-members-guide.html', o:IRCCN, l:{en:'Panel Members\' Guide: routine tests by age', th:'คู่มือแพทย์ของ IRCC: การตรวจตามช่วงอายุ'}},
+  imeexempt:{u:'https://www.canada.ca/en/immigration-refugees-citizenship/corporate/mandate/policies-operational-instructions-agreements/public-policies/excempt-ime-2024.html', o:IRCCN, l:{en:'Public policy: reuse a medical exam from the last 5 years (to 5 Oct 2029)', th:'นโยบายชั่วคราว: ใช้ผลตรวจสุขภาพเดิมภายใน 5 ปี (ถึง 5 ต.ค. 2029)'}},
+  pccee:{u:IRCC+'immigrate-canada/express-entry/apply-permanent-residence/police-certificates.html', o:IRCCN, l:{en:'Express Entry: police certificates', th:'Express Entry: ใบรับรองความประพฤติ'}},
+  pccth:{u:IRCC+'application/medical-police/police-certificates/how/thailand.html', o:IRCCN, l:{en:'Police certificates: Thailand', th:'ใบรับรองความประพฤติ: ประเทศไทย'}},
+  pccthp:{u:'https://pcscenter.online/', o:{en:'Royal Thai Police, Special Branch Bureau', th:'กองบัญชาการตำรวจสันติบาล สำนักงานตำรวจแห่งชาติ'}, l:{en:'Police Clearance Service Center: booking, fee and documents', th:'ศูนย์บริการหนังสือรับรองความประพฤติ: จองคิว ค่าธรรมเนียม และเอกสาร'}},
+  pccabroad:{u:'https://image.mfa.go.th/mfa/0/pFxDf7ZYQ7/Visa-consular_information/police_clearance_certificate/Application_for_applicants_residing_abroad.pdf', o:{en:'Royal Thai Police (via Thai MFA)', th:'สำนักงานตำรวจแห่งชาติ (ผ่านกระทรวงการต่างประเทศ)'}, l:{en:'Application process for applicants living abroad (PDF)', th:'ขั้นตอนสำหรับผู้ยื่นที่อยู่ต่างประเทศ (PDF)'}},
+  rcmpfp:{u:'https://rcmp.ca/en/criminal-records/criminal-record-checks/private-fingerprinting-companies-accredited-rcmp', o:{en:'RCMP', th:'ตำรวจม้าแคนาดา (RCMP)'}, l:{en:'Fingerprinting companies accredited by the RCMP', th:'บริษัทพิมพ์ลายนิ้วมือที่ RCMP รับรอง'}},
+  trguide:{u:IRCC+'application/application-forms-guides/guide-5269-applying-study-permit-outside-canada.html', o:IRCCN, l:{en:'Study permit guide IMM 5269: translations', th:'คู่มือ Study Permit IMM 5269: การแปลเอกสาร'}},
+  trhelp:{u:'https://ircc.canada.ca/english/helpcentre/answer.asp?qnum=018&top=4', o:IRCCN, l:{en:'Help Centre: documents not in English or French', th:'ศูนย์ช่วยเหลือ: เอกสารที่ไม่ใช่ภาษาอังกฤษหรือฝรั่งเศส'}},
+  trpi:{u:'https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/operational-bulletins-manuals/standard-requirements/translation.html', o:IRCCN, l:{en:'Program instructions: translation of documents', th:'คำสั่งปฏิบัติงาน: การแปลเอกสาร'}},
+  imm5819:{u:'https://ircc.canada.ca/english/pdf/kits/forms/IMM5819E.pdf', o:IRCCN, l:{en:'Bangkok visa office checklist IMM 5819 (study permit)', th:'เช็กลิสต์สำนักงานวีซ่ากรุงเทพฯ IMM 5819 (Study Permit)'}},
+  dcaleg:{u:'https://consular.mfa.go.th/th/page/legalization', o:{en:'Department of Consular Affairs, Thailand', th:'กรมการกงสุล กระทรวงการต่างประเทศ'}, l:{en:'Document legalization: booking, hours, English official documents', th:'นิติกรณ์เอกสาร: จองคิว เวลาทำการ และเอกสารราชการฉบับภาษาอังกฤษ'}},
+  dcamail:{u:encodeURI('https://consular.mfa.go.th/th/publicservice/บริการรับรองเอกสารทางไปรษณีย์'), o:{en:'Department of Consular Affairs, Thailand', th:'กรมการกงสุล กระทรวงการต่างประเทศ'}, l:{en:'Legalization by mail: 200 THB per stamp (updated 10 Feb 2026)', th:'รับรองเอกสารทางไปรษณีย์: นิติกรณ์ละ 200 บาท (ปรับปรุง 10 ก.พ. 2026)'}},
+  lct:{u:'https://search.lawyerscouncil.or.th', o:{en:'Lawyers Council of Thailand', th:'สภาทนายความ'}, l:{en:'Check a lawyer\'s licence and notarial registration', th:'ตรวจสอบใบอนุญาตทนายความและการขึ้นทะเบียนผู้ทำคำรับรอง'}},
+  apostille:{u:'https://www.hcch.net/en/news-archive/details?varevent=1158', o:{en:'Hague Conference on Private International Law', th:'ที่ประชุมกรุงเฮกว่าด้วยกฎหมายระหว่างประเทศแผนกคดีบุคคล (HCCH)'}, l:{en:'Thailand joins the Apostille Convention (28 Feb 2027)', th:'ไทยเข้าร่วมอนุสัญญา Apostille (28 ก.พ. 2027)'}}
+});
+GLOSS.push(
+  {k:'VAC', f:'Visa Application Centre (run by VFS Global)', c:'permit', s:'vac', m:['VAC','VFS Global','ศูนย์รับคำร้องวีซ่า','ศูนย์รับคำร้อง'],
+   th:'ศูนย์รับคำร้องวีซ่าแคนาดา ดำเนินการโดยบริษัท VFS Global ในไทยมีแห่งเดียวที่กรุงเทพฯ (The Shoppes at Belle Grand Rama 9) ใช้เก็บ Biometrics และยื่นพาสปอร์ตหลังได้รับอนุมัติ ไม่ได้พิจารณาวีซ่าเอง',
+   en:'The Canada visa application centre, run by VFS Global. Thailand has one, in Bangkok (The Shoppes at Belle Grand Rama 9). You give biometrics and hand in your passport there; it does not decide applications.'},
+  {k:{en:'Passport request letter', th:'จดหมายขอพาสปอร์ต'}, c:'permit', s:'vfspass', m:['passport request','Passport request'],
+   th:'จดหมายใน IRCC account ที่ส่งมาหลังอนุมัติ ให้นำพาสปอร์ตไปยื่นที่ VAC เพื่อติดวีซ่า ห้ามส่งพาสปอร์ตก่อนได้จดหมายนี้ ยื่นได้โดยไม่ต้องจองคิว',
+   en:'The letter in your IRCC account after approval asking you to hand in your passport at the VAC so the visa can be placed in it. Do not send the passport before it arrives. No appointment needed.'},
+  {k:{en:'Biometric Instruction Letter', th:'จดหมายแจ้งเก็บ Biometrics'}, f:'BIL', c:'permit', s:'vac', m:['Biometric Instruction Letter'],
+   th:'จดหมายที่ IRCC ส่งหลังยื่นใบสมัครและจ่ายค่า Biometrics แล้ว ต้องนำไปที่ VAC พร้อมพาสปอร์ตในวันนัด',
+   en:'The letter IRCC sends after you apply and pay the biometrics fee. Bring it and your passport to the VAC on your appointment day.'},
+  {k:{en:'Panel physician', th:'แพทย์ที่ IRCC รับรอง'}, c:'permit', s:'panel', m:['panel physician','Panel physician','แพทย์ที่ IRCC รับรอง'],
+   th:'แพทย์ที่ IRCC อนุญาตให้ตรวจสุขภาพเพื่อการย้ายถิ่นฐาน ผลตรวจจากแพทย์ทั่วไปใช้ไม่ได้ ค้นหาได้จากเครื่องมือของ IRCC',
+   en:'A doctor IRCC approves to do immigration medical exams. An ordinary doctor\'s exam does not count. Find one with IRCC\'s search tool.'},
+  {k:'IME, eMedical', f:'Immigration Medical Examination', c:'permit', s:'medpr', m:['IME','eMedical'],
+   th:'การตรวจสุขภาพเพื่อการย้ายถิ่นฐานกับแพทย์ที่ IRCC รับรอง ผลส่งให้ IRCC ทางระบบ eMedical ผลใช้ได้ 12 เดือน หลังตรวจจะได้ eMedical Information Sheet ไว้แนบใบสมัคร',
+   en:'The immigration medical exam with a panel physician. Results go to IRCC through eMedical and are valid for 12 months; you get an eMedical Information Sheet to upload.'},
+  {k:{en:'Police certificate', th:'ใบรับรองความประพฤติ'}, f:'Police Clearance Certificate', c:'pr', s:'pccee', m:['ใบรับรองความประพฤติ','หนังสือรับรองความประพฤติ','Police Clearance Certificate','police certificates','Police certificates','police certificate','Police certificate'],
+   th:'เอกสารรับรองประวัติอาชญากรรมจากตำรวจ ใช้ตอนยื่น PR ต้องมีจากทุกประเทศที่เคยอยู่ติดต่อกัน 6 เดือนขึ้นไปในช่วง 10 ปีหลัง (นับตั้งแต่อายุ 18) ไม่ต้องใช้ของแคนาดา ของไทยออกโดยกองบัญชาการตำรวจสันติบาล',
+   en:'A record check from the police, needed for PR from each country where you lived 6 months or more in a row in the last 10 years (since age 18). Not needed for Canada. Thailand\'s is issued by the Royal Thai Police Special Branch.'},
+  {k:{en:'Certified translation and affidavit', th:'คำแปลที่รับรองและคำให้การของผู้แปล'}, c:'permit', s:'trguide', m:['คำให้การของผู้แปล','affidavit','Affidavit','certified translation','Certified translation','คำแปลที่รับรอง'],
+   th:'เอกสารภาษาไทยต้องแนบคำแปลภาษาอังกฤษ และคำให้การของผู้แปล (affidavit) ที่ผู้แปลสาบานต่อหน้าโนตารีหรือเทียบเท่าว่าแปลถูกต้อง ยกเว้นผู้แปลเป็นนักแปลที่ได้รับการรับรองในแคนาดา ห้ามแปลเอง และห้ามให้ครอบครัวหรือเอเจนต์แปล',
+   en:'Thai documents need an English translation plus the translator\'s affidavit, sworn before a notary or equivalent, that it is accurate, unless the translator is certified in Canada. You, your family and your agent may not translate.'},
+  {k:{en:'Document legalization', th:'นิติกรณ์เอกสาร'}, f:'Department of Consular Affairs, Thailand', c:'permit', s:'dcaleg', m:['นิติกรณ์เอกสาร','นิติกรณ์','กรมการกงสุล','legalization','Legalization'],
+   th:'การรับรองคำแปลหรือสำเนาเอกสารโดยกรมการกงสุล ค่าธรรมเนียม 200 บาทต่อตราประทับ ได้คืนใน 2 วันทำการ (แบบด่วน 400 บาท รับวันเดียว สำหรับเอกสารบางประเภท) จองคิวออนไลน์ก่อน เป็นการรับรองเพิ่มเติม IRCC ไม่ได้บังคับและไม่ได้แทนคำให้การของผู้แปล',
+   en:'Certification of a translation or copy by Thailand\'s Department of Consular Affairs: 200 THB per stamp, back in 2 working days (express 400 THB same day for some documents). Book online. It is extra assurance; IRCC does not require it and it does not replace the translator\'s affidavit.'},
+  {k:{en:'Notarial Services Attorney', th:'ทนายความผู้ทำคำรับรองลายมือชื่อและเอกสาร'}, c:'permit', s:'lct', m:['Notarial Services Attorney','ทนายความผู้ทำคำรับรอง'],
+   th:'ทนายความที่ขึ้นทะเบียนกับสภาทนายความให้รับรองลายมือชื่อและเอกสาร ในไทยมักใช้แทนโนตารีเวลาผู้แปลทำคำให้การ ราคาแล้วแต่ทนาย ไม่มีอัตราทางการ ตรวจใบอนุญาตได้ที่เว็บสภาทนายความ',
+   en:'A lawyer registered with the Lawyers Council of Thailand to certify signatures and documents, commonly used in Thailand in place of a notary for a translator\'s affidavit. Fees are set by each lawyer. Check the licence on the Council\'s site.'},
+  {k:'Apostille', c:'permit', s:'apostille', m:['Apostille'],
+   th:'ตราประทับรับรองเอกสารแบบสากลที่ใช้แทนการรับรองหลายขั้น ไทยจะเข้าร่วมอนุสัญญานี้วันที่ 28 กุมภาพันธ์ 2027 ขั้นตอนรับรองเอกสารในไทยอาจเปลี่ยนหลังวันนั้น',
+   en:'A single international certificate that replaces multi-step legalization. Thailand joins the convention on 28 February 2027, so Thai certification steps may change after that.'},
+  {k:{en:'Letter of explanation', th:'จดหมายอธิบาย (Letter of Explanation)'}, c:'permit', m:['Letter of Explanation','letter of explanation'],
+   th:'จดหมายที่เขียนอธิบายเจ้าหน้าที่เอง เช่น แผนการเรียน ที่มาของเงิน หรือเหตุที่ส่งเอกสารบางอย่างไม่ทัน พร้อมแนบหลักฐาน',
+   en:'A letter you write to the officer, for example your study plan, where your money came from, or why a document is late, with evidence attached.'}
+);
+(e => { if (e) { e.th = 'การเก็บลายนิ้วมือและถ่ายรูปที่ VAC กรุงเทพฯ หลังยื่นใบสมัคร ค่าธรรมเนียม CAD 85 จ่ายให้ IRCC ใช้ได้ 10 ปีสำหรับวีซ่า Study Permit และ Work Permit (จึงมักไม่ต้องเก็บใหม่ตอนขอ PGWP) แต่ต้องเก็บใหม่ทุกครั้งที่ยื่น PR'; e.en = 'Fingerprints and a photo at the Bangkok VAC after you apply. CAD 85, paid to IRCC. Valid 10 years for visas, study and work permits (so a PGWP usually needs none), but PR needs new biometrics every time.'; e.s = 'biovalid'; } })(GLOSS.find(x => x.k === 'Biometrics'));
 
 /* The simulator's own word list, rewritten for the current model (round 3). */
 SIM_UI.gloss = [
@@ -2206,20 +2277,39 @@ const COSTS = {
   open:{en:'Adjust in the simulator', th:'ปรับค่าในเครื่องจำลอง'},
   note:{en:'What updates automatically: the exchange rate and the IRCC living-cost amount are read every day (and again when you tap Check now), so every THB figure and the money to show move with them. The IRCC fee list and school prices block automatic reading, so each official line has a Verify link to the live source page.', th:'สิ่งที่อัปเดตอัตโนมัติ: อัตราแลกเปลี่ยนและยอดค่าครองชีพของ IRCC ถูกอ่านใหม่ทุกวัน (และทุกครั้งที่กด "อัปเดตตอนนี้") ตัวเลขเงินบาททุกรายการและเงินที่ต้องแสดงจึงปรับตาม ส่วนรายการค่าธรรมเนียมของ IRCC และราคาของสถาบันไม่เปิดให้ดึงข้อมูลอัตโนมัติ รายการทางการแต่ละรายการจึงมีลิงก์ "ตรวจสอบ" ไปยังหน้าเว็บต้นทาง'},
   showLive:{en:a => `Includes the IRCC living-cost amount of CAD ${a}, read from the IRCC page automatically.`, th:a => `รวมยอดค่าครองชีพของ IRCC CAD ${a} ที่อ่านจากเว็บ IRCC อัตโนมัติ`},
+  howT:{en:'Where this number comes from, and how to do it', th:'ตัวเลขนี้มาจากไหน และต้องทำอย่างไร'},
   secs:[
     {sum:true, t:{en:'1. Preparing in Thailand', th:'1. เตรียมตัวที่ไทย'}, items:[
       {t:{en:'IELTS Academic test (computer)', th:'ค่าสอบ IELTS Academic (คอมพิวเตอร์)'}, thb:[8860,8860], n:{en:'Per attempt, IDP and British Council Thailand, checked 19 Nov 2026', th:'ต่อครั้ง IDP และ British Council ประเทศไทย ตรวจสอบเมื่อ 19 พ.ย. 2026'}, r:'idp'},
       {t:{en:'Passport (new or renewal)', th:'พาสปอร์ต (ทำใหม่หรือต่ออายุ)'}, thb:[1000,1500], n:{en:'5-year or 10-year', th:'อายุ 5 ปี หรือ 10 ปี'}},
       {t:{en:'Transcript and degree certificate in English', th:'Transcript และใบปริญญาฉบับภาษาอังกฤษ'}, thb:[200,1000]},
-      {t:{en:'Document translation and certification', th:'ค่าแปลและรับรองเอกสาร'}, thb:[1000,5000]},
+      {t:{en:'Document translation and certification', th:'ค่าแปลและรับรองเอกสาร'}, thb:[1000,5000], r:'trguide',
+       n:{en:'About 3 to 5 documents at 350 to 950 THB a page (no official price)', th:'ประมาณ 3 ถึง 5 ฉบับ หน้าละ 350 ถึง 950 บาท (ไม่มีราคาทางการ)'},
+       how:[
+        {en:'IRCC rule: for every document not in English or French, upload a copy of the Thai original, the English translation, and the translator\'s affidavit sworn before a notary or equivalent. No affidavit is needed if the translator is certified in Canada. [[trguide]] [[trhelp]]', th:'กฎของ IRCC: เอกสารที่ไม่ใช่ภาษาอังกฤษหรือฝรั่งเศส ต้องอัปโหลดสำเนาต้นฉบับภาษาไทย คำแปลภาษาอังกฤษ และคำให้การของผู้แปล (affidavit) ที่สาบานต่อหน้าโนตารีหรือเทียบเท่า ไม่ต้องมีคำให้การถ้าผู้แปลเป็นนักแปลที่ได้รับการรับรองในแคนาดา [[trguide]] [[trhelp]]'},
+        {en:'Who may not translate: you, your family (parents, siblings, spouse, grandparents, children, aunts, uncles, nieces, nephews, first cousins) or your agent or representative. [[trguide]] [[trpi]]', th:'ใครแปลไม่ได้: ตัวคุณเอง ครอบครัว (พ่อแม่ พี่น้อง คู่สมรส ปู่ย่าตายาย ลูก ลุงป้าน้าอา หลาน ลูกพี่ลูกน้อง) และเอเจนต์หรือตัวแทนของคุณ [[trguide]] [[trpi]]'},
+        {en:'How it is usually done in Thailand: a translation shop translates, and the translator signs the affidavit before a Notarial Services Attorney (the usual stand-in for a notary; IRCC does not name this service). Optional extra: certification by the Department of Consular Affairs, 200 THB per stamp, back in 2 working days (express 400 THB same day for ID card, house registration, birth, marriage and name-change papers). Book at qlegal.consular.go.th. It does not replace the affidavit. [[dcaleg]] [[dcamail]] [[lct]]', th:'วิธีที่นิยมในไทย: ให้ร้านแปลแปล แล้วผู้แปลทำคำให้การต่อหน้าทนายความผู้ทำคำรับรองลายมือชื่อและเอกสาร (Notarial Services Attorney) ซึ่งใช้แทนโนตารีในทางปฏิบัติ (IRCC ไม่ได้ระบุชื่อบริการนี้โดยตรง) ทางเลือกเสริมคือรับรองคำแปลที่กรมการกงสุล ตราละ 200 บาท ได้คืนใน 2 วันทำการ (ด่วน 400 บาท รับวันเดียว สำหรับบัตรประชาชน ทะเบียนบ้าน สูติบัตร ทะเบียนสมรส และใบเปลี่ยนชื่อ) จองคิวที่ qlegal.consular.go.th ตรานี้ไม่ได้แทนคำให้การของผู้แปล [[dcaleg]] [[dcamail]] [[lct]]'},
+        {en:'Cost: there is no official price. Three translation shops list about 350 to 950 THB a page; if the shop also handles consular certification, add about 1,500 to 2,500 THB per document. The amount above assumes 3 to 5 documents.', th:'ค่าใช้จ่าย: ไม่มีราคาทางการ ร้านแปล 3 แห่งประกาศราคาประมาณหน้าละ 350 ถึง 950 บาท ถ้าให้ร้านดำเนินการรับรองที่กรมการกงสุลด้วย บวกเพิ่มประมาณฉบับละ 1,500 ถึง 2,500 บาท ตัวเลขในตารางคิดจากเอกสาร 3 ถึง 5 ฉบับ'},
+        {en:'Documents that usually need translating (Bangkok visa office checklist): birth certificate (proof of relationship to your sponsor), marriage and name-change certificates, employer letters, tax documents, company certificates and passbooks. [[imm5819]]', th:'เอกสารที่มักต้องแปล (ตามเช็กลิสต์ของสำนักงานวีซ่ากรุงเทพฯ): สูติบัตร (หลักฐานความสัมพันธ์กับสปอนเซอร์) ทะเบียนสมรส ใบเปลี่ยนชื่อ หนังสือรับรองการทำงาน เอกสารภาษี หนังสือรับรองบริษัท และสมุดบัญชีเงินฝาก [[imm5819]]'},
+        {en:'Pay less: district offices issue 30 kinds of official documents in English, and banks issue English balance certificates for visas, so those need no translation. [[dcaleg]]', th:'ประหยัดค่าแปล: สำนักงานเขตหรืออำเภอออกเอกสารราชการฉบับภาษาอังกฤษได้ 30 ประเภท และธนาคารออกหนังสือรับรองยอดเงินภาษาอังกฤษสำหรับขอวีซ่าได้ เอกสารเหล่านี้จึงไม่ต้องแปล [[dcaleg]]'},
+        {en:'Heads up: Thailand joins the Apostille Convention on 28 February 2027, so certification steps may change. Check again close to your application. [[apostille]]', th:'ข้อควรรู้: ไทยจะเข้าร่วมอนุสัญญา Apostille วันที่ 28 กุมภาพันธ์ 2027 ขั้นตอนรับรองเอกสารอาจเปลี่ยน ควรตรวจอีกครั้งใกล้วันยื่น [[apostille]]'}
+       ]},
       {t:{en:'School application fee', th:'ค่าสมัครเรียน'}, cad:[100,200], n:{en:'Per school', th:'ต่อสถาบัน'}}
     ]},
     {sum:true, t:{en:'2. Visa application', th:'2. การยื่นวีซ่า'}, items:[
       {t:{en:'Study permit fee', th:'ค่าธรรมเนียม Study Permit'}, cad:[150,150], off:true, u:FEES_URL},
-      {t:{en:'Biometrics', th:'ค่า Biometrics'}, cad:[85,85], off:true, u:FEES_URL},
+      {t:{en:'Biometrics', th:'ค่า Biometrics'}, cad:[85,85], off:true, u:FEES_URL, n:{en:'Paid to IRCC; valid 10 years for study and work permits', th:'จ่ายให้ IRCC ใช้ได้ 10 ปีสำหรับ Study Permit และ Work Permit'}},
       {t:{en:'Co-op work term', th:'เทอมทำงาน Co-op'}, cad:[0,0], n:{en:'No separate permit since 1 April 2026: a school letter is enough', th:'ไม่ต้องขอ Permit แยกตั้งแต่ 1 เมษายน 2026 ใช้จดหมายจากสถาบัน'}, u:IRCC+'study-canada/work/intern.html'},
       {t:{en:'Upfront medical exam (IOM Bangkok)', th:'ตรวจสุขภาพล่วงหน้า (IOM กรุงเทพฯ)'}, thb:[5000,8000], r:'med'},
-      {t:{en:'Visa centre service and courier', th:'ค่าบริการศูนย์รับคำร้องและค่าจัดส่ง'}, thb:[500,1500]}
+      {t:{en:'Visa centre service and courier', th:'ค่าบริการศูนย์รับคำร้องและค่าจัดส่ง'}, thb:[0,700], r:'vfsfees',
+       n:{en:'VFS Global prices from 1 Nov 2026; mostly optional', th:'ราคาของ VFS Global ตั้งแต่ 1 พ.ย. 2026 ส่วนใหญ่ไม่บังคับ'},
+       how:[
+        {en:'Thailand has one Canada visa application centre (VAC), run by VFS Global: The Shoppes at Belle Grand Rama 9, 1st floor, Rama 9 Road, Huai Khwang, Bangkok. Open Monday to Friday, 08:30 to 16:30. [[vac]]', th:'ไทยมีศูนย์รับคำร้องวีซ่าแคนาดา (VAC) แห่งเดียว ดำเนินการโดย VFS Global อยู่ที่ The Shoppes at Belle Grand Rama 9 ชั้น 1 ถนนพระราม 9 เขตห้วยขวาง กรุงเทพฯ เปิดจันทร์ถึงศุกร์ 08:30 ถึง 16:30 [[vac]]'},
+        {en:'Biometrics: book an appointment first (booking is free). Bring the Biometric Instruction Letter, the VFS consent form and your passport. The CAD 85 biometrics fee is paid to IRCC online and already includes one document transmission, so VFS charges nothing extra. [[vfsfees]]', th:'Biometrics: ต้องจองคิวก่อน (จองฟรี) นำจดหมายแจ้งเก็บ Biometrics แบบฟอร์มยินยอมของ VFS และพาสปอร์ตไปด้วย ค่า Biometrics CAD 85 จ่ายให้ IRCC ทางออนไลน์ และรวมค่าส่งเอกสาร 1 ครั้งแล้ว VFS จึงไม่เก็บเงินเพิ่ม [[vfsfees]]'},
+        {en:'After approval: wait for the passport request letter in your IRCC account, then hand in your passport at the VAC (walk-in, no appointment) or send it by courier. It is free if you use the transmission included with biometrics; otherwise 325 THB. [[vfspass]]', th:'หลังได้รับอนุมัติ: รอจดหมายขอพาสปอร์ตในบัญชี IRCC ก่อน แล้วนำพาสปอร์ตไปยื่นที่ VAC (walk-in ไม่ต้องจองคิว) หรือส่งทางไปรษณีย์ ไม่เสียเงินถ้าใช้สิทธิ์ส่งเอกสารที่รวมในค่า Biometrics ไม่อย่างนั้นค่าส่ง 325 บาท [[vfspass]]'},
+        {en:'Optional extras: passport returned by courier 270 THB, SMS updates 70 THB, Premium Lounge 2,930 THB (1,866 THB until 30 April 2027). If you collect the passport yourself and skip the extras, you pay nothing more. All VFS charges are non-refundable. [[vfsfees]]', th:'บริการเสริม (ไม่บังคับ): ส่งพาสปอร์ตคืนทางไปรษณีย์ 270 บาท SMS แจ้งสถานะ 70 บาท Premium Lounge 2,930 บาท (ลดเหลือ 1,866 บาทถึง 30 เมษายน 2027) ถ้าไปรับพาสปอร์ตเองและไม่ใช้บริการเสริม ไม่ต้องจ่ายเพิ่ม ค่าบริการของ VFS ไม่คืนทุกกรณี [[vfsfees]]'},
+        {en:'Biometrics stay valid for 10 years for visas, study and work permits, so a later PGWP usually needs none. A PR application always needs new biometrics. [[biovalid]] [[biopr]]', th:'Biometrics ใช้ได้ 10 ปีสำหรับวีซ่า Study Permit และ Work Permit ตอนขอ PGWP จึงมักไม่ต้องเก็บใหม่ แต่ตอนยื่น PR ต้องเก็บใหม่ทุกครั้ง [[biovalid]] [[biopr]]'}
+       ]}
     ]},
     {sum:true, t:{en:'3. Before you fly', th:'3. ก่อนเดินทาง'}, items:[
       {t:{en:'One-way flight, Bangkok to Vancouver or Toronto', th:'ตั๋วเที่ยวเดียว กรุงเทพฯ ไปแวนคูเวอร์หรือโตรอนโต'}, thb:[25000,45000]},
@@ -2240,7 +2330,29 @@ const COSTS = {
       {t:{en:'Language test for PGWP and PR', th:'ค่าสอบภาษาสำหรับ PGWP และ PR'}, cad:[290,340], n:{en:'CELPIP or IELTS General Training in Canada', th:'CELPIP หรือ IELTS General Training สอบในแคนาดา'}, r:'lang'},
       {t:{en:'Educational Credential Assessment (for your Thai degree)', th:'Educational Credential Assessment (สำหรับปริญญาจากไทย)'}, cad:[250,300], r:'eca'},
       {t:{en:'PR application through Express Entry', th:'ค่ายื่น PR ผ่าน Express Entry'}, cad:[1590,1590], off:true, n:{en:'Processing fee plus right of permanent residence fee', th:'ค่าดำเนินการ บวกค่า Right of Permanent Residence'}, u:FEES_URL},
-      {t:{en:'PR medical exam and police certificates', th:'ตรวจสุขภาพและใบรับรองความประพฤติสำหรับ PR'}, cad:[300,500]}
+      {t:{en:'PR medical exam (panel physician in Canada)', th:'ตรวจสุขภาพสำหรับ PR (แพทย์ที่ IRCC รับรองในแคนาดา)'}, cad:[240,280], r:'medpr',
+       n:{en:'Set by each clinic; two clinic price lists show about CAD 240 to 275 for an adult', th:'แต่ละคลินิกตั้งราคาเอง ราคาที่ประกาศของ 2 คลินิกประมาณ CAD 240 ถึง 275 สำหรับผู้ใหญ่'},
+       how:[
+        {en:'When: in Express Entry the exam is done after you get the invitation (ITA) but before you submit the PR application. Results are valid for 12 months and must still be valid when you apply and when you land as a PR, so do it close to applying. [[medpr]] [[eepr]]', th:'ตรวจเมื่อไร: ถ้ายื่นผ่าน Express Entry ต้องตรวจหลังได้คำเชิญ (ITA) แต่ก่อนส่งใบสมัคร PR ผลตรวจใช้ได้ 12 เดือน และต้องยังไม่หมดอายุทั้งตอนยื่นและตอนได้ PR จึงควรตรวจให้ใกล้วันยื่นที่สุด [[medpr]] [[eepr]]'},
+        {en:'Where: only an IRCC panel physician. Use IRCC\'s search tool (choose Canada and your province), then phone the clinic to book. [[panel]]', th:'ตรวจที่ไหน: เฉพาะแพทย์ที่ IRCC รับรอง (panel physician) ค้นหาด้วยเครื่องมือของ IRCC เลือกประเทศ Canada และมณฑล แล้วโทรจองคลินิก [[panel]]'},
+        {en:'Bring: your passport (or other valid ID), glasses or contact lenses, past medical reports, a list of your medicines, and 4 photos if the clinic does not use eMedical. [[medpr]]', th:'สิ่งที่ต้องนำไป: พาสปอร์ต (หรือบัตรประจำตัวที่ยังไม่หมดอายุ) แว่นตาหรือคอนแทกเลนส์ รายงานผลตรวจเดิม รายชื่อยาที่ใช้อยู่ และรูปถ่าย 4 ใบถ้าคลินิกไม่ใช้ระบบ eMedical [[medpr]]'},
+        {en:'What happens: health questions, a physical exam (height, weight, hearing, vision, heart, lungs), a chest X-ray from age 11, and blood tests including syphilis and HIV from age 15. You may ask for a chaperone. [[medpr]] [[panelguide]]', th:'ตรวจอะไรบ้าง: ซักประวัติสุขภาพ ตรวจร่างกาย (ส่วนสูง น้ำหนัก การได้ยิน สายตา หัวใจ ปอด) เอกซเรย์ปอดตั้งแต่อายุ 11 ปี และตรวจเลือด เช่น ซิฟิลิสและ HIV ตั้งแต่อายุ 15 ปี ขอให้มีผู้อยู่ด้วยระหว่างตรวจได้ [[medpr]] [[panelguide]]'},
+        {en:'Cost: IRCC sets no fee. You pay the clinic on the day, and it is not refunded if the application is refused. Two Ontario clinics list about CAD 240 to 275 for an adult including X-ray and lab tests; phone to confirm. [[medpr]]', th:'ค่าใช้จ่าย: IRCC ไม่ได้กำหนดราคา จ่ายให้คลินิกในวันตรวจ และไม่คืนเงินแม้ใบสมัครไม่ผ่าน คลินิกในออนแทรีโอ 2 แห่งประกาศราคาผู้ใหญ่รวมเอกซเรย์และค่าแล็บประมาณ CAD 240 ถึง 275 ควรโทรถามก่อน [[medpr]]'},
+        {en:'After the exam the doctor gives you an eMedical Information Sheet to upload with your PR application. [[eepr]]', th:'หลังตรวจ แพทย์จะให้ eMedical Information Sheet ไว้อัปโหลดพร้อมใบสมัคร PR [[eepr]]'},
+        {en:'Maybe no new exam: if you live in Canada and passed an IRCC medical (for example for your study permit) within the last 5 years, enter its number on the application; the officer may accept it (temporary policy to 5 October 2029, not guaranteed). [[imeexempt]]', th:'อาจไม่ต้องตรวจใหม่: ถ้าอยู่ในแคนาดาและเคยตรวจสุขภาพกับ IRCC แล้วผ่าน (เช่น ตอนขอ Study Permit) ภายใน 5 ปี ให้ใส่เลขที่ผลตรวจเดิมในใบสมัคร เจ้าหน้าที่อาจยอมรับได้ (นโยบายชั่วคราวถึง 5 ตุลาคม 2029 ไม่รับประกัน) [[imeexempt]]'}
+       ]},
+      {t:{en:'Police certificate from Thailand', th:'ใบรับรองความประพฤติจากตำรวจไทย'}, thb:[100,600], off:true, r:'pccth',
+       n:{en:'Royal Thai Police fee; fingerprinting in Canada is extra if you apply from abroad', th:'ค่าธรรมเนียมของสำนักงานตำรวจแห่งชาติ ถ้ายื่นจากต่างประเทศมีค่าพิมพ์ลายนิ้วมือในแคนาดาเพิ่ม'},
+       how:[
+        {en:'Which countries: every country where you lived 6 months or more in a row during the last 10 years (only from age 18). You do not need one from Canada when you apply for PR, so most Thai applicants need only Thailand\'s. [[pccee]]', th:'ต้องใช้ของประเทศไหน: ทุกประเทศที่เคยอยู่ติดต่อกัน 6 เดือนขึ้นไปในช่วง 10 ปีที่ผ่านมา (นับเฉพาะหลังอายุ 18 ปี) ตอนยื่น PR ไม่ต้องใช้ของแคนาดา คนไทยส่วนใหญ่จึงต้องใช้แค่ของไทย [[pccee]]'},
+        {en:'When: ask for it as soon as your Express Entry profile is in the pool, because after an invitation you have only 60 days to apply. The Thai certificate must be issued after the last time you stayed in Thailand for 6 months or more in a row. [[pccee]]', th:'ขอเมื่อไร: ขอทันทีที่โปรไฟล์ Express Entry อยู่ใน Pool เพราะหลังได้คำเชิญมีเวลายื่นแค่ 60 วัน ใบของไทยต้องออกหลังจากครั้งสุดท้ายที่คุณอยู่ไทยติดต่อกัน 6 เดือนขึ้นไป [[pccee]]'},
+        {en:'Who issues it: the Police Clearance Service Center, Special Branch Bureau, Royal Thai Police (online at pcscenter.online). [[pccth]] [[pccthp]]', th:'ผู้ออก: ศูนย์บริการหนังสือรับรองความประพฤติ กองบัญชาการตำรวจสันติบาล สำนักงานตำรวจแห่งชาติ (ระบบออนไลน์ pcscenter.online) [[pccth]] [[pccthp]]'},
+        {en:'If you are in Thailand: register and book online, then go in person with your ID card and passport. Fee 100 THB (collect yourself) or 160 THB (by post). About 15 working days, or 25 if a record is found. [[pccthp]]', th:'ถ้าอยู่ไทย: ลงทะเบียนและจองคิวออนไลน์ แล้วไปยื่นด้วยตัวเองพร้อมบัตรประชาชนและพาสปอร์ตตัวจริง ค่าธรรมเนียม 100 บาท (รับเอง) หรือ 160 บาท (ส่งไปรษณีย์) ใช้เวลาประมาณ 15 วันทำการ หรือ 25 วันถ้ามีประวัติ [[pccthp]]'},
+        {en:'If you are in Canada: get 2 sets of fingerprints from local police or an RCMP-accredited fingerprinting company, add certified copies of your passport, ID card and house registration and 2 photos, then mail them to the centre or let someone in Thailand apply for you. Fee 100 THB with a prepaid return envelope, or 600 THB including return postage; 15 to 25 working days plus mail time. [[pccabroad]] [[rcmpfp]]', th:'ถ้าอยู่แคนาดา: พิมพ์ลายนิ้วมือ 2 ชุดที่ตำรวจท้องถิ่นหรือบริษัทที่ RCMP รับรอง แนบสำเนาพาสปอร์ต บัตรประชาชน และทะเบียนบ้านที่รับรองสำเนา รูปถ่าย 2 ใบ แล้วส่งไปรษณีย์ไปที่ศูนย์ หรือมอบอำนาจให้คนที่ไทยยื่นแทน ค่าธรรมเนียม 100 บาทถ้าแนบซองตอบกลับที่ติดแสตมป์แล้ว หรือ 600 บาทรวมค่าส่งกลับ ใช้เวลา 15 ถึง 25 วันทำการบวกเวลาส่งไปรษณีย์ [[pccabroad]] [[rcmpfp]]'},
+        {en:'Check first: official pages give different mailing addresses for the centre, so confirm the current address on pcscenter.online before sending, and ask the fingerprinting company for its price. [[pccthp]]', th:'ตรวจก่อนส่ง: หน้าเว็บทางการแต่ละแห่งระบุที่อยู่ของศูนย์ไม่ตรงกัน ควรยืนยันที่อยู่ล่าสุดบน pcscenter.online ก่อนส่ง และสอบถามราคาค่าพิมพ์ลายนิ้วมือกับผู้ให้บริการ [[pccthp]]'},
+        {en:'Upload a colour scan of the original with a certified English translation. If it is late, upload a letter of explanation with proof you asked for it (receipt, payment or tracking number). [[pccee]]', th:'อัปโหลดสแกนสีจากตัวจริง พร้อมคำแปลภาษาอังกฤษที่รับรอง ถ้ายังไม่ได้รับ ให้แนบจดหมายอธิบายพร้อมหลักฐานว่ายื่นขอแล้ว (ใบเสร็จ หลักฐานการจ่ายเงิน หรือเลขพัสดุ) [[pccee]]'}
+       ]},
+      {t:{en:'Biometrics for PR (again)', th:'Biometrics สำหรับ PR (เก็บใหม่)'}, cad:[85,85], off:true, u:FEES_URL, r:'biopr', n:{en:'Required with every PR application', th:'ต้องเก็บใหม่ทุกครั้งที่ยื่น PR'}}
     ]}
   ]
 };
@@ -2329,9 +2441,11 @@ function viewCosts(){
               ${it.n?`<span class="faint text-[13px]">${T(it.n)}</span>`:''}
         
               ${it.u?`<a href="${it.u}" target="_blank" rel="noopener noreferrer" class="tap text-[14px] inline-flex items-center gap-1 hover:underline" style="color:var(--blue)">${ic('external-link','icon-sm')}${T(C.verify)}</a>`:''}
-        
+
             </div>
-        
+            ${it.how ? `<details class="how mt-2" data-field="how-${it.t.en.replace(/[^A-Za-z0-9]+/g,'-')}" ${S.open && S.open['how-' + it.t.en.replace(/[^A-Za-z0-9]+/g,'-')] ? 'open' : ''}><summary class="text-[13.5px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(it.howT || C.howT)}</summary>
+              <ol class="howlist">${it.how.map(x => `<li>${T(x)}</li>`).join('')}</ol></details>` : ''}
+
           </div>
         
           <div class="amt"><span class="cur faint text-[12px]">CAD </span>${m.cad}</div>
@@ -3660,18 +3774,78 @@ function glossShell(){
     </div>
     <div class="gl-body" id="gloss-list"></div>`;
 }
+/* Forgiving search: no need to type the whole word. Each word typed must match somewhere, in any order.
+   A word matches a term name by prefix or substring, by letters in order ("pgw" finds PGWP), with one typo
+   for words of 4+ letters ("ietls"), or by * and ? wildcards; it also matches inside the explanation.
+   Case, spaces, hyphens and Thai tone marks are ignored. Results are ranked best first. */
+const gNorm = s => String(s || '').toLowerCase().normalize('NFC').replace(/[็-์]/g, '').replace(/[\s\-_.,:;()'"\/&·]+/g, '');
+const gSubseq = (q, s) => { let i = 0; for (const ch of s) { if (ch === q[i]) i++; if (i === q.length) return true; } return false; };
+function gDist1(a, b){   /* true when a and b differ by at most one edit, or two neighbouring letters swapped */
+  if (Math.abs(a.length - b.length) > 1) return false;
+  if (a.length === b.length) {
+    const d = []; for (let k = 0; k < a.length; k++) if (a[k] !== b[k]) d.push(k);
+    if (d.length === 2 && d[1] === d[0] + 1 && a[d[0]] === b[d[1]] && a[d[1]] === b[d[0]]) return true;
+  }
+  let i = 0, j = 0, ed = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue; }
+    if (++ed > 1) return false;
+    if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
+  }
+  return ed + (a.length - i) + (b.length - j) <= 1;
+}
+function gScore(e, words){
+  const txt = v => typeof v === 'function' ? v() : (v || '');
+  const names = [typeof e.k === 'string' ? e.k : e.k.en, typeof e.k === 'string' ? '' : e.k.th, ...(e.m || [])].filter(Boolean).map(gNorm);
+  const full = gNorm(e.f), desc = gNorm(txt(e.th) + ' ' + txt(e.en));
+  let total = 0;
+  for (const w of words) {
+    let s = 0;
+    if (/[*?]/.test(w)) {
+      const re = new RegExp('^' + w.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
+      const re2 = new RegExp(w.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.'));
+      if (names.some(n => re.test(n))) s = 75; else if (names.some(n => re2.test(n)) || re2.test(full)) s = 55; else if (re2.test(desc)) s = 18;
+    } else {
+      if (names.some(n => n === w)) s = 100;
+      else if (names.some(n => n.startsWith(w))) s = 80;
+      else if (names.some(n => n.includes(w))) s = 62;
+      else if (full.includes(w)) s = 48;
+      else if (w.length >= 4 && names.some(n => gDist1(w, n) || (n.length > w.length && gDist1(w, n.slice(0, w.length))))) s = 34;
+      else if (w.length >= 2 && names.some(n => n[0] === w[0] && n.length <= 12 && gSubseq(w, n))) s = 28;
+      else if (desc.includes(w)) s = 20;
+    }
+    if (!s) return 0;
+    total += s;
+  }
+  return total;
+}
+/* highlight what was typed inside a term name (plain substring, ignoring case) */
+function gMark(text, raw){
+  let h = esc(text);
+  raw.filter(w => w.length >= 1 && !/[*?]/.test(w)).sort((a, b) => b.length - a.length).forEach(w => {
+    const i = h.toLowerCase().indexOf(w.toLowerCase());
+    if (i >= 0 && !/<[^>]*$/.test(h.slice(0, i))) h = h.slice(0, i) + '<mark>' + h.slice(i, i + w.length) + '</mark>' + h.slice(i + w.length);
+  });
+  return h;
+}
 function renderGlossList(){
   const box = document.getElementById('gloss-list'); if (!box) return;
-  const q = GL_Q.trim().toLowerCase(), txt = v => typeof v === 'function' ? v() : (v || '');
-  const hay = e => [typeof e.k === 'string' ? e.k : e.k.en + ' ' + e.k.th, e.f, ...(e.m || []), txt(e.th), txt(e.en)].join(' ').toLowerCase();
-  const html = GLOSS_CATS.filter(([k]) => GL_CAT === 'all' || GL_CAT === k).map(([k, l]) => {
-    const items = GLOSS.filter(e => e.c === k && (!q || hay(e).includes(q)));
-    if (!items.length) return '';
-    return `<section><h3 class="grp" style="margin-top:18px">${T(l)}</h3>${items.map(e => `
-      <div class="gl-item" id="${gid(e)}"><div class="font-semibold text-[15px]">${esc(gk(e))}${e.f ? ` <span class="faint font-normal text-[13px]">${esc(e.f)}</span>` : ''}</div>
+  const raw = GL_Q.trim().split(/\s+/).filter(Boolean), words = raw.map(w => /[*?]/.test(w) ? w.toLowerCase() : gNorm(w)).filter(Boolean);
+  const catOk = e => GL_CAT === 'all' || e.c === GL_CAT;
+  const item = e => `
+      <div class="gl-item" id="${gid(e)}"><div class="font-semibold text-[15px]">${gMark(gk(e), raw)}${e.f ? ` <span class="faint font-normal text-[13px]">${gMark(e.f, raw)}</span>` : ''}${words.length ? ` <span class="badge b-gray" style="font-weight:500">${T(GLOSS_CATS.find(c => c[0] === e.c)[1])}</span>` : ''}</div>
         <p class="muted text-[14px] mt-0.5">${esc(gtxt(e))}</p>
-        ${e.s && SRC[e.s] ? `<a class="text-[13px] inline-flex items-center gap-1 mt-1" href="${SRC[e.s].u}" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(GLOSS_UI.official)}</a>` : ''}</div>`).join('')}</section>`;
-  }).join('');
+        ${e.s && SRC[e.s] ? `<a class="text-[13px] inline-flex items-center gap-1 mt-1" href="${SRC[e.s].u}" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(GLOSS_UI.official)}</a>` : ''}</div>`;
+  let html;
+  if (words.length) {
+    const hits = GLOSS.filter(catOk).map(e => ({e, s:gScore(e, words)})).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+    html = hits.length ? `<p class="faint text-[13px]" style="margin-top:14px">${T(GLOSS_UI.found)(hits.length)}</p>${hits.map(x => item(x.e)).join('')}` : '';
+  } else {
+    html = GLOSS_CATS.filter(([k]) => GL_CAT === 'all' || GL_CAT === k).map(([k, l]) => {
+      const items = GLOSS.filter(e => e.c === k);
+      return items.length ? `<section><h3 class="grp" style="margin-top:18px">${T(l)}</h3>${items.map(item).join('')}</section>` : '';
+    }).join('');
+  }
   box.innerHTML = html || `<p class="muted text-center" style="margin-top:32px">${T(GLOSS_UI.none)}</p>`;
   icons();
 }
