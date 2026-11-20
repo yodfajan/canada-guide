@@ -336,6 +336,30 @@
   .mline .f{color:var(--ink2);font-variant-numeric:tabular-nums}
   .why h4{font-size:15px;font-weight:600;margin:14px 0 4px}
   summary svg{display:inline-block;vertical-align:-2px}
+  .amt-col{display:flex;flex-direction:column;align-items:flex-end;flex:none}
+  .inbox{display:flex;flex-direction:column;gap:4px;min-width:0}
+  /* glossary: tappable terms, popover and full sheet */
+  .term{all:unset;cursor:pointer;color:inherit;text-decoration:underline dotted;text-decoration-color:var(--blue);text-decoration-thickness:1.5px;text-underline-offset:3px;border-radius:3px}
+  @media (hover:hover){.term:hover{background:var(--blue-soft)}}
+  .term:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+  #term-pop{position:fixed;z-index:120;display:none;padding:14px 16px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow),var(--specular);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);color:var(--ink);line-height:1.55}
+  #term-pop.on{display:block}
+  #term-pop a{color:var(--blue)}
+  dialog#gloss-dlg{padding:0;border:0;width:min(760px,calc(100vw - 32px));max-width:100vw;height:min(88vh,900px);max-height:100dvh;border-radius:22px;background:var(--window);color:var(--ink);box-shadow:var(--glass-shadow)}
+  dialog#gloss-dlg[open]{display:flex;flex-direction:column}
+  dialog#gloss-dlg::backdrop{background:rgba(10,14,25,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .gl-head{padding:18px 20px 10px;border-bottom:1px solid var(--line)}
+  .gl-body{flex:1;overflow:auto;padding:0 20px 28px;overscroll-behavior:contain}
+  .gl-search{width:100%;margin-top:12px;min-height:42px;border-radius:12px;border:1px solid var(--line2);background:var(--field);color:var(--ink);padding:6px 12px;font:inherit;font-size:16px}
+  .gl-cats{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:4px;scrollbar-width:none}
+  .gl-cats::-webkit-scrollbar{display:none}
+  .gl-cats button{flex:none;border:0;border-radius:999px;padding:5px 12px;font:inherit;font-size:13.5px;background:var(--gray-soft);color:var(--ink);cursor:pointer;min-height:34px}
+  .gl-cats button.on{background:var(--blue-soft);color:var(--blue);font-weight:600}
+  .gl-item{padding:10px 8px;margin:0 -8px;border-top:1px solid var(--line);border-radius:10px;transition:background .3s}
+  .gl-item.flash{background:var(--blue-soft)}
+  .gl-item a{color:var(--blue)}
+  @media (max-width:640px){dialog#gloss-dlg{width:100vw;height:100dvh;border-radius:0;margin:0}}
   .autoline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;color:var(--ink2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
   .ctbl th.cur-col,.ctbl td.cur-col{background:var(--blue-soft)}
   .ctbl{width:100%;border-collapse:collapse;font-size:14.5px;min-width:640px}
@@ -414,6 +438,7 @@
       <span class="appicon"><i data-lucide="book-open" class="icon-sm"></i></span>
       <div class="tb-title"><span id="brand" class="tb-full"></span><span id="tb-title"></span></div>
       <button id="fx-chip" class="badge b-gray num" data-act="tab" data-v="costs" title="CAD to THB" aria-label="CAD to THB exchange rate, open All Costs"></button>
+      <button id="gloss-btn" class="tb-btn" data-act="gloss-open"></button>
       <button id="theme-btn" class="tb-btn" data-act="theme"></button>
       <div class="seg" role="group" aria-label="Language">
         
@@ -431,6 +456,7 @@
   </div>
 </div>
 <nav id="btabs" class="bnav" role="tablist" aria-label="Sections"></nav>
+<dialog id="gloss-dlg" aria-labelledby="gloss-title"></dialog>
 
 <script>
 /* ============================== STATE ============================== */
@@ -438,7 +464,7 @@ const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
   lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', open:{}, scenario:'safe',
   sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0,
-        cur:'both', proofAuto:true, travel:2500, setup:2000, rentC:null, foodC:null, otherC:null, healthC:null },
+        cur:'both', proofAuto:true, travel:2500, setup:2000, rentC:null, foodC:null, otherC:null, healthC:null, tips:0 },
   fx:{ rate:null, date:null, day:null, src:'' }
 };
 let S = JSON.parse(JSON.stringify(DEFAULTS));
@@ -1433,6 +1459,370 @@ Object.assign(SIM_UI, {
 });
 SIM_UI.gloss[1] = {k:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'}, v:() => ({en:`A fixed amount set by the government and updated every year (now CAD ${fmt(fundsAmt())} for one person, read live from the IRCC page). It is proof you can live a year, not a spending budget.`, th:`ยอดที่รัฐบาลกำหนดและปรับทุกปี (ปัจจุบัน CAD ${fmt(fundsAmt())} สำหรับ 1 คน อ่านจากเว็บ IRCC อัตโนมัติ) เป็นหลักฐานว่าอยู่ได้ 1 ปี ไม่ใช่งบที่ต้องใช้จริง`})};
 
+/* ============================== GLOSSARY ==============================
+   One list for every term and abbreviation in the app. k = term, f = full name, c = group, s = official source key,
+   m = exact text that becomes tappable on every page (first time per card; longest match wins), a:false = list only. */
+const GLOSS_CATS = [
+  ['permit', {en:'Visas and permits', th:'วีซ่าและใบอนุญาต'}],
+  ['pr', {en:'Path to PR', th:'เส้นทางสู่ PR'}],
+  ['study', {en:'Study and schools', th:'การเรียนและสถาบัน'}],
+  ['test', {en:'English tests', th:'การสอบภาษาอังกฤษ'}],
+  ['money', {en:'Money, work and tax', th:'เงิน การทำงาน และภาษี'}],
+  ['health', {en:'Health insurance', th:'ประกันสุขภาพ'}],
+  ['field', {en:'Job and field abbreviations', th:'คำย่อในสาขาและอาชีพ'}],
+  ['org', {en:'Agencies, places and codes', th:'หน่วยงาน สถานที่ และรหัสย่อ'}],
+  ['school', {en:'School short names', th:'ชื่อย่อสถาบัน'}]
+];
+const GLOSS = [
+  /* ---- visas and permits ---- */
+  {k:'IRCC', f:'Immigration, Refugees and Citizenship Canada', c:'permit', s:'sp',
+   th:'กระทรวงตรวจคนเข้าเมืองของแคนาดา เป็นหน่วยงานที่พิจารณา Study Permit, Work Permit, PGWP และ PR ตัวเลขทางการในแอปนี้มาจากเว็บของ IRCC',
+   en:'The Canadian immigration department. It decides study permits, work permits, PGWPs and PR, and publishes the official figures this app uses.'},
+  {k:'Study Permit', c:'permit', s:'sp', m:['Study Permit','study permit'],
+   th:'ใบอนุญาตให้เรียนในแคนาดา ยื่นออนไลน์จากไทย ถ้าผ่านจะได้ Letter of Introduction และวีซ่าเข้าประเทศ (TRV) ส่วน Study Permit ตัวจริงเจ้าหน้าที่จะพิมพ์ให้ที่สนามบินตอนเดินทางถึง',
+   en:'Permission to study in Canada. You apply online from Thailand; if approved you get a Letter of Introduction and an entry visa (TRV), and the permit itself is printed at the airport when you land.'},
+  {k:'Letter of Introduction', f:'Port of entry letter', c:'permit', s:'arrive', m:['Letter of Introduction'],
+   th:'จดหมายแจ้งว่า Study Permit ได้รับอนุมัติ ต้องพกขึ้นเครื่องไปแสดงเจ้าหน้าที่ที่สนามบินแคนาดาเพื่อรับ Study Permit ตัวจริง ห้ามใส่กระเป๋าโหลด',
+   en:'The approval letter for your study permit. Show it to the officer at the Canadian airport to receive the permit. Keep it in your hand luggage.'},
+  {k:'Biometrics', c:'permit', s:'fees', m:['Biometrics','biometrics'],
+   th:'การเก็บลายนิ้วมือและถ่ายรูปที่ศูนย์รับคำร้องวีซ่าในกรุงเทพฯ หลังยื่นใบสมัคร ค่าธรรมเนียม CAD 85',
+   en:'Fingerprints and a photo taken at the visa application centre in Bangkok after you apply. Fee CAD 85.'},
+  {k:{en:'Upfront medical exam', th:'ตรวจสุขภาพล่วงหน้า'}, c:'permit', s:'med', m:['Upfront medical exam','Upfront medical','ตรวจสุขภาพล่วงหน้า'],
+   th:'ตรวจสุขภาพกับแพทย์ที่ IRCC รับรอง (เช่น IOM กรุงเทพฯ) ก่อนยื่นวีซ่า เพื่อไม่ต้องรอ IRCC สั่งตรวจภายหลัง',
+   en:'A medical exam with an IRCC-approved doctor (for example IOM Bangkok) before you apply, so IRCC does not have to request one later.'},
+  {k:'DLI', f:'Designated Learning Institution', c:'permit', s:'dli',
+   th:'สถาบันที่ได้รับอนุมัติให้รับนักศึกษาต่างชาติ ขอ Study Permit ได้เฉพาะเมื่อเรียนกับสถาบันที่เป็น DLI รายชื่อ DLI ยังบอกด้วยว่าสถาบันไหนมีหลักสูตรที่ได้ PGWP',
+   en:'A school approved to host international students. You can get a study permit only for a DLI. The DLI list also shows which schools offer PGWP-eligible programs.'},
+  {k:'LOA', f:'Letter of Acceptance', c:'permit', s:'docs', m:['LOA','Letter of Acceptance'],
+   th:'จดหมายตอบรับเข้าเรียนอย่างเป็นทางการจากสถาบัน ระบุหลักสูตร วันเริ่มเรียน ระยะเวลา และค่าเล่าเรียน ต้องใช้ยื่น Study Permit',
+   en:'The official offer from your school, showing the program, start date, length and tuition. You need it to apply for the study permit.'},
+  {k:'PAL', f:'Provincial Attestation Letter', c:'permit', s:'pal',
+   th:'หนังสือรับรองจากมณฑลว่าคุณได้ที่นั่งในโควตาของมณฑล สถาบันออกให้หลังจ่ายมัดจำ ต้องแนบตอนยื่น Study Permit (นักศึกษาปริญญาโทและปริญญาเอกไม่ต้องใช้)',
+   en:"A letter from the province confirming your place within its quota. Your school issues it after your deposit, and you attach it to the study permit application. Master's and doctoral students do not need one."},
+  {k:'CAQ', f:"Certificat d'acceptation du Québec", c:'permit', s:'caq',
+   th:'หนังสือรับรองการเรียนของรัฐควิเบก ถ้าเรียนในควิเบกต้องได้ CAQ ก่อนยื่น Study Permit',
+   en:"Quebec's acceptance certificate. If you study in Quebec you need it before applying for the study permit."},
+  {k:{en:'Proof of funds', th:'หลักฐานการเงิน'}, c:'permit', s:'funds', m:['หลักฐานการเงิน','Proof of funds','proof of funds','เงินที่ต้องแสดง','Money to show','money to show'],
+   th:'หลักฐานว่ามีเงินพอจ่ายค่าเล่าเรียนปีแรก ค่าครองชีพตามยอดของ IRCC และค่าเดินทางไปและกลับ เช่น Statement หนังสือรับรองจากธนาคาร และเอกสารของสปอนเซอร์',
+   en:'Evidence that you can pay first-year tuition, the IRCC living-cost amount and travel to and from Canada: bank statements, a bank letter and sponsor documents.'},
+  {k:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'}, c:'permit', s:'funds', m:['ค่าครองชีพขั้นต่ำของ IRCC','ค่าครองชีพที่ IRCC กำหนด','IRCC living-cost minimum','IRCC living-cost amount'],
+   th:() => `ยอดค่าครองชีพที่ IRCC ให้แสดงสำหรับ 1 ปี ไม่รวมค่าเล่าเรียนและค่าเดินทาง ปัจจุบัน CAD ${fmt(fundsAmt())} สำหรับ 1 คน แอปอ่านยอดนี้จากเว็บ IRCC อัตโนมัติทุกวัน เป็นหลักฐานว่าอยู่ได้ 1 ปี ไม่ใช่งบที่ต้องใช้จริง`,
+   en:() => `The living-cost amount IRCC asks you to show for one year, not counting tuition or travel. Now CAD ${fmt(fundsAmt())} for one person; the app reads it from the IRCC page every day. It is proof, not a spending budget.`},
+  {k:{en:'Sponsor', th:'สปอนเซอร์'}, c:'permit', s:'funds', m:['สปอนเซอร์','sponsor','Sponsor'],
+   th:'คนที่ช่วยออกเงินให้ เช่น พ่อแม่ ต้องมีจดหมายสปอนเซอร์ หลักฐานความสัมพันธ์ (เช่น สูติบัตร) และหลักฐานรายได้และเงินฝากของสปอนเซอร์',
+   en:'Someone who pays for you, such as a parent. You need their letter, proof of your relationship (for example a birth certificate) and proof of their income and savings.'},
+  {k:'Statement', f:'Bank statement', c:'permit', m:['Statement'],
+   th:'รายการเดินบัญชีจากธนาคาร ปกติขอย้อนหลัง 4 ถึง 6 เดือน เพื่อให้เห็นว่าเงินอยู่ในบัญชีมานานพอและมีที่มาชัดเจน',
+   en:'Your bank account history. Usually 4 to 6 months are asked for, to show the money has been there a while and where it came from.'},
+  {k:{en:'Seasoning the account', th:'เดินบัญชี'}, c:'permit', m:['เดินบัญชี','seasoning'],
+   th:'การเก็บเงินไว้ในบัญชีต่อเนื่องหลายเดือนก่อนยื่น เงินก้อนใหญ่ที่เพิ่งโอนเข้ามาโดยอธิบายที่มาไม่ได้ อาจทำให้เจ้าหน้าที่สงสัยว่าเป็นเงินยืมมาชั่วคราว',
+   en:'Keeping the money in your account for several months before you apply. A large deposit that just arrived without an explanation can look like borrowed money.'},
+  {k:'Co-op', c:'permit', s:'coop', m:['Co-op','co-op'],
+   th:'เทอมทำงานแบบได้ค่าจ้างที่เป็นส่วนหนึ่งของหลักสูตร IRCC ไม่จำกัดชั่วโมงต่อสัปดาห์ แต่ช่วงทำงานต้องไม่เกินครึ่งหนึ่งของหลักสูตร ตั้งแต่ 1 เมษายน 2026 นักศึกษาหลังมัธยมใช้จดหมายจากสถาบันแทน Co-op Work Permit',
+   en:'A paid work term that is part of your program. IRCC sets no weekly hour limit, but work terms may be at most half of the program. Since 1 April 2026 post-secondary students need only a school letter, not a separate Co-op work permit.'},
+  {k:'Co-op Work Permit', c:'permit', s:'coop', m:['Co-op Work Permit','Co-op work permit'],
+   th:'ใบอนุญาตทำงานสำหรับเทอม Co-op แบบเดิม ตั้งแต่ 1 เมษายน 2026 นักศึกษาหลังมัธยมไม่ต้องขอแล้ว ใช้ Study Permit กับจดหมายจากสถาบัน',
+   en:'The old separate permit for Co-op terms. Since 1 April 2026 post-secondary students use their study permit and a school letter instead.'},
+  {k:'Work Permit', c:'permit', m:['Work Permit','work permit'],
+   th:'ใบอนุญาตทำงานในแคนาดา มี 2 แบบ: แบบผูกกับนายจ้าง (ทำได้กับนายจ้างที่ระบุเท่านั้น) และแบบเปิด (ทำกับนายจ้างไหนก็ได้)',
+   en:'Permission to work in Canada. Employer-specific permits name one employer; open work permits let you work for almost any employer.'},
+  {k:{en:'Open work permit', th:'ใบอนุญาตทำงานแบบเปิด'}, c:'permit', m:['Open Work Permit','open work permit','ใบอนุญาตทำงานแบบเปิด'],
+   th:'ใบอนุญาตทำงานที่ไม่ผูกกับนายจ้าง เปลี่ยนงานได้อิสระ เช่น PGWP และใบอนุญาตทำงานของคู่สมรส',
+   en:'A work permit not tied to one employer, so you can change jobs freely. Examples: the PGWP and the spouse work permit.'},
+  {k:{en:'Off-campus work', th:'ทำงานนอกสถาบัน'}, c:'permit', s:'offc', m:['ทำงานนอกสถาบัน','off campus','off-campus'],
+   th:'งานที่ไม่ได้อยู่ในสถาบัน ช่วงที่มีเรียนทำได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ ช่วงปิดเทอมตามตารางทำเต็มเวลาได้ และต้องเริ่มเรียนแล้วจึงทำงานได้',
+   en:'Work outside your school: up to 24 hours a week while classes run, full time during scheduled breaks, and only after your program has started.'},
+  {k:{en:'Scheduled break', th:'ปิดเทอมตามตาราง'}, c:'permit', s:'offcbrk', m:['ปิดเทอมตามตาราง','Scheduled break','scheduled break'],
+   th:'ช่วงหยุดตามปฏิทินของสถาบัน เช่น ปิดเทอมฤดูร้อน ถ้าหยุด 7 วันขึ้นไปและเรียนทั้งก่อนและหลังช่วงนั้น ทำงานเต็มเวลาได้ สูงสุด 180 วันต่อปี',
+   en:'A holiday in the school calendar, such as summer. If it lasts 7 days or more and you study before and after it, you may work full time, up to 180 days a year.'},
+  {k:'PGWP', f:'Post-Graduation Work Permit', c:'permit', s:'pgwp',
+   th:'ใบอนุญาตทำงานแบบเปิดหลังเรียนจบ อายุสูงสุด 3 ปี ใช้สะสมประสบการณ์ทำงานเพื่อยื่น PR ต้องจบหลักสูตรที่มีสิทธิ์ (หลักสูตรวิทยาลัยต้องอยู่ในรายการสาขา) มีผลภาษาตามเกณฑ์ และยื่นภายใน 180 วันหลังเรียนจบ วิทยาลัยเอกชนส่วนใหญ่ไม่มีสิทธิ์',
+   en:'An open work permit after graduation, up to 3 years, used to gain work experience for PR. You need an eligible program (college programs must be on the field-of-study list), the language result, and to apply within 180 days of finishing. Most private colleges do not qualify.'},
+  {k:{en:'PGWP field-of-study list', th:'รายการสาขาของ PGWP'}, c:'permit', s:'pgwpfos', m:['field-of-study list','field-of-study','รายการสาขาของ PGWP'],
+   th:'รายการรหัส CIP ที่ IRCC กำหนดว่าหลักสูตรวิทยาลัยแบบไหนได้ PGWP ส่วนปริญญาตรีและปริญญาโทไม่ต้องอยู่ในรายการ',
+   en:"IRCC's list of CIP codes that decides which college programs lead to a PGWP. Bachelor's and master's degrees do not need to be on it."},
+  {k:{en:'Spouse work permit', th:'ใบอนุญาตทำงานของคู่สมรส'}, c:'permit', s:'spouse', m:['คู่สมรส','spouse','Spouse'],
+   th:'ใบอนุญาตทำงานแบบเปิดสำหรับคู่สมรสหรือคู่ชีวิตของนักศึกษา ปัจจุบันให้เฉพาะคู่ของนักศึกษาปริญญาโทที่หลักสูตรยาว 16 เดือนขึ้นไป ปริญญาเอก หรือหลักสูตรวิชาชีพบางสาขา',
+   en:"An open work permit for a student's spouse or common-law partner. Now only for partners of students in master's programs of 16 months or more, doctoral programs, or some professional programs."},
+  {k:{en:'Processing time', th:'ระยะเวลาพิจารณา'}, c:'permit', s:'proc', m:['ระยะเวลาพิจารณา','Processing time','processing time'],
+   th:'เวลาที่ IRCC ใช้พิจารณาใบสมัคร แอปดึงตัวเลขล่าสุดสำหรับผู้ยื่นจากประเทศไทยจาก IRCC อัตโนมัติทุกวัน',
+   en:'How long IRCC takes to decide an application. The app reads the current figure for applicants in Thailand from IRCC each day.'},
+  {k:'Bridge Strategy', c:'permit', m:['Bridge Strategy'],
+   th:'คำที่แอปนี้ใช้เรียกแผนย้ายจากหลักสูตรเอกชน (ไม่มี PGWP) ไปเรียนต่อสถาบันรัฐเพื่อให้ได้ PGWP และต่อ PR ต้องขอ Study Permit ใหม่ PAL ใหม่ และแสดงเงินรอบใหม่',
+   en:"This app's name for moving from a private program (no PGWP) to a public school so you can get a PGWP and aim for PR. It needs a new study permit, a new PAL and new proof of funds."},
+  {k:'RCIC', f:'Regulated Canadian Immigration Consultant', c:'permit', s:'rep',
+   th:'ที่ปรึกษาการย้ายถิ่นฐานที่มีใบอนุญาตของแคนาดา คนที่รับเงินเพื่อให้คำแนะนำเรื่องวีซ่าต้องเป็น RCIC ทนายความ หรือโนตารีในควิเบก ตรวจชื่อได้ในทะเบียนของ CICC',
+   en:'A licensed Canadian immigration consultant. Anyone paid to advise on visas must be an RCIC, a lawyer or a Quebec notary. Check the name in the CICC register.'},
+  {k:'CICC', f:'College of Immigration and Citizenship Consultants', c:'permit', s:'rep',
+   th:'หน่วยงานที่ออกใบอนุญาตและกำกับดูแลที่ปรึกษาการย้ายถิ่นฐาน (RCIC) มีทะเบียนให้ค้นชื่อได้',
+   en:'The regulator that licenses immigration consultants (RCICs). Its public register lets you check a name.'},
+  {k:{en:'Education agent', th:'เอเจนต์การศึกษา'}, c:'permit', m:['เอเจนต์','agent'],
+   th:'ตัวแทนที่ช่วยเลือกและสมัครสถาบัน ส่วนใหญ่ได้ค่าคอมมิชชันจากโรงเรียน ช่วยเรื่องสมัครเรียนได้ แต่ถ้ารับเงินเพื่อให้คำแนะนำเรื่องวีซ่าต้องเป็น RCIC หรือทนาย',
+   en:'Someone who helps you choose and apply to schools, usually paid commission by the school. For paid visa advice they must be an RCIC or a lawyer.'},
+  {k:'ICEF', f:'ICEF Agency Status', c:'permit',
+   th:'การรับรองเอเจนต์การศึกษาระดับนานาชาติ แสดงว่าเอเจนต์ผ่านการตรวจสอบ แต่ไม่ใช่ใบอนุญาตให้คำแนะนำด้านวีซ่า',
+   en:'An international accreditation for education agents. It shows the agent was checked, but it is not a licence to give visa advice.'},
+  /* ---- path to PR ---- */
+  {k:'PR', f:'Permanent Residency', c:'pr',
+   th:'สถานะผู้มีถิ่นที่อยู่ถาวร อยู่ ทำงาน และเรียนที่ไหนในแคนาดาก็ได้ ได้สวัสดิการส่วนใหญ่เหมือนพลเมือง และยื่นขอสัญชาติได้ภายหลัง',
+   en:'Permanent residence: live, work and study anywhere in Canada, get most benefits citizens get, and later apply for citizenship.'},
+  {k:'Express Entry', c:'pr', s:'draws', m:['Express Entry'],
+   th:'ระบบออนไลน์ของ IRCC สำหรับคัดเลือกผู้ยื่น PR กลุ่มแรงงานทักษะ สร้างโปรไฟล์แล้วได้คะแนน CRS จากนั้น IRCC จะส่งคำเชิญให้ยื่น PR เป็นรอบ ๆ ให้คนที่คะแนนถึงเกณฑ์',
+   en:"IRCC's online system for skilled-worker PR. You create a profile, get a CRS score, and IRCC invites the top scorers to apply in regular rounds."},
+  {k:'CRS', f:'Comprehensive Ranking System', c:'pr', s:'crs',
+   th:'คะแนนจัดอันดับใน Express Entry (เต็ม 1,200) คิดจากอายุ การศึกษา ผลภาษา และประสบการณ์ทำงาน ยิ่งสูงยิ่งมีโอกาสได้คำเชิญ',
+   en:'The Express Entry score out of 1,200, from age, education, language and work experience. Higher scores get invited first.'},
+  {k:{en:'Draw and invitation (ITA)', th:'รอบคัดเลือกและคำเชิญ (ITA)'}, c:'pr', s:'draws', m:['รอบคัดเลือก','คำเชิญ','ITA','draws','draw'],
+   th:'รอบคัดเลือกคือครั้งที่ IRCC ส่งคำเชิญ (Invitation to Apply) ให้คนในระบบ Express Entry ที่คะแนน CRS ถึงขั้นต่ำของรอบนั้น ได้คำเชิญแล้วต้องยื่นเอกสาร PR ภายใน 60 วัน',
+   en:"A draw is a round in which IRCC sends Invitations to Apply to Express Entry candidates at or above that round's CRS cut-off. You then have 60 days to submit the PR application."},
+  {k:{en:'Category-based selection', th:'รอบเฉพาะหมวด'}, c:'pr', s:'eecat', m:['รอบเฉพาะหมวด','Category-based','category-based','Category rounds','category rounds'],
+   th:'รอบคัดเลือกที่เชิญเฉพาะคนในอาชีพหรือคุณสมบัติที่แคนาดาต้องการ เช่น Healthcare, STEM หรือ Trades มักใช้คะแนน CRS ต่ำกว่ารอบทั่วไป',
+   en:'Draws that invite only people with certain jobs or skills Canada needs, such as healthcare, STEM or trades. Cut-offs are usually lower than general rounds.'},
+  {k:'CEC', f:'Canadian Experience Class', c:'pr', s:'cec',
+   th:'โปรแกรม PR ใน Express Entry สำหรับคนที่ทำงานเต็มเวลาในแคนาดาอย่างน้อย 1 ปี (1,560 ชั่วโมง) ในงานระดับ TEER 0 ถึง 3 ภายใน 3 ปีที่ผ่านมา งานที่ทำระหว่างเป็นนักศึกษาเต็มเวลาไม่นับ เป็นเส้นทางที่นิยมที่สุดหลังได้ PGWP',
+   en:'The Express Entry PR program for people with at least 1 year (1,560 hours) of skilled Canadian work (TEER 0 to 3) in the last 3 years. Work done while a full-time student does not count. The most common route after a PGWP.'},
+  {k:'PNP', f:'Provincial Nominee Program', c:'pr', s:'pnp', m:['PNP','Provincial Nominee Program','Provincial Nominee'],
+   th:'โปรแกรมที่แต่ละมณฑลคัดเลือกคนที่มณฑลต้องการ แล้วเสนอชื่อ (nominate) ให้ได้ PR ถ้าได้การเสนอชื่อที่ผูกกับ Express Entry จะได้คะแนน CRS เพิ่ม 600',
+   en:'Each province picks people it needs and nominates them for PR. A nomination linked to Express Entry adds 600 CRS points.'},
+  {k:'BC PNP, OINP, AAIP, SINP, MPNP, NSNP', c:'pr', s:'pnp', m:['BC PNP','OINP','AAIP','SINP','MPNP','NSNP'],
+   th:'ชื่อโปรแกรม PNP ของแต่ละมณฑล: BC PNP (บริติชโคลัมเบีย) OINP (ออนแทรีโอ) AAIP (อัลเบอร์ตา) SINP (ซัสแคตเชวัน) MPNP (แมนิโทบา) NSNP (โนวาสโกเชีย)',
+   en:"Each province's nominee program: BC PNP (British Columbia), OINP (Ontario), AAIP (Alberta), SINP (Saskatchewan), MPNP (Manitoba), NSNP (Nova Scotia)."},
+  {k:'CLB', f:'Canadian Language Benchmarks', c:'pr', s:'lang',
+   th:'ระดับภาษาของแคนาดา 1 ถึง 12 แปลงมาจากผลสอบ เช่น IELTS General Training ทุกทักษะ 6.0 เท่ากับ CLB 7 PGWP ต้องการ CLB 7 สำหรับปริญญาตรีขึ้นไป และ CLB 5 สำหรับหลักสูตรวิทยาลัย',
+   en:"Canada's language levels from 1 to 12, converted from test scores. For example IELTS General Training 6.0 in every skill is CLB 7. The PGWP needs CLB 7 for a degree and CLB 5 for a college program."},
+  {k:'NOC', f:'National Occupational Classification', c:'pr', s:'noc',
+   th:'ระบบรหัสอาชีพ 5 หลักของแคนาดา (ฉบับ 2021) บอกว่างานของคุณคืออาชีพอะไรและอยู่ระดับ TEER ไหน ต้องใช้ตอนยื่น PR',
+   en:"Canada's 5-digit job codes (2021 version). They say which occupation your job is and its TEER level, which matters for PR."},
+  {k:'TEER', f:'Training, Education, Experience and Responsibilities', c:'pr', s:'findnoc',
+   th:'ระดับ 0 ถึง 5 ซึ่งเป็นตัวเลขหลักที่ 2 ของรหัส NOC บอกว่างานต้องการการศึกษาหรือประสบการณ์แค่ไหน งาน TEER 0 ถึง 3 นับเป็นงานทักษะสำหรับ CEC',
+   en:'Levels 0 to 5, shown by the second digit of a NOC code, saying how much training a job needs. TEER 0 to 3 jobs count as skilled work for the CEC.'},
+  {k:'STEM', f:'Science, Technology, Engineering and Mathematics', c:'pr', s:'eecat',
+   th:'กลุ่มสาขาวิทยาศาสตร์ เทคโนโลยี วิศวกรรม และคณิตศาสตร์ มักอยู่ในรายการสาขาของ PGWP และเป็นหมวดหนึ่งของรอบเฉพาะหมวดใน Express Entry',
+   en:'Science, technology, engineering and mathematics. These fields are usually on the PGWP list and form one of the Express Entry category rounds.'},
+  {k:'ECA', f:'Educational Credential Assessment', c:'pr', s:'eca',
+   th:'การเทียบวุฒิการศึกษาต่างประเทศ (เช่น ปริญญาจากไทย) กับวุฒิของแคนาดา เพื่อเก็บคะแนนการศึกษาใน Express Entry ต้องทำกับหน่วยงานที่ IRCC กำหนด เช่น WES',
+   en:'An assessment that compares a foreign degree (for example from Thailand) with Canadian education, so it earns points in Express Entry. Done by an IRCC-designated body such as WES.'},
+  {k:'WES', f:'World Education Services', c:'pr', s:'eca',
+   th:'หน่วยงานเทียบวุฒิ (ECA) ที่คนนิยมใช้มากที่สุด', en:'The most widely used ECA organization.'},
+  /* ---- study and schools ---- */
+  {k:'CIP', f:'Classification of Instructional Programs', c:'study', s:'cip',
+   th:'รหัสสาขาวิชาของแคนาดา (เช่น 11.0701 Computer Science) ใช้ตรวจว่าหลักสูตรวิทยาลัยอยู่ในรายการสาขาของ PGWP ไหม ควรขอรหัส CIP 6 หลักจากสถาบันเป็นลายลักษณ์อักษร',
+   en:"Canada's code for a field of study (for example 11.0701 Computer Science). It decides whether a college program is on the PGWP list. Ask the school for the 6-digit CIP code in writing."},
+  {k:{en:'Public college', th:'วิทยาลัยรัฐ'}, c:'study', m:['วิทยาลัยรัฐ','Public college','public college'],
+   th:'วิทยาลัยของรัฐ เช่น Seneca, Conestoga, BCIT เปิดหลักสูตร Diploma และ Post-Graduate Diploma จบแล้วขอ PGWP ได้ถ้าสาขาอยู่ในรายการ',
+   en:'A government-funded college such as Seneca, Conestoga or BCIT, offering diplomas and post-graduate diplomas. Graduates can get a PGWP if the field is on the list.'},
+  {k:{en:'Private career college', th:'วิทยาลัยอาชีพเอกชน'}, c:'study', m:['วิทยาลัยอาชีพเอกชน','Private career college','private career college'],
+   th:'โรงเรียนอาชีพเอกชน หลักสูตรสั้นและถูกกว่า มักมี Co-op แต่จบแล้วไม่มีสิทธิ์ PGWP บางแห่งปิดตัวกะทันหัน ควรตรวจสถานะก่อนจ่ายเงิน',
+   en:'A private vocational school: shorter, cheaper programs, often with Co-op, but no PGWP. Some have closed suddenly, so check their status before paying.'},
+  {k:'Work & Study', c:'study', m:['Work & Study'],
+   th:'ชื่อที่เอเจนต์ในไทยใช้เรียกหลักสูตรวิทยาลัยอาชีพเอกชนที่เรียนครึ่งหนึ่งและทำงาน Co-op อีกครึ่งหนึ่ง ไม่ใช่ประเภทวีซ่า',
+   en:'A name agents in Thailand use for private college programs with half study and half Co-op work. It is not a visa type.'},
+  {k:'Diploma', c:'study', m:['Diploma'],
+   th:'หลักสูตรของวิทยาลัย ยาว 1 ถึง 3 ปี (Advanced Diploma ยาว 3 ปี) เน้นทักษะทำงานจริง',
+   en:'A college program of 1 to 3 years (an advanced diploma is 3 years), focused on job skills.'},
+  {k:'Post-Graduate Diploma', f:'PG Diploma', c:'study', m:['Post-Graduate Diploma','PG Diploma'],
+   th:'หลักสูตรของวิทยาลัยสำหรับคนที่จบปริญญาตรีแล้ว ยาว 8 เดือนถึง 2 ปี หลักสูตร 2 ปีขึ้นไปได้ PGWP 3 ปี (ถ้าสาขาอยู่ในรายการ)',
+   en:'A college program for people who already have a degree, 8 months to 2 years long. A program of 2 years or more can give a 3-year PGWP if the field is on the list.'},
+  {k:{en:"Course-based and thesis master's", th:'ปริญญาโทแบบเรียนรายวิชาและแบบวิทยานิพนธ์'}, c:'study', m:['course-based','thesis'],
+   th:'ปริญญาโทแบบเรียนรายวิชา (course-based) เรียนจบเร็วกว่าและมักมี Co-op ส่วนแบบวิทยานิพนธ์ (thesis) เน้นงานวิจัย ทั้งสองแบบถ้ายาว 8 เดือนขึ้นไปได้ PGWP 3 ปี',
+   en:"A course-based master's is taught classes, often shorter and often with Co-op; a thesis master's centres on research. Either one of 8 months or more gives a 3-year PGWP."},
+  {k:{en:'Intake', th:'รอบเปิดเรียน (Intake)'}, c:'study', m:['รอบเปิดเรียน','Intake','intake'],
+   th:'รอบเปิดรับนักศึกษาใหม่ ปกติมีมกราคม พฤษภาคม และกันยายน รอบกันยายนมีหลักสูตรให้เลือกมากที่สุด',
+   en:'A start date for new students, usually January, May or September. September has the most programs.'},
+  {k:{en:'Tuition deposit', th:'มัดจำค่าเรียน'}, c:'study', m:['มัดจำ','deposit'],
+   th:'เงินที่จ่ายให้สถาบันเพื่อยืนยันที่นั่ง มักต้องจ่ายก่อนได้ PAL หรือก่อนยื่นวีซ่า อ่านเงื่อนไขการคืนเงินกรณีวีซ่าไม่ผ่านก่อนจ่าย',
+   en:'Money paid to the school to hold your place, usually before you get a PAL or apply for the visa. Read the refund rules for a refused visa before you pay.'},
+  {k:{en:'Compulsory school fees', th:'ค่าธรรมเนียมบังคับ'}, c:'study', m:['ค่าธรรมเนียมบังคับ','Compulsory school fees','compulsory school fees','compulsory fees'],
+   th:'ค่าใช้จ่ายที่สถาบันเก็บเพิ่มจากค่าเล่าเรียน เช่น ค่ากิจกรรมนักศึกษา ค่าเทคโนโลยี บางที่รวมประกันสุขภาพหรือบัตรโดยสารด้วย ดูยอดได้ใน LOA',
+   en:'Charges on top of tuition, such as student union, technology and activity fees; some include health insurance or a transit pass. See your LOA.'},
+  {k:'Transcript', c:'study', m:['Transcript','transcript'],
+   th:'ใบแสดงผลการเรียนรายวิชาและเกรด ต้องใช้ฉบับภาษาอังกฤษตอนสมัครเรียน', en:'Your official record of courses and grades. You need an English copy to apply.'},
+  {k:'Credential', c:'study', m:['credentials','credential','Credential'],
+   th:'วุฒิการศึกษาหรือใบรับรองที่ได้หลังเรียนจบ เช่น Diploma หรือปริญญา', en:'The qualification you receive when you finish, such as a diploma or degree.'},
+  {k:'Placement, practicum', c:'study', m:['placement','Placement','practicum','Practicum'],
+   th:'ช่วงฝึกงานภาคปฏิบัติที่เป็นส่วนหนึ่งของหลักสูตร (ได้หรือไม่ได้ค่าจ้างก็ได้) เช่น ฝึกงานในโรงพยาบาลหรือโรงเรียน',
+   en:'Hands-on work training that is part of a program, paid or unpaid, for example in a hospital or a school.'},
+  /* ---- English tests ---- */
+  {k:'IELTS', f:'International English Language Testing System', c:'test', s:'idp', m:['IELTS Academic','IELTS General Training','IELTS'],
+   th:'สอบภาษาอังกฤษที่นิยมที่สุด มี 2 แบบ: Academic ใช้สมัครเรียน และ General Training ใช้กับ IRCC สำหรับ PGWP และ PR (IRCC ไม่รับแบบ Academic) ในไทยสอบด้วยคอมพิวเตอร์ ค่าสอบ THB 8,860',
+   en:'The most common English test. Academic is for school admission; General Training is the one IRCC accepts for the PGWP and PR (IRCC does not accept Academic). In Thailand it is computer-based, THB 8,860.'},
+  {k:'CELPIP-General', f:'Canadian English Language Proficiency Index Program', c:'test', s:'celpip', m:['CELPIP-General','CELPIP'],
+   th:'สอบภาษาอังกฤษของแคนาดา สอบด้วยคอมพิวเตอร์จบในครั้งเดียว IRCC รับสำหรับ PGWP และ PR มีศูนย์สอบในไทย ค่าสอบประมาณ THB 7,000',
+   en:"Canada's own English test, computer-based in one sitting. IRCC accepts it for the PGWP and PR, and it is offered in Thailand (about THB 7,000)."},
+  {k:'PTE', f:'Pearson Test of English', c:'test', s:'pte', m:['PTE Academic','PTE Core','PTE'],
+   th:'สอบภาษาอังกฤษของ Pearson ด้วยคอมพิวเตอร์ PTE Academic ใช้สมัครเรียน ส่วน PTE Core ใช้กับ IRCC สำหรับ PGWP และ PR',
+   en:"Pearson's computer-based English test. PTE Academic is for admission; PTE Core is the version IRCC accepts for the PGWP and PR."},
+  {k:'TOEFL iBT', f:'Test of English as a Foreign Language', c:'test', s:'toefl', m:['TOEFL iBT','TOEFL'],
+   th:'สอบภาษาอังกฤษของ ETS หลายสถาบันรับตอนสมัครเรียน แต่ IRCC ไม่รับสำหรับ PGWP และ PR',
+   en:"ETS's English test. Many schools accept it for admission, but IRCC does not accept it for the PGWP or PR."},
+  {k:'Duolingo English Test', c:'test', s:'det', m:['Duolingo English Test','Duolingo'],
+   th:'สอบภาษาอังกฤษออนไลน์ที่บ้าน ราคาถูก บางสถาบันรับ แต่ IRCC ไม่รับ', en:'A cheap online test taken at home. Some schools accept it; IRCC does not.'},
+  {k:'TEF, TCF', f:"Test d'évaluation de français, Test de connaissance du français", c:'test', s:'lang', m:['TEF','TCF'],
+   th:'สอบภาษาฝรั่งเศสที่ IRCC รับ ถ้ามีผลภาษาฝรั่งเศสดีควบคู่กับภาษาอังกฤษจะได้คะแนน CRS เพิ่ม',
+   en:'French tests IRCC accepts. Good French on top of English adds CRS points.'},
+  {k:'IDP, British Council', c:'test', s:'idp', m:['British Council','IDP'],
+   th:'สองบริษัทที่จัดสอบ IELTS ในประเทศไทย จองสอบได้กับทั้งสองแห่ง', en:'The two organizations that run IELTS in Thailand; you can book with either.'},
+  {k:'ETS', f:'Educational Testing Service', c:'test', s:'toefl', th:'องค์กรที่จัดสอบ TOEFL', en:'The organization that runs TOEFL.'},
+  /* ---- money, work and tax ---- */
+  {k:'CAD, THB, USD', c:'money', a:false,
+   th:'รหัสสกุลเงิน: CAD ดอลลาร์แคนาดา, THB บาทไทย, USD ดอลลาร์สหรัฐ ตัวเลขในแอปแปลงด้วยอัตราแลกเปลี่ยนล่าสุดของวันนี้',
+   en:"Currency codes: CAD Canadian dollar, THB Thai baht, USD US dollar. The app converts with today's live exchange rate."},
+  {k:'SIN', f:'Social Insurance Number', c:'money', s:'sin',
+   th:'เลข 9 หลักที่ต้องมีก่อนเริ่มทำงานและรับค่าจ้าง ขอได้ฟรีจาก Service Canada (ที่สำนักงานหรือออนไลน์) หลังเดินทางถึง Study Permit ต้องระบุว่าอนุญาตให้ทำงาน',
+   en:'The 9-digit number you need before you can be paid. Get it free from Service Canada (in person or online) after you arrive; your study permit must show you may work.'},
+  {k:'CPP', f:'Canada Pension Plan', c:'money', s:'payroll',
+   th:'เงินสมทบกองทุนบำนาญของรัฐ หักจากค่าจ้างทุกงวด 5.95% ของค่าจ้างส่วนที่เกิน CAD 3,500 ต่อปี (อัตราปี 2026)',
+   en:"Canada's public pension. 5.95% of pay above CAD 3,500 a year is taken from each paycheque (2026 rate)."},
+  {k:'EI', f:'Employment Insurance', c:'money', s:'payroll',
+   th:'ประกันการจ้างงาน คล้ายประกันสังคมกรณีว่างงานของไทย หัก 1.63% ของค่าจ้าง (อัตราปี 2026)',
+   en:'Employment insurance, which pays benefits if you lose your job. 1.63% of pay is taken (2026 rate).'},
+  {k:'CRA', f:'Canada Revenue Agency', c:'money', s:'tuitioncr',
+   th:'กรมสรรพากรของแคนาดา ยื่นภาษีทุกปีภายใน 30 เมษายน นักศึกษาส่วนใหญ่ได้ภาษีที่ถูกหักไว้คืนบางส่วน',
+   en:"Canada's tax agency. File a tax return each year by 30 April; most students get some of the withheld tax back."},
+  {k:{en:'Take-home pay', th:'รายได้สุทธิ'}, c:'money', s:'payroll', m:['รายได้สุทธิ','Take-home pay','take-home pay'],
+   th:'เงินที่เข้าบัญชีจริงหลังหัก CPP EI และภาษี แอปนี้คิด 93% ของรายได้ถ้าไม่เกิน CAD 1,700 ต่อเดือน และลดลงถึง 80% เมื่อรายได้สูงขึ้น',
+   en:'What reaches your bank after CPP, EI and tax. This app uses 93% of pay up to CAD 1,700 a month, falling to 80% at higher pay.'},
+  {k:{en:'Gross pay', th:'รายได้ก่อนหัก'}, c:'money', m:['รายได้ก่อนหัก','before deductions','Gross pay','gross pay'],
+   th:'ค่าจ้างเต็มจำนวนก่อนหักอะไรเลย คือ ชั่วโมงทำงาน × ค่าจ้างต่อชั่วโมง', en:'Your full pay before anything is taken off: hours × hourly wage.'},
+  {k:{en:'Minimum wage', th:'ค่าแรงขั้นต่ำ'}, c:'money', s:'minw', m:['ค่าแรงขั้นต่ำ','Minimum wage','minimum wage'],
+   th:'ค่าจ้างต่ำสุดต่อชั่วโมงที่นายจ้างต้องจ่าย แต่ละมณฑลกำหนดเอง ในมณฑลที่แอปนี้ครอบคลุม ปี 2026 อยู่ระหว่าง CAD 15.00 (อัลเบอร์ตา) ถึง 18.25 (บริติชโคลัมเบีย)',
+   en:'The lowest hourly pay an employer may offer, set by each province. In the provinces this app covers it ranges from CAD 15.00 (Alberta) to 18.25 (British Columbia) in 2026.'},
+  {k:{en:'Median wage', th:'ค่ามัธยฐานค่าจ้าง'}, c:'money', s:'wages', m:['ค่ามัธยฐาน','median','Median'],
+   th:'ค่าจ้างตรงกลาง คือมีคนได้มากกว่าครึ่งหนึ่งและน้อยกว่าครึ่งหนึ่ง ใช้ดูค่าจ้างทั่วไปได้ดีกว่าค่าเฉลี่ย',
+   en:'The middle wage: half of workers earn more and half earn less. A fairer guide to typical pay than the average.'},
+  {k:{en:'Tuition tax credit', th:'สิทธิ์ลดหย่อนค่าเล่าเรียน'}, c:'money', s:'tuitioncr', m:['tuition credit','ลดหย่อนค่าเล่าเรียน'],
+   th:'นักศึกษาที่เป็นผู้มีถิ่นที่อยู่ทางภาษีในแคนาดานำค่าเล่าเรียนไปลดภาษีได้ ใช้แบบฟอร์ม T2202 ที่สถาบันออกให้',
+   en:'Students who are Canadian tax residents can use their tuition to reduce income tax, with the T2202 form from the school.'},
+  {k:{en:'Break-even hours', th:'ชั่วโมงคุ้มทุน'}, c:'money', m:['ชั่วโมงคุ้มทุน','Break-even','break-even'],
+   th:'จำนวนชั่วโมงทำงานต่อสัปดาห์ที่ทำให้รายได้สุทธิเท่ากับค่าครองชีพพอดี', en:'The weekly work hours at which take-home pay exactly equals living costs.'},
+  {k:{en:'Setup reserve', th:'เงินสำรองตั้งตัว'}, c:'money', m:['เงินสำรองตั้งตัว','Setup reserve','setup reserve'],
+   th:'เงินที่ควรเตรียมไว้ใช้ช่วงแรกที่ไปถึง เช่น เงินประกันห้อง ของใช้ในบ้าน และเสื้อกันหนาว แอปตั้งไว้ CAD 2,000 แก้เองได้ในหน้างบ',
+   en:'Money for your first weeks: a rent deposit, household items and winter clothes. The app uses CAD 2,000; you can change it in the simulator.'},
+  {k:'Job Bank', c:'money', s:'wages', m:['Job Bank'],
+   th:'เว็บหางานและข้อมูลค่าจ้างของรัฐบาลแคนาดา ดูค่าจ้างของแต่ละอาชีพในแต่ละเมืองได้', en:"The Government of Canada's job board and wage data, by occupation and city."},
+  /* ---- health insurance ---- */
+  {k:'MSP', f:'Medical Services Plan, British Columbia', c:'health', s:'h_BC',
+   th:'ประกันสุขภาพของรัฐบริติชโคลัมเบีย นักศึกษาที่มี Study Permit 6 เดือนขึ้นไปต้องสมัคร จ่ายเดือนละ CAD 75 ช่วงรอสิทธิ์ (เดือนที่มาถึงบวกอีก 2 เดือน) ต้องมีประกันส่วนตัว',
+   en:"British Columbia's public health plan. Students with a study permit of 6 months or more must enrol and pay CAD 75 a month; private cover is needed during the waiting period (arrival month plus 2 months)."},
+  {k:'OHIP', f:'Ontario Health Insurance Plan', c:'health',
+   th:'ประกันสุขภาพของรัฐออนแทรีโอ นักศึกษาต่างชาติไม่มีสิทธิ์ สถาบันจะให้เข้าแผนประกันของสถาบันแทน',
+   en:"Ontario's public health plan. International students are not eligible; schools enrol them in their own plan."},
+  {k:'UHIP', f:'University Health Insurance Plan', c:'health', s:'uhip',
+   th:'ประกันสุขภาพที่มหาวิทยาลัยในออนแทรีโอให้นักศึกษาต่างชาติซื้อ ประมาณปีละ CAD 935 ถึง 950',
+   en:'The plan Ontario universities require international students to buy, about CAD 935 to 950 a year.'},
+  {k:'AHCIP', f:'Alberta Health Care Insurance Plan', c:'health',
+   th:'ประกันสุขภาพของรัฐอัลเบอร์ตา ไม่มีเบี้ย นักศึกษาที่มี Study Permit 12 เดือนลงทะเบียนได้',
+   en:"Alberta's public health plan. No premium; students with a 12-month study permit can register."},
+  {k:'RAMQ', f:"Régie de l'assurance maladie du Québec", c:'health',
+   th:'ประกันสุขภาพของรัฐควิเบก นักศึกษาไทยไม่มีสิทธิ์ ต้องซื้อประกันของสถาบัน', en:"Quebec's public health plan. Thai students are not eligible and must buy the school plan."},
+  {k:'MSI', f:'Medical Services Insurance, Nova Scotia', c:'health',
+   th:'ประกันสุขภาพของรัฐโนวาสโกเชีย นักศึกษาที่มี Study Permit 12 เดือนขึ้นไปได้สิทธิ์ตั้งแต่เดือนที่ 13 ปีแรกต้องใช้ประกันของสถาบัน',
+   en:"Nova Scotia's public health plan. Students with a permit of 12 months or more are covered from month 13; use the school plan for the first year."},
+  /* ---- job and field abbreviations ---- */
+  {k:'IT', f:'Information Technology', c:'field', th:'เทคโนโลยีสารสนเทศ งานด้านคอมพิวเตอร์ ระบบ และเครือข่าย', en:'Computers, systems and networks.'},
+  {k:'AI', f:'Artificial Intelligence', c:'field', th:'ปัญญาประดิษฐ์ ระบบคอมพิวเตอร์ที่ทำงานคล้ายการคิดของคน', en:'Computer systems that perform tasks that need human-like thinking.'},
+  {k:'ML', f:'Machine Learning', c:'field', th:'การเรียนรู้ของเครื่อง สาขาย่อยของ AI ที่สอนคอมพิวเตอร์ให้เรียนรู้จากข้อมูล', en:'A branch of AI where computers learn patterns from data.'},
+  {k:'BI', f:'Business Intelligence', c:'field', th:'การนำข้อมูลธุรกิจมาวิเคราะห์ ทำรายงานและแดชบอร์ดเพื่อช่วยตัดสินใจ', en:'Turning business data into reports and dashboards for decisions.'},
+  {k:'SQL', f:'Structured Query Language', c:'field', th:'ภาษาสำหรับดึงและจัดการข้อมูลในฐานข้อมูล เป็นทักษะพื้นฐานของงานด้านข้อมูล', en:'The language for querying databases; a basic skill for data jobs.'},
+  {k:'ETL', f:'Extract, Transform, Load', c:'field', th:'กระบวนการดึงข้อมูลจากหลายแหล่ง แปลงให้อยู่ในรูปแบบเดียวกัน แล้วโหลดเข้าคลังข้อมูล', en:'Pulling data from sources, cleaning it, and loading it into a data warehouse.'},
+  {k:'ERP', f:'Enterprise Resource Planning', c:'field', th:'ระบบบริหารทรัพยากรทั้งองค์กร เช่น SAP ใช้ดูแลบัญชี จัดซื้อ และคลังสินค้า', en:'Company-wide business software, such as SAP, for finance, purchasing and inventory.'},
+  {k:'QA', f:'Quality Assurance', c:'field', th:'การประกันคุณภาพ เช่น การทดสอบซอฟต์แวร์', en:'Checking quality, for example testing software.'},
+  {k:'SOC', f:'Security Operations Centre', c:'field', th:'ศูนย์เฝ้าระวังและรับมือภัยไซเบอร์ขององค์กร', en:'The team that watches for and responds to cyber attacks.'},
+  {k:'PMO', f:'Project Management Office', c:'field', th:'หน่วยงานกลางที่ดูแลมาตรฐานและการบริหารโครงการขององค์กร', en:'The office that runs project standards and reporting in an organization.'},
+  {k:'PMP', f:'Project Management Professional', c:'field', th:'ใบรับรองวิชาชีพผู้จัดการโครงการระดับสากลจาก PMI', en:'An international project manager certification from PMI.'},
+  {k:'SEO', f:'Search Engine Optimization', c:'field', th:'การปรับเว็บไซต์ให้ติดอันดับสูงในผลการค้นหา เช่น Google', en:'Improving a website so it ranks higher in search results.'},
+  {k:'EHR, EMR', f:'Electronic Health Record, Electronic Medical Record', c:'field', m:['EHR','EMR'], th:'ระบบเวชระเบียนอิเล็กทรอนิกส์ของโรงพยาบาลและคลินิก', en:'Digital patient record systems in hospitals and clinics.'},
+  {k:'HR', f:'Human Resources', c:'field', th:'ทรัพยากรบุคคล งานสรรหา ดูแล และพัฒนาพนักงาน', en:'Hiring, supporting and developing staff.'},
+  {k:'CHRP', f:'Chartered Human Resources Professional', c:'field', th:'ใบรับรองวิชาชีพด้านทรัพยากรบุคคลของแคนาดา', en:"Canada's professional HR designation."},
+  {k:'CPA', f:'Chartered Professional Accountant', c:'field', th:'นักบัญชีวิชาชีพของแคนาดา ต้องสอบและมีประสบการณ์ตามเกณฑ์', en:"Canada's professional accountant designation, earned through exams and experience."},
+  {k:'ECE', f:'Early Childhood Education (Educator)', c:'field', th:'การศึกษาปฐมวัย หรือครูปฐมวัย ต้องลงทะเบียนกับมณฑลก่อนทำงาน', en:'Early childhood education, or a registered early childhood educator.'},
+  {k:'RN', f:'Registered Nurse', c:'field', th:'พยาบาลวิชาชีพ ต้องสอบใบอนุญาตของมณฑลก่อนทำงาน', en:'A licensed nurse; you must pass the provincial licensing process first.'},
+  {k:'EIT', f:'Engineer in Training', c:'field', th:'วิศวกรฝึกหัดที่ทำงานสะสมประสบการณ์ก่อนได้ใบอนุญาตวิศวกร (P.Eng.)', en:'An engineering graduate gaining experience before getting the P.Eng. licence.'},
+  {k:'MBA, MSc', f:'Master of Business Administration, Master of Science', c:'field', m:['MBA','MSc'], th:'ชื่อย่อปริญญาโท: MBA บริหารธุรกิจ และ MSc สายวิทยาศาสตร์', en:"Master's degree names: MBA in business administration, MSc in science."},
+  {k:'MMA, MMSc, MDS, MDSAI', c:'field', m:['MMA','MMSc','MDSAI','MDS'],
+   th:'ชื่อย่อปริญญาโทเฉพาะทาง: Master of Management Analytics (MMA) Master of Management Sciences (MMSc) Master of Data Science (MDS) และ Master of Data Science and Artificial Intelligence (MDSAI)',
+   en:"Specialist master's names: Master of Management Analytics (MMA), Master of Management Sciences (MMSc), Master of Data Science (MDS), Master of Data Science and Artificial Intelligence (MDSAI)."},
+  /* ---- agencies, places and codes ---- */
+  {k:'CMHC', f:'Canada Mortgage and Housing Corporation', c:'org', s:'cmhc', th:'หน่วยงานรัฐด้านที่อยู่อาศัย สำรวจค่าเช่าทั่วประเทศทุกเดือนตุลาคม แอปใช้ตัวเลขค่าเช่าจาก CMHC', en:"Canada's housing agency. Its October rental survey is where this app's rent figures come from."},
+  {k:'CMA', f:'Census Metropolitan Area', c:'org', th:'เขตมหานครตามสำมะโนประชากร คือตัวเมืองรวมเมืองรอบ ๆ ใช้ในข้อมูลค่าเช่าของ CMHC', en:'A city plus its surrounding towns, as used in CMHC rent data.'},
+  {k:'Statistics Canada', f:'StatCan', c:'org', s:'statcantu', m:['Statistics Canada','StatCan'], th:'สำนักงานสถิติแห่งชาติของแคนาดา แหล่งข้อมูลค่าเล่าเรียนและรหัส CIP', en:"Canada's national statistics agency, the source of tuition data and CIP codes."},
+  {k:'ESDC', f:'Employment and Social Development Canada', c:'org', s:'noc', th:'กระทรวงที่ดูแล SIN, NOC และ Job Bank', en:'The department behind the SIN, NOC and Job Bank.'},
+  {k:'ECCC', f:'Environment and Climate Change Canada', c:'org', s:'climate', th:'กระทรวงสิ่งแวดล้อม แหล่งข้อมูลอุณหภูมิเฉลี่ยของแต่ละเมืองในแอปนี้', en:'The environment department, the source of the city temperatures in this app.'},
+  {k:'Bank of Canada', c:'org', s:'boc', m:['Bank of Canada','ธนาคารกลางแคนาดา'], th:'ธนาคารกลางของแคนาดา ตั้งเป้าเงินเฟ้อปีละ 2% แอปใช้ตัวเลขนี้ประมาณค่าครองชีพของปีถัดไป', en:"Canada's central bank. It targets 2% inflation, which this app uses to project later years."},
+  {k:'IOM', f:'International Organization for Migration', c:'org', s:'med', th:'องค์การระหว่างประเทศเพื่อการโยกย้ายถิ่นฐาน สาขากรุงเทพฯ เป็นหนึ่งในสถานตรวจสุขภาพที่ IRCC รับรอง', en:'An international migration agency. Its Bangkok clinic is one of the IRCC-approved medical exam sites.'},
+  {k:{en:'Province codes', th:'รหัสย่อมณฑล'}, c:'org', a:false,
+   th:'BC บริติชโคลัมเบีย, AB อัลเบอร์ตา, SK ซัสแคตเชวัน, MB แมนิโทบา, ON ออนแทรีโอ, QC ควิเบก, NS โนวาสโกเชีย',
+   en:'BC British Columbia, AB Alberta, SK Saskatchewan, MB Manitoba, ON Ontario, QC Quebec, NS Nova Scotia.'},
+  {k:{en:'Airport codes', th:'รหัสสนามบิน'}, c:'org', m:['YVR','YYZ','YUL','YYC','YEG','YOW','YWG','YXE','YHZ','YKF','YYJ'],
+   th:'YVR แวนคูเวอร์, YYJ วิกตอเรีย, YYC แคลกะรี, YEG เอดมันตัน, YXE ซัสคาทูน, YWG วินนิเพก, YYZ โตรอนโต, YKF วอเตอร์ลู, YOW ออตตาวา, YUL มอนทรีออล, YHZ แฮลิแฟกซ์',
+   en:'YVR Vancouver, YYJ Victoria, YYC Calgary, YEG Edmonton, YXE Saskatoon, YWG Winnipeg, YYZ Toronto, YKF Waterloo, YOW Ottawa, YUL Montreal, YHZ Halifax.'},
+  /* ---- school short names ---- */
+  {k:'BCIT', f:'British Columbia Institute of Technology', c:'school', th:'สถาบันโพลีเทคนิคของรัฐ เมืองเบอร์นาบี้ บริติชโคลัมเบีย', en:'A public polytechnic in Burnaby, British Columbia.'},
+  {k:'UBC', f:'University of British Columbia', c:'school', th:'มหาวิทยาลัยรัฐ เมืองแวนคูเวอร์ บริติชโคลัมเบีย', en:'A public university in Vancouver, British Columbia.'},
+  {k:'SFU', f:'Simon Fraser University', c:'school', th:'มหาวิทยาลัยรัฐ เมืองเบอร์นาบี้ บริติชโคลัมเบีย', en:'A public university in Burnaby, British Columbia.'},
+  {k:'VCC', f:'Vancouver Community College', c:'school', th:'วิทยาลัยรัฐ เมืองแวนคูเวอร์', en:'A public college in Vancouver.'},
+  {k:'SAIT', f:'Southern Alberta Institute of Technology', c:'school', th:'สถาบันโพลีเทคนิคของรัฐ เมืองแคลกะรี อัลเบอร์ตา', en:'A public polytechnic in Calgary, Alberta.'},
+  {k:'NAIT', f:'Northern Alberta Institute of Technology', c:'school', th:'สถาบันโพลีเทคนิคของรัฐ เมืองเอดมันตัน อัลเบอร์ตา', en:'A public polytechnic in Edmonton, Alberta.'},
+  {k:'NSCC', f:'Nova Scotia Community College', c:'school', th:'วิทยาลัยรัฐของโนวาสโกเชีย', en:'The public college of Nova Scotia.'},
+  {k:'CCTB', f:'Canadian College of Technology and Business', c:'school', th:'วิทยาลัยเอกชนในแวนคูเวอร์ ไม่รับนักศึกษารอบปี 2026', en:'A private college in Vancouver; no 2026 intakes.'},
+  {k:'ILAC', f:'International Language Academy of Canada', c:'school', th:'โรงเรียนภาษาและวิทยาลัยเอกชน ปิดตัวเมื่อกันยายน 2026', en:'A private language school and college group; closed in September 2026.'},
+  {k:'CICCC', f:'Cornerstone International Community College of Canada', c:'school', th:'วิทยาลัยอาชีพเอกชนในแวนคูเวอร์ ถูกระงับการดำเนินงานในปี 2026', en:'A private career college in Vancouver; suspended in 2026.'}
+];
+const GLOSS_UI = {
+  title:{en:'Terms and abbreviations', th:'คำศัพท์และคำย่อ'},
+  sub:{en:n => `${n} terms used in this guide, in plain words. Tap any underlined word on a page to see its meaning there.`, th:n => `${n} คำที่ใช้ในคู่มือนี้ อธิบายแบบเข้าใจง่าย แตะคำที่มีเส้นประใต้คำในหน้าไหนก็ได้เพื่อดูความหมายตรงนั้นเลย`},
+  search:{en:'Search, for example PGWP or tax', th:'ค้นหา เช่น PGWP หรือ ภาษี'},
+  all:{en:'All', th:'ทั้งหมด'}, none:{en:'No term matches. Try another word.', th:'ไม่พบคำที่ค้นหา ลองคำอื่น'},
+  open:{en:'All terms', th:'คำศัพท์ทั้งหมด'}, close:{en:'Close', th:'ปิด'},
+  official:{en:'Official page', th:'หน้าเว็บทางการ'},
+  seeAll:{en:n => `See all ${n} terms`, th:n => `ดูคำศัพท์ทั้งหมด ${n} คำ`},
+  btn:{en:'Terms and abbreviations', th:'คำศัพท์และคำย่อ'}
+};
+/* Simulator text, round 4: tips, rent with utilities, edit hours and wages inside the "where from" panel. */
+Object.assign(SRC, {
+  tipscra:{u:'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-10400-other-employment-income.html', o:{en:'Canada Revenue Agency', th:'กรมสรรพากรแคนาดา (CRA)'}, l:{en:'Line 10400: tips and gratuities are taxable income', th:'Line 10400: ทิปเป็นรายได้ที่ต้องเสียภาษี'}}
+});
+Object.assign(SIM_UI, {
+  tipsL:{en:'Tips per hour, if your job gets them (today)', th:'ทิปเฉลี่ยต่อชั่วโมง ถ้างานได้ทิป (ปัจจุบัน)'},
+  tipsNote:{en:'Tipping is common in Canadian restaurants, bars and cafés (customers often add about 15 to 20% of the bill), but what staff actually receive varies a lot by place and role, and some places share tips with the kitchen. There is no official figure, so this starts at 0; enter what a real employer tells you. Tips count for part-time hours (study months, extra job, breaks) and are taxable income. [[tipscra]]', th:'ร้านอาหาร บาร์ และร้านกาแฟในแคนาดานิยมให้ทิป (ลูกค้ามักให้ประมาณ 15 ถึง 20% ของบิล) แต่ทิปที่พนักงานได้จริงต่างกันมากตามร้านและตำแหน่ง บางร้านแบ่งทิปให้ครัวด้วย ไม่มีตัวเลขทางการ ค่าเริ่มต้นจึงเป็น 0 ถ้านายจ้างจริงบอกตัวเลขค่อยใส่ ทิปคิดกับชั่วโมงงานพาร์ตไทม์ (เดือนที่เรียน งานเสริม ปิดเทอม) และเป็นรายได้ที่ต้องเสียภาษี [[tipscra]]'},
+  tipsU:{en:'tips', th:'ทิป'},
+  rent:{en:'Rent, including water, electricity and heat', th:'ค่าเช่า (รวมค่าน้ำ ค่าไฟ ค่าฮีตเตอร์)'},
+  whyExp:{en:'Defaults come from your housing choice, using Toronto and Vancouver figures raised to your start year. Rent here already includes water, electricity and heat: most shared rooms include them. If a place you find charges electricity separately (often about CAD 50 to 80 a month for a studio, an estimate), add it to rent. Type what you expect to pay in your city. Picking a housing option again puts its defaults back.', th:'ค่าเริ่มต้นมาจากตัวเลือกที่พัก ใช้ตัวเลขของโตรอนโตและแวนคูเวอร์ ปรับเป็นราคาของปีที่เริ่มเรียนแล้ว ค่าเช่าในแอปนี้รวมค่าน้ำ ค่าไฟ และค่าฮีตเตอร์แล้ว (ห้องแชร์ส่วนใหญ่รวมให้) ถ้าห้องที่เจอเก็บค่าไฟแยก (ห้องสตูดิโอมักประมาณ CAD 50 ถึง 80 ต่อเดือน เป็นค่าประมาณ) ให้บวกเพิ่มในช่องค่าเช่า พิมพ์ยอดที่คาดว่าจะจ่ายจริงในเมืองของคุณได้เลย ถ้ากดเลือกที่พักใหม่ ค่าจะกลับเป็นค่าเริ่มต้นของที่พักนั้น'},
+  incEdit:{en:"Type new numbers here (today's amounts; the results adjust them to your start year). The sliders change too.", th:'พิมพ์ตัวเลขใหม่ได้ตรงนี้เลย (เป็นค่าของวันนี้ ผลลัพธ์จะปรับเป็นปีที่เริ่มเรียนให้) แถบเลื่อนจะเปลี่ยนตามด้วย'},
+  inHours:{en:'Study-term hours a week', th:'ชั่วโมงทำงานช่วงเรียนต่อสัปดาห์'},
+  inWage:{en:'Part-time wage per hour', th:'ค่าจ้างพาร์ตไทม์ต่อชั่วโมง'},
+  inTips:{en:'Tips per hour', th:'ทิปต่อชั่วโมง'},
+  inCoopH:{en:'Co-op or full-time hours a week', th:'ชั่วโมง Co-op หรือเต็มเวลาต่อสัปดาห์'},
+  inCoopW:{en:'Co-op wage per hour', th:'ค่าจ้าง Co-op ต่อชั่วโมง'},
+  inSide:{en:'Extra job hours a week (Co-op months)', th:'ชั่วโมงงานเสริมต่อสัปดาห์ (เดือน Co-op)'}
+});
+SIMC.living.shared.note = {en:'Rent CAD 1,150 including water, electricity and heat (a room in shared housing averages CAD 1,146 to 1,220 in Toronto in 2026), food 450, transit, phone and personal 360, health insurance 80 a month. [[uoft]]', th:'ค่าเช่า CAD 1,150 รวมค่าน้ำ ค่าไฟ และค่าฮีตเตอร์ (ห้องในบ้านแชร์ในโตรอนโตปี 2026 เฉลี่ย CAD 1,146 ถึง 1,220) ค่าอาหาร 450 ค่าเดินทาง โทรศัพท์ และของใช้ส่วนตัว 360 ประกันสุขภาพ 80 ต่อเดือน [[uoft]]'};
+SIMC.living.studio.note = {en:'Rent CAD 1,850: what a new tenant pays for a vacant studio (CMHC, October 2025: Vancouver 1,988, Toronto 1,689). Treated as including water and heat; if electricity is extra, add it to rent. Plus food 450, other costs including internet 420, and health insurance 80 a month. [[cmhc]]', th:'ค่าเช่า CAD 1,850 คือราคาที่ผู้เช่าใหม่จ่ายสำหรับห้องสตูดิโอว่าง (CMHC ตุลาคม 2025: แวนคูเวอร์ 1,988 โตรอนโต 1,689) ถือว่ารวมค่าน้ำและค่าฮีตเตอร์แล้ว ถ้าค่าไฟแยก ให้บวกเพิ่มในช่องค่าเช่า บวกค่าอาหาร 450 ค่าใช้จ่ายอื่นรวมอินเทอร์เน็ต 420 และประกันสุขภาพ 80 ต่อเดือน [[cmhc]]'};
+GLOSS.push({k:{en:'Tips', th:'ทิป'}, c:'money', s:'tipscra', m:['ทิป','tips','Tips'],
+  th:'เงินที่ลูกค้าให้พนักงานเพิ่มจากค่าอาหาร พบบ่อยในร้านอาหาร บาร์ และร้านกาแฟ ลูกค้ามักให้ประมาณ 15 ถึง 20% ของบิล แต่ที่พนักงานได้จริงต่างกันมาก ทิปเป็นรายได้ที่ต้องแจ้งและเสียภาษี',
+  en:'Money customers add for service, common in restaurants, bars and cafés (often about 15 to 20% of the bill). What staff actually receive varies a lot. Tips are taxable income you must report.'});
+
+/* The simulator's own word list, rewritten for the current model (round 3). */
+SIM_UI.gloss = [
+  SIM_UI.gloss[0], SIM_UI.gloss[1],
+  {k:{en:'Study term', th:'เทอมเรียน'}, v:{en:'Months with classes. You may work off campus up to 24 hours a week, set with the study-term hours slider.', th:'เดือนที่มีเรียน ทำงานนอกสถาบันได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ ตั้งค่าได้ที่แถบเลื่อนชั่วโมงทำงานช่วงเทอมเรียน'}},
+  {k:{en:'Co-op term', th:'เทอม Co-op'}, v:{en:'A paid work term that is part of the program. IRCC sets no weekly hour limit, so full time is allowed if the employer offers it; many private schools only require about 20 hours a week. Set the hours and wage with their own sliders.', th:'เทอมทำงานแบบได้ค่าจ้างที่เป็นส่วนหนึ่งของหลักสูตร IRCC ไม่จำกัดชั่วโมงต่อสัปดาห์ จึงทำเต็มเวลาได้ถ้านายจ้างให้ แต่โรงเรียนเอกชนหลายแห่งกำหนดแค่ประมาณ 20 ชั่วโมงต่อสัปดาห์ ตั้งชั่วโมงและค่าจ้างได้ที่แถบเลื่อนของ Co-op'}},
+  {k:{en:'Extra part-time job', th:'งานพาร์ตไทม์เสริม'}, v:{en:'A second, separate off-campus job during Co-op months, up to 24 hours a week, paid at your part-time wage.', th:'งานนอกสถาบันอีกงานที่ทำควบคู่ช่วง Co-op ได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ คิดที่ค่าจ้างงานพาร์ตไทม์'}},
+  {k:{en:'Scheduled break', th:'ปิดเทอมตามตาราง'}, v:{en:'A break in the school calendar, such as summer. If it lasts 7 days or more and you study before and after it, you may work full time.', th:'ช่วงหยุดตามปฏิทินของสถาบัน เช่น ปิดเทอมฤดูร้อน ถ้ายาว 7 วันขึ้นไปและเรียนทั้งก่อนและหลังช่วงนั้น ทำงานเต็มเวลาได้'}},
+  {k:{en:'After graduation', th:'หลังเรียนจบ'}, v:{en:'You may keep working full time only while a PGWP application, made before your study permit expired, is waiting for a decision. Without it, you may not work.', th:'ทำงานเต็มเวลาต่อได้เฉพาะระหว่างรอผล PGWP ที่ยื่นก่อน Study Permit หมดอายุ ถ้าไม่ได้ยื่นจะทำงานไม่ได้'}},
+  {k:{en:'Gross pay', th:'รายได้ก่อนหัก'}, v:{en:'Hours a week × hourly wage × 4.33 weeks, before anything is taken off.', th:'ชั่วโมงต่อสัปดาห์ × ค่าจ้างต่อชั่วโมง × 4.33 สัปดาห์ ก่อนหักอะไรเลย'}},
+  {k:{en:'Take-home pay', th:'รายได้สุทธิ'}, v:{en:'What reaches your bank after CPP (5.95%), EI (1.63%) and income tax. The share kept falls as pay rises: 93% up to CAD 1,700 a month, then 89%, 84%, 82% and 80% above CAD 3,600. Part of the tax may come back at tax time, and tax-resident students can claim the tuition credit. [[payroll]] [[tuitioncr]]', th:'เงินที่เข้าบัญชีจริงหลังหัก CPP (5.95%) EI (1.63%) และภาษีเงินได้ สัดส่วนที่ได้รับลดลงเมื่อรายได้สูงขึ้น: 93% ถ้าไม่เกิน CAD 1,700 ต่อเดือน แล้วเป็น 89% 84% 82% และ 80% เมื่อเกิน CAD 3,600 ภาษีบางส่วนอาจได้คืนตอนยื่นภาษี และนักศึกษาที่เป็นผู้มีถิ่นที่อยู่ทางภาษีใช้สิทธิ์ลดหย่อนค่าเล่าเรียนได้ [[payroll]] [[tuitioncr]]'}},
+  {k:{en:'Net per month (+ or −)', th:'คงเหลือต่อเดือน (+ หรือ −)'}, v:{en:'Take-home pay minus living costs. A minus number means you use savings that month.', th:'รายได้สุทธิ ลบ ค่าครองชีพ ถ้าติดลบแปลว่าเดือนนั้นต้องใช้เงินเก็บ'}},
+  {k:{en:'Break-even hours', th:'ชั่วโมงคุ้มทุน'}, v:{en:'The weekly work hours at which pay exactly equals living costs.', th:'จำนวนชั่วโมงทำงานต่อสัปดาห์ที่ทำให้รายได้เท่ากับค่าครองชีพพอดี'}},
+  {k:{en:'Compulsory school fees', th:'ค่าธรรมเนียมบังคับ'}, v:{en:'Student, technology and activity fees charged on top of tuition. Find the amount on your LOA.', th:'ค่ากิจกรรมนักศึกษา ค่าเทคโนโลยี และค่าอื่นที่เก็บเพิ่มจากค่าเล่าเรียน ดูยอดได้ใน LOA'}},
+  {k:{en:'Travel to and from Canada', th:'ค่าเดินทางไปและกลับแคนาดา'}, v:{en:'IRCC asks you to show money for the trip there and back. The estimate is CAD 2,500; type your own flight quote if you have one.', th:'IRCC ให้แสดงเงินค่าเดินทางไปและกลับด้วย ค่าประมาณคือ CAD 2,500 ถ้ามีราคาตั๋วจริงพิมพ์ใส่เองได้'}},
+  {k:{en:'Setup reserve', th:'เงินสำรองตั้งตัว'}, v:{en:'Money for your first weeks: rent deposit, household items, winter clothes. Not required by IRCC, but you will need it.', th:'เงินใช้ช่วงแรกที่ไปถึง เช่น เงินประกันห้อง ของใช้ในบ้าน เสื้อกันหนาว IRCC ไม่ได้บังคับ แต่ต้องใช้จริง'}},
+  SIM_UI.gloss.find(g => T(g.k) === T(SIM_UI.health)) || {k:SIM_UI.health, v:{en:'Included at CAD 80 a month.', th:'รวมไว้ที่เดือนละ CAD 80'}},
+  {k:{en:"Today's price and start year", th:'ราคาปัจจุบัน กับ ปีที่เริ่มเรียน'}, v:{en:"Sliders use today's prices. The results add estimated yearly increases up to your start year. Amounts you type in the results are taken as start-year amounts.", th:'แถบเลื่อนใช้ราคาปัจจุบัน ผลลัพธ์จะบวกอัตราเพิ่มรายปีโดยประมาณจนถึงปีที่เริ่มเรียน ส่วนยอดที่พิมพ์เองในผลลัพธ์ถือเป็นยอดของปีที่เริ่มเรียน'}},
+  {k:{en:'Your amount', th:'ยอดที่คุณใส่'}, v:{en:'A line you typed over with your own quote. Tap "Use default" to return to the estimate.', th:'รายการที่คุณพิมพ์ยอดจริงทับไว้ กด "ใช้ค่าเริ่มต้น" เพื่อกลับไปใช้ค่าประมาณ'}},
+  {k:{en:'Live exchange rate', th:'อัตราแลกเปลี่ยนล่าสุด'}, v:{en:'Read automatically every day, so every THB amount follows it. Type your own rate to use your bank\'s.', th:'ดึงอัตโนมัติทุกวัน ตัวเลขเงินบาททุกยอดจึงปรับตาม พิมพ์อัตราเองได้ถ้าจะใช้อัตราของธนาคารคุณ'}}
+];
+
 const READY_UI = {
   h1:{en:'Test the waters in Canada, then decide how far to go.', th:'ลองใช้ชีวิตที่แคนาดาก่อน แล้วค่อยตัดสินใจว่าจะไปไกลแค่ไหน'},
   lead:{en:'An interactive guide for Thai professionals: compare private Co-op, public college Co-op and a master\'s degree, pick a field that still leads to PR, and check the budget before you commit.', th:'คู่มือแบบอินเทอร์แอกทีฟสำหรับคนทำงานชาวไทย: เปรียบเทียบ Co-op เอกชน Co-op วิทยาลัยรัฐ และปริญญาโท เลือกสาขาที่ยังต่อยอดสู่ PR ได้ และตรวจงบประมาณก่อนตัดสินใจ'},
@@ -1907,8 +2297,9 @@ function viewStart(){
       <div class="card">
         
         <h2 class="text-[18px] font-semibold mb-1">${T(A.glossT)}</h2>
-        
-        ${A.gloss.map(g => `<div class="py-2" style="border-top:1px solid var(--line)"><div class="font-semibold text-[14.5px]">${g.k}</div><div class="muted text-[14px]">${T(g.v)}</div></div>`).join('')}
+
+        ${['DLI','LOA','PAL','Study Permit','Co-op','PGWP','SIN','PR'].map(k => GLOSS.find(e => e.k === k)).filter(Boolean).map(e => `<div class="py-2" style="border-top:1px solid var(--line)"><div class="font-semibold text-[14.5px]">${esc(gk(e))}${e.f ? ` <span class="faint font-normal text-[12.5px]">${esc(e.f)}</span>` : ''}</div><div class="muted text-[14px]">${esc(gtxt(e))}</div></div>`).join('')}
+        <button class="btn btn-ghost mt-2" style="font-size:14px" data-act="gloss-open">${ic('book-open-text','icon-sm')}${T(GLOSS_UI.seeAll)(GLOSS.length)}</button>
       </div>
       </div>
     </div>`;
@@ -2462,8 +2853,10 @@ function simCalc(o){
   const cw = val(s.coopWage, ty.coopWage) * f('wage'), ftH = val(s.coopHours, ty.coopH);
   const net = g => g * takeHome(g);
   const side = val(s.side, 0);
-  const gS = s.hours * wage * SIMC.weeks, gC = (ftH * cw + side * wage) * SIMC.weeks, gB = ftH * wage * SIMC.weeks, gG = s.pgwp === false ? 0 : gB;
-  const netC20 = net((20 * cw + side * wage) * SIMC.weeks);
+  /* tips: average per hour in part-time service jobs (study months, extra job, breaks, after graduation); taxable like pay */
+  const tips = val(s.tips, 0) * f('wage'), pt = wage + tips;
+  const gS = s.hours * pt * SIMC.weeks, gC = (ftH * cw + side * pt) * SIMC.weeks, gB = ftH * pt * SIMC.weeks, gG = s.pgwp === false ? 0 : gB;
+  const netC20 = net((20 * cw + side * pt) * SIMC.weeks);
   const incS = net(gS), incC = net(gC), incB = net(gB), incG = net(gG);
   const plan = planOf(s), N = plan.length;
   const months = []; let bal = proof, low = {v:bal, m:0}, runOut = 0;
@@ -2478,12 +2871,12 @@ function simCalc(o){
   });
   const cnt = k => plan.filter(p => p === k).length;
   const show = tu1 + proof + travel;
-  return {s, ty, n, lv, exp, wage, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), tuY, fees, tu1, tu2, proof, pY, travel, setup, incS, incC, incB, incG, plan, N, years:N / 12, months,
+  return {s, ty, n, lv, exp, wage, tips, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), tuY, fees, tu1, tu2, proof, pY, travel, setup, incS, incC, incB, incG, plan, N, years:N / 12, months,
     gS, gC, gB, gG, fac:{tuition:f('tuition'), rent:f('rent'), cpi:f('cpi'), health:f('health'), wage:f('wage'), proof:proofF},
     end:bal, low, runOut, runOutY1: runOut && runOut <= 12 ? runOut : 0, extra:Math.max(0, -low.v),
     mS:cnt('S'), mC:cnt('C'), mB:cnt('B'), mG:cnt('G'), netS:incS - exp, netC:incC - exp, netB:incB - exp, netG:incG - exp,
     show, total:show + setup,
-    breakEvenHrs:exp / (wage * SIMC.weeks * 0.93), cover:Math.round(incS / exp * 100),
+    breakEvenHrs:exp / (pt * SIMC.weeks * 0.93), cover:Math.round(incS / exp * 100),
     tuTotal:tu1 + (N > 12 ? tu2 : 0)};
 }
 
@@ -2519,6 +2912,7 @@ function viewBudget(){
         ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l])), T(SIMC.living[s.living].note))}
         ${slider('hours', T(M.hours), 0, 24, 1, T(M.hoursNote))}
         ${slider('wage', T(M.wage), 15, 25, 0.25, T(M.wageNote))}
+        ${slider('tips', T(M.tipsL), 0, 15, 0.5, T(M.tipsNote), 0)}
         ${hasFT ? slider('coopHours', T(M.coopHours), 10, 40, 1, T(priv ? M.ftNotePriv : M.ftNote), ty.coopH) : ''}
         ${hasC ? slider('coopWage', T(M.coopWage), 0, 40, 0.25, T(ty.cwNote), ty.coopWage) : ''}
         ${hasC ? slider('side', T(M.sideL), 0, 24, 1, T(M.sideNote), 0) : ''}
@@ -2537,6 +2931,7 @@ function viewBudget(){
     <details class="card mt-4">
       <summary class="font-semibold text-[17px] cursor-pointer">${ic('book-open-text','icon-sm')} ${T(M.glossT)}</summary>
       <dl class="mt-3 grid sm:grid-cols-2 gap-x-8">${M.gloss.map(g => `<div class="py-3" style="border-top:1px solid var(--line)"><dt class="font-semibold text-[15px]">${T(g.k)}</dt><dd class="muted text-[14.5px] mt-1">${T(g.v)}</dd></div>`).join('')}</dl>
+      <button class="btn btn-ghost mt-2" style="font-size:14px" data-act="gloss-open">${ic('book-open-text','icon-sm')}${T(GLOSS_UI.seeAll)(GLOSS.length)}</button>
     </details>
     <p class="faint text-[13px] mt-4" style="max-width:90ch">${T(M.assume)}</p>`;
 }
@@ -2813,9 +3208,9 @@ async function loadFx(force){
 let LIST_EDIT = false;
 function amtRow(k, label, c, unit){
   const M = SIM_UI, m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5, r = S.sim.rate || 24;
-  const shown = Math.round(m.v * m.fac * (unit === 'thb' ? r : 1));
-  return `<div class="row erow"><div class="min-w-0"><label for="amt-${k}">${label}</label><div class="faint text-[12.5px]">${T(M.defIs)} ${mny(m.def * m.fac, {cur:unit})}${custom ? ` · <button class="linkbtn" data-act="amtdef" data-v="${k}">${T(M.useDef)}</button>` : ''}</div></div>
-    <span class="amt-in"><span class="faint text-[12px]">${unit.toUpperCase()}</span><input class="numin num" id="amt-${k}" type="number" inputmode="decimal" min="0" step="any" data-amt="${k}" data-unit="${unit}" value="${shown}"></span></div>`;
+  const now = m.v * m.fac, shown = Math.round(now * (unit === 'thb' ? r : 1));
+  return `<div class="row erow"><div class="min-w-0"><label for="amt-${k}">${label}</label><div class="faint text-[12.5px]">${T(M.defIs)} ${mny(m.def * m.fac)}${custom ? ` · <button class="linkbtn" data-act="amtdef" data-v="${k}">${T(M.useDef)}</button>` : ''}</div></div>
+    <span class="amt-col"><span class="amt-in"><span class="faint text-[12px]">${unit.toUpperCase()}</span><input class="numin num" id="amt-${k}" type="number" inputmode="decimal" min="0" step="any" data-amt="${k}" data-unit="${unit}" value="${shown}"></span>${curOf() === 'both' ? `<span class="msub">≈ ${thb(now * r)}</span>` : ''}</span></div>`;
 }
 function proofStatusHtml(){
   const M = SIM_UI, s = S.sim, a = fmt(fundsAmt()), d = fdate(fundsEff() + 'T00:00:00');
@@ -2836,15 +3231,25 @@ function autoLineHtml(){
     <button class="linkbtn inline-flex items-center gap-1" data-act="refresh" ${busy ? 'aria-busy="true"' : ''}>${ic('refresh-cw','icon-sm')}${T(busy ? M.refreshing : M.refresh)}</button>`;
 }
 function whyPanel(c, one, unit){
-  const M = SIM_UI, s = c.s, wk = SIMC.weeks;
+  const M = SIM_UI, s = c.s, wk = SIMC.weeks, both = curOf() === 'both';
+  const thbLine = (v, o = {}) => both ? `<span class="msub">${mny(v, Object.assign({cur:'thb'}, o))}</span>` : '';
   const pct = g => Math.round(takeHome(g) * 100);
-  const res = (g, inc) => g > 0 ? ` = ${one(g)} ${T(M.beforeDed)}<br>${T(M.kept)} ${pct(g)}% = <b class="num">${one(inc)}</b>` : ` = <b class="num">${one(0)}</b>`;
+  const hr = w => `${one(w, {dec:true})}${T(M.hr)}`;
+  const ptRate = c.tips > 0 ? `(${one(c.wage, {dec:true})} + ${T(M.tipsU)} ${one(c.tips, {dec:true})})${T(M.hr)}` : hr(c.wage);
+  const res = (g, inc) => g > 0
+    ? ` = ${one(g)} ${T(M.beforeDed)}<br>${T(M.kept)} ${pct(g)}% = <b class="num">${one(inc)}</b>${thbLine(inc)}`
+    : ` = <b class="num">${one(0)}</b>`;
   const inc = [];
-  inc.push([T(M.study), `${s.hours} ${T(M.wkU)} × ${one(c.wage, {dec:true})}${T(M.hr)} × ${wk} ${T(M.weeksU)}` + res(c.gS, c.incS)]);
-  if (c.mC) inc.push([T(M.coop), `(${c.ftH} ${T(M.wkU)} × ${one(c.cw, {dec:true})}${T(M.hr)}${c.side ? ` + ${c.side} ${T(M.wkU)} ${T(M.sideU)} × ${one(c.wage, {dec:true})}` : ''}) × ${wk} ${T(M.weeksU)}` + res(c.gC, c.incC)]);
-  if (c.mB) inc.push([T(M.brkS), `${c.ftH} ${T(M.wkU)} × ${one(c.wage, {dec:true})}${T(M.hr)} × ${wk} ${T(M.weeksU)}` + res(c.gB, c.incB)]);
-  if (c.mG) inc.push([T(M.gradS), s.pgwp === false ? `${T(M.noPay)}` + res(0, 0) : `${c.ftH} ${T(M.wkU)} × ${one(c.wage, {dec:true})}${T(M.hr)} × ${wk} ${T(M.weeksU)}` + res(c.gG, c.incG)]);
-  const go = (id, l) => `<button class="btn btn-ghost" style="padding:3px 10px;font-size:13.5px" data-act="focus" data-v="${id}">${ic('sliders-horizontal','icon-sm')}${T(l)}</button>`;
+  inc.push([T(M.study), `${s.hours} ${T(M.wkU)} × ${ptRate} × ${wk} ${T(M.weeksU)}` + res(c.gS, c.incS)]);
+  if (c.mC) inc.push([T(M.coop), `(${c.ftH} ${T(M.wkU)} × ${hr(c.cw)}${c.side ? ` + ${c.side} ${T(M.wkU)} ${T(M.sideU)} × ${ptRate}` : ''}) × ${wk} ${T(M.weeksU)}` + res(c.gC, c.incC)]);
+  if (c.mB) inc.push([T(M.brkS), `${c.ftH} ${T(M.wkU)} × ${ptRate} × ${wk} ${T(M.weeksU)}` + res(c.gB, c.incB)]);
+  if (c.mG) inc.push([T(M.gradS), s.pgwp === false ? `${T(M.noPay)}` + res(0, 0) : `${c.ftH} ${T(M.wkU)} × ${ptRate} × ${wk} ${T(M.weeksU)}` + res(c.gG, c.incG)]);
+  /* type hours and wages right here (today's values, same as the sliders) */
+  const box = (k, label, v, step, u) => `<label class="inbox"><span class="text-[13px] muted">${label}</span><span class="flex items-center gap-1"><input class="numin num" type="number" inputmode="decimal" min="0" step="${step}" data-simc="${k}" value="${v}">${u ? `<span class="faint text-[12px]">${u}</span>` : ''}</span></label>`;
+  const ty = c.ty, cadHr = 'CAD' + T(M.hr);
+  const boxes = [box('hours', T(M.inHours), s.hours, 1, T(M.wkU)), box('wage', T(M.inWage), Number(s.wage), 0.25, cadHr), box('tips', T(M.inTips), val(s.tips, 0), 0.5, cadHr)];
+  if (c.plan.some(p => p !== 'S')) boxes.push(box('coopHours', T(M.inCoopH), c.ftH, 1, T(M.wkU)));
+  if (c.mC) boxes.push(box('coopWage', T(M.inCoopW), val(s.coopWage, ty.coopWage), 0.25, cadHr), box('side', T(M.inSide), c.side, 1, T(M.wkU)));
   const lc = [['rentC', M.rent], ['foodC', M.food], ['otherC', M.other], ['healthC', M.health]];
   const anyLc = lc.some(([k]) => S.sim[k] != null);
   const nets = [[T(M.study), c.incS, c.netS]];
@@ -2858,15 +3263,16 @@ function whyPanel(c, one, unit){
     <p class="muted text-[13.5px]">${T(M.whyInc)}</p>
     <div class="mt-1">${inc.map(([l, f]) => `<div class="mline"><span class="font-medium">${l}</span><span class="f" style="text-align:right">${f}</span></div>`).join('')}</div>
     <div class="faint text-[13px] mt-1">${T(M.m1Half)}${c.n ? ' ' + T(M.wageProj)(s.intake, Number(s.wage).toFixed(2), c.wage.toFixed(2)) : ''}</div>
-    <div class="flex flex-wrap items-center gap-2 mt-2"><span class="text-[13.5px] muted">${T(M.incEdit)}</span>${go('sim-hours', M.goHours)}${go('sim-wage', M.goWage)}${c.plan.some(p => p !== 'S') ? go('sim-coopHours', M.goCoopH) : ''}${c.mC ? go('sim-coopWage', M.goCoopW) : ''}</div>
+    <p class="text-[13.5px] muted mt-3">${T(M.incEdit)}</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">${boxes.join('')}</div>
     <h4>${T(M.whyExpT)}</h4>
     <p class="muted text-[13.5px] mb-1">${T(M.whyExp)}</p>
     ${lc.map(([k, l]) => amtRow(k, T(l), c, unit)).join('')}
-    <div class="row font-semibold"><span>${T(M.sumExp)}</span><span class="num">${one(c.exp)}</span></div>
+    <div class="row font-semibold"><span>${T(M.sumExp)}</span><span class="num">${mny(c.exp, {stack:true})}</span></div>
     ${anyLc ? `<button class="linkbtn text-[13.5px] mt-1" data-act="lcreset">${T(M.resetAll)}</button>` : ''}
     <h4>${T(M.whyNetT)}</h4>
     <p class="muted text-[13.5px]">${T(M.whyNet)}</p>
-    ${nets.map(([l, i, n]) => `<div class="mline"><span class="font-medium">${l}</span><span class="f">${one(i)} − ${one(c.exp)} = <b class="${n < 0 ? 'neg' : 'pos'}">${one(n, {sign:true})}</b> ${T(M.mo)}</span></div>`).join('')}
+    ${nets.map(([l, i, n]) => `<div class="mline"><span class="font-medium">${l}</span><span class="f" style="text-align:right">${one(i)} − ${one(c.exp)} = <b class="${n < 0 ? 'neg' : 'pos'}">${one(n, {sign:true})}</b> ${T(M.mo)}${thbLine(n, {sign:true})}</span></div>`).join('')}
   </details>`;
 }
 /* Commit an amount typed in the results; keep focus on whatever field the user moved to. */
@@ -2875,12 +3281,18 @@ document.addEventListener('pointerdown', () => { ptrDown = true; }, true);
 document.addEventListener('pointerup', () => { ptrDown = false; if (simPending) setTimeout(flushSim, 0); }, true);
 function flushSim(){
   simPending = false;
-  const a = document.activeElement, k = a && a.dataset && a.dataset.amt;
+  const a = document.activeElement, d = a && a.dataset, sel = d && (d.amt ? `[data-amt="${d.amt}"]` : d.simc ? `[data-simc="${d.simc}"]` : '');
   renderSimOut(); icons(); save();
-  if (k) { const n = document.querySelector(`[data-amt="${k}"]`); if (n) { n.focus({preventScroll:true}); try { n.select(); } catch (e) {} } }
+  if (sel) { const n = document.querySelector(sel); if (n) { n.focus({preventScroll:true}); try { n.select(); } catch (e) {} } }
 }
 function queueFlush(){ if (ptrDown) simPending = true; else setTimeout(flushSim, 0); }
 document.addEventListener('change', e => {
+  const sk = e.target.dataset && e.target.dataset.simc;
+  if (sk) {   /* hours and wages typed in the "where from" panel: same limits as the sliders */
+    const v = parseFloat(e.target.value), lim = {hours:[0,24], wage:[5,100], tips:[0,50], coopHours:[0,60], coopWage:[0,100], side:[0,24]}[sk];
+    if (isFinite(v) && lim) S.sim[sk] = Math.min(lim[1], Math.max(lim[0], v));
+    queueFlush(); return;
+  }
   const k = e.target.dataset && e.target.dataset.amt; if (!k) return;
   let v = parseFloat(e.target.value);
   if (!isFinite(v) || v < 0 || (v === 0 && ['tuition','proof','rentC','foodC'].includes(k))) { queueFlush(); return; }
@@ -2891,7 +3303,7 @@ document.addEventListener('change', e => {
   queueFlush();
 });
 document.addEventListener('keydown', e => {
-  if (!e.target.dataset || !e.target.dataset.amt) return;
+  if (!e.target.dataset || !(e.target.dataset.amt || e.target.dataset.simc)) return;
   if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
   else if (e.key === 'Escape' && LIST_EDIT) { LIST_EDIT = false; renderSimOut(); icons(); }
 });
@@ -2926,6 +3338,7 @@ function renderSimOut(){
   set('lab-side', c.side + ' ' + T(M.wk));
   set('lab-fees', cad(c.s.fees === undefined ? SIMC.types[s.type].fees : c.s.fees));
   set('lab-wage', 'CAD ' + Number(s.wage).toFixed(2) + T(M.hr));
+  set('lab-tips', 'CAD ' + val(s.tips, 0).toFixed(2) + T(M.hr));
   set('lab-coopWage', 'CAD ' + val(s.coopWage, SIMC.types[s.type].coopWage).toFixed(2) + T(M.hr));
   const cu = curOf(), r = s.rate || 24;
   /* one currency for short lines: THB when the user picked THB, otherwise CAD */
@@ -2988,6 +3401,7 @@ function renderSimOut(){
     const txt = sp.textContent, short = txt.replace(/\D+/g, '').trim();
     sp.textContent = short && w * short.length / Math.max(1, txt.length) <= room ? short : '';
   });
+  linkTerms(out);
 }
 function bindTips(root){
   let tip = document.getElementById('viz-tip');
@@ -3166,6 +3580,117 @@ function refsHtml(used){
     <ol class="reflist">${used.map((k,i) => { const s = SRC[k], host = new URL(s.u).hostname.replace(/^www\./,'');
       return `<li id="ref-${i+1}"><span class="rn">[${i+1}]</span><span><a href="${s.u}" target="_blank" rel="noopener noreferrer">${T(s.l)}</a><span class="faint">. ${T(s.o)}, ${host}</span> <span style="color:var(--blue)">${ic('external-link','icon-sm')}</span></span></li>`; }).join('')}</ol>`;
 }
+/* ---------- glossary: full sheet, tap-to-explain popover, automatic term links ---------- */
+const gk = e => T(e.k);
+const gtxt = e => { const v = S.lang === 'th' ? e.th : e.en; return typeof v === 'function' ? v() : v; };
+const gid = e => 'g-' + (typeof e.k === 'string' ? e.k : e.k.en).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+let GL_CAT = 'all', GL_Q = '', TERM_RE = null, TERM_MAP = null, TERM_BTN = null;
+function termIndex(){
+  if (TERM_RE) return;
+  TERM_MAP = new Map();
+  GLOSS.forEach(e => { if (e.a === false) return; (e.m || [typeof e.k === 'string' ? e.k : e.k.en]).forEach(t => { if (!TERM_MAP.has(t)) TERM_MAP.set(t, e); }); });
+  const keys = [...TERM_MAP.keys()].sort((a, b) => b.length - a.length).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  TERM_RE = new RegExp('(' + keys.join('|') + ')(?![A-Za-z0-9])', 'g');
+}
+/* Places a word is never turned into a link: controls, headings, numbers, charts, the map. */
+const TERM_SKIP = 'a,button,label,summary,input,textarea,select,svg,sup,code,h1,h2,h3,th,dt,.seg,.badge,.eyebrow,.tline,.vlegend,.term,.leaflet-container,[data-act],[data-cite],.num,.hero,.amt,.f,#sim-mini';
+function linkTerms(root, skipIn){
+  if (!root) return; termIndex();
+  const seen = new Map();   /* card -> glossary entries already linked in it, so each term is underlined once per card */
+  const flexy = new Map();   /* text sitting directly in a flex or grid box would split the line, so leave it */
+  const isFlex = p => { if (!flexy.has(p)) flexy.set(p, /flex|grid/.test(getComputedStyle(p).display)); return flexy.get(p); };
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode: n => {
+    const p = n.parentElement;
+    return !p || n.nodeValue.trim().length < 2 || p.closest(TERM_SKIP) || (skipIn && p.closest(skipIn)) || isFlex(p) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }});
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n => {
+    const txt = n.nodeValue, block = n.parentElement.closest('.card, details, .tl-step') || root;
+    let set = seen.get(block); if (!set) { set = new Set(); seen.set(block, set); }
+    const parts = []; let m, last = 0; TERM_RE.lastIndex = 0;
+    while ((m = TERM_RE.exec(txt))) {
+      const t = m[1], i = m.index, e = TERM_MAP.get(t);
+      if (/^[A-Za-z]/.test(t) && i > 0 && /[A-Za-z0-9-]/.test(txt[i - 1])) continue;   /* whole words only */
+      if (set.has(e)) continue;
+      set.add(e); parts.push([last, i, t, e]); last = i + t.length;
+    }
+    if (!parts.length) return;
+    const df = document.createDocumentFragment();
+    parts.forEach(([from, i, t, e]) => {
+      if (i > from) df.append(txt.slice(from, i));
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'term'; b.dataset.term = gid(e); b.textContent = t; b.setAttribute('aria-expanded', 'false');
+      df.append(b);
+    });
+    if (last < txt.length) df.append(txt.slice(last));
+    n.replaceWith(df);
+  });
+}
+function hideTerm(){ const p = document.getElementById('term-pop'); if (p) p.classList.remove('on'); if (TERM_BTN) TERM_BTN.setAttribute('aria-expanded', 'false'); TERM_BTN = null; }
+function showTerm(btn){
+  const e = GLOSS.find(x => gid(x) === btn.dataset.term); if (!e) return;
+  if (TERM_BTN === btn) { hideTerm(); return; }
+  hideTerm();
+  let pop = document.getElementById('term-pop');
+  if (!pop) { pop = document.createElement('div'); pop.id = 'term-pop'; pop.setAttribute('role', 'dialog'); document.body.appendChild(pop); }
+  const U = GLOSS_UI;
+  pop.setAttribute('aria-label', gk(e));
+  pop.innerHTML = `
+    <div class="flex items-start gap-2"><div class="min-w-0"><div class="font-semibold text-[16px]">${esc(gk(e))}</div>${e.f ? `<div class="faint text-[13px]">${esc(e.f)}</div>` : ''}</div>
+      <button class="tb-btn ml-auto" style="width:30px;height:30px;margin:-4px -6px 0 0" data-act="term-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
+    <p class="text-[14.5px] mt-2">${esc(gtxt(e))}</p>
+    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[13.5px]">
+      ${e.s && SRC[e.s] ? `<a href="${SRC[e.s].u}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1">${ic('external-link','icon-sm')}${T(U.official)}</a>` : ''}
+      <button class="linkbtn inline-flex items-center gap-1" data-act="gloss-open" data-v="${gid(e)}">${ic('book-open-text','icon-sm')}${T(U.open)}</button></div>`;
+  icons();
+  TERM_BTN = btn; TERM_Y = scrollY; btn.setAttribute('aria-expanded', 'true');
+  const r = btn.getBoundingClientRect(), w = Math.min(360, innerWidth - 24);
+  pop.style.width = w + 'px'; pop.classList.add('on');
+  pop.style.left = Math.max(12, Math.min(innerWidth - w - 12, r.left + r.width / 2 - w / 2)) + 'px';
+  const h = pop.offsetHeight, below = r.bottom + 8;
+  pop.style.top = (below + h > innerHeight - 96 && r.top - h - 8 > 64 ? r.top - h - 8 : Math.min(below, innerHeight - h - 12)) + 'px';
+}
+function glossShell(){
+  const U = GLOSS_UI;
+  return `<div class="gl-head">
+      <div class="flex items-center gap-2"><span style="color:var(--blue)">${ic('book-open-text')}</span><h2 id="gloss-title" class="text-[20px] font-bold">${T(U.title)}</h2>
+        <button class="tb-btn ml-auto" data-act="gloss-close" aria-label="${esc(T(U.close))}">${ic('x')}</button></div>
+      <p class="muted text-[14px] mt-1">${T(U.sub)(GLOSS.length)}</p>
+      <input id="gloss-q" class="gl-search" type="search" autocomplete="off" placeholder="${esc(T(U.search))}" aria-label="${esc(T(U.search))}" value="${esc(GL_Q)}" data-gloss-q>
+      <div class="gl-cats" role="group" aria-label="${esc(T(U.title))}">${[['all', U.all], ...GLOSS_CATS].map(([k, l]) => `<button class="${GL_CAT === k ? 'on' : ''}" aria-pressed="${GL_CAT === k}" data-act="gloss-cat" data-v="${k}">${T(l)}</button>`).join('')}</div>
+    </div>
+    <div class="gl-body" id="gloss-list"></div>`;
+}
+function renderGlossList(){
+  const box = document.getElementById('gloss-list'); if (!box) return;
+  const q = GL_Q.trim().toLowerCase(), txt = v => typeof v === 'function' ? v() : (v || '');
+  const hay = e => [typeof e.k === 'string' ? e.k : e.k.en + ' ' + e.k.th, e.f, ...(e.m || []), txt(e.th), txt(e.en)].join(' ').toLowerCase();
+  const html = GLOSS_CATS.filter(([k]) => GL_CAT === 'all' || GL_CAT === k).map(([k, l]) => {
+    const items = GLOSS.filter(e => e.c === k && (!q || hay(e).includes(q)));
+    if (!items.length) return '';
+    return `<section><h3 class="grp" style="margin-top:18px">${T(l)}</h3>${items.map(e => `
+      <div class="gl-item" id="${gid(e)}"><div class="font-semibold text-[15px]">${esc(gk(e))}${e.f ? ` <span class="faint font-normal text-[13px]">${esc(e.f)}</span>` : ''}</div>
+        <p class="muted text-[14px] mt-0.5">${esc(gtxt(e))}</p>
+        ${e.s && SRC[e.s] ? `<a class="text-[13px] inline-flex items-center gap-1 mt-1" href="${SRC[e.s].u}" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(GLOSS_UI.official)}</a>` : ''}</div>`).join('')}</section>`;
+  }).join('');
+  box.innerHTML = html || `<p class="muted text-center" style="margin-top:32px">${T(GLOSS_UI.none)}</p>`;
+  icons();
+}
+function openGloss(focusId){
+  hideTerm();
+  const d = document.getElementById('gloss-dlg'); if (!d) return;
+  if (focusId) { GL_CAT = 'all'; GL_Q = ''; }
+  d.innerHTML = glossShell(); renderGlossList(); icons();
+  if (!d.open) { try { d.showModal(); } catch (e) { d.setAttribute('open', ''); } }
+  if (focusId) {
+    const el = document.getElementById(focusId);
+    if (el) { el.scrollIntoView({block:'center'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1800); }
+  }
+}
+document.addEventListener('input', e => { if (e.target.matches && e.target.matches('[data-gloss-q]')) { GL_Q = e.target.value; renderGlossList(); } });
+let TERM_Y = 0;   /* close the popover only after a real scroll, not a leftover smooth-scroll nudge */
+window.addEventListener('scroll', () => { if (TERM_BTN && Math.abs(scrollY - TERM_Y) > 40) hideTerm(); }, {passive:true});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && TERM_BTN) hideTerm(); });
+
 function render(keepScroll){
   if (!VIEWS[S.tab]) S.tab = 'ready';
   document.documentElement.lang = S.lang;
@@ -3182,6 +3707,9 @@ function render(keepScroll){
   tb.innerHTML = ic(dark ? 'sun' : 'moon');
   tb.setAttribute('aria-label', T(dark ? {en:'Switch to light theme', th:'เปลี่ยนเป็นธีมสว่าง'} : {en:'Switch to dark theme', th:'เปลี่ยนเป็นธีมมืด'}));
   tb.title = tb.getAttribute('aria-label');
+  const gb = document.getElementById('gloss-btn');
+  gb.innerHTML = ic('book-open-text'); gb.setAttribute('aria-label', T(GLOSS_UI.btn)); gb.title = T(GLOSS_UI.btn);
+  hideTerm();
   document.getElementById('btabs').innerHTML = UI.tabs.map(t => `<button class="${S.tab===t.id?'on':''}" role="tab" aria-selected="${S.tab===t.id}" aria-label="${T(t.l)}" data-act="tab" data-v="${t.id}">${ic(t.icon)}<span>${T(t.s)}</span></button>`).join('');
   document.getElementById('disclaimer').textContent = T(UI.disclaimer);
   document.getElementById('links').innerHTML = `
@@ -3195,11 +3723,18 @@ function render(keepScroll){
   renderSimOut(); updateChip(); updateRefs();
   initMap();
   icons();
+  linkTerms(app, '#sim-out');
+  const gd = document.getElementById('gloss-dlg');
+  if (gd && gd.open) { gd.innerHTML = glossShell(); renderGlossList(); icons(); }
   if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
   save();
 }
 
 document.addEventListener('click', e => {
+  const tm = e.target.closest('.term');
+  if (tm) { e.preventDefault(); showTerm(tm); return; }
+  if (TERM_BTN && !e.target.closest('#term-pop')) hideTerm();
+  if (e.target.id === 'gloss-dlg') { e.target.close(); return; }   /* tap on the dimmed backdrop */
   const c = e.target.closest('[data-cite]');
   if (c) {
     e.preventDefault();
@@ -3237,12 +3772,16 @@ document.addEventListener('click', e => {
   else if (act === 'amtdef') { amtDefault(v); queueFlush(); }
   else if (act === 'lcreset') { ['rentC','foodC','otherC','healthC'].forEach(k => { S.sim[k] = null; }); queueFlush(); }
   else if (act === 'refresh') { loadFx(true); loadLive(true); }
+  else if (act === 'gloss-open') { openGloss(v); }
+  else if (act === 'gloss-close') { const d = document.getElementById('gloss-dlg'); if (d && d.open) d.close(); }
+  else if (act === 'gloss-cat') { GL_CAT = v; document.querySelectorAll('.gl-cats button').forEach(x => { x.classList.toggle('on', x.dataset.v === v); x.setAttribute('aria-pressed', x.dataset.v === v); }); renderGlossList(); const gl = document.getElementById('gloss-list'); if (gl) gl.scrollTop = 0; }
+  else if (act === 'term-close') { hideTerm(); }
   else if (act === 'focus') { const el = document.getElementById(v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.focus({preventScroll:true}); } }
 });
 document.addEventListener('input', e => {
   const k = e.target.dataset.sim; if (!k) return;
   const v = parseFloat(e.target.value);
-  if (!isFinite(v) || v < 0 || (v === 0 && !['hours','coopWage','fees'].includes(k))) return;
+  if (!isFinite(v) || v < 0 || (v === 0 && !['hours','coopWage','fees','side','tips'].includes(k))) return;
   S.sim[k] = v; if (k === 'rate') S.sim.rateAuto = false; if (k === 'proof') S.sim.proofAuto = false;
   saveSoon(); queueSim();
 });
