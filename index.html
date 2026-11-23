@@ -338,6 +338,29 @@
   summary svg{display:inline-block;vertical-align:-2px}
   .amt-col{display:flex;flex-direction:column;align-items:flex-end;flex:none}
   .inbox{display:flex;flex-direction:column;gap:4px;min-width:0}
+  /* plan calendar: month grid of checklist steps and key dates */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+  .cal-wd{font-size:12px;font-weight:600;color:var(--ink3);text-align:center;padding:2px 0 4px}
+  .cal-cell{min-height:96px;border-radius:10px;background:var(--bg);padding:4px;display:flex;flex-direction:column;gap:3px;cursor:pointer;min-width:0}
+  @media (hover:hover){.cal-cell:hover{background:var(--hover)}}
+  .cal-cell.out{opacity:.4}
+  .cal-cell.sel{box-shadow:inset 0 0 0 2px var(--blue)}
+  .cal-dn{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+  .cal-dn:focus-visible{outline:2px solid var(--blue)}
+  .cal-cell.today .cal-dn{background:var(--blue);color:#fff}
+  .cal-ev{all:unset;box-sizing:border-box;cursor:pointer;display:block;font-size:11.5px;line-height:1.35;padding:2px 5px;border-radius:5px;border-left:3px solid var(--c);
+    background:color-mix(in srgb,var(--c) 16%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .cal-ev:focus-visible{outline:2px solid var(--blue)}
+  .cal-ev.done{text-decoration:line-through;opacity:.55}
+  .cal-more{font-size:11px;color:var(--ink3);padding-left:4px}
+  .cal-dots{display:none;gap:3px;flex-wrap:wrap;padding:0 2px}
+  .cal-dot{width:7px;height:7px;border-radius:50%;background:var(--c)}
+  .cal-dot.done{opacity:.35}
+  .cal-key{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink2)}
+  .cal-key i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+  .cal-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+  .cal-bar{width:4px;align-self:stretch;border-radius:2px;background:var(--c);flex:none}
+  @media (max-width:640px){.cal-cell{min-height:54px;padding:3px}.cal-ev,.cal-more{display:none}.cal-dots{display:flex}.cal-wd{font-size:11px}}
   .howlist{margin:6px 0 2px;padding-left:20px;list-style:decimal;font-size:14px;color:var(--ink2)}
   .howlist li{margin:4px 0;padding-left:2px}
   .howlist li::marker{color:var(--ink3);font-variant-numeric:tabular-nums}
@@ -360,7 +383,7 @@
   .gl-cats button{flex:none;border:0;border-radius:999px;padding:5px 12px;font:inherit;font-size:13.5px;background:var(--gray-soft);color:var(--ink);cursor:pointer;min-height:34px}
   .gl-cats button.on{background:var(--blue-soft);color:var(--blue);font-weight:600}
   .gl-item{padding:10px 8px;margin:0 -8px;border-top:1px solid var(--line);border-radius:10px;transition:background .3s}
-  .gl-item.flash{background:var(--blue-soft)}
+  .gl-item.flash,label.check.flash{background:var(--blue-soft);border-radius:10px}
   .gl-item a{color:var(--blue)}
   .gl-item mark{background:rgba(255,204,0,.42);color:inherit;border-radius:3px;padding:0 1px}
   @media (max-width:640px){dialog#gloss-dlg{width:100vw;height:100dvh;border-radius:0;margin:0}}
@@ -2996,7 +3019,7 @@ function plannerCard(){
   const row = (id, title, date, details, extra) => `<div class="flex flex-wrap items-center justify-between gap-2 py-2" style="border-top:1px solid var(--line)">
       <div class="min-w-0" style="flex:1 1 220px"><div class="text-[14.5px] font-medium">${esc(plainT(title))}</div>${extra || ''}</div>
       <div class="flex items-center gap-2"><input type="date" class="numin" style="width:150px" data-plan="${id}" value="${date}" aria-label="${esc(T(U.planned))}">
-      <a class="btn btn-ghost" style="padding:4px 10px;font-size:13.5px" href="${gcalUrl(title, date, details)}" target="_blank" rel="noopener noreferrer" title="${esc(T(U.gcal))}">${ic('calendar-plus','icon-sm')}${T(U.gcalS)}</a></div></div>`;
+      <a class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" href="${gcalUrl(title, date, details)}" target="_blank" rel="noopener noreferrer" title="${esc(T(U.gcal))}">${ic('calendar-plus','icon-sm')}${T(U.gcalS)}</a></div></div>`;
   return `
     <div class="card mb-4" id="planner">
       <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days')}</span>${T(U.title)}</h3>
@@ -3020,6 +3043,86 @@ function plannerCard(){
         <a class="text-[13.5px] inline-flex items-center gap-1" style="color:var(--blue)" href="https://support.google.com/calendar/answer/37118" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(U.helpL)}</a>
       </details>
       <p class="faint text-[13px] mt-3 flex gap-2"><span style="margin-top:2px">${ic('lock','icon-sm')}</span><span>${T(U.privacy)}</span></p>
+    </div>`;
+}
+/* Month calendar of the plan: steps coloured by checklist phase, key dates in green. Tap a step for details,
+   tap a day (on a phone, days show dots) to list what is planned that day. */
+Object.assign(PLAN_UI, {
+  calT:{en:'Your plan on a calendar', th:'ปฏิทินแผนของคุณ'},
+  calSub:{en:'Every step and key date from the planner, by month. Tap an item for details, or a day to see what is planned.', th:'ทุกข้อและวันสำคัญจากแผนด้านบน แสดงเป็นรายเดือน แตะรายการเพื่อดูรายละเอียด หรือแตะวันที่เพื่อดูว่าวันนั้นมีอะไรบ้าง'},
+  prev:{en:'Previous month', th:'เดือนก่อน'}, next:{en:'Next month', th:'เดือนถัดไป'}, today:{en:'Today', th:'วันนี้'}, nextItem:{en:'Next step', th:'ข้อถัดไป'},
+  keyMs:{en:'Key dates', th:'วันสำคัญ'}, dayT:{en:d => `Planned on ${d}`, th:d => `แผนวันที่ ${d}`}, monthT:{en:m => `Planned in ${m}`, th:m => `แผนในเดือน${m}`},
+  none:{en:'Nothing planned.', th:'ไม่มีรายการ'}, more:{en:n => `+${n} more`, th:n => `+อีก ${n}`},
+  done:{en:'Done', th:'ทำแล้ว'}, markDone:{en:'Mark as done', th:'ทำเสร็จแล้ว'}, undo:{en:'Not done yet', th:'ยังไม่เสร็จ'},
+  goStep:{en:'Show in checklist', th:'ดูในเช็กลิสต์'}, close:{en:'Close', th:'ปิด'}, step:{en:'Step', th:'ข้อ'}
+});
+function calEvents(){
+  const pd = planDates();
+  const ev = CHECK.items.map((it, i) => ({id:it.id, n:i + 1, title:T(it.t), date:pd[it.id].date, ph:it.ph, kind:'step', done:!!S.check[it.id], late:pd[it.id].late, d:T(it.d), why:T(it.why)}));
+  planMilestones().forEach(m => ev.push({id:m.id, title:T(m.t), date:m.date, ph:5, kind:'ms', d:T(m.d)}));
+  return ev.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+}
+const calColor = ph => `var(--s${Math.min(6, ph + 1)})`;
+function calendarCard(){
+  const U = PLAN_UI, ev = calEvents(), loc = S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB';
+  const todayS = isoD(new Date()), firstOpen = ev.find(e => e.kind === 'step' && !e.done && e.date >= todayS);
+  const ym = /^\d{4}-\d{2}$/.test(S.calMonth || '') ? S.calMonth : (firstOpen ? firstOpen.date : todayS).slice(0, 7);
+  const [Y, Mo] = ym.split('-').map(Number), first = new Date(Y, Mo - 1, 1), start = new Date(first); start.setDate(1 - first.getDay());
+  const monthName = first.toLocaleDateString(loc, {month:'long', year:'numeric'});
+  const byDay = {}; ev.forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+  const wd = S.lang === 'th' ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const cells = Array.from({length:42}, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
+  const lastRow = cells.slice(35).every(d => d.getMonth() !== Mo - 1) ? 35 : 42;   /* drop an empty sixth week */
+  const sel = ev.find(e => e.id === S.calSel), day = S.calDay && S.calDay.slice(0, 7) === ym ? S.calDay : '';
+  const chip = e => `<button class="cal-ev ${e.done ? 'done' : ''}" style="--c:${calColor(e.ph)}" data-act="cal-ev" data-v="${e.id}" title="${esc(e.title)}">${e.kind === 'step' ? e.n + '. ' : ''}${esc(e.title)}</button>`;
+  const list = (day ? (byDay[day] || []) : ev.filter(e => e.date.slice(0, 7) === ym));
+  const shift = n => { const d = new Date(Y, Mo - 1 + n, 1); return isoD(d).slice(0, 7); };
+  const detail = sel ? `
+      <div class="mt-3 p-3" id="cal-detail" style="border-radius:12px;background:var(--bg);border-left:4px solid ${calColor(sel.ph)}">
+        <div class="flex items-start gap-2"><div class="min-w-0"><div class="eyebrow">${sel.kind === 'step' ? T(U.step) + ' ' + sel.n + ' · ' + T(CHECK.phases[sel.ph].t) : T(U.keyMs)} · ${fdateD(sel.date)}</div>
+          <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}${sel.done ? ` <span class="badge b-green">${T(U.done)}</span>` : (sel.late ? ` <span class="badge b-amber">${T(U.late)}</span>` : '')}</div></div>
+          <button class="tb-btn ml-auto" style="width:30px;height:30px" data-act="cal-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
+        <p class="text-[14.5px] mt-2">${sel.d}</p>
+        ${sel.why ? `<p class="muted text-[14px] mt-1"><strong>${T(CHECK.why)}:</strong> ${sel.why}</p>` : ''}
+        <div class="flex flex-wrap gap-2 mt-3">
+          ${sel.kind === 'step' ? `<button class="btn ${sel.done ? 'btn-ghost' : 'btn-primary'}" style="padding:6px 14px;font-size:14px" data-act="cal-done" data-v="${sel.id}">${ic(sel.done ? 'rotate-ccw' : 'check','icon-sm')}${T(sel.done ? U.undo : U.markDone)}</button>` : ''}
+          <a class="btn btn-ghost" style="padding:6px 14px;font-size:14px" href="${gcalUrl(sel.title, sel.date, sel.d + (sel.why ? '\n\n' + T(CHECK.why) + ': ' + sel.why : ''))}" target="_blank" rel="noopener noreferrer">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</a>
+          ${sel.kind === 'step' ? `<button class="btn btn-ghost" style="padding:6px 14px;font-size:14px" data-act="cal-go" data-v="${sel.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}
+        </div>
+      </div>` : '';
+  return `
+    <div class="card mb-4" id="calendar">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-range')}</span>${T(U.calT)}</h3>
+        <div class="flex flex-wrap items-center gap-1">
+          <button class="tb-btn" data-act="cal-month" data-v="${shift(-1)}" aria-label="${esc(T(U.prev))}">${ic('chevron-left')}</button>
+          <span class="font-semibold text-[15px] num whitespace-nowrap" style="min-width:120px;text-align:center" aria-live="polite">${monthName}</span>
+          <button class="tb-btn" data-act="cal-month" data-v="${shift(1)}" aria-label="${esc(T(U.next))}">${ic('chevron-right')}</button>
+          <button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-month" data-v="${todayS.slice(0, 7)}">${T(U.today)}</button>
+          ${firstOpen ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-month" data-v="${firstOpen.date.slice(0, 7)}">${T(U.nextItem)}</button>` : ''}
+        </div>
+      </div>
+      <p class="muted text-[14px] mt-1">${T(U.calSub)}</p>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">${CHECK.phases.map((p, i) => `<span class="cal-key" style="--c:${calColor(i)}"><i></i>${i + 1}. ${T(p.t)}</span>`).join('')}<span class="cal-key" style="--c:${calColor(5)}"><i></i>${T(U.keyMs)}</span></div>
+      <div class="cal-grid mt-3" role="grid" aria-label="${esc(monthName)}">
+        ${wd.map(w => `<div class="cal-wd" role="columnheader">${w}</div>`).join('')}
+        ${cells.slice(0, lastRow).map(d => { const s = isoD(d), es = byDay[s] || [];
+          return `<div class="cal-cell ${d.getMonth() !== Mo - 1 ? 'out' : ''} ${s === todayS ? 'today' : ''} ${s === day ? 'sel' : ''}" role="gridcell" data-act="cal-day" data-v="${s}">
+            <button class="cal-dn" data-act="cal-day" data-v="${s}" aria-label="${esc(d.toLocaleDateString(loc, {day:'numeric', month:'long', year:'numeric'}))}${es.length ? ', ' + es.length : ''}">${d.getDate()}</button>
+            ${es.slice(0, 2).map(chip).join('')}${es.length > 2 ? `<span class="cal-more">${T(U.more)(es.length - 2)}</span>` : ''}
+            ${es.length ? `<span class="cal-dots">${es.map(e => `<i class="cal-dot ${e.done ? 'done' : ''}" style="--c:${calColor(e.ph)}"></i>`).join('')}</span>` : ''}
+          </div>`; }).join('')}
+      </div>
+      ${detail}
+      <div class="mt-4">
+        <div class="eyebrow mb-1">${day ? T(U.dayT)(fdateD(day)) : T(U.monthT)(first.toLocaleDateString(loc, {month:'long'}))}</div>
+        ${list.length ? list.map(e => `<div class="cal-row" style="--c:${calColor(e.ph)}"><span class="cal-bar"></span>
+            <div class="min-w-0" style="flex:1"><div class="faint text-[12.5px] num">${fdateD(e.date)}${e.kind === 'step' ? ' · ' + T(U.step) + ' ' + e.n : ''}</div>
+              <button class="linkbtn text-[14.5px] ${e.done ? 'line-through' : ''}" style="color:var(--ink);text-align:left" data-act="cal-ev" data-v="${e.id}">${esc(e.title)}</button>
+              ${e.done ? ` <span class="badge b-green">${T(U.done)}</span>` : (e.late ? ` <span class="badge b-amber">${T(U.late)}</span>` : '')}</div>
+            <a class="btn btn-ghost" style="padding:4px 10px;font-size:13px;flex:none" href="${gcalUrl(e.title, e.date, e.d + (e.why ? '\n\n' + T(CHECK.why) + ': ' + e.why : ''))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(T(U.gcal) + ': ' + e.title)}">${ic('calendar-plus','icon-sm')}</a>
+          </div>`).join('') : `<p class="muted text-[14px] py-2">${T(U.none)}</p>`}
+      </div>
     </div>`;
 }
 function viewPrep(){
@@ -3046,7 +3149,7 @@ function viewPrep(){
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2"><h3 class="text-[18px] font-semibold"><span class="num muted">${pi+1}.</span> ${T(ph.t)}</h3><span class="badge b-blue">${ic('clock','icon-sm')}${T(ph.m)}</span></div>
       <div class="card" style="padding:4px 18px">${its.map(({it, i}) => `
         
-        <label class="check ${S.check[it.id]?'done':''} ${nx===it?'is-next':''}">
+        <label class="check ${S.check[it.id]?'done':''} ${nx===it?'is-next':''}" id="ck-${it.id}">
         
           <input type="checkbox" data-check="${it.id}" ${S.check[it.id]?'checked':''} aria-label="${esc(T(it.t))}">
         
@@ -3079,6 +3182,7 @@ function viewPrep(){
       <div class="bar"><i style="width:${c.pct}%;background:var(--green)"></i></div>
     </div>
     ${plannerCard()}
+    ${calendarCard()}
     ${nextCard}
     <section class="mb-10">${list}</section>
     <section id="tests" class="mb-10">${viewTests()}</section>
@@ -4279,6 +4383,12 @@ document.addEventListener('click', e => {
     S.plan.dates = {}; render(true);
   }
   else if (act === 'plan-reset') { S.plan.dates = {}; render(true); }
+  else if (act === 'cal-month') { S.calMonth = v; S.calDay = ''; S.calSel = ''; render(true); }
+  else if (act === 'cal-day') { S.calDay = S.calDay === v ? '' : v; S.calSel = ''; render(true); }
+  else if (act === 'cal-ev') { S.calSel = v; const e = calEvents().find(x => x.id === v); if (e) { S.calMonth = e.date.slice(0, 7); S.calDay = e.date; } render(true); const el = document.getElementById('cal-detail'); if (el) el.scrollIntoView({block:'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+  else if (act === 'cal-close') { S.calSel = ''; render(true); }
+  else if (act === 'cal-done') { S.check[v] = !S.check[v]; render(true); }
+  else if (act === 'cal-go') { const el = document.getElementById('ck-' + v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); } }
   else if (act === 'plan-ics') { downloadIcs(); }
   else if (act === 'focus') { const el = document.getElementById(v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.focus({preventScroll:true}); } }
 });
