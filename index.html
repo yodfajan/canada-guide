@@ -352,6 +352,12 @@
     background:color-mix(in srgb,var(--c) 16%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .cal-ev:focus-visible{outline:2px solid var(--blue)}
   .cal-ev.done{text-decoration:line-through;opacity:.55}
+  .cal-ev svg{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:3px}
+  .cal-ev.rem{border-left-style:dashed;background:transparent;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 35%,transparent)}
+  .cal-dot.rem{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+  .rem-panel{display:block;margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--bg);cursor:default}
+  .rem-panel svg{display:inline-block;vertical-align:-2px}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none;transform:none}
   .cal-more{font-size:11px;color:var(--ink3);padding-left:4px}
   .cal-dots{display:none;gap:3px;flex-wrap:wrap;padding:0 2px}
   .cal-dot{width:7px;height:7px;border-radius:50%;background:var(--c)}
@@ -2980,10 +2986,60 @@ function planMilestones(){
 }
 const plainT = s => String(s).replace(/\s?\[\[[a-z0-9_]+\]\]/gi, '').replace(/<[^>]+>/g, '').trim();
 const guideUrl = () => /^https?:/.test(location.protocol) ? location.origin + location.pathname : '';
+const gBody = details => { const link = guideUrl(); return plainT(details) + '\n\n' + T(PLAN_UI.from) + (link ? '\n' + link : ''); };
 function gcalUrl(title, date, details){
-  const d1 = date.replace(/-/g, ''), d2 = plusDays(date, 1).replace(/-/g, ''), link = guideUrl();
-  const body = plainT(details) + '\n\n' + T(PLAN_UI.from) + (link ? '\n' + link : '');
-  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(plainT(title)) + '&dates=' + d1 + '/' + d2 + '&details=' + encodeURIComponent(body);
+  const d1 = date.replace(/-/g, ''), d2 = plusDays(date, 1).replace(/-/g, '');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(plainT(title)) + '&dates=' + d1 + '/' + d2 + '&details=' + encodeURIComponent(gBody(details));
+}
+/* A 15-minute event at a clock time in the viewer's own time zone; Google alerts on it with the calendar's default notification. */
+function gcalTimedUrl(title, date, time, details){
+  const [h, m] = String(time || '09:00').split(':').map(Number), st = parseD(date); st.setHours(h || 0, m || 0, 0, 0);
+  const en = new Date(st.getTime() + 15 * 6e4);
+  const f = d => isoD(d).replace(/-/g, '') + 'T' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + '00';
+  let tz = 'Asia/Bangkok'; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch (e) {}
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(plainT(title)) + '&dates=' + f(st) + '/' + f(en) + '&ctz=' + encodeURIComponent(tz) + '&details=' + encodeURIComponent(gBody(details));
+}
+const gSearchUrl = q => 'https://calendar.google.com/calendar/r/search?q=' + encodeURIComponent(plainT(q));
+/* What the user has sent to Google Calendar: added[id] = {date}, rem[id] = [{n, u, t, base, date}]; remDef = last reminder settings. */
+function planStore(){
+  S.plan = S.plan || {}; const p = S.plan;
+  p.added = p.added || {}; p.rem = p.rem || {}; p.remDef = p.remDef || {n:1, u:'w', t:'09:00'};
+  return p;
+}
+function planItem(id){
+  const i = CHECK.items.findIndex(x => x.id === id);
+  if (i >= 0) { const it = CHECK.items[i], pd = planDates(); return {id, n:i + 1, ph:it.ph, kind:'step', title:T(it.t), date:pd[id].date, d:T(it.d), why:T(it.why), details:T(it.d) + '\n\n' + T(CHECK.why) + ': ' + T(it.why)}; }
+  const m = planMilestones().find(x => x.id === id);
+  return m ? {id, ph:5, kind:'ms', title:T(m.t), date:m.date, d:T(m.d), why:'', details:T(m.d)} : null;
+}
+const REM_U = {d:{en:'days', th:'วัน'}, w:{en:'weeks', th:'สัปดาห์'}, m:{en:'months', th:'เดือน'}};
+function remDate(date, n, u){ const d = parseD(date); if (u === 'm') d.setMonth(d.getMonth() - n); else d.setDate(d.getDate() - n * (u === 'w' ? 7 : 1)); return isoD(d); }
+const remText = r => S.lang === 'th' ? `ก่อน ${r.n} ${T(REM_U[r.u])} เวลา ${r.t} (${fdateD(r.date)})` : `${r.n} ${T(REM_U[r.u])} before at ${r.t} (${fdateD(r.date)})`;
+/* Add or added state for one item, plus its reminder button. Adding twice is blocked until the item is removed. */
+function gcalControls(id){
+  const U = PLAN_UI, st = planStore(), it = planItem(id); if (!it) return '';
+  const a = st.added[id], rems = st.rem[id] || [];
+  const main = a
+    ? `<span class="badge b-green">${ic('circle-check','icon-sm')}${T(U.gAdded)}</span>${a.date !== it.date ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : ''}<button class="linkbtn text-[13.5px]" data-act="g-del" data-v="${id}">${T(U.gDel)}</button>`
+    : `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="g-add" data-v="${id}">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</button>`;
+  return `<span class="gc-ctl inline-flex flex-wrap items-center gap-2">${main}<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="rem-open" data-v="${id}" aria-expanded="${S.remOpen === id}">${ic(rems.length ? 'bell-ring' : 'bell-plus','icon-sm')}${T(U.remL)}${rems.length ? ` (${rems.length})` : ''}</button></span>`;
+}
+function remPanel(id){
+  if (S.remOpen !== id) return '';
+  const U = PLAN_UI, st = planStore(), it = planItem(id); if (!it) return '';
+  const d = st.remDef, rems = st.rem[id] || [], when = remDate(it.date, +d.n, d.u), past = when < isoD(new Date());
+  const dup = rems.some(r => +r.n === +d.n && r.u === d.u && r.t === d.t && r.base === it.date);
+  const n = `<input type="number" class="numin" style="width:72px" min="0" max="99" step="1" data-rem="n" value="${d.n}" aria-label="${esc(T(U.remHow))}">`;
+  const u = `<select class="numin" style="width:auto;text-align:left;padding-right:6px" data-rem="u" aria-label="${esc(T(U.remUnit))}">${['d','w','m'].map(k => `<option value="${k}" ${d.u === k ? 'selected' : ''}>${T(REM_U[k])}</option>`).join('')}</select>`;
+  const t = `<input type="time" class="numin" style="width:116px" data-rem="t" value="${d.t}" aria-label="${esc(T(U.remAt))}">`;
+  return `<span class="rem-panel">
+      <span class="block font-medium text-[14px]">${ic('bell','icon-sm')} ${T(U.remT)}: ${esc(it.title)}</span>
+      <span class="flex flex-wrap items-center gap-2 mt-2">${S.lang === 'th' ? `<span class="text-[14px]">${T(U.remBefore)}</span>${n}${u}` : `${n}${u}<span class="text-[14px]">${T(U.remBefore)}</span>`}<span class="text-[14px]">${T(U.remAt)}</span>${t}</span>
+      <span class="block text-[13.5px] mt-2 ${past ? 'neg' : 'muted'}">${past ? T(U.remPast) : T(U.remOn)(fdateD(when), d.t, fdateD(it.date))}</span>
+      <span class="flex flex-wrap gap-2 mt-2"><button class="btn btn-primary" style="padding:6px 14px;font-size:14px" data-act="rem-add" data-v="${id}" ${past || dup ? 'disabled' : ''}>${ic('bell-plus','icon-sm')}${T(dup ? U.remDup : U.remAdd)}</button></span>
+      ${rems.length ? `<span class="block mt-3">${rems.map((r, i) => `<span class="flex flex-wrap items-center gap-2 py-1.5" style="border-top:1px solid var(--line)"><span style="color:var(--blue)">${ic('bell','icon-sm')}</span><span class="text-[14px]">${remText(r)}</span>${r.base !== it.date ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : ''}<button class="linkbtn text-[13.5px]" data-act="rem-del" data-v="${id}|${i}">${T(U.gDel)}</button></span>`).join('')}</span>` : ''}
+      <span class="block faint text-[12.5px] mt-2">${T(U.remNote)}</span>
+    </span>`;
 }
 /* All-day events in one .ics file; lines folded at 75 bytes as the format requires. */
 function planIcs(){
@@ -2993,10 +3049,17 @@ function planIcs(){
     out.push(cur); return out.join('\r\n '); };
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z'), dates = planDates(), link = guideUrl();
   const tag = isoD(planIntake()).slice(0, 7).replace('-', '');   /* stable per step and intake, so a re-import is recognised */
+  /* alarms: the user's reminders for this item (minutes from the all-day start), else 3 days before */
+  const st = planStore(), alarms = (id, date, title) => {
+    const rs = st.rem[id] || [];
+    const trig = rs.length ? rs.map(r => { const [h, m] = r.t.split(':').map(Number), at = parseD(remDate(date, +r.n, r.u)); at.setHours(h, m);
+      const mins = Math.round((parseD(date) - at) / 6e4); return mins >= 0 ? 'TRIGGER:-PT' + mins + 'M' : 'TRIGGER:PT' + (-mins) + 'M'; }) : ['TRIGGER:-P3D'];
+    return trig.flatMap(tr => ['BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc2(title), tr, 'END:VALARM']);
+  };
   const ev = (id, title, date, details) => ['BEGIN:VEVENT', 'UID:' + id + '-' + tag + '@canada-guide', 'DTSTAMP:' + stamp,
     'DTSTART;VALUE=DATE:' + date.replace(/-/g, ''), 'DTEND;VALUE=DATE:' + plusDays(date, 1).replace(/-/g, ''),
     'SUMMARY:' + esc2(title), 'DESCRIPTION:' + esc2(plainT(details) + '\n\n' + T(PLAN_UI.from) + (link ? '\n' + link : '')),
-    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc2(title), 'TRIGGER:-P3D', 'END:VALARM', 'END:VEVENT'];
+    ...alarms(id, date, title), 'END:VEVENT'];
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Canada Guide//Plan//TH', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + esc2(T(PLAN_UI.calName))];
   CHECK.items.forEach((it, i) => lines.push(...ev(it.id, (i + 1) + '. ' + T(it.t), dates[it.id].date, T(it.d) + '\n\n' + T(CHECK.why) + ': ' + T(it.why))));
   planMilestones().forEach(m => lines.push(...ev(m.id, T(m.t), m.date, T(m.d))));
@@ -3016,10 +3079,12 @@ function plannerCard(){
   const monthsAway = (intake - new Date()) / (30.44 * 864e5);
   const years = [...new Set([...(SIMC.intakes || [2027, 2028]), y])].sort();
   const up = CHECK.items.filter(it => !S.check[it.id]).sort((a, b) => dates[a.id].date < dates[b.id].date ? -1 : 1).slice(0, 3);
-  const row = (id, title, date, details, extra) => `<div class="flex flex-wrap items-center justify-between gap-2 py-2" style="border-top:1px solid var(--line)">
-      <div class="min-w-0" style="flex:1 1 220px"><div class="text-[14.5px] font-medium">${esc(plainT(title))}</div>${extra || ''}</div>
-      <div class="flex items-center gap-2"><input type="date" class="numin" style="width:150px" data-plan="${id}" value="${date}" aria-label="${esc(T(U.planned))}">
-      <a class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" href="${gcalUrl(title, date, details)}" target="_blank" rel="noopener noreferrer" title="${esc(T(U.gcal))}">${ic('calendar-plus','icon-sm')}${T(U.gcalS)}</a></div></div>`;
+  const row = (id, title, date, details, extra) => `<div class="py-2" style="border-top:1px solid var(--line)">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="min-w-0" style="flex:1 1 200px"><div class="text-[14.5px] font-medium">${esc(plainT(title))}</div>${extra || ''}</div>
+        <input type="date" class="numin" style="width:150px" data-plan="${id}" value="${date}" aria-label="${esc(T(U.planned))}">
+      </div>
+      <div class="mt-2">${gcalControls(id)}</div>${remPanel(id)}</div>`;
   return `
     <div class="card mb-4" id="planner">
       <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days')}</span>${T(U.title)}</h3>
@@ -3056,40 +3121,75 @@ Object.assign(PLAN_UI, {
   done:{en:'Done', th:'ทำแล้ว'}, markDone:{en:'Mark as done', th:'ทำเสร็จแล้ว'}, undo:{en:'Not done yet', th:'ยังไม่เสร็จ'},
   goStep:{en:'Show in checklist', th:'ดูในเช็กลิสต์'}, close:{en:'Close', th:'ปิด'}, step:{en:'Step', th:'ข้อ'}
 });
+/* Added-to-Google tracking and reminders (23 Nov 2026) */
+Object.assign(PLAN_UI, {
+  calSub:{en:'Shows only what you have added to Google Calendar, plus your reminders. Tap an item for details, or a day to see what is on it.', th:'แสดงเฉพาะรายการที่คุณเพิ่มลง Google Calendar แล้ว และการแจ้งเตือนที่ตั้งไว้ แตะรายการเพื่อดูรายละเอียด หรือแตะวันที่เพื่อดูว่าวันนั้นมีอะไรบ้าง'},
+  calEmpty:{en:'Your calendar is empty. Tap "Add to Google Calendar" on any step in the planner or checklist and it will appear here.', th:'ปฏิทินยังว่าง กด "เพิ่มลง Google Calendar" ที่ข้อไหนก็ได้ในแผนหรือเช็กลิสต์ รายการจะขึ้นที่นี่'},
+  nextItem:{en:'Next item', th:'รายการถัดไป'},
+  gAdded:{en:'Added to Google', th:'เพิ่มใน Google แล้ว'}, gDel:{en:'Remove', th:'ลบ'},
+  gMoved:{en:'Date changed: remove, then add again', th:'วันที่เปลี่ยนแล้ว: ลบแล้วเพิ่มใหม่'},
+  gDelQ:{en:t => `Remove "${t}" from your added items?\n\nThis page cannot delete events inside Google Calendar. After you confirm, Google Calendar opens a search for this event so you can delete it there too.`, th:t => `ลบ "${t}" ออกจากรายการที่เพิ่มแล้ว?\n\nหน้านี้ลบกิจกรรมใน Google Calendar ให้ไม่ได้ เมื่อกดตกลง จะเปิด Google Calendar ค้นหากิจกรรมนี้ให้ เพื่อลบในนั้นด้วย`},
+  remL:{en:'Reminder', th:'แจ้งเตือน'}, remT:{en:'Remind me before', th:'ตั้งแจ้งเตือนก่อนวันครบกำหนด'},
+  remHow:{en:'How many', th:'จำนวน'}, remUnit:{en:'Unit', th:'หน่วย'}, remBefore:{en:'before', th:'ก่อน'}, remAt:{en:'at', th:'เวลา'},
+  remOn:{en:(d, t, due) => `Reminder on ${d} at ${t}, for the date ${due}.`, th:(d, t, due) => `จะแจ้งเตือนวันที่ ${d} เวลา ${t} สำหรับวันครบกำหนด ${due}`},
+  remPast:{en:'That reminder date has already passed. Choose a shorter time before.', th:'วันแจ้งเตือนนี้ผ่านไปแล้ว เลือกระยะที่สั้นลง'},
+  remAdd:{en:'Add reminder to Google', th:'เพิ่มการแจ้งเตือนลง Google'}, remDup:{en:'This reminder is already added', th:'เพิ่มการแจ้งเตือนนี้แล้ว'},
+  remNote:{en:'The reminder is a short event at the time you choose. Google alerts you with your calendar\'s default notification (often 30 minutes before); you can change it on the Google event page. To change a reminder, remove it and add a new one.', th:'การแจ้งเตือนคือกิจกรรมสั้น ๆ ตามเวลาที่เลือก Google จะเตือนตามการแจ้งเตือนเริ่มต้นของปฏิทินคุณ (มักเป็น 30 นาทีก่อน) เปลี่ยนได้ในหน้ากิจกรรมของ Google ถ้าจะแก้การแจ้งเตือน ให้ลบแล้วเพิ่มใหม่'},
+  remTitle:{en:t => `Reminder: ${t}`, th:t => `แจ้งเตือน: ${t}`},
+  remDue:{en:d => `Due ${d}`, th:d => `ครบกำหนดวันที่ ${d}`},
+  remDelL:{en:'Remove reminder', th:'ลบการแจ้งเตือน'},
+  privacy:{en:'Nothing is sent anywhere by this page. "Add to Google Calendar" opens Google Calendar in your own account with the event filled in; tap Save there. The page remembers what you added on this device; if you did not save it in Google, tap Remove and add it again.', th:'หน้านี้ไม่ได้ส่งข้อมูลไปที่ไหน ปุ่ม "เพิ่มลง Google Calendar" จะเปิดปฏิทินในบัญชี Google ของคุณเองพร้อมกรอกรายละเอียดให้ แล้วกด "บันทึก" ในนั้น หน้านี้จำไว้ในเครื่องว่าเพิ่มอะไรไปแล้ว ถ้าใน Google ไม่ได้กดบันทึก ให้กด "ลบ" แล้วเพิ่มใหม่'}
+});
+/* Only what the user has added to Google Calendar: the items (on the date they were added with) and their reminders. */
 function calEvents(){
-  const pd = planDates();
-  const ev = CHECK.items.map((it, i) => ({id:it.id, n:i + 1, title:T(it.t), date:pd[it.id].date, ph:it.ph, kind:'step', done:!!S.check[it.id], late:pd[it.id].late, d:T(it.d), why:T(it.why)}));
-  planMilestones().forEach(m => ev.push({id:m.id, title:T(m.t), date:m.date, ph:5, kind:'ms', d:T(m.d)}));
-  return ev.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  const st = planStore(), ev = [];
+  Object.keys(st.added).forEach(id => { const it = planItem(id); if (!it) return; const a = st.added[id];
+    ev.push(Object.assign({}, it, {key:'a:' + id, date:a.date, done:it.kind === 'step' && !!S.check[id], moved:a.date !== it.date, isRem:false})); });
+  Object.keys(st.rem).forEach(id => { const it = planItem(id); if (!it) return;
+    (st.rem[id] || []).forEach((r, i) => ev.push(Object.assign({}, it, {key:'r:' + id + ':' + i, date:r.date, time:r.t, r, idx:i, base:r.base, isRem:true}))); });
+  return ev.sort((a, b) => (a.date + (a.time || '')) < (b.date + (b.time || '')) ? -1 : 1);
 }
 const calColor = ph => `var(--s${Math.min(6, ph + 1)})`;
 function calendarCard(){
   const U = PLAN_UI, ev = calEvents(), loc = S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB';
-  const todayS = isoD(new Date()), firstOpen = ev.find(e => e.kind === 'step' && !e.done && e.date >= todayS);
-  const ym = /^\d{4}-\d{2}$/.test(S.calMonth || '') ? S.calMonth : (firstOpen ? firstOpen.date : todayS).slice(0, 7);
+  const todayS = isoD(new Date()), nextEv = ev.find(e => e.date >= todayS && !e.done);
+  const ym = /^\d{4}-\d{2}$/.test(S.calMonth || '') ? S.calMonth : (nextEv ? nextEv.date : todayS).slice(0, 7);
   const [Y, Mo] = ym.split('-').map(Number), first = new Date(Y, Mo - 1, 1), start = new Date(first); start.setDate(1 - first.getDay());
   const monthName = first.toLocaleDateString(loc, {month:'long', year:'numeric'});
   const byDay = {}; ev.forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
   const wd = S.lang === 'th' ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const cells = Array.from({length:42}, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
   const lastRow = cells.slice(35).every(d => d.getMonth() !== Mo - 1) ? 35 : 42;   /* drop an empty sixth week */
-  const sel = ev.find(e => e.id === S.calSel), day = S.calDay && S.calDay.slice(0, 7) === ym ? S.calDay : '';
-  const chip = e => `<button class="cal-ev ${e.done ? 'done' : ''}" style="--c:${calColor(e.ph)}" data-act="cal-ev" data-v="${e.id}" title="${esc(e.title)}">${e.kind === 'step' ? e.n + '. ' : ''}${esc(e.title)}</button>`;
+  const sel = ev.find(e => e.key === S.calSel), day = S.calDay && S.calDay.slice(0, 7) === ym ? S.calDay : '';
+  const label = e => (e.isRem ? (e.time + ' ') : '') + (e.kind === 'step' ? e.n + '. ' : '') + e.title;
+  const chip = e => `<button class="cal-ev ${e.done ? 'done' : ''} ${e.isRem ? 'rem' : ''}" style="--c:${calColor(e.ph)}" data-act="cal-ev" data-v="${e.key}" title="${esc((e.isRem ? T(U.remL) + ': ' : '') + label(e))}">${e.isRem ? ic('bell','icon-sm') : ''}${esc(label(e))}</button>`;
   const list = (day ? (byDay[day] || []) : ev.filter(e => e.date.slice(0, 7) === ym));
   const shift = n => { const d = new Date(Y, Mo - 1 + n, 1); return isoD(d).slice(0, 7); };
-  const detail = sel ? `
+  const firstTodo = CHECK.items.find(it => !S.check[it.id]);
+  const btn = 'padding:6px 14px;font-size:14px';
+  const detail = !sel ? '' : sel.isRem ? `
+      <div class="mt-3 p-3" id="cal-detail" style="border-radius:12px;background:var(--bg);border-left:4px dashed ${calColor(sel.ph)}">
+        <div class="flex items-start gap-2"><div class="min-w-0"><div class="eyebrow">${ic('bell','icon-sm')} ${T(U.remL)} · ${fdateD(sel.date)} ${sel.time}</div>
+          <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}</div></div>
+          <button class="tb-btn ml-auto" style="width:30px;height:30px" data-act="cal-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
+        <p class="text-[14.5px] mt-2">${T(U.remDue)(fdateD(sel.base))} · ${remText(sel.r)}</p>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button class="btn btn-ghost" style="${btn}" data-act="rem-del" data-v="${sel.id}|${sel.idx}">${ic('bell-off','icon-sm')}${T(U.remDelL)}</button>
+          ${sel.kind === 'step' ? `<button class="btn btn-ghost" style="${btn}" data-act="cal-go" data-v="${sel.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}
+        </div>
+      </div>` : `
       <div class="mt-3 p-3" id="cal-detail" style="border-radius:12px;background:var(--bg);border-left:4px solid ${calColor(sel.ph)}">
         <div class="flex items-start gap-2"><div class="min-w-0"><div class="eyebrow">${sel.kind === 'step' ? T(U.step) + ' ' + sel.n + ' · ' + T(CHECK.phases[sel.ph].t) : T(U.keyMs)} · ${fdateD(sel.date)}</div>
-          <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}${sel.done ? ` <span class="badge b-green">${T(U.done)}</span>` : (sel.late ? ` <span class="badge b-amber">${T(U.late)}</span>` : '')}</div></div>
+          <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}${sel.done ? ` <span class="badge b-green">${T(U.done)}</span>` : ''}</div></div>
           <button class="tb-btn ml-auto" style="width:30px;height:30px" data-act="cal-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
         <p class="text-[14.5px] mt-2">${sel.d}</p>
         ${sel.why ? `<p class="muted text-[14px] mt-1"><strong>${T(CHECK.why)}:</strong> ${sel.why}</p>` : ''}
+        <div class="mt-3">${gcalControls(sel.id)}</div>${remPanel(sel.id)}
         <div class="flex flex-wrap gap-2 mt-3">
-          ${sel.kind === 'step' ? `<button class="btn ${sel.done ? 'btn-ghost' : 'btn-primary'}" style="padding:6px 14px;font-size:14px" data-act="cal-done" data-v="${sel.id}">${ic(sel.done ? 'rotate-ccw' : 'check','icon-sm')}${T(sel.done ? U.undo : U.markDone)}</button>` : ''}
-          <a class="btn btn-ghost" style="padding:6px 14px;font-size:14px" href="${gcalUrl(sel.title, sel.date, sel.d + (sel.why ? '\n\n' + T(CHECK.why) + ': ' + sel.why : ''))}" target="_blank" rel="noopener noreferrer">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</a>
-          ${sel.kind === 'step' ? `<button class="btn btn-ghost" style="padding:6px 14px;font-size:14px" data-act="cal-go" data-v="${sel.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}
+          ${sel.kind === 'step' ? `<button class="btn ${sel.done ? 'btn-ghost' : 'btn-primary'}" style="${btn}" data-act="cal-done" data-v="${sel.id}">${ic(sel.done ? 'rotate-ccw' : 'check','icon-sm')}${T(sel.done ? U.undo : U.markDone)}</button>` : ''}
+          ${sel.kind === 'step' ? `<button class="btn btn-ghost" style="${btn}" data-act="cal-go" data-v="${sel.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}
         </div>
-      </div>` : '';
+      </div>`;
   return `
     <div class="card mb-4" id="calendar">
       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -3098,31 +3198,31 @@ function calendarCard(){
           <button class="tb-btn" data-act="cal-month" data-v="${shift(-1)}" aria-label="${esc(T(U.prev))}">${ic('chevron-left')}</button>
           <span class="font-semibold text-[15px] num whitespace-nowrap" style="min-width:120px;text-align:center" aria-live="polite">${monthName}</span>
           <button class="tb-btn" data-act="cal-month" data-v="${shift(1)}" aria-label="${esc(T(U.next))}">${ic('chevron-right')}</button>
-          <button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-month" data-v="${todayS.slice(0, 7)}">${T(U.today)}</button>
-          ${firstOpen ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-month" data-v="${firstOpen.date.slice(0, 7)}">${T(U.nextItem)}</button>` : ''}
+          <button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-today">${T(U.today)}</button>
+          ${nextEv ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-next" data-v="${nextEv.key}">${T(U.nextItem)}</button>` : ''}
         </div>
       </div>
       <p class="muted text-[14px] mt-1">${T(U.calSub)}</p>
-      <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">${CHECK.phases.map((p, i) => `<span class="cal-key" style="--c:${calColor(i)}"><i></i>${i + 1}. ${T(p.t)}</span>`).join('')}<span class="cal-key" style="--c:${calColor(5)}"><i></i>${T(U.keyMs)}</span></div>
+      ${ev.length ? `<div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">${CHECK.phases.map((p, i) => `<span class="cal-key" style="--c:${calColor(i)}"><i></i>${i + 1}. ${T(p.t)}</span>`).join('')}<span class="cal-key" style="--c:${calColor(5)}"><i></i>${T(U.keyMs)}</span><span class="cal-key">${ic('bell','icon-sm')}${T(U.remL)}</span></div>`
+        : `<div class="text-[14px] mt-3 flex flex-wrap items-center gap-2" style="background:var(--blue-soft);border-radius:10px;padding:10px 12px"><span style="color:var(--blue);margin-top:2px">${ic('calendar-plus','icon-sm')}</span><span style="flex:1 1 220px">${T(U.calEmpty)}</span>${firstTodo ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-go" data-v="${firstTodo.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}</div>`}
       <div class="cal-grid mt-3" role="grid" aria-label="${esc(monthName)}">
         ${wd.map(w => `<div class="cal-wd" role="columnheader">${w}</div>`).join('')}
         ${cells.slice(0, lastRow).map(d => { const s = isoD(d), es = byDay[s] || [];
           return `<div class="cal-cell ${d.getMonth() !== Mo - 1 ? 'out' : ''} ${s === todayS ? 'today' : ''} ${s === day ? 'sel' : ''}" role="gridcell" data-act="cal-day" data-v="${s}">
             <button class="cal-dn" data-act="cal-day" data-v="${s}" aria-label="${esc(d.toLocaleDateString(loc, {day:'numeric', month:'long', year:'numeric'}))}${es.length ? ', ' + es.length : ''}">${d.getDate()}</button>
             ${es.slice(0, 2).map(chip).join('')}${es.length > 2 ? `<span class="cal-more">${T(U.more)(es.length - 2)}</span>` : ''}
-            ${es.length ? `<span class="cal-dots">${es.map(e => `<i class="cal-dot ${e.done ? 'done' : ''}" style="--c:${calColor(e.ph)}"></i>`).join('')}</span>` : ''}
+            ${es.length ? `<span class="cal-dots">${es.map(e => `<i class="cal-dot ${e.done ? 'done' : ''} ${e.isRem ? 'rem' : ''}" style="--c:${calColor(e.ph)}"></i>`).join('')}</span>` : ''}
           </div>`; }).join('')}
       </div>
       ${detail}
-      <div class="mt-4">
+      ${ev.length ? `<div class="mt-4">
         <div class="eyebrow mb-1">${day ? T(U.dayT)(fdateD(day)) : T(U.monthT)(first.toLocaleDateString(loc, {month:'long'}))}</div>
-        ${list.length ? list.map(e => `<div class="cal-row" style="--c:${calColor(e.ph)}"><span class="cal-bar"></span>
-            <div class="min-w-0" style="flex:1"><div class="faint text-[12.5px] num">${fdateD(e.date)}${e.kind === 'step' ? ' · ' + T(U.step) + ' ' + e.n : ''}</div>
-              <button class="linkbtn text-[14.5px] ${e.done ? 'line-through' : ''}" style="color:var(--ink);text-align:left" data-act="cal-ev" data-v="${e.id}">${esc(e.title)}</button>
-              ${e.done ? ` <span class="badge b-green">${T(U.done)}</span>` : (e.late ? ` <span class="badge b-amber">${T(U.late)}</span>` : '')}</div>
-            <a class="btn btn-ghost" style="padding:4px 10px;font-size:13px;flex:none" href="${gcalUrl(e.title, e.date, e.d + (e.why ? '\n\n' + T(CHECK.why) + ': ' + e.why : ''))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(T(U.gcal) + ': ' + e.title)}">${ic('calendar-plus','icon-sm')}</a>
+        ${list.length ? list.map(e => `<div class="cal-row" style="--c:${calColor(e.ph)}"><span class="cal-bar" ${e.isRem ? 'style="background:none;border-left:3px dashed var(--c)"' : ''}></span>
+            <div class="min-w-0" style="flex:1"><div class="faint text-[12.5px] num">${fdateD(e.date)}${e.isRem ? ' · ' + e.time + ' · ' + T(U.remL) : (e.kind === 'step' ? ' · ' + T(U.step) + ' ' + e.n : '')}</div>
+              <button class="linkbtn text-[14.5px] ${e.done ? 'line-through' : ''}" style="color:var(--ink);text-align:left" data-act="cal-ev" data-v="${e.key}">${esc(e.title)}</button>
+              ${e.done ? ` <span class="badge b-green">${T(U.done)}</span>` : ''}${e.moved ? ` <span class="badge b-amber">${T(U.gMoved)}</span>` : ''}</div>
           </div>`).join('') : `<p class="muted text-[14px] py-2">${T(U.none)}</p>`}
-      </div>
+      </div>` : ''}
     </div>`;
 }
 function viewPrep(){
@@ -3166,8 +3266,8 @@ function viewPrep(){
               <span class="faint text-[13px] inline-flex items-center gap-1">${ic('calendar','icon-sm')}<span>${T(U.planned)}</span></span>
               <input type="date" class="numin" style="width:150px" data-plan="${it.id}" value="${pd[it.id].date}" aria-label="${esc(T(U.planned) + ': ' + T(it.t))}">
               ${pd[it.id].late ? `<span class="badge b-amber">${T(U.late)}</span>` : ''}${pd[it.id].custom ? `<span class="badge b-blue">${T(U.mine)}</span>` : ''}
-              <a class="linkbtn text-[13.5px] inline-flex items-center gap-1" href="${gcalUrl(T(it.t), pd[it.id].date, T(it.d) + '\n\n' + T(C.why) + ': ' + T(it.why))}" target="_blank" rel="noopener noreferrer">${ic('calendar-plus','icon-sm')}<span>${T(U.gcal)}</span></a>
-            </span></span>
+              ${gcalControls(it.id)}
+            </span>${remPanel(it.id)}</span>
         
         </label>`).join('')}</div>
     </div>`;
@@ -3820,6 +3920,16 @@ function flushSim(){
 }
 function queueFlush(){ if (ptrDown) simPending = true; else setTimeout(flushSim, 0); }
 document.addEventListener('change', e => {
+  const rk = e.target.dataset && e.target.dataset.rem;
+  if (rk) {   /* reminder settings, remembered for the next reminder too */
+    const st = planStore(); let val2 = e.target.value;
+    if (rk === 'n') val2 = Math.max(0, Math.min(99, parseInt(val2, 10) || 0));
+    if (rk === 't' && !/^\d{2}:\d{2}$/.test(val2)) val2 = '09:00';
+    if (rk === 'u' && !['d','w','m'].includes(val2)) val2 = 'w';
+    st.remDef[rk] = val2; render(true);
+    const f = document.querySelector(`#app [data-rem="${rk}"]`); if (f) f.focus({preventScroll:true});
+    return;
+  }
   const pk = e.target.dataset && e.target.dataset.plan;
   if (pk) {   /* a planned date typed by the user; clearing the field goes back to the recommended date */
     S.plan = S.plan || {}; S.plan.dates = S.plan.dates || {};
@@ -4331,6 +4441,8 @@ function render(keepScroll){
 }
 
 document.addEventListener('click', e => {
+  /* calendar controls sit inside checklist labels: clicking their text must not tick the step */
+  if (e.target.closest('.rem-panel, .gc-ctl') && !e.target.closest('input, select, button, a, textarea')) e.preventDefault();
   const tm = e.target.closest('.term');
   if (tm) { e.preventDefault(); showTerm(tm); return; }
   if (TERM_BTN && !e.target.closest('#term-pop')) hideTerm();
@@ -4385,7 +4497,34 @@ document.addEventListener('click', e => {
   else if (act === 'plan-reset') { S.plan.dates = {}; render(true); }
   else if (act === 'cal-month') { S.calMonth = v; S.calDay = ''; S.calSel = ''; render(true); }
   else if (act === 'cal-day') { S.calDay = S.calDay === v ? '' : v; S.calSel = ''; render(true); }
-  else if (act === 'cal-ev') { S.calSel = v; const e = calEvents().find(x => x.id === v); if (e) { S.calMonth = e.date.slice(0, 7); S.calDay = e.date; } render(true); const el = document.getElementById('cal-detail'); if (el) el.scrollIntoView({block:'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+  else if (act === 'cal-today') { const t = isoD(new Date()); S.calMonth = t.slice(0, 7); S.calDay = t; S.calSel = ''; render(true); }
+  else if (act === 'cal-ev' || act === 'cal-next') { S.calSel = v; const e = calEvents().find(x => x.key === v); if (e) { S.calMonth = e.date.slice(0, 7); S.calDay = e.date; } render(true); const el = document.getElementById('cal-detail'); if (el) el.scrollIntoView({block:'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+  else if (act === 'g-add') {   /* open the pre-filled Google event once; adding again is blocked until it is removed */
+    const st = planStore(), it = planItem(v); if (!it || st.added[v]) return;
+    window.open(gcalUrl(it.title, it.date, it.details), '_blank', 'noopener');
+    st.added[v] = {date:it.date, at:Date.now()}; render(true);
+  }
+  else if (act === 'g-del') {
+    const st = planStore(), it = planItem(v); if (!it || !st.added[v]) return;
+    if (!confirm(T(PLAN_UI.gDelQ)(it.title))) return;
+    delete st.added[v]; window.open(gSearchUrl(it.title), '_blank', 'noopener');
+    if (S.calSel === 'a:' + v) S.calSel = ''; render(true);
+  }
+  else if (act === 'rem-open') { S.remOpen = S.remOpen === v ? '' : v; render(true); }
+  else if (act === 'rem-add') {
+    const st = planStore(), it = planItem(v), d = st.remDef; if (!it) return;
+    const when = remDate(it.date, +d.n, d.u), rems = st.rem[v] = st.rem[v] || [];
+    if (when < isoD(new Date()) || rems.some(r => +r.n === +d.n && r.u === d.u && r.t === d.t && r.base === it.date)) return;
+    window.open(gcalTimedUrl(T(PLAN_UI.remTitle)(it.title), when, d.t, T(PLAN_UI.remDue)(fdateD(it.date)) + '\n\n' + it.details), '_blank', 'noopener');
+    rems.push({n:+d.n, u:d.u, t:d.t, base:it.date, date:when, at:Date.now()}); render(true);
+  }
+  else if (act === 'rem-del') {
+    const [id, i] = String(v).split('|'), st = planStore(), it = planItem(id), r = (st.rem[id] || [])[+i]; if (!it || !r) return;
+    if (!confirm(T(PLAN_UI.gDelQ)(T(PLAN_UI.remTitle)(it.title) + ' (' + remText(r) + ')'))) return;
+    st.rem[id].splice(+i, 1); if (!st.rem[id].length) delete st.rem[id];
+    window.open(gSearchUrl(T(PLAN_UI.remTitle)(it.title)), '_blank', 'noopener');
+    S.calSel = ''; render(true);
+  }
   else if (act === 'cal-close') { S.calSel = ''; render(true); }
   else if (act === 'cal-done') { S.check[v] = !S.check[v]; render(true); }
   else if (act === 'cal-go') { const el = document.getElementById('ck-' + v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); } }
