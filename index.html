@@ -1432,7 +1432,7 @@ Object.assign(SIM_UI, {
   lShow:{en:'Money to show in the bank (for IRCC)', th:'เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)'},
   lSetup:{en:'Setup reserve: rent deposit, first purchases', th:'เงินสำรองตั้งตัว: เงินประกันห้อง ของใช้ช่วงแรก'},
   lReady:{en:'Cash to have ready before you go (money to show + setup reserve)', th:'เงินสดที่ต้องเตรียมก่อนไป (เงินที่ต้องแสดง + เงินสำรองตั้งตัว)'},
-  sameNote:{en:'Same list and numbers as the All Costs page: an amount typed on either page changes both.', th:'รายการและตัวเลขชุดเดียวกับหน้าค่าใช้จ่าย พิมพ์ยอดที่หน้าไหนก็เปลี่ยนทั้งสองหน้า'},
+  sameNote:{en:'The All Costs page shows the same money-to-show amount as the line above. The big number at the top also adds the setup reserve.', th:'หน้าค่าใช้จ่ายแสดงเงินที่ต้องแสดงในบัญชียอดเดียวกับบรรทัดด้านบน ส่วนตัวเลขใหญ่บนสุดบวกเงินสำรองตั้งตัวเพิ่มด้วย'},
   lTravelSetup:{en:'Travel and setup', th:'ค่าเดินทางและตั้งตัว'},
   health:{en:'Health insurance', th:'ประกันสุขภาพ'},
   showNote:{en:'This total is the money to show in the bank (first-year tuition, living costs and travel, which IRCC asks you to prove) plus a setup reserve. The list below shows each part. [[funds]]', th:'ยอดนี้คือเงินที่ต้องแสดงในบัญชี (ค่าเล่าเรียนปีแรก ค่าครองชีพ และค่าเดินทาง ที่ IRCC ขอหลักฐาน) บวกเงินสำรองตั้งตัว รายการด้านล่างแสดงแต่ละส่วน [[funds]]'},
@@ -2661,10 +2661,10 @@ const COSTS = {
   totalT:{en:'Cash you spend before the first day of class', th:'เงินสดที่ต้องใช้จริงก่อนวันเปิดเรียน'},
   totalN:{en:'Sections 1 to 4, not counting tuition or the money you must show in the bank.', th:'รวมหมวด 1 ถึง 4 ไม่นับค่าเล่าเรียนและเงินที่ต้องแสดงในบัญชี'},
   ownIncl:{en:'Uses the amounts you typed where you have them.', th:'ใช้ยอดที่คุณใส่เองในรายการที่ใส่ไว้'},
-  sameNote:{en:'Same list and numbers as the Budget page: an amount typed on either page changes both.', th:'รายการและตัวเลขชุดเดียวกับหน้างบ พิมพ์ยอดที่หน้าไหนก็เปลี่ยนทั้งสองหน้า'},
+  sameNote:{en:s => `Same amount as the "Money to show in the bank (for IRCC)" line on the Budget page, which follows your simulator settings. The big number at the top of the Budget page is the cash to have ready before you go: this amount plus a setup reserve of ${s}.`, th:s => `ยอดเดียวกับบรรทัด "เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)" ในหน้างบ และเปลี่ยนตามค่าที่ตั้งในเครื่องจำลอง ส่วนตัวเลขใหญ่บนสุดของหน้างบคือเงินสดที่ต้องเตรียมก่อนไป คือยอดนี้บวกเงินสำรองตั้งตัว ${s}`},
   itemsT:{en:'Costs by section', th:'ค่าใช้จ่ายแยกตามหมวด'},
-  itemsSub:{en:'Ranges are estimates. Tap "Enter my own amounts" to type what you actually paid or were quoted; it is saved on this device.', th:'ช่วงราคาเป็นค่าประมาณ กด "ใส่ยอดเอง" เพื่อพิมพ์ยอดที่คุณจ่ายจริงหรือได้ใบเสนอราคา ยอดจะถูกบันทึกไว้ในเครื่องนี้'},
-  editHint:{en:'Type each amount in the currency shown (THB for costs in Thailand, CAD for costs in Canada), then press Enter or tap elsewhere. Leave a box empty to keep the estimate.', th:'พิมพ์ยอดในสกุลเงินที่แสดง (บาทสำหรับค่าใช้จ่ายในไทย CAD สำหรับค่าใช้จ่ายในแคนาดา) แล้วกด Enter หรือแตะที่อื่น ช่องที่เว้นว่างจะใช้ค่าประมาณเดิม'},
+  itemsSub:{en:'Ranges are estimates. Tap "Enter my own amounts" to type what you actually paid or were quoted in sections 1 to 4; it is saved on this device.', th:'ช่วงราคาเป็นค่าประมาณ กด "ใส่ยอดเอง" เพื่อพิมพ์ยอดที่คุณจ่ายจริงหรือได้ใบเสนอราคาในหมวด 1 ถึง 4 ยอดจะถูกบันทึกไว้ในเครื่องนี้'},
+  editHint:{en:'Sections 1 to 4: type each amount in the currency shown (THB for costs in Thailand, CAD for costs in Canada), then press Enter or tap elsewhere. Leave a box empty to keep the estimate.', th:'หมวด 1 ถึง 4: พิมพ์ยอดในสกุลเงินที่แสดง (บาทสำหรับค่าใช้จ่ายในไทย CAD สำหรับค่าใช้จ่ายในแคนาดา) แล้วกด Enter หรือแตะที่อื่น ช่องที่เว้นว่างจะใช้ค่าประมาณเดิม'},
   ownPh:{en:'Your amount', th:'ยอดจริง'}, estIs:{en:'Estimate', th:'ค่าประมาณ'}, useEst:{en:'Use the estimate', th:'ใช้ค่าประมาณ'},
   resetOwn:{en:'Clear my amounts', th:'ล้างยอดที่ใส่เอง'},
   showT:{en:'Money you must show in the bank', th:'เงินที่ต้องแสดงในบัญชี'},
@@ -2821,9 +2821,11 @@ function viewStart(){
     </div>`;
 }
 
-/* All Costs lines: an amount the user typed (in the line's own currency, saved on the device) replaces the estimate range. */
+/* All Costs lines in sections 1 to 4: an amount the user typed (in the line's own currency, saved on the device) replaces the estimate range.
+   Section 5 (later: PGWP and PR) stays as estimates. */
 const costKey = it => it.t.en.replace(/[^A-Za-z0-9]+/g,'-');
-function costOwn(it){ const v = S.costs && S.costs[costKey(it)]; return v == null || v === '' || isNaN(v) ? null : +v; }
+const costEditable = it => COSTS.secs.some(s => s.sum && s.items.includes(it));
+function costOwn(it){ if (!costEditable(it)) return null; const v = S.costs && S.costs[costKey(it)]; return v == null || v === '' || isNaN(v) ? null : +v; }
 function costRange(it){
   const r = S.sim.rate || 24, o = costOwn(it);
   if (o != null) { const c = it.cad ? o : o / r; return [c, c]; }
@@ -2840,7 +2842,7 @@ function costCell(it){
 }
 function viewCosts(){
   const C = COSTS, r = S.sim.rate || 24, M = SIM_UI;
-  const anyOwn = S.costs && Object.keys(S.costs).length > 0;
+  const anyOwn = C.secs.some(s => s.sum && s.items.some(it => costOwn(it) != null));
   let tMin = 0, tMax = 0;
   const secs = C.secs.map(sec => {
     let a = 0, b = 0;
@@ -2870,7 +2872,7 @@ function viewCosts(){
 
           </div>
         
-          ${COST_EDIT ? costCell(it) : `<div class="amt"><span class="cur faint text-[12px]">CAD </span>${m.cad}</div>
+          ${COST_EDIT && sec.sum ? costCell(it) : `<div class="amt"><span class="cur faint text-[12px]">CAD </span>${m.cad}</div>
 
           <div class="amt"><span class="cur faint text-[12px] font-normal">THB </span>${m.thb}</div>`}
 
@@ -2908,8 +2910,7 @@ function viewCosts(){
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(C.h1)}</h1>
       <p class="muted mt-3 text-[17px]">${T(C.lead)}</p>
     </section>
-    <div class="grid lg:grid-cols-5 gap-4 mb-4 items-start">
-     <div class="grid gap-4 lg:col-span-2">
+    <div class="grid lg:grid-cols-3 gap-4 mb-4">
       <div class="card">
         
         <div class="eyebrow mb-2">${T(C.conv)}</div>
@@ -2930,8 +2931,7 @@ function viewCosts(){
         
         <p class="faint text-[13px] mt-2">${T(C.totalN)}${anyOwn ? ' ' + T(C.ownIncl) : ''}</p>
       </div>
-     </div>
-      <div class="card lg:col-span-3" id="cost-money">
+      <div class="card" id="cost-money">
 
         <div class="eyebrow">${T(M.lShow)}</div>
 
@@ -2939,9 +2939,9 @@ function viewCosts(){
 
         <div class="muted num">${cad(show)}</div>
 
-        <p class="faint text-[13px] mt-2 mb-3">${T(C.showN)} ${c.s.proofAuto !== false && LIVE.funds ? T(C.showLive)(fmt(fundsAmt())) : ''}</p>
-        ${cashList(c)}
-        <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(C.sameNote)}</span></p>
+        <p class="faint text-[13px] mt-2">${T(C.showN)} ${c.s.proofAuto !== false && LIVE.funds ? T(C.showLive)(fmt(fundsAmt())) : ''}</p>
+        <p class="faint text-[13px] mt-2 flex gap-2"><span style="margin-top:2px">${ic('link','icon-sm')}</span><span>${T(C.sameNote)(inline(c.setup))}</span></p>
+
         <button class="btn btn-ghost mt-1" style="padding:4px 8px;font-size:14px" data-act="tab" data-v="budget">${T(C.open)}${ic('arrow-right','icon-sm')}</button>
       </div>
     </div>
