@@ -284,7 +284,10 @@ The main choice control (language, currency, program type, intake, filters).
 - **Tab dock:** eight tabs with 22px icons and 11px labels on phones; on computers a centred dock with 18px icons beside 13.5px labels. The active tab becomes a Glass Dense pill with Link Blue semibold text; others are Ink Secondary.
 
 ### Plan calendar (signature component)
-A month grid of the user's plan: 7 columns, 10px cells on Inset Wash, day numbers in 24px circles (today filled System Blue), events as 5px chips with a 3px left bar and a 16% wash of their series colour, done items struck through. Under 640px the chips turn into 7px coloured dots and tapping a day lists its items below. A legend always names the six colours.
+The Calendar card switches between two views with a segmented control. "My Google Calendar" shows the user's real Google Calendar as an embedded frame (12px radius, white, hairline inset ring, 640px tall, 540px on phones) under a row of glass buttons (Refresh, Open in Google Calendar) and a Change calendar link; before a Calendar ID is saved it shows an inset setup panel (Inset Wash, 12px radius) with a search-style field, a primary Show calendar button and a how-to disclosure. "Added from this page" is a month grid: 7 columns, 10px cells on Inset Wash, day numbers in 24px circles (today filled System Blue), events as 5px chips with a 3px left bar and a 16% wash of their series colour, done items struck through. Under 640px the chips turn into 7px coloured dots and tapping a day lists its items below. When nothing is added yet, the grid stays clear under a Blue Wash hint; once items exist, a legend names the six colours.
+
+### Add to Google control
+An item not yet added shows a glass "Add to Google Calendar" button; once added it becomes a green "Added to Google" badge with a Remove link (an amber badge appears if the planned date changed since).
 
 ### Charts
 Line, bar and stacked bar charts drawn as inline SVG: 1px grid lines in a faint ink, 12px tabular axis labels in Ink Tertiary, a 2px series line with a 10% area fill, glass tooltips (10px radius, blur 20px), legends with 10px rounded swatches, and every chart offering a "show as a table" fallback.
