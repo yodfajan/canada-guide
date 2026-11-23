@@ -368,6 +368,9 @@
   .howlist{margin:6px 0 2px;padding-left:20px;list-style:decimal;font-size:14px;color:var(--ink2)}
   .howlist li{margin:4px 0;padding-left:2px}
   .howlist li::marker{color:var(--ink3);font-variant-numeric:tabular-nums}
+  .gc-steps li{margin:7px 0;color:var(--ink)}
+  .gc-steps li::marker{color:var(--blue);font-weight:600}
+  .gc-steps b{font-weight:600}
   /* glossary: tappable terms, popover and full sheet */
   .term{all:unset;cursor:pointer;color:inherit;text-decoration:underline dotted;text-decoration-color:var(--blue);text-decoration-thickness:1.5px;text-underline-offset:3px;border-radius:3px}
   @media (hover:hover){.term:hover{background:var(--blue-soft)}}
@@ -508,6 +511,8 @@ if (S.sim.proof === 22895) S.sim.proof = 23448;
 /* Older saves: a proof amount the user typed (not an IRCC figure) stays manual */
 try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o && o.sim && o.sim.proofAuto === undefined && o.sim.proof && ![22895, 23448].includes(o.sim.proof)) S.sim.proofAuto = false; } catch (e) {}
 if (!S.steps) S.steps = {};
+/* The English test step was split in two on 23 Nov 2026: a ticked old step means preparation is done too. */
+if (S.check && S.check.ielts && S.check['ielts-prep'] === undefined) S.check['ielts-prep'] = true;
 const T = o => (o == null ? '' : (typeof o === 'function' ? T(o()) : (typeof o === 'string' ? o : (o[S.lang] ?? o.en))));
 const rnd = (n, to) => Math.round(n / to) * to;
 const rangeStr = (a, b) => a === b ? fmt(a) : fmt(a) + (S.lang === 'th' ? ' ถึง ' : ' to ') + fmt(b);
@@ -1207,9 +1212,12 @@ const CHECK = {
     {id:'season', ph:0, t:{en:'Put the money in one account and leave it', th:'รวมเงินไว้บัญชีเดียวและปล่อยให้นิ่ง'},
      d:{en:'Tuition for year one plus the IRCC living-cost minimum. Keep it for 4 to 6 months; avoid large deposits you cannot explain. [[funds]]', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC คงเงินไว้ 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่ที่อธิบายที่มาไม่ได้ [[funds]]'},
      why:{en:'Officers read your account history, not just today\'s balance. Time is the only way to build that history.', th:'เจ้าหน้าที่ดูประวัติบัญชี ไม่ใช่แค่ยอดวันนี้ และประวัตินี้สร้างได้ด้วยเวลาเท่านั้น'}, go:'budget'},
-    {id:'ielts', ph:0, t:{en:'English test: prepare and book', th:'สอบภาษาอังกฤษ: เตรียมตัวและจองสอบ'},
-     d:{en:'Usually IELTS Academic 6.5 overall with no band under 6.0 for public colleges; universities often ask more. Results are valid for 2 years. See the test list below for prices and booking.', th:'โดยทั่วไป IELTS Academic รวม 6.5 ไม่มีทักษะใดต่ำกว่า 6.0 สำหรับวิทยาลัยรัฐ มหาวิทยาลัยมักขอสูงกว่า ผลสอบมีอายุ 2 ปี ดูราคาและลิงก์จองสอบในรายการด้านล่าง'},
-     why:{en:'Schools need the score before they make an offer, and a retake can cost 1 to 2 months.', th:'สถาบันต้องเห็นคะแนนก่อนออกข้อเสนอ และการสอบซ้ำอาจเสียเวลา 1 ถึง 2 เดือน'}, anchor:'tests'},
+    {id:'ielts-prep', ph:0, t:{en:'English test: start preparing', th:'สอบภาษาอังกฤษ: เริ่มเตรียมตัว'},
+     d:{en:'Check which test your schools accept: usually IELTS Academic, 6.5 overall with no band under 6.0 for public colleges; universities often ask more. Try the free practice material from IDP or British Council to see how far you are from that score, then study the weak skills.', th:'ตรวจว่าสถาบันที่สนใจรับข้อสอบแบบไหน โดยทั่วไปคือ IELTS Academic รวม 6.5 ไม่มีทักษะใดต่ำกว่า 6.0 สำหรับวิทยาลัยรัฐ มหาวิทยาลัยมักขอสูงกว่า ลองทำแบบฝึกฟรีจาก IDP หรือ British Council เพื่อดูว่ายังห่างจากคะแนนเป้าหมายแค่ไหน แล้วฝึกทักษะที่ยังอ่อน'},
+     why:{en:'Your score decides which programs can accept you, so find the gap early while there is still time to close it.', th:'คะแนนเป็นตัวตัดสินว่าหลักสูตรไหนรับคุณได้ จึงควรรู้ช่องว่างตั้งแต่เนิ่น ๆ ตอนที่ยังมีเวลาฝึก'}, anchor:'tests'},
+    {id:'ielts', ph:0, t:{en:'English test: book and take it', th:'สอบภาษาอังกฤษ: จองสอบและเข้าสอบ'},
+     d:{en:'Book with IDP or British Council (IELTS in Thailand is computer-delivered, THB 8,860). Pick a date that still leaves room for a retake before school deadlines. Results are valid for 2 years. See the test list below for prices and booking links.', th:'จองกับ IDP หรือ British Council (IELTS ในไทยสอบด้วยคอมพิวเตอร์ ค่าสอบ 8,860 บาท) เลือกวันสอบที่ยังเหลือเวลาสอบซ้ำได้ก่อนกำหนดปิดรับสมัคร ผลสอบมีอายุ 2 ปี ดูราคาและลิงก์จองสอบในรายการด้านล่าง'},
+     why:{en:'Schools need the score before they make an offer, and a retake can cost 1 to 2 months. Later, the PGWP and PR need IELTS General Training, CELPIP or PTE Core, not IELTS Academic.', th:'สถาบันต้องเห็นคะแนนก่อนออกข้อเสนอ และการสอบซ้ำอาจเสียเวลา 1 ถึง 2 เดือน ส่วน PGWP และ PR ภายหลังต้องใช้ IELTS General Training, CELPIP หรือ PTE Core ไม่ใช่ IELTS Academic'}, anchor:'tests'},
     {id:'transcript', ph:1, t:{en:'Transcripts and degree certificate in English', th:'Transcript และใบปริญญาฉบับภาษาอังกฤษ'},
      d:{en:'Official English copies from your university. Some schools also want a credential evaluation such as WES.', th:'ฉบับภาษาอังกฤษอย่างเป็นทางการจากมหาวิทยาลัย บางสถาบันขอผลประเมินวุฒิ เช่น WES ด้วย'},
      why:{en:'Every application needs them, and universities can take a few weeks to issue sealed copies.', th:'ทุกการสมัครต้องใช้ และมหาวิทยาลัยอาจใช้เวลาหลายสัปดาห์ในการออกเอกสาร'}},
@@ -3103,10 +3111,20 @@ Object.assign(PLAN_UI, {
   gcBad:{en:'That does not look like a Calendar ID. It should contain @, or be the embed code from Google Calendar settings.', th:'ดูเหมือนไม่ใช่ Calendar ID ควรมีเครื่องหมาย @ หรือเป็นโค้ดฝังจากหน้าตั้งค่าของ Google Calendar'},
   gcHowT:{en:'How to find your Calendar ID', th:'วิธีหา Calendar ID'},
   gcHow:[
-    {en:'Main calendar: the Calendar ID is simply the Gmail address you use for Google Calendar.', th:'ปฏิทินหลัก: Calendar ID คืออีเมล Gmail ที่ใช้กับ Google Calendar'},
-    {en:'Another calendar (for example one you made called "Canada plan"): open calendar.google.com on a computer, then Settings (gear), choose the calendar under "Settings for my calendars", open "Integrate calendar" and copy the Calendar ID. You can also paste the whole embed code from there.', th:'ปฏิทินอื่น (เช่นปฏิทินที่สร้างชื่อ "แผนแคนาดา"): เปิด calendar.google.com บนคอมพิวเตอร์ ไปที่การตั้งค่า (รูปเฟือง) เลือกปฏิทินใต้ "การตั้งค่าสำหรับปฏิทินของฉัน" เปิด "ผสานรวมปฏิทิน" แล้วคัดลอก "รหัสปฏิทิน" หรือวางโค้ดฝังทั้งหมดก็ได้'},
+    {en:'On a computer, open <b>calendar.google.com</b> in a web browser (the phone app does not show this setting).', th:'เปิด <b>calendar.google.com</b> ในเว็บเบราว์เซอร์บนคอมพิวเตอร์ (แอปในมือถือไม่มีหน้านี้)'},
+    {en:'Click the gear icon at the top right, then <b>Settings</b>.', th:'กดรูปฟันเฟืองมุมขวาบน แล้วเลือก <b>Settings</b> (ภาษาไทย: การตั้งค่า)'},
+    {en:'In the left column, under <b>Settings for my calendars</b>, click the calendar you want. Your main calendar carries your own name.', th:'ที่แถบด้านซ้าย หัวข้อ <b>Settings for my calendars</b> (ภาษาไทย: การตั้งค่าสำหรับปฏิทินของฉัน) คลิกชื่อปฏิทินที่ต้องการ ปฏิทินหลักจะเป็นชื่อของคุณ'},
+    {en:'Scroll down to the <b>Integrate calendar</b> section.', th:'เลื่อนลงมาที่หัวข้อ <b>Integrate calendar</b> (ภาษาไทย: ผสานรวมปฏิทิน)'},
+    {en:'The first line, <b>Calendar ID</b>, is what you need: select it and copy it. For your main calendar it is your Gmail address; a calendar you created ends with @group.calendar.google.com.', th:'บรรทัดแรก <b>Calendar ID</b> (ภาษาไทย: รหัสปฏิทิน) คือสิ่งที่ต้องใช้ ให้เลือกแล้วคัดลอก ถ้าเป็นปฏิทินหลักจะเป็นอีเมล Gmail ของคุณ ถ้าเป็นปฏิทินที่สร้างเองจะลงท้ายด้วย @group.calendar.google.com'},
+    {en:'Come back to this page, paste it into the box above and press <b>Show calendar</b>.', th:'กลับมาหน้านี้ วางลงในช่องด้านบน แล้วกด <b>แสดงปฏิทิน</b>'}
+  ],
+  gcTipsT:{en:'Good to know', th:'ข้อควรรู้'},
+  gcTips:[
+    {en:'The <b>Embed code</b> box in the same section also works: paste the whole code.', th:'กล่อง <b>Embed code</b> (โค้ดสำหรับฝัง) ในหัวข้อเดียวกันก็ใช้ได้ วางโค้ดทั้งก้อนได้เลย'},
     {en:'Several calendars: separate the IDs with commas.', th:'หลายปฏิทิน: คั่น Calendar ID ด้วยเครื่องหมายจุลภาค (,)'},
-    {en:'"Add to Google Calendar" saves to your main calendar unless you pick another calendar on the Google page before saving.', th:'ปุ่ม "เพิ่มลง Google Calendar" จะบันทึกลงปฏิทินหลัก เว้นแต่จะเลือกปฏิทินอื่นในหน้า Google ก่อนกดบันทึก'}
+    {en:'You do not need "Make available to public": keep the calendar private. It shows here when you are signed in to Google in this browser.', th:'ไม่ต้องเปิด "Make available to public" (เผยแพร่เป็นสาธารณะ) ให้ปฏิทินเป็นส่วนตัวไว้ จะแสดงในหน้านี้เมื่อเบราว์เซอร์ลงชื่อเข้าใช้ Google อยู่'},
+    {en:'"Add to Google Calendar" saves to your main calendar unless you choose another calendar on the Google page before saving.', th:'ปุ่ม "เพิ่มลง Google Calendar" จะบันทึกลงปฏิทินหลัก เว้นแต่จะเลือกปฏิทินอื่นในหน้า Google ก่อนกดบันทึก'},
+    {en:'Menu names can differ slightly between Google\'s language settings.', th:'ชื่อเมนูอาจต่างเล็กน้อยตามภาษาที่ตั้งไว้ใน Google'}
   ],
   gcHelpL:{en:'Google help: add a calendar to a website', th:'วิธีฝังปฏิทินจาก Google'},
   gcReload:{en:'Refresh', th:'รีเฟรช'}, gcOpen:{en:'Open in Google Calendar', th:'เปิดใน Google Calendar'}, gcChange:{en:'Change calendar', th:'เปลี่ยนปฏิทิน'},
@@ -3153,8 +3171,10 @@ function googleCalView(){
           <button class="btn btn-primary" style="padding:6px 16px;font-size:14px" data-act="gcal-save">${ic('calendar-check','icon-sm')}${T(U.gcSave)}</button>
           ${g.editing ? `<button class="btn btn-ghost" style="padding:6px 16px;font-size:14px" data-act="gcal-cancel">${T(U.gcCancel)}</button><button class="linkbtn text-[13.5px]" data-act="gcal-forget">${T(U.gcForget)}</button>` : ''}
         </div>
-        <details class="mt-3" data-field="gcHow" ${S.open && S.open.gcHow ? 'open' : ''}><summary class="text-[14px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(U.gcHowT)}</summary>
-          <ol class="howlist">${U.gcHow.map(x => `<li>${T(x)}</li>`).join('')}</ol>
+        <details class="mt-3" data-field="gcHow" ${S.open && S.open.gcHow === false ? '' : 'open'}><summary class="text-[14px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(U.gcHowT)}</summary>
+          <ol class="howlist gc-steps">${U.gcHow.map(x => `<li>${T(x)}</li>`).join('')}</ol>
+          <div class="text-[13.5px] font-medium mt-3">${T(U.gcTipsT)}</div>
+          <ul class="clean mt-1">${U.gcTips.map(x => `<li style="font-size:13.5px;color:var(--ink2)"><span style="color:var(--ink3)">${ic('chevron-right','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
           <a class="text-[13.5px] inline-flex items-center gap-1" style="color:var(--blue)" href="https://support.google.com/calendar/answer/41207" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(U.gcHelpL)}</a>
         </details>
         <p class="faint text-[13px] mt-3 flex gap-2"><span style="margin-top:2px">${ic('lock','icon-sm')}</span><span>${T(U.gcPrivacy)}</span></p>
