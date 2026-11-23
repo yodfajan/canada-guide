@@ -1615,7 +1615,7 @@ const GLOSS = [
   {k:'CIP', f:'Classification of Instructional Programs', c:'study', s:'cip',
    th:'รหัสสาขาวิชาของแคนาดา (เช่น 11.0701 Computer Science) ใช้ตรวจว่าหลักสูตรวิทยาลัยอยู่ในรายการสาขาของ PGWP ไหม ควรขอรหัส CIP 6 หลักจากสถาบันเป็นลายลักษณ์อักษร',
    en:"Canada's code for a field of study (for example 11.0701 Computer Science). It decides whether a college program is on the PGWP list. Ask the school for the 6-digit CIP code in writing."},
-  {k:{en:'Public college', th:'วิทยาลัยรัฐ'}, c:'study', m:['วิทยาลัยรัฐ','Public college','public college'],
+  {k:{en:'Public college', th:'วิทยาลัยรัฐ'}, c:'study', m:['วิทยาลัยรัฐ','Public college','public college'], na:['มหา'],
    th:'วิทยาลัยของรัฐ เช่น Seneca, Conestoga, BCIT เปิดหลักสูตร Diploma และ Post-Graduate Diploma จบแล้วขอ PGWP ได้ถ้าสาขาอยู่ในรายการ',
    en:'A government-funded college such as Seneca, Conestoga or BCIT, offering diplomas and post-graduate diplomas. Graduates can get a PGWP if the field is on the list.'},
   {k:{en:'Private career college', th:'วิทยาลัยอาชีพเอกชน'}, c:'study', m:['วิทยาลัยอาชีพเอกชน','Private career college','private career college'],
@@ -1834,6 +1834,17 @@ Object.assign(SRC, {
   dcaleg:{u:'https://consular.mfa.go.th/th/page/legalization', o:{en:'Department of Consular Affairs, Thailand', th:'กรมการกงสุล กระทรวงการต่างประเทศ'}, l:{en:'Document legalization: booking, hours, English official documents', th:'นิติกรณ์เอกสาร: จองคิว เวลาทำการ และเอกสารราชการฉบับภาษาอังกฤษ'}},
   dcamail:{u:encodeURI('https://consular.mfa.go.th/th/publicservice/บริการรับรองเอกสารทางไปรษณีย์'), o:{en:'Department of Consular Affairs, Thailand', th:'กรมการกงสุล กระทรวงการต่างประเทศ'}, l:{en:'Legalization by mail: 200 THB per stamp (updated 10 Feb 2026)', th:'รับรองเอกสารทางไปรษณีย์: นิติกรณ์ละ 200 บาท (ปรับปรุง 10 ก.พ. 2026)'}},
   lct:{u:'https://search.lawyerscouncil.or.th', o:{en:'Lawyers Council of Thailand', th:'สภาทนายความ'}, l:{en:'Check a lawyer\'s licence and notarial registration', th:'ตรวจสอบใบอนุญาตทนายความและการขึ้นทะเบียนผู้ทำคำรับรอง'}},
+  eps:{u:'https://www.edmontonpolice.ca/CommunityPolicing/OperationalServices/PoliceInformationCheck/FingerprintingServices/Fees', o:{en:'Edmonton Police Service', th:'ตำรวจเอดมันตัน'}, l:{en:'Fingerprinting fees: $50 first set, $15 each extra', th:'ค่าพิมพ์ลายนิ้วมือ: ชุดแรก $50 ชุดต่อไป $15'}},
+  wps:{u:'https://www.winnipeg.ca/police/services/online-record-checks/fee-schedule', o:{en:'Winnipeg Police Service', th:'ตำรวจวินนิเพก'}, l:{en:'Fee schedule: fingerprints, 1 or 2 sets', th:'อัตราค่าธรรมเนียม: พิมพ์ลายนิ้วมือ 1 หรือ 2 ชุด'}},
+  vpdfp:{u:'https://vpd.ca/contact-us/fingerprinting-services/', o:{en:'Vancouver Police Department', th:'ตำรวจแวนคูเวอร์'}, l:{en:'Fingerprinting: digital only, no ink-and-roll', th:'พิมพ์ลายนิ้วมือ: เฉพาะดิจิทัล ไม่มีแบบหมึก'}},
+  tpsfp:{u:'https://www.tps.ca/services/police-record-checks/', o:{en:'Toronto Police Service', th:'ตำรวจโตรอนโต'}, l:{en:'Record checks: other fingerprints go to private agencies', th:'ตรวจประวัติ: การพิมพ์ลายนิ้วมืออื่น ๆ ให้ใช้บริษัทเอกชน'}},
+  thvanpcc:{u:'https://vancouver.thaiembassy.org/en/page/criminal-record-check', o:{en:'Royal Thai Consulate-General, Vancouver', th:'สถานกงสุลใหญ่ ณ นครแวนคูเวอร์'}, l:{en:'Criminal record check: use an RCMP-accredited company for fingerprints', th:'ตรวจประวัติอาชญากรรม: พิมพ์ลายนิ้วมือกับบริษัทที่ RCMP รับรอง'}},
+  fpplus:{u:'https://myfingerprints.ca/pricing-fingerprinting', o:{en:'Fingerprints Plus (Toronto area)', th:'Fingerprints Plus (โตรอนโต)'}, l:{en:'Pricing: ink card $57.52, extra copy $22.12, plus HST', th:'ราคา: บัตรหมึก $57.52 ชุดเพิ่ม $22.12 บวก HST'}},
+  forensicsca:{u:'https://forensicscanada.ca/ink-and-roll-fingerprinting/', o:{en:'Forensics Canada (Toronto)', th:'Forensics Canada (โตรอนโต)'}, l:{en:'Ink and roll for international police certificates: $44', th:'พิมพ์แบบหมึกสำหรับใบรับรองต่างประเทศ: $44'}},
+  gambit:{u:'https://gambitid.com/ink-and-roll-fingerprinting.html', o:{en:'Gambit ID (Ottawa)', th:'Gambit ID (ออตตาวา)'}, l:{en:'Ink and roll fingerprinting: $95 plus HST', th:'พิมพ์ลายนิ้วมือแบบหมึก: $95 บวก HST'}},
+  f1fp:{u:'https://f1fingerprint.ca/price/', o:{en:'Frontier One (Calgary)', th:'Frontier One (แคลกะรี)'}, l:{en:'Ink fingerprinting: $70 first set, $55 extra, tax included', th:'พิมพ์แบบหมึก: ชุดแรก $70 ชุดเพิ่ม $55 รวมภาษี'}},
+  fproom:{u:'https://thefingerprintroom.com/fingerprinting-background-services/', o:{en:'The Fingerprint Room (Richmond BC, Calgary)', th:'The Fingerprint Room (ริชมอนด์ BC และแคลกะรี)'}, l:{en:'Ink and roll on any form: from $60 plus GST', th:'พิมพ์แบบหมึกลงแบบฟอร์มใดก็ได้: เริ่ม $60 บวก GST'}},
+  cmqc:{u:'https://commissionnairesquebec.ca/en/services-for-individuals/fingerprinting-for-individuals/', o:{en:'Commissionnaires du Québec (Montreal)', th:'Commissionnaires du Québec (มอนทรีออล)'}, l:{en:'Fingerprint card for police certificates abroad: $45 plus taxes', th:'บัตรลายนิ้วมือสำหรับใบรับรองต่างประเทศ: $45 บวกภาษี'}},
   apostille:{u:'https://www.hcch.net/en/news-archive/details?varevent=1158', o:{en:'Hague Conference on Private International Law', th:'ที่ประชุมกรุงเฮกว่าด้วยกฎหมายระหว่างประเทศแผนกคดีบุคคล (HCCH)'}, l:{en:'Thailand joins the Apostille Convention (28 Feb 2027)', th:'ไทยเข้าร่วมอนุสัญญา Apostille (28 ก.พ. 2027)'}}
 });
 GLOSS.push(
@@ -2201,6 +2212,118 @@ AGENT_UI.tools = [
   {u:'https://www.senecapolytechnic.ca/international/agent-directory.html', l:{en:'Example: Seneca Polytechnic agent directory', th:'ตัวอย่าง: รายชื่อเอเจนต์ของ Seneca Polytechnic'}, d:{en:'A school\'s own list of authorized agents, including agencies in Thailand.', th:'รายชื่อเอเจนต์ที่สถาบันอนุญาต รวมถึงเอเจนต์ในประเทศไทย'}},
   {u:'https://www.mtroyal.ca/Admission/mru-agents.htm', l:{en:'Example: Mount Royal University agents', th:'ตัวอย่าง: เอเจนต์ของ Mount Royal University'}, d:{en:'Another school list that includes a Thailand agent.', th:'อีกหนึ่งรายชื่อของสถาบันที่มีเอเจนต์ในประเทศไทย'}}
 ];
+Object.assign(AGENT_UI, {
+  sub:{en:'This guide does not rank agents: service quality depends on the branch and the counsellor and cannot be verified from official sources. Below are the checks to use, and agencies in Thailand that pass checks you can verify yourself, with the evidence links.', th:'คู่มือนี้ไม่จัดอันดับเอเจนต์ เพราะคุณภาพบริการขึ้นกับสาขาและผู้ให้คำปรึกษา และตรวจสอบจากแหล่งทางการไม่ได้ ด้านล่างคือวิธีตรวจสอบ และรายชื่อเอเจนต์ในไทยที่ผ่านการตรวจที่คุณตรวจซ้ำเองได้ พร้อมลิงก์หลักฐาน'},
+  listT:{en:'Agencies in Thailand that pass verifiable checks', th:'เอเจนต์ในไทยที่ผ่านการตรวจสอบได้'},
+  listSub:{en:'Each agency below is ICEF-accredited and/or named as an authorized agent for Thailand by Canadian public colleges or universities. Tap a badge or a school name to see the evidence.', th:'เอเจนต์แต่ละรายด้านล่างได้รับการรับรอง ICEF และ/หรือมีชื่อเป็นเอเจนต์ที่ได้รับอนุญาตสำหรับประเทศไทยของวิทยาลัยหรือมหาวิทยาลัยรัฐของแคนาดา แตะป้ายหรือชื่อสถาบันเพื่อดูหลักฐาน'},
+  listWarn:{en:'Not an endorsement or a ranking. Agents are paid by schools, so they may favour partner schools. Always check the CIP code, PGWP status and refund policy yourself, and use a licensed RCIC for paid visa advice.', th:'ไม่ใช่การรับรองหรือจัดอันดับ เอเจนต์ได้ค่าตอบแทนจากสถาบัน จึงอาจแนะนำเฉพาะสถาบันคู่สัญญา ควรตรวจรหัส CIP สถานะ PGWP และนโยบายคืนเงินด้วยตัวเองเสมอ และถ้าจ่ายเงินเพื่อขอคำแนะนำด้านวีซ่าต้องใช้ RCIC ที่มีใบอนุญาต'},
+  icefB:{en:'ICEF accredited', th:'ได้รับรอง ICEF'},
+  schoolsB:{en:n => `Listed by ${n} Canadian public school${n > 1 ? 's' : ''}`, th:n => `มีชื่อในรายชื่อเอเจนต์ของสถาบันรัฐแคนาดา ${n} แห่ง`},
+  listedBy:{en:'Listed by:', th:'มีชื่อใน:'},
+  listNone:{en:'No agency matches.', th:'ไม่พบเอเจนต์'},
+  listNote:{en:'Checked on 20 November 2026 from the ICEF directory and school agent-list pages. Lists change, so open the evidence links to confirm before you sign anything.', th:'ตรวจเมื่อ 20 พฤศจิกายน 2026 จากทำเนียบ ICEF และหน้ารายชื่อเอเจนต์ของแต่ละสถาบัน รายชื่อเปลี่ยนได้ ควรเปิดลิงก์หลักฐานเพื่อยืนยันก่อนเซ็นสัญญาใด ๆ'}
+});
+/* Agencies in Thailand that pass at least 2 of 3 checks (A: ICEF Agency Status, B: listed for Thailand by a Canadian public
+   school, C: TIECA member or ICEF Canada Course / ITAC staff). Checked 20 to 23 Nov 2026; only school lists read directly are used. */
+const AG_SCH = {
+  sen:{n:'Seneca', u:'https://www.senecapolytechnic.ca/international/agent-directory.html'},
+  hum:{n:'Humber', u:'https://humber.ca/international/programs/find-the-right-program/finding-a-local-agent?country=TH'},
+  nait:{n:'NAIT', u:'https://www.nait.ca/nait/international/authorized-international-agents'},
+  rrc:{n:'RRC Polytech', u:'https://www.rrc.ca/international/agents/'},
+  bvc:{n:'Bow Valley College', u:'https://www.bowvalleycollege.ca/about-us/contact-us/authorized-agent-representatives'},
+  fan:{n:'Fanshawe', u:'https://www.fanshawec.ca/fanshawe-education-partners-list?country=TH'},
+  loy:{n:'Loyalist', u:'https://loyalistcollege.com/admissions/how-to-apply/international-applicants/international-agent-partners/'},
+  ure:{n:'University of Regina', u:'https://www.uregina.ca/ur-international/agent-partners.html'},
+  umb:{n:'University of Manitoba', u:'https://umanitoba.ca/admissions/international-students/educational-agents'}
+};
+const AG_CCG = 'https://www.icef.com/academy/icef-canada-course-graduates-ccgs-list/', AG_ITAC = 'https://www.icef.com/academy/icef-trained-agent-counsellors-itacs-list/';
+const agO = {tieca:u => ({l:{en:'TIECA member', th:'สมาชิก TIECA'}, u}), ccg:{l:{en:'ICEF Canada Course graduate', th:'ผ่านหลักสูตร Canada Course ของ ICEF'}, u:AG_CCG}, itac:{l:{en:'ICEF trained counsellor', th:'ผู้ให้คำปรึกษาที่ผ่านการอบรม ICEF'}, u:AG_ITAC}};
+const AGENTS_TH = [
+  {n:'Pacific Premiere Consulting Group', u:'https://www.pacificpremiere.com', city:{en:'Bangkok (EmQuartier), Vancouver branch', th:'กรุงเทพฯ (EmQuartier) มีสาขาแวนคูเวอร์'}, icef:'https://www.icef.com/agency/0012000000y0KvYAAU',
+   schools:[AG_SCH.sen, AG_SCH.nait, AG_SCH.rrc, AG_SCH.bvc, AG_SCH.loy, AG_SCH.ure], other:[agO.tieca('https://tieca.org/member/pacific-premiere-consulting-group/'), agO.ccg, agO.itac],
+   note:{en:'ICEF renewal was due on 21 Nov 2026: open the ICEF link to confirm it is current.', th:'การรับรอง ICEF ครบกำหนดต่ออายุวันที่ 21 พ.ย. 2026 กดลิงก์ ICEF เพื่อยืนยันว่ายังมีผลอยู่'}},
+  {n:'KorPunGun (KPG)', u:'https://korpungun.com', city:{en:'Bangkok', th:'กรุงเทพฯ'}, icef:'https://www.icef.com/agency/0010J0000210HtzQAE',
+   schools:[AG_SCH.sen, AG_SCH.hum, AG_SCH.nait, AG_SCH.bvc], other:[agO.tieca('https://tieca.org/member/kor-pun-gun/'), agO.ccg]},
+  {n:'International Student Guide (IS-Guide)', u:'https://is-guide.com', city:{en:'Bangkok (Bueng Kum)', th:'กรุงเทพฯ (บึงกุ่ม)'}, icef:'https://www.icef.com/agency/0016M00002YK4UnQAL',
+   schools:[AG_SCH.fan, AG_SCH.rrc, AG_SCH.bvc], other:[agO.tieca('https://tieca.org/member/'), agO.ccg]},
+  {n:'EdNET', u:'https://www.ednet.co.th', city:{en:'Bangkok (Chatuchak), Ubon Ratchathani', th:'กรุงเทพฯ (จตุจักร) อุบลราชธานี'}, icef:'https://www.icef.com/agency/0012000000UPzN8AAL',
+   schools:[AG_SCH.hum, AG_SCH.rrc], other:[agO.tieca('https://tieca.org/member/ednet/')],
+   note:{en:'ICEF lists "Ednet Co., Ltd." while the schools list "EdNET North America Co., Ltd.", two companies at the same address.', th:'ICEF ระบุชื่อ "Ednet Co., Ltd." ส่วนสถาบันระบุ "EdNET North America Co., Ltd." เป็น 2 บริษัทที่อยู่ที่เดียวกัน'}},
+  {n:'Thai Study Abroad Consultant (TSAB)', u:'https://thaistudyabroad.com', city:{en:'Bangkok (Ratchathewi)', th:'กรุงเทพฯ (ราชเทวี)'}, icef:'https://www.icef.com/agency/0012000000UQ2rlAAD',
+   schools:[AG_SCH.sen], other:[agO.tieca('https://tieca.org/member/thai-study-abroad-consultant/')]},
+  {n:'Big Box Education', u:'https://www.bigboxedu.com', city:{en:'Bangkok (Mitrtown, Rama 4)', th:'กรุงเทพฯ (มิตรทาวน์ พระราม 4)'}, icef:'https://www.icef.com/agency/0010J00001jlLtSQAU',
+   schools:[AG_SCH.sen, AG_SCH.hum, AG_SCH.nait, AG_SCH.bvc, AG_SCH.ure], other:[]},
+  {n:'IDP Education Thailand', u:'https://www.idp.com/thailand/study-abroad/study-in-canada/', city:{en:'Bangkok, Chiang Mai and other offices', th:'กรุงเทพฯ เชียงใหม่ และสาขาอื่น'}, icef:'',
+   schools:[AG_SCH.sen, AG_SCH.hum, AG_SCH.nait, AG_SCH.umb, AG_SCH.fan], other:[agO.tieca('https://tieca.org/member/idp-education-services/')],
+   note:{en:'Not in the ICEF directory. Also runs IELTS in Thailand.', th:'ไม่อยู่ในทำเนียบ ICEF เป็นผู้จัดสอบ IELTS ในไทยด้วย'}},
+  {n:'iae GLOBAL Thailand', u:'https://www.iaeglobal.co', city:{en:'Bangkok (Sukhumvit 31)', th:'กรุงเทพฯ (สุขุมวิท 31)'}, icef:'https://www.icef.com/agency/0012000000QHyl1AAD',
+   schools:[AG_SCH.sen, AG_SCH.hum, AG_SCH.nait, AG_SCH.fan, AG_SCH.umb], other:[],
+   note:{en:'The ICEF listing is for the head office in Tokyo, which says it owns the Thailand office.', th:'ICEF ระบุสำนักงานใหญ่ที่โตเกียว ซึ่งระบุว่าเป็นเจ้าของสาขาในไทย'}},
+  {n:'StudyIn (SI-UK Thailand)', u:'https://gostudyin.com/thailand/', city:{en:'Bangkok (Sukhumvit 25), Chiang Mai', th:'กรุงเทพฯ (สุขุมวิท 25) เชียงใหม่'}, icef:'',
+   schools:[AG_SCH.sen, AG_SCH.hum, AG_SCH.nait], other:[agO.tieca('https://tieca.org/member/studyin/'), agO.ccg]},
+  {n:'Smile Campus International', u:'https://www.smilecampus.com', city:{en:'Bangkok, Hat Yai, Chiang Mai, Kalasin, Udon Thani', th:'กรุงเทพฯ หาดใหญ่ เชียงใหม่ กาฬสินธุ์ อุดรธานี'}, icef:'https://www.icef.com/agency/0012000000UQ3gdAAD',
+   schools:[], other:[agO.tieca('https://tieca.org/member/smile-campus-international/'), agO.itac],
+   note:{en:'No Canadian school list found naming it; ask which Canadian schools it represents.', th:'ยังไม่พบในรายชื่อเอเจนต์ของสถาบันแคนาดา ควรถามว่าเป็นตัวแทนของสถาบันไหน'}},
+  {n:'Born to Consult', u:'https://borntobeconsultant.com', city:{en:'Bangkok', th:'กรุงเทพฯ'}, icef:'https://www.icef.com/agency/0012000000UQ4AAAA1',
+   schools:[], other:[agO.itac],
+   note:{en:'ICEF profile focuses on Canada, but no Canadian school list found naming it; its ICEF training dates from 2011.', th:'โปรไฟล์ ICEF เน้นแคนาดา แต่ยังไม่พบในรายชื่อของสถาบันแคนาดา และการอบรม ICEF เป็นปี 2011'}}
+];
+/* Where to go and ask: booking, contact and branches from each agency's own website (checked 23 Nov 2026).
+   iae GLOBAL (no Thailand office shown on its site) and Born to Consult (no phone or booking) are left out of this list. */
+const AG_CITY = {bkk:{en:'Bangkok', th:'กรุงเทพฯ'}, cnx:{en:'Chiang Mai', th:'เชียงใหม่'}, kkc:{en:'Khon Kaen', th:'ขอนแก่น'}, hdy:{en:'Hat Yai', th:'หาดใหญ่'},
+  ubp:{en:'Ubon Ratchathani', th:'อุบลราชธานี'}, kls:{en:'Kalasin', th:'กาฬสินธุ์'}, udn:{en:'Udon Thani', th:'อุดรธานี'}};
+const AG_INFO = {
+  'Pacific Premiere Consulting Group':{book:'https://www.pacificpremiere.com/contact-us.html', bookL:{en:'Request a call back', th:'ฝากข้อมูลให้โทรกลับ'}, canada:'https://www.pacificpremiere.com/about-canada.html',
+    free:{en:'Says it charges no extra fees', th:'เว็บระบุว่าไม่คิดค่าธรรมเนียมเพิ่ม'}, contact:{en:'Phone 085-658-7000 · LINE @PacificPremiere · near BTS Phrom Phong', th:'โทร 085-658-7000 · LINE @PacificPremiere · ใกล้ BTS พร้อมพงษ์'}, cities:[AG_CITY.bkk]},
+  'KorPunGun (KPG)':{book:'https://booking.korpungun.com/', bookL:{en:'Book a free 30-minute Zoom', th:'นัดปรึกษาฟรีผ่าน Zoom 30 นาที'}, canada:'https://korpungun.com/study-in-canada/',
+    free:{en:'Free consultation, online by Zoom or in person', th:'ปรึกษาฟรี ผ่าน Zoom หรือนัดพบที่สำนักงาน'}, city:{en:'Bangkok (Nong Khaem)', th:'กรุงเทพฯ (หนองแขม)'},
+    contact:{en:'Phone 094-883-8778 · LINE @korpungun · Mon to Fri 10:00 to 18:00', th:'โทร 094-883-8778 · LINE @korpungun · จันทร์ถึงศุกร์ 10:00 ถึง 18:00'}, cities:[AG_CITY.bkk]},
+  'International Student Guide (IS-Guide)':{book:'https://is-guide.com/contact-us/', bookL:{en:'Contact', th:'ติดต่อ'}, canada:'https://is-guide.com/',
+    free:{en:'Free 30-minute consultation (a 5,000 THB deposit applies if they act for you)', th:'ปรึกษาฟรี 30 นาที (ถ้าให้ดำเนินการแทน มีมัดจำ 5,000 บาท)'},
+    contact:{en:'Phone 080-113-6026 · LINE @is-guide', th:'โทร 080-113-6026 · LINE @is-guide'}, cities:[AG_CITY.bkk]},
+  'EdNET':{book:'https://www.ednet.co.th/contact-us/', bookL:{en:'Book by LINE or phone', th:'นัดผ่าน LINE หรือโทร'}, canada:'https://www.ednet.co.th/study-aboard-select-country/canada/',
+    free:{en:'Free consultation at every level', th:'ปรึกษาฟรีทุกระดับ'},
+    contact:{en:'Phone 086-783-8893 · LINE @ednet · Mon to Fri 09:00 to 18:00 · Ubon branch 045-950-418', th:'โทร 086-783-8893 · LINE @ednet · จันทร์ถึงศุกร์ 09:00 ถึง 18:00 · สาขาอุบลฯ 045-950-418'}, cities:[AG_CITY.bkk, AG_CITY.ubp]},
+  'Thai Study Abroad Consultant (TSAB)':{book:'https://thaistudyabroad.com/contactus-2/', bookL:{en:'Contact', th:'ติดต่อ'}, canada:encodeURI('https://thaistudyabroad.com/เรียนต่อแคนาดา/'),
+    free:{en:'Free consultation', th:'ปรึกษาฟรีไม่มีค่าใช้จ่าย'},
+    contact:{en:'Phone 02-245-5845 · LINE @thaistudyabroad · Mon to Sat 9:00 to 18:00 · near Victory Monument', th:'โทร 02-245-5845 · LINE @thaistudyabroad · จันทร์ถึงเสาร์ 9:00 ถึง 18:00 · ใกล้อนุสาวรีย์ชัยฯ'}, cities:[AG_CITY.bkk]},
+  'Big Box Education':{book:'https://www.bigboxedu.com/free-consultation/', canada:'https://www.bigboxedu.com/article/study-canada/',
+    free:{en:'Free consultation', th:'ปรึกษาฟรี'},
+    contact:{en:'Phone 098-559-7119 · Mon to Fri 9:30 to 18:00 · Mitrtown, Sam Yan', th:'โทร 098-559-7119 · จันทร์ถึงศุกร์ 9:30 ถึง 18:00 · มิตรทาวน์ สามย่าน'}, cities:[AG_CITY.bkk]},
+  'IDP Education Thailand':{book:'https://www.idp.com/thailand/education-counsellor-office-finder/', bookL:{en:'Find an office and book', th:'ค้นหาสาขาและนัดปรึกษา'}, canada:'https://www.idp.com/thailand/study-abroad/study-in-canada/',
+    free:{en:'Free at every step; online or in-person counselling', th:'ปรึกษาฟรีทุกขั้นตอน เลือกปรึกษาออนไลน์หรือที่สาขาได้'}, city:{en:'Bangkok (Silom), Chiang Mai, Khon Kaen, Hat Yai', th:'กรุงเทพฯ (สีลม) เชียงใหม่ ขอนแก่น หาดใหญ่'},
+    contact:{en:'Phone 02-055-4200 (Silom) · Mon to Fri 9:00 to 17:00 · LINE via the link on its site', th:'โทร 02-055-4200 (สีลม) · จันทร์ถึงศุกร์ 9:00 ถึง 17:00 · LINE ผ่านลิงก์บนเว็บไซต์'}, cities:[AG_CITY.bkk, AG_CITY.cnx, AG_CITY.kkc, AG_CITY.hdy]},
+  'StudyIn (SI-UK Thailand)':{book:'https://gostudyin.com/thailand/free-consultation/', canada:'https://gostudyin.com/thailand/study-in-canada/',
+    free:{en:'Free consultation, one-to-one or online', th:'ปรึกษาฟรี แบบตัวต่อตัวหรือออนไลน์'},
+    contact:{en:'Phone 02-260-6033 (Bangkok) · 091-079-9303 (Chiang Mai)', th:'โทร 02-260-6033 (กรุงเทพฯ) · 091-079-9303 (เชียงใหม่)'}, cities:[AG_CITY.bkk, AG_CITY.cnx]},
+  'Smile Campus International':{book:'https://smilecampus.com/contact', bookL:{en:'Contact a branch', th:'ติดต่อสาขา'}, canada:'https://smilecampus.com/studyabroad/country/5',
+    free:{en:'Free consultation at every step', th:'ปรึกษาฟรีทุกขั้นตอน'},
+    contact:{en:'Phone 086-632-4594 · LINE @smilecampus · head office Empire Tower, Sathorn', th:'โทร 086-632-4594 · LINE @smilecampus · สำนักงานใหญ่ Empire Tower สาทร'}, cities:[AG_CITY.bkk, AG_CITY.hdy, AG_CITY.cnx, AG_CITY.kls, AG_CITY.udn]}
+};
+AGENTS_TH.forEach(a => Object.assign(a, AG_INFO[a.n] || {}));
+for (let i = AGENTS_TH.length - 1; i >= 0; i--) if (!AG_INFO[AGENTS_TH[i].n]) AGENTS_TH.splice(i, 1);
+AGENTS_TH.push({n:'Hands On Education Consultants', u:'https://hands-on.co.th', city:{en:'Bangkok (Silom, Sukhumvit, Pinklao, Rama 2, Rama 9), Chiang Mai', th:'กรุงเทพฯ (สีลม สุขุมวิท ปิ่นเกล้า พระราม 2 พระราม 9) เชียงใหม่'},
+  icef:'', schools:[], other:[], book:'https://hands-on.co.th/enquiry/', bookL:{en:'Send an enquiry', th:'ส่งคำถามปรึกษา'}, canada:'https://hands-on.co.th/study-in-canada/',
+  free:{en:'Free at every step', th:'บริการฟรีทุกขั้นตอน'}, cities:[AG_CITY.bkk, AG_CITY.cnx],
+  contact:{en:'Phone 02-635-5230 · LINE @handson · Silom Mon to Fri 10:00 to 18:00, Sat 10:00 to 16:00 (other branches by appointment)', th:'โทร 02-635-5230 · LINE @handson · สาขาสีลม จันทร์ถึงศุกร์ 10:00 ถึง 18:00 เสาร์ 10:00 ถึง 16:00 (สาขาอื่นควรนัดก่อน)'},
+  note:{en:'Not found in the ICEF directory, the TIECA member list or the Canadian school agent lists we checked. That does not mean it is untrustworthy: its site says it represents over 350 schools in 6 countries. Ask which Canadian schools it represents, then confirm on each school\'s agent list.', th:'ไม่พบในทำเนียบ ICEF รายชื่อสมาชิก TIECA และรายชื่อเอเจนต์ของสถาบันแคนาดาที่ตรวจ ไม่ได้แปลว่าไม่น่าเชื่อถือ เว็บไซต์ระบุว่าเป็นตัวแทนกว่า 350 สถาบันใน 6 ประเทศ ให้ถามว่าเป็นตัวแทนของสถาบันแคนาดาแห่งไหน แล้วตรวจกับรายชื่อเอเจนต์ของสถาบันนั้น'}});
+Object.assign(AGENT_UI, {
+  listSub:{en:'Each agency passes at least 2 of 3 checks: (1) ICEF Agency Status, (2) named for Thailand on a Canadian public college or university agent list, (3) member of TIECA (Thai International Education Consultants Association) or staff trained by ICEF. Tap a badge or school to see the evidence.', th:'แต่ละรายผ่านอย่างน้อย 2 ใน 3 ข้อ: (1) ได้รับรอง ICEF (2) มีชื่อเป็นเอเจนต์สำหรับประเทศไทยของวิทยาลัยหรือมหาวิทยาลัยรัฐของแคนาดา (3) เป็นสมาชิกสมาคมที่ปรึกษาการศึกษาต่างประเทศไทย (TIECA) หรือมีพนักงานผ่านการอบรมของ ICEF แตะป้ายหรือชื่อสถาบันเพื่อดูหลักฐาน'},
+  passB:{en:n => `Passes ${n} of 3 checks`, th:n => `ผ่าน ${n} ใน 3 ข้อ`},
+  listT:{en:'Where to ask for advice about studying in Canada (Thailand)', th:'ที่ปรึกษาเรียนต่อแคนาดาในไทย: ไปถามปรึกษาได้'},
+  listSub:{en:'Education agencies with offices in Thailand where you can ask about studying in Canada, in person or online. Booking and contact details come from each agency\'s own website. The badges show which of 3 checks each one passes: (1) ICEF Agency Status, (2) named for Thailand on a Canadian public college or university agent list, (3) member of TIECA or staff trained by ICEF. Tap a badge or school to see the evidence.', th:'เอเจนต์การศึกษาที่มีสำนักงานในไทย ไปถามปรึกษาเรื่องเรียนต่อแคนาดาได้ทั้งที่สาขาและออนไลน์ ข้อมูลนัดหมายและติดต่อมาจากเว็บไซต์ของเอเจนต์เอง ป้ายแสดงว่าผ่านการตรวจกี่ข้อจาก 3 ข้อ: (1) ได้รับรอง ICEF (2) มีชื่อเป็นเอเจนต์สำหรับประเทศไทยของวิทยาลัยหรือมหาวิทยาลัยรัฐของแคนาดา (3) เป็นสมาชิกสมาคมที่ปรึกษาการศึกษาต่างประเทศไทย (TIECA) หรือมีพนักงานผ่านการอบรมของ ICEF แตะป้ายหรือชื่อสถาบันเพื่อดูหลักฐาน'},
+  passNone:{en:'Not found on the 3 check sources', th:'ยังไม่พบในแหล่งตรวจทั้ง 3'},
+  cityL:{en:'Branch in', th:'มีสาขาที่'}, cityAll:{en:'All', th:'ทั้งหมด'},
+  bookL:{en:'Book a consultation', th:'นัดปรึกษา'}, canadaL:{en:'Study in Canada page', th:'หน้าเรียนต่อแคนาดา'}
+});
+AGENT_UI.tools = AGENT_UI.tools.filter(t => !/mtroyal/.test(t.u)).concat([
+  {u:'https://www.educanada.ca/study-plan-etudes/before-avant/education-agents.aspx?lang=eng', l:{en:'EduCanada: education agents', th:'EduCanada: เอเจนต์การศึกษา'}, d:{en:'Canada does not accredit or endorse agents, and agents may not give immigration advice. Confirm with the school.', th:'รัฐบาลแคนาดาไม่ได้รับรองหรือแนะนำเอเจนต์ และเอเจนต์ให้คำแนะนำด้านวีซ่าไม่ได้ ควรยืนยันกับสถาบันเอง'}},
+  {u:'https://tieca.org/member/', l:{en:'TIECA member list', th:'รายชื่อสมาชิก TIECA'}, d:{en:'Thai International Education Consultants Association, with a code of ethics.', th:'สมาคมที่ปรึกษาการศึกษาต่างประเทศไทย มีจรรยาบรรณวิชาชีพ'}},
+  {u:AG_CCG, l:{en:'ICEF Canada Course graduates', th:'ผู้ผ่านหลักสูตร Canada Course ของ ICEF'}, d:{en:'Counsellors trained on Canadian education; filter by Thailand.', th:'ผู้ให้คำปรึกษาที่ผ่านการอบรมเรื่องการศึกษาในแคนาดา กรองตามประเทศไทยได้'}},
+  {u:'https://humber.ca/international/programs/find-the-right-program/finding-a-local-agent?country=TH', l:{en:'Example: Humber agents in Thailand', th:'ตัวอย่าง: เอเจนต์ของ Humber ในไทย'}, d:{en:'A school\'s own list, filtered to Thailand.', th:'รายชื่อของสถาบันเอง กรองเฉพาะประเทศไทย'}}
+]);
+GLOSS.push({k:'TIECA', f:'Thai International Education Consultants Association', c:'org', th:'สมาคมที่ปรึกษาการศึกษาต่างประเทศไทย มีสมาชิกประมาณ 78 บริษัท และมีจรรยาบรรณวิชาชีพ เป็นการตรวจสอบเบื้องต้น ไม่ใช่ใบอนุญาตของรัฐ', en:'The Thai International Education Consultants Association, about 78 member companies with a code of ethics. A useful first check, not a government licence.'});
+GLOSS.push({k:'RCMP', f:'Royal Canadian Mounted Police', c:'org', s:'rcmpfp', th:'ตำรวจสหพันธรัฐของแคนาดา ดูแลระบบประวัติอาชญากรรมและรับรองบริษัทเอกชนที่พิมพ์ลายนิ้วมือ', en:"Canada's federal police. It runs the criminal records system and accredits private fingerprinting companies."});
 Object.assign(SRC, {
   idp:{u:'https://ielts.idp.com/thailand/about/how-to-book-ielts', o:{en:'IDP Thailand', th:'IDP ประเทศไทย'}, l:{en:'IELTS fees and booking in Thailand', th:'ค่าสอบและการจอง IELTS ในประเทศไทย'}},
   celpip:{u:'https://www.celpip.ca/country/thailand/', o:{en:'Paragon Testing (CELPIP)', th:'Paragon Testing (CELPIP)'}, l:{en:'CELPIP in Thailand: dates and fees', th:'CELPIP ในประเทศไทย: วันสอบและค่าสอบ'}},
@@ -2342,15 +2465,24 @@ const COSTS = {
         {en:'Maybe no new exam: if you live in Canada and passed an IRCC medical (for example for your study permit) within the last 5 years, enter its number on the application; the officer may accept it (temporary policy to 5 October 2029, not guaranteed). [[imeexempt]]', th:'อาจไม่ต้องตรวจใหม่: ถ้าอยู่ในแคนาดาและเคยตรวจสุขภาพกับ IRCC แล้วผ่าน (เช่น ตอนขอ Study Permit) ภายใน 5 ปี ให้ใส่เลขที่ผลตรวจเดิมในใบสมัคร เจ้าหน้าที่อาจยอมรับได้ (นโยบายชั่วคราวถึง 5 ตุลาคม 2029 ไม่รับประกัน) [[imeexempt]]'}
        ]},
       {t:{en:'Police certificate from Thailand', th:'ใบรับรองความประพฤติจากตำรวจไทย'}, thb:[100,600], off:true, r:'pccth',
-       n:{en:'Royal Thai Police fee; fingerprinting in Canada is extra if you apply from abroad', th:'ค่าธรรมเนียมของสำนักงานตำรวจแห่งชาติ ถ้ายื่นจากต่างประเทศมีค่าพิมพ์ลายนิ้วมือในแคนาดาเพิ่ม'},
+       n:{en:'Royal Thai Police fee; from Canada add fingerprints (next line)', th:'ค่าธรรมเนียมของสำนักงานตำรวจแห่งชาติ ถ้ายื่นจากแคนาดาบวกค่าพิมพ์ลายนิ้วมือ (รายการถัดไป)'},
        how:[
         {en:'Which countries: every country where you lived 6 months or more in a row during the last 10 years (only from age 18). You do not need one from Canada when you apply for PR, so most Thai applicants need only Thailand\'s. [[pccee]]', th:'ต้องใช้ของประเทศไหน: ทุกประเทศที่เคยอยู่ติดต่อกัน 6 เดือนขึ้นไปในช่วง 10 ปีที่ผ่านมา (นับเฉพาะหลังอายุ 18 ปี) ตอนยื่น PR ไม่ต้องใช้ของแคนาดา คนไทยส่วนใหญ่จึงต้องใช้แค่ของไทย [[pccee]]'},
         {en:'When: ask for it as soon as your Express Entry profile is in the pool, because after an invitation you have only 60 days to apply. The Thai certificate must be issued after the last time you stayed in Thailand for 6 months or more in a row. [[pccee]]', th:'ขอเมื่อไร: ขอทันทีที่โปรไฟล์ Express Entry อยู่ใน Pool เพราะหลังได้คำเชิญมีเวลายื่นแค่ 60 วัน ใบของไทยต้องออกหลังจากครั้งสุดท้ายที่คุณอยู่ไทยติดต่อกัน 6 เดือนขึ้นไป [[pccee]]'},
         {en:'Who issues it: the Police Clearance Service Center, Special Branch Bureau, Royal Thai Police (online at pcscenter.online). [[pccth]] [[pccthp]]', th:'ผู้ออก: ศูนย์บริการหนังสือรับรองความประพฤติ กองบัญชาการตำรวจสันติบาล สำนักงานตำรวจแห่งชาติ (ระบบออนไลน์ pcscenter.online) [[pccth]] [[pccthp]]'},
         {en:'If you are in Thailand: register and book online, then go in person with your ID card and passport. Fee 100 THB (collect yourself) or 160 THB (by post). About 15 working days, or 25 if a record is found. [[pccthp]]', th:'ถ้าอยู่ไทย: ลงทะเบียนและจองคิวออนไลน์ แล้วไปยื่นด้วยตัวเองพร้อมบัตรประชาชนและพาสปอร์ตตัวจริง ค่าธรรมเนียม 100 บาท (รับเอง) หรือ 160 บาท (ส่งไปรษณีย์) ใช้เวลาประมาณ 15 วันทำการ หรือ 25 วันถ้ามีประวัติ [[pccthp]]'},
         {en:'If you are in Canada: get 2 sets of fingerprints from local police or an RCMP-accredited fingerprinting company, add certified copies of your passport, ID card and house registration and 2 photos, then mail them to the centre or let someone in Thailand apply for you. Fee 100 THB with a prepaid return envelope, or 600 THB including return postage; 15 to 25 working days plus mail time. [[pccabroad]] [[rcmpfp]]', th:'ถ้าอยู่แคนาดา: พิมพ์ลายนิ้วมือ 2 ชุดที่ตำรวจท้องถิ่นหรือบริษัทที่ RCMP รับรอง แนบสำเนาพาสปอร์ต บัตรประชาชน และทะเบียนบ้านที่รับรองสำเนา รูปถ่าย 2 ใบ แล้วส่งไปรษณีย์ไปที่ศูนย์ หรือมอบอำนาจให้คนที่ไทยยื่นแทน ค่าธรรมเนียม 100 บาทถ้าแนบซองตอบกลับที่ติดแสตมป์แล้ว หรือ 600 บาทรวมค่าส่งกลับ ใช้เวลา 15 ถึง 25 วันทำการบวกเวลาส่งไปรษณีย์ [[pccabroad]] [[rcmpfp]]'},
-        {en:'Check first: official pages give different mailing addresses for the centre, so confirm the current address on pcscenter.online before sending, and ask the fingerprinting company for its price. [[pccthp]]', th:'ตรวจก่อนส่ง: หน้าเว็บทางการแต่ละแห่งระบุที่อยู่ของศูนย์ไม่ตรงกัน ควรยืนยันที่อยู่ล่าสุดบน pcscenter.online ก่อนส่ง และสอบถามราคาค่าพิมพ์ลายนิ้วมือกับผู้ให้บริการ [[pccthp]]'},
+        {en:'Check first: official pages give different mailing addresses for the centre, so confirm the current address on pcscenter.online before sending. Fingerprint prices are in the next line. [[pccthp]]', th:'ตรวจก่อนส่ง: หน้าเว็บทางการแต่ละแห่งระบุที่อยู่ของศูนย์ไม่ตรงกัน ควรยืนยันที่อยู่ล่าสุดบน pcscenter.online ก่อนส่ง ราคาค่าพิมพ์ลายนิ้วมือดูได้ในรายการถัดไป [[pccthp]]'},
         {en:'Upload a colour scan of the original with a certified English translation. If it is late, upload a letter of explanation with proof you asked for it (receipt, payment or tracking number). [[pccee]]', th:'อัปโหลดสแกนสีจากตัวจริง พร้อมคำแปลภาษาอังกฤษที่รับรอง ถ้ายังไม่ได้รับ ให้แนบจดหมายอธิบายพร้อมหลักฐานว่ายื่นขอแล้ว (ใบเสร็จ หลักฐานการจ่ายเงิน หรือเลขพัสดุ) [[pccee]]'}
+       ]},
+      {t:{en:'Fingerprints in Canada for the Thai police certificate (2 ink cards)', th:'ค่าพิมพ์ลายนิ้วมือในแคนาดาสำหรับใบรับรองความประพฤติไทย (2 ชุด แบบหมึก)'}, cad:[65,125], r:'rcmpfp',
+       n:{en:'Only if you apply from Canada; most cost about CAD 80 to 110 with tax', th:'เฉพาะกรณียื่นจากแคนาดา ส่วนใหญ่ประมาณ CAD 80 ถึง 110 รวมภาษี'},
+       how:[
+        {en:'What to ask for: 2 sets of ink-and-roll fingerprints on fingerprint cards, signed and stamped by the official, "for a foreign police certificate (Thailand)". Digital (LiveScan) prints are not what the Thai police ask for. [[pccabroad]]', th:'ขออะไร: ลายนิ้วมือแบบหมึก (ink and roll) 2 ชุดบนบัตรลายนิ้วมือ มีลายเซ็นและตราประทับของเจ้าหน้าที่ บอกผู้ให้บริการว่า "for a foreign police certificate (Thailand)" ลายนิ้วมือแบบดิจิทัล (LiveScan) ไม่ใช่สิ่งที่ตำรวจไทยขอ [[pccabroad]]'},
+        {en:'Thai missions do not take fingerprints: the Embassy in Ottawa and the Consulate-General in Vancouver point you to RCMP-accredited companies (the Toronto, Montreal, Edmonton and Calgary honorary consulates are closed). [[thvanpcc]] [[rcmpfp]]', th:'สถานทูตและสถานกงสุลไทยไม่ได้รับพิมพ์ลายนิ้วมือ: สถานทูตที่ออตตาวาและสถานกงสุลใหญ่ที่แวนคูเวอร์แนะนำให้ใช้บริษัทที่ RCMP รับรอง (สถานกงสุลกิตติมศักดิ์ที่โตรอนโต มอนทรีออล เอดมันตัน และแคลกะรีปิดอยู่) [[thvanpcc]] [[rcmpfp]]'},
+        {en:'City police: Edmonton $50 for the first set and $15 for each extra (2 sets $65); Winnipeg $81.90 with GST for 1 or 2 sets. Vancouver police do digital only, and Calgary, Toronto and Ottawa police send you to private companies. [[eps]] [[wps]] [[vpdfp]] [[tpsfp]]', th:'ตำรวจเมือง: เอดมันตัน ชุดแรก $50 ชุดต่อไป $15 (2 ชุด $65) วินนิเพก $81.90 รวม GST สำหรับ 1 หรือ 2 ชุด ตำรวจแวนคูเวอร์ทำเฉพาะแบบดิจิทัล ส่วนตำรวจแคลกะรี โตรอนโต และออตตาวาให้ไปใช้บริษัทเอกชน [[eps]] [[wps]] [[vpdfp]] [[tpsfp]]'},
+        {en:'Example prices from RCMP-accredited companies (examples only, not recommendations; pages show no date, so phone first): Toronto: Fingerprints Plus about $90 with tax for 2 cards, Forensics Canada from $44 plus tax for one. Ottawa: Gambit ID $95 plus HST. Calgary: Frontier One $125 with tax for 2 sets, The Fingerprint Room from $60 plus GST (also in Richmond BC). Montreal: Commissionnaires du Québec $45 plus taxes a card. Vancouver: Commissionaires BC and others do ink prints but post no price. [[fpplus]] [[forensicsca]] [[gambit]] [[f1fp]] [[fproom]] [[cmqc]]', th:'ตัวอย่างราคาบริษัทที่ RCMP รับรอง (เป็นตัวอย่างเท่านั้น ไม่ใช่การแนะนำ หน้าเว็บไม่ระบุวันที่ ควรโทรถามก่อน): โตรอนโต: Fingerprints Plus 2 ชุดประมาณ $90 รวมภาษี Forensics Canada เริ่ม $44 บวกภาษีต่อชุด ออตตาวา: Gambit ID $95 บวก HST แคลกะรี: Frontier One 2 ชุด $125 รวมภาษี The Fingerprint Room เริ่ม $60 บวก GST (มีที่ริชมอนด์ BC ด้วย) มอนทรีออล: Commissionnaires du Québec บัตรละ $45 บวกภาษี แวนคูเวอร์: Commissionaires BC และบริษัทอื่นทำแบบหมึกได้แต่ไม่ประกาศราคา [[fpplus]] [[forensicsca]] [[gambit]] [[f1fp]] [[fproom]] [[cmqc]]'},
+        {en:'Summary: 2 ink cards cost about CAD 65 to 125, most often about 80 to 110 with tax. Find a company near you on the RCMP list (281 locations, updated monthly). [[rcmpfp]]', th:'สรุป: 2 ชุดแบบหมึกประมาณ CAD 65 ถึง 125 ส่วนใหญ่ประมาณ 80 ถึง 110 รวมภาษี ค้นหาบริษัทใกล้บ้านได้จากรายชื่อของ RCMP (281 แห่ง อัปเดตทุกเดือน) [[rcmpfp]]'}
        ]},
       {t:{en:'Biometrics for PR (again)', th:'Biometrics สำหรับ PR (เก็บใหม่)'}, cad:[85,85], off:true, u:FEES_URL, r:'biopr', n:{en:'Required with every PR application', th:'ต้องเก็บใหม่ทุกครั้งที่ยื่น PR'}}
     ]}
@@ -2792,7 +2924,7 @@ function viewPrep(){
         
             ${it.live === 'proc' && LIVE.pt ? `<span class="badge b-green mt-1">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(LIVE.pt.study)}</span>` : ''}
         
-            <span class="block faint text-[13.5px] mt-1">${ic('lightbulb','icon-sm')} ${T(it.why)}</span></span>
+            <span class="flex items-start gap-1.5 faint text-[13.5px] mt-1"><span style="margin-top:3px">${ic('lightbulb','icon-sm')}</span><span>${T(it.why)}</span></span></span>
         
         </label>`).join('')}</div>
     </div>`;
@@ -2877,6 +3009,47 @@ function viewMasters(){
         <td><a href="${m.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1" style="color:var(--blue)">${ic('external-link','icon-sm')}${T(U.page)}</a></td></tr>`).join('')}</tbody></table></div>
     <p class="faint text-[13.5px] mt-3">${T(U.note)}</p>`;
 }
+/* Named agencies in Thailand that pass checks a reader can verify (ICEF accreditation, listed by Canadian public schools).
+   Evidence links are kept with each entry; this is not an endorsement or a ranking. */
+function agentListCard(){
+  const U = AGENT_UI, list = (typeof AGENTS_TH !== 'undefined' ? AGENTS_TH : []);
+  if (!list.length) return '';
+  const checks = a => (a.icef ? 1 : 0) + (a.schools.length ? 1 : 0) + ((a.other || []).length ? 1 : 0);
+  /* filter by city: built from the branch cities each agency shows on its own site */
+  const cityKeys = [...new Set(list.flatMap(a => (a.cities || []).map(c => c.en)))];
+  const cur = cityKeys.includes(S.agentCity) ? S.agentCity : 'all';
+  const rows = list.filter(a => cur === 'all' || (a.cities || []).some(c => c.en === cur)).sort((x, y) => checks(y) - checks(x));
+  const cityName = k => { for (const a of list) for (const c of (a.cities || [])) if (c.en === k) return T(c); return k; };
+  return `
+    <div class="card mt-4" id="agent-list">
+      <h3 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('messages-square')}</span>${T(U.listT)}</h3>
+      <p class="muted text-[14px] mt-1">${T(U.listSub)}</p>
+      <div class="text-[13.5px] mt-2 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px"><span style="color:var(--amber)">${ic('triangle-alert','icon-sm')}</span><span>${T(U.listWarn)}</span></div>
+      ${cityKeys.length > 1 ? `<div class="flex flex-wrap items-center gap-2 mt-3"><span class="faint text-[13px]">${T(U.cityL)}</span><div class="seg">${[['all', T(U.cityAll)], ...cityKeys.map(k => [k, cityName(k)])].map(([k, l]) => `<button class="${cur === k ? 'on' : ''}" aria-pressed="${cur === k}" data-act="agent-city" data-v="${esc(k)}">${esc(l)}</button>`).join('')}</div></div>` : ''}
+      <div class="mt-3">${rows.map(a => `
+        <div class="py-3" style="border-top:1px solid var(--line)">
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <a href="${a.u}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-semibold text-[15.5px] hover:underline" style="color:var(--blue)">${esc(a.n)}${ic('external-link','icon-sm')}</a>
+            ${a.city ? `<span class="faint text-[13px]">${esc(T(a.city))}</span>` : ''}
+          </div>
+          ${a.free ? `<div class="text-[13.5px] mt-1 flex items-start gap-1.5" style="color:var(--green)"><span style="margin-top:3px">${ic('circle-check','icon-sm')}</span><span>${T(a.free)}</span></div>` : ''}
+          ${a.book || a.canada ? `<div class="flex flex-wrap gap-2 mt-2">
+            ${a.book ? `<a class="btn btn-primary" style="padding:6px 14px;font-size:14px" href="${a.book}" target="_blank" rel="noopener noreferrer">${ic('calendar-check','icon-sm')}${T(a.bookL || U.bookL)}</a>` : ''}
+            ${a.canada ? `<a class="btn btn-ghost" style="padding:6px 14px;font-size:14px" href="${a.canada}" target="_blank" rel="noopener noreferrer">${ic('globe','icon-sm')}${T(U.canadaL)}</a>` : ''}
+          </div>` : ''}
+          ${a.contact ? `<div class="text-[13.5px] muted mt-2">${T(a.contact)}</div>` : ''}
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="badge ${checks(a) ? 'b-gray' : 'b-amber'}" style="font-weight:600">${checks(a) ? T(U.passB)(checks(a)) : T(U.passNone)}</span>
+            ${a.icef ? `<a href="${a.icef}" target="_blank" rel="noopener noreferrer" class="badge b-green">${ic('shield-check','icon-sm')}${T(U.icefB)}</a>` : ''}
+            ${a.schools.length ? `<span class="badge b-blue">${ic('school','icon-sm')}${T(U.schoolsB)(a.schools.length)}</span>` : ''}
+            ${(a.other || []).map(o => `<a href="${o.u}" target="_blank" rel="noopener noreferrer" class="badge b-gray">${esc(T(o.l))}</a>`).join('')}
+          </div>
+          ${a.schools.length ? `<div class="text-[13.5px] muted mt-1.5">${T(U.listedBy)} ${a.schools.map(s => `<a href="${s.u}" target="_blank" rel="noopener noreferrer" class="hover:underline" style="color:var(--blue)">${esc(s.n)}</a>`).join(', ')}</div>` : ''}
+          ${a.note ? `<div class="faint text-[13px] mt-1 flex items-start gap-1.5"><span style="margin-top:3px">${ic('info','icon-sm')}</span><span>${T(a.note)}</span></div>` : ''}
+        </div>`).join('') || `<p class="muted text-[14px] py-3">${T(U.listNone)}</p>`}</div>
+      <p class="faint text-[13px] mt-2">${T(U.listNote)}</p>
+    </div>`;
+}
 function viewAgents(){
   const U = AGENT_UI;
   return `
@@ -2896,6 +3069,7 @@ function viewAgents(){
         <ul class="clean mt-2">${U.red.map(x => `<li><span style="color:var(--red)">${ic('x','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
       </div>
     </div>
+    ${agentListCard()}
     <div class="card mt-4">
       <h3 class="text-[17px] font-semibold mb-1">${T(U.toolsT)}</h3>
       <div class="grid sm:grid-cols-2 gap-x-8">${U.tools.map(x => `<a href="${x.u}" target="_blank" rel="noopener noreferrer" class="tap flex items-start gap-2 py-3 text-[15px] hover:underline" style="color:var(--blue);border-top:1px solid var(--line)">${ic('external-link','icon-sm')}<span><span class="font-medium">${T(x.l)}</span><span class="block muted text-[13.5px]">${T(x.d)}</span></span></a>`).join('')}</div>
@@ -3724,6 +3898,7 @@ function linkTerms(root, skipIn){
     while ((m = TERM_RE.exec(txt))) {
       const t = m[1], i = m.index, e = TERM_MAP.get(t);
       if (/^[A-Za-z]/.test(t) && i > 0 && /[A-Za-z0-9-]/.test(txt[i - 1])) continue;   /* whole words only */
+      if (e.na && e.na.some(p => txt.slice(Math.max(0, i - p.length), i) === p)) continue;   /* Thai: not inside a longer word, e.g. มหาวิทยาลัยรัฐ */
       if (set.has(e)) continue;
       set.add(e); parts.push([last, i, t, e]); last = i + t.length;
     }
@@ -3950,6 +4125,7 @@ document.addEventListener('click', e => {
   else if (act === 'gloss-close') { const d = document.getElementById('gloss-dlg'); if (d && d.open) d.close(); }
   else if (act === 'gloss-cat') { GL_CAT = v; document.querySelectorAll('.gl-cats button').forEach(x => { x.classList.toggle('on', x.dataset.v === v); x.setAttribute('aria-pressed', x.dataset.v === v); }); renderGlossList(); const gl = document.getElementById('gloss-list'); if (gl) gl.scrollTop = 0; }
   else if (act === 'term-close') { hideTerm(); }
+  else if (act === 'agent-city') { S.agentCity = v; render(true); }
   else if (act === 'focus') { const el = document.getElementById(v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.focus({preventScroll:true}); } }
 });
 document.addEventListener('input', e => {
