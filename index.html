@@ -427,6 +427,10 @@
   .tlink .pl-ic{vertical-align:-2px;margin-left:3px}
   .tlink:hover,.tlink:focus-visible{text-decoration:underline}
   @media (pointer:coarse){.plist a{min-height:44px;align-items:center}}
+  /* All Costs edit mode: the input takes both amount columns */
+  .trow .cost-edit{grid-column:1 / -1;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}
+  .trow .cost-edit .msub{display:block}
+  @media (min-width:640px){.trow .cost-edit{grid-column:span 2}}
   .hscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;min-width:0}
   #sim-out,#sim-out>*,.grid>.card{min-width:0}
   .sim-mini{position:sticky;top:calc(60px + env(safe-area-inset-top));z-index:20;display:flex;justify-content:space-between;gap:12px;
@@ -519,7 +523,7 @@
 /* ============================== STATE ============================== */
 const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
-  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', progOpt:'A', open:{}, scenario:'safe', plan:{y:null, m:9, dates:{}},
+  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', progOpt:'A', open:{}, scenario:'safe', plan:{y:null, m:9, dates:{}}, costs:{},
   sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0,
         cur:'both', proofAuto:true, travel:2500, setup:2000, rentC:null, foodC:null, otherC:null, healthC:null, tips:0 },
   fx:{ rate:null, date:null, day:null, src:'' }
@@ -1425,11 +1429,13 @@ Object.assign(SIM_UI, {
   feesL:{en:'Compulsory school fees per year (today)', th:'ค่าธรรมเนียมบังคับของสถาบันต่อปี (ปัจจุบัน)'},
   feesNote:{en:'Student, technology and other fees charged on top of tuition. Check the amount on your Letter of Acceptance. Public colleges often charge CAD 1,500 to 2,700 a year. If your school bundles health insurance or a transit pass, lower this so it is not counted twice.', th:'ค่าธรรมเนียมนักศึกษา ค่าเทคโนโลยี และค่าอื่น ๆ ที่เก็บเพิ่มจากค่าเล่าเรียน ตรวจยอดใน Letter of Acceptance วิทยาลัยรัฐมักเก็บปีละ CAD 1,500 ถึง 2,700 ถ้าสถาบันรวมประกันสุขภาพหรือบัตรโดยสารไว้แล้ว ให้ลดยอดนี้เพื่อไม่ให้นับซ้ำ'},
   lTravel:{en:'Travel to and from Canada', th:'ค่าเดินทางไปและกลับแคนาดา'},
-  lShow:{en:'Money to show IRCC', th:'เงินที่ต้องแสดงต่อ IRCC'},
+  lShow:{en:'Money to show in the bank (for IRCC)', th:'เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)'},
   lSetup:{en:'Setup reserve: rent deposit, first purchases', th:'เงินสำรองตั้งตัว: เงินประกันห้อง ของใช้ช่วงแรก'},
+  lReady:{en:'Cash to have ready before you go (money to show + setup reserve)', th:'เงินสดที่ต้องเตรียมก่อนไป (เงินที่ต้องแสดง + เงินสำรองตั้งตัว)'},
+  sameNote:{en:'Same list and numbers as the All Costs page: an amount typed on either page changes both.', th:'รายการและตัวเลขชุดเดียวกับหน้าค่าใช้จ่าย พิมพ์ยอดที่หน้าไหนก็เปลี่ยนทั้งสองหน้า'},
   lTravelSetup:{en:'Travel and setup', th:'ค่าเดินทางและตั้งตัว'},
   health:{en:'Health insurance', th:'ประกันสุขภาพ'},
-  showNote:{en:'IRCC asks for proof of first-year tuition, living costs and travel to and from Canada. The total also adds a setup reserve. [[funds]]', th:'IRCC ขอหลักฐานว่ามีเงินค่าเล่าเรียนปีแรก ค่าครองชีพ และค่าเดินทางไปและกลับแคนาดา ยอดรวมนี้บวกเงินสำรองตั้งตัวด้วย [[funds]]'},
+  showNote:{en:'This total is the money to show in the bank (first-year tuition, living costs and travel, which IRCC asks you to prove) plus a setup reserve. The list below shows each part. [[funds]]', th:'ยอดนี้คือเงินที่ต้องแสดงในบัญชี (ค่าเล่าเรียนปีแรก ค่าครองชีพ และค่าเดินทาง ที่ IRCC ขอหลักฐาน) บวกเงินสำรองตั้งตัว รายการด้านล่างแสดงแต่ละส่วน [[funds]]'},
   brk:{en:'Scheduled break', th:'ปิดเทอมตามตาราง'}, brkS:{en:'Break', th:'ปิดเทอม'},
   grad:{en:'After graduation (while waiting for a PGWP)', th:'หลังเรียนจบ (ระหว่างรอผล PGWP)'}, gradS:{en:'After graduation', th:'หลังเรียนจบ'},
   pgwpQ:{en:'After graduation, will you apply for a PGWP before your study permit expires?', th:'หลังเรียนจบ จะยื่นขอ PGWP ก่อน Study Permit หมดอายุไหม'},
@@ -2654,6 +2660,13 @@ const COSTS = {
   sub:{en:'Subtotal', th:'รวมย่อย'}, verify:{en:'Verify', th:'ตรวจสอบ'},
   totalT:{en:'Cash you spend before the first day of class', th:'เงินสดที่ต้องใช้จริงก่อนวันเปิดเรียน'},
   totalN:{en:'Sections 1 to 4, not counting tuition or the money you must show in the bank.', th:'รวมหมวด 1 ถึง 4 ไม่นับค่าเล่าเรียนและเงินที่ต้องแสดงในบัญชี'},
+  ownIncl:{en:'Uses the amounts you typed where you have them.', th:'ใช้ยอดที่คุณใส่เองในรายการที่ใส่ไว้'},
+  sameNote:{en:'Same list and numbers as the Budget page: an amount typed on either page changes both.', th:'รายการและตัวเลขชุดเดียวกับหน้างบ พิมพ์ยอดที่หน้าไหนก็เปลี่ยนทั้งสองหน้า'},
+  itemsT:{en:'Costs by section', th:'ค่าใช้จ่ายแยกตามหมวด'},
+  itemsSub:{en:'Ranges are estimates. Tap "Enter my own amounts" to type what you actually paid or were quoted; it is saved on this device.', th:'ช่วงราคาเป็นค่าประมาณ กด "ใส่ยอดเอง" เพื่อพิมพ์ยอดที่คุณจ่ายจริงหรือได้ใบเสนอราคา ยอดจะถูกบันทึกไว้ในเครื่องนี้'},
+  editHint:{en:'Type each amount in the currency shown (THB for costs in Thailand, CAD for costs in Canada), then press Enter or tap elsewhere. Leave a box empty to keep the estimate.', th:'พิมพ์ยอดในสกุลเงินที่แสดง (บาทสำหรับค่าใช้จ่ายในไทย CAD สำหรับค่าใช้จ่ายในแคนาดา) แล้วกด Enter หรือแตะที่อื่น ช่องที่เว้นว่างจะใช้ค่าประมาณเดิม'},
+  ownPh:{en:'Your amount', th:'ยอดจริง'}, estIs:{en:'Estimate', th:'ค่าประมาณ'}, useEst:{en:'Use the estimate', th:'ใช้ค่าประมาณ'},
+  resetOwn:{en:'Clear my amounts', th:'ล้างยอดที่ใส่เอง'},
   showT:{en:'Money you must show in the bank', th:'เงินที่ต้องแสดงในบัญชี'},
   showN:{en:'First-year tuition and fees, the IRCC living-cost amount, and travel to and from Canada, from the budget simulator.', th:'ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC และค่าเดินทางไปและกลับแคนาดา ตามเครื่องจำลองงบประมาณ'},
   open:{en:'Adjust in the simulator', th:'ปรับค่าในเครื่องจำลอง'},
@@ -2808,14 +2821,32 @@ function viewStart(){
     </div>`;
 }
 
-function costRange(it){ const r = S.sim.rate || 24; return it.cad ? it.cad : [it.thb[0]/r, it.thb[1]/r]; }
+/* All Costs lines: an amount the user typed (in the line's own currency, saved on the device) replaces the estimate range. */
+const costKey = it => it.t.en.replace(/[^A-Za-z0-9]+/g,'-');
+function costOwn(it){ const v = S.costs && S.costs[costKey(it)]; return v == null || v === '' || isNaN(v) ? null : +v; }
+function costRange(it){
+  const r = S.sim.rate || 24, o = costOwn(it);
+  if (o != null) { const c = it.cad ? o : o / r; return [c, c]; }
+  return it.cad ? it.cad : [it.thb[0]/r, it.thb[1]/r];
+}
+function costCell(it){
+  const C = COSTS, k = costKey(it), unit = it.cad ? 'cad' : 'thb', o = costOwn(it), r = S.sim.rate || 24;
+  const est = it.cad ? money(it.cad[0], it.cad[1], 'cad') : money(it.thb[0], it.thb[1], 'thb');
+  const mm = o == null ? null : money(o, o, unit), other = !mm || o === 0 ? '' : (unit === 'cad' ? '≈ THB ' + mm.thb : '≈ CAD ' + mm.cad);   /* same rounding as the normal view */
+  return `<div class="amt cost-edit">
+      <span class="amt-in"><span class="faint text-[12px]">${unit.toUpperCase()}</span><input class="numin num" type="number" inputmode="decimal" min="0" step="any" data-cost="${k}" data-unit="${unit}" value="${o == null ? '' : o}" placeholder="${esc(T(C.ownPh))}" aria-label="${esc(T(it.t))}"></span>
+      <span class="msub">${other ? other + ' · ' : ''}${T(C.estIs)} ${unit === 'cad' ? 'CAD ' + est.cad : 'THB ' + est.thb}${o != null ? ` · <button class="linkbtn" data-act="costdef" data-v="${k}">${T(C.useEst)}</button>` : ''}</span>
+    </div>`;
+}
 function viewCosts(){
-  const C = COSTS, r = S.sim.rate || 24;
+  const C = COSTS, r = S.sim.rate || 24, M = SIM_UI;
+  const anyOwn = S.costs && Object.keys(S.costs).length > 0;
   let tMin = 0, tMax = 0;
   const secs = C.secs.map(sec => {
     let a = 0, b = 0;
     const rows = sec.items.map(it => {
-      const m = it.cad ? money(it.cad[0], it.cad[1], 'cad') : money(it.thb[0], it.thb[1], 'thb');
+      const o = costOwn(it);
+      const m = o != null ? money(o, o, it.cad ? 'cad' : 'thb') : it.cad ? money(it.cad[0], it.cad[1], 'cad') : money(it.thb[0], it.thb[1], 'thb');
       const cr = costRange(it); a += cr[0]; b += cr[1];
       return `
         
@@ -2827,7 +2858,7 @@ function viewCosts(){
         
             <div class="flex flex-wrap items-center gap-2 mt-1">
         
-              <span class="badge ${it.off?'b-green':'b-gray'}">${T(it.off?C.off:C.est)}</span>
+              ${o != null ? `<span class="badge b-blue">${T(M.mine)}</span>` : `<span class="badge ${it.off?'b-green':'b-gray'}">${T(it.off?C.off:C.est)}</span>`}
         
               ${it.n?`<span class="faint text-[13px]">${T(it.n)}</span>`:''}
         
@@ -2839,10 +2870,10 @@ function viewCosts(){
 
           </div>
         
-          <div class="amt"><span class="cur faint text-[12px]">CAD </span>${m.cad}</div>
-        
-          <div class="amt"><span class="cur faint text-[12px] font-normal">THB </span>${m.thb}</div>
-        
+          ${COST_EDIT ? costCell(it) : `<div class="amt"><span class="cur faint text-[12px]">CAD </span>${m.cad}</div>
+
+          <div class="amt"><span class="cur faint text-[12px] font-normal">THB </span>${m.thb}</div>`}
+
         </div>`;
     }).join('');
     if (sec.sum) { tMin += a; tMax += b; }
@@ -2871,13 +2902,14 @@ function viewCosts(){
         </div>
       </section>`;
   }).join('');
-  const tot = money(rnd(tMin,10), rnd(tMax,10), 'cad'), show = simCalc().show;
+  const tot = money(rnd(tMin,10), rnd(tMax,10), 'cad'), c = simCalc(), show = c.show;
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(C.h1)}</h1>
       <p class="muted mt-3 text-[17px]">${T(C.lead)}</p>
     </section>
-    <div class="grid lg:grid-cols-3 gap-4 mb-4">
+    <div class="grid lg:grid-cols-5 gap-4 mb-4 items-start">
+     <div class="grid gap-4 lg:col-span-2">
       <div class="card">
         
         <div class="eyebrow mb-2">${T(C.conv)}</div>
@@ -2896,22 +2928,31 @@ function viewCosts(){
         
         <div class="muted num">CAD ${tot.cad}</div>
         
-        <p class="faint text-[13px] mt-2">${T(C.totalN)}</p>
+        <p class="faint text-[13px] mt-2">${T(C.totalN)}${anyOwn ? ' ' + T(C.ownIncl) : ''}</p>
       </div>
-      <div class="card">
-        
-        <div class="eyebrow">${T(C.showT)}</div>
-        
-        <div class="text-[24px] font-bold num mt-1">${thb(show*r)}</div>
-        
-        <div class="muted num">${cad(show)}</div>
-        
-        <p class="faint text-[13px] mt-2">${T(C.showN)} ${S.sim.proofAuto !== false && LIVE.funds ? T(C.showLive)(fmt(fundsAmt())) : ''}</p>
+     </div>
+      <div class="card lg:col-span-3" id="cost-money">
 
+        <div class="eyebrow">${T(M.lShow)}</div>
+
+        <div class="text-[24px] font-bold num mt-1">${thb(show*r)}</div>
+
+        <div class="muted num">${cad(show)}</div>
+
+        <p class="faint text-[13px] mt-2 mb-3">${T(C.showN)} ${c.s.proofAuto !== false && LIVE.funds ? T(C.showLive)(fmt(fundsAmt())) : ''}</p>
+        ${cashList(c)}
+        <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(C.sameNote)}</span></p>
         <button class="btn btn-ghost mt-1" style="padding:4px 8px;font-size:14px" data-act="tab" data-v="budget">${T(C.open)}${ic('arrow-right','icon-sm')}</button>
       </div>
     </div>
-    <div class="grid gap-6 mt-6">${secs}</div>
+    <div class="flex flex-wrap items-end justify-between gap-3 mt-8" id="cost-items">
+      <div style="max-width:64ch"><h2 class="text-[22px] font-semibold">${T(C.itemsT)}</h2><p class="muted text-[14.5px] mt-1">${T(COST_EDIT ? C.editHint : C.itemsSub)}</p></div>
+      <div class="flex flex-wrap gap-2">
+        ${anyOwn ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:14px" data-act="costreset">${ic('rotate-ccw','icon-sm')}${T(C.resetOwn)}</button>` : ''}
+        <button class="btn ${COST_EDIT ? 'btn-primary' : 'btn-ghost'}" style="padding:4px 12px;font-size:14px" data-act="costedit" aria-pressed="${COST_EDIT}">${ic(COST_EDIT ? 'check' : 'pencil','icon-sm')}${T(COST_EDIT ? M.editDone : M.editL)}</button>
+      </div>
+    </div>
+    <div class="grid gap-6 mt-4">${secs}</div>
     <p class="faint text-[13px] mt-4 flex gap-2" style="max-width:90ch">${ic('info','icon-sm')}<span>${T(C.note)}</span></p>`;
 }
 
@@ -4115,7 +4156,30 @@ async function loadFx(force){
 }
 
 /* ---------- simulator helpers: typed amounts, live status, where the monthly numbers come from ---------- */
-let LIST_EDIT = false;
+let LIST_EDIT = false, COST_EDIT = false;
+/* The money list shared by the Budget and All Costs pages: same lines, labels and numbers from simCalc().
+   Amounts typed on either page write the same simulator fields, so the two pages always agree. */
+function cashList(c){
+  const M = SIM_UI, s = c.s, unit = curOf() === 'thb' ? 'thb' : 'cad';
+  const line = (k, label, amount, badge) => {
+    const m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5;
+    if (!LIST_EDIT) return `<div class="row"><span class="muted min-w-0">${label}${custom ? ` <span class="badge b-blue">${T(M.mine)}</span>` : (badge || '')}</span><span class="num">${mny(amount, {stack:true})}</span></div>`;
+    return amtRow(k, label, c, unit);
+  };
+  const liveBadge = s.proofAuto !== false && LIVE.funds ? ` <span class="badge b-green">${ic('radio','icon-sm')}${T(M.liveB)}</span>` : '';
+  return `
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+        ${LIST_EDIT ? `<p class="text-[13.5px] muted" style="max-width:52ch">${T(M.editHint)}</p>` : '<span></span>'}
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:14px" data-act="listedit" aria-pressed="${LIST_EDIT}">${ic(LIST_EDIT ? 'check' : 'pencil','icon-sm')}${T(LIST_EDIT ? M.editDone : M.editL)}</button>
+      </div>
+      ${line('tuition', T(M.lTuY), c.tuY)}
+      ${line('fees', T(M.lFeesY), c.fees)}
+      ${line('proof', T(M.lProof), c.proof, liveBadge)}
+      ${line('travel', T(M.lTravel), c.travel)}
+      <div class="row font-semibold"><span>${T(M.lShow)}</span><span class="num">${mny(c.show, {stack:true})}</span></div>
+      ${line('setup', T(M.lSetup), c.setup)}
+      <div class="row font-semibold"><span>${T(M.lReady)}</span><span class="num">${mny(c.total, {stack:true})}</span></div>`;
+}
 function amtRow(k, label, c, unit){
   const M = SIM_UI, m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5, r = S.sim.rate || 24;
   const now = m.v * m.fac, shown = Math.round(now * (unit === 'thb' ? r : 1));
@@ -4191,8 +4255,8 @@ document.addEventListener('pointerdown', () => { ptrDown = true; }, true);
 document.addEventListener('pointerup', () => { ptrDown = false; if (simPending) setTimeout(flushSim, 0); }, true);
 function flushSim(){
   simPending = false;
-  const a = document.activeElement, d = a && a.dataset, sel = d && (d.amt ? `[data-amt="${d.amt}"]` : d.simc ? `[data-simc="${d.simc}"]` : '');
-  renderSimOut(); icons(); save();
+  const a = document.activeElement, d = a && a.dataset, sel = d && (d.amt ? `[data-amt="${d.amt}"]` : d.simc ? `[data-simc="${d.simc}"]` : d.cost ? `[data-cost="${d.cost}"]` : '');
+  if (S.tab === 'costs') render(true); else { renderSimOut(); icons(); save(); }   /* All Costs shows the same money list, so redraw that page */
   if (sel) { const n = document.querySelector(sel); if (n) { n.focus({preventScroll:true}); try { n.select(); } catch (e) {} } }
 }
 function queueFlush(){ if (ptrDown) simPending = true; else setTimeout(flushSim, 0); }
@@ -4209,6 +4273,13 @@ document.addEventListener('change', e => {
     if (isFinite(v) && lim) S.sim[sk] = Math.min(lim[1], Math.max(lim[0], v));
     queueFlush(); return;
   }
+  const ck = e.target.dataset && e.target.dataset.cost;
+  if (ck) {   /* an All Costs line typed by the user, in the line's own currency; an empty box goes back to the estimate */
+    const raw = String(e.target.value).trim(), v = parseFloat(raw);
+    S.costs = S.costs || {};
+    if (raw === '') delete S.costs[ck]; else if (isFinite(v) && v >= 0) S.costs[ck] = v;
+    queueFlush(); return;
+  }
   const k = e.target.dataset && e.target.dataset.amt; if (!k) return;
   let v = parseFloat(e.target.value);
   if (!isFinite(v) || v < 0 || (v === 0 && ['tuition','proof','rentC','foodC'].includes(k))) { queueFlush(); return; }
@@ -4219,9 +4290,9 @@ document.addEventListener('change', e => {
   queueFlush();
 });
 document.addEventListener('keydown', e => {
-  if (!e.target.dataset || !(e.target.dataset.amt || e.target.dataset.simc)) return;
+  if (!e.target.dataset || !(e.target.dataset.amt || e.target.dataset.simc || e.target.dataset.cost)) return;
   if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
-  else if (e.key === 'Escape' && LIST_EDIT) { LIST_EDIT = false; renderSimOut(); icons(); }
+  else if (e.key === 'Escape' && (LIST_EDIT || COST_EDIT)) { LIST_EDIT = COST_EDIT = false; if (S.tab === 'costs') render(true); else { renderSimOut(); icons(); } }
 });
 /* Smooth sliders: draw at most once per frame, save shortly after the last change. */
 let simRaf = 0, saveT = 0;
@@ -4266,14 +4337,7 @@ function renderSimOut(){
       <div class="v ${net>=0?'pos':'neg'}">${one(net, {sign:true})}<span class="text-[14px] font-medium muted">${T(M.mo)}</span></div>
       <div class="s">${T(M.income)} ${one(inc)} − ${T(M.exp)} ${one(c.exp)}</div>
       ${cu === 'both' ? `<div class="s">${mny(net, {sign:true, cur:'thb'})} ${T(M.mo)}</div>` : ''}</div>`;
-  /* cash list: each line can be typed over in edit mode */
   const unit = cu === 'thb' ? 'thb' : 'cad';
-  const line = (k, label, amount, badge) => {
-    const m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5;
-    if (!LIST_EDIT) return `<div class="row"><span class="muted min-w-0">${label}${custom ? ` <span class="badge b-blue">${T(M.mine)}</span>` : (badge || '')}</span><span class="num">${mny(amount, {stack:true})}</span></div>`;
-    return amtRow(k, label, c, unit);
-  };
-  const liveBadge = s.proofAuto !== false && LIVE.funds ? ` <span class="badge b-green">${ic('radio','icon-sm')}${T(M.liveB)}</span>` : '';
   out.innerHTML = cites(`
     <div class="card">
       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -4285,17 +4349,9 @@ function renderSimOut(){
         ${cu === 'both' ? `<div class="text-[18px] font-semibold muted num">${cad(c.total)}</div>` : ''}
       </div>
       <div class="faint text-[13.5px] mb-3">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
-        ${LIST_EDIT ? `<p class="text-[13.5px] muted" style="max-width:52ch">${T(M.editHint)}</p>` : '<span></span>'}
-        <button class="btn btn-ghost" style="padding:4px 10px;font-size:14px" data-act="listedit" aria-pressed="${LIST_EDIT}">${ic(LIST_EDIT ? 'check' : 'pencil','icon-sm')}${T(LIST_EDIT ? M.editDone : M.editL)}</button>
-      </div>
-      ${line('tuition', T(M.lTuY), c.tuY)}
-      ${line('fees', T(M.lFeesY), c.fees)}
-      ${line('proof', T(M.lProof), c.proof, liveBadge)}
-      ${line('travel', T(M.lTravel), c.travel)}
-      <div class="row font-semibold"><span>${T(M.lShow)}</span><span class="num">${mny(c.show, {stack:true})}</span></div>
-      ${line('setup', T(M.lSetup), c.setup)}
+      ${cashList(c)}
       ${c.extra > 0 ? `<div class="row font-semibold neg"><span>${T(M.lExtra)}</span><span class="num">${mny(c.extra, {stack:true})}</span></div>` : ''}
+      <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(M.sameNote)}</span></p>
       <div class="autoline" id="auto-line">${autoLineHtml()}</div>
       <div class="mt-4">${timeline(c)}</div>
       <div class="grid gap-3 mt-4 ${[c.mS, c.mC, c.mB, c.mG].filter(Boolean).length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}">${term(T(M.study), c.mS, c.netS, c.incS)}${c.mC ? term(T(M.coop), c.mC, c.netC, c.incC) : ''}${c.mB ? term(T(M.brkS), c.mB, c.netB, c.incB) : ''}${c.mG ? term(T(M.gradS), c.mG, c.netG, c.incG) : ''}</div>
@@ -4749,7 +4805,7 @@ document.addEventListener('click', e => {
   const act = b.dataset.act, v = b.dataset.v;
   if (act === 'lang') { S.lang = v; render(true); }
   else if (act === 'theme') { S.theme = S.theme === 'dark' ? 'light' : 'dark'; render(true); }
-  else if (act === 'tab') { S.tab = v; render(false); if (b.dataset.anchor) goAnchor(b.dataset.anchor); }
+  else if (act === 'tab') { S.tab = v; LIST_EDIT = COST_EDIT = false; render(false); if (b.dataset.anchor) goAnchor(b.dataset.anchor); }
   else if (act === 'quiz') { S.quiz[b.dataset.q] = +b.dataset.o; render(true); }
   else if (act === 'quizreset') { S.quiz = {}; render(true); }
   else if (act === 'goroad') { S.scenario = v; S.tab = 'roadmap'; render(false); }
@@ -4771,7 +4827,10 @@ document.addEventListener('click', e => {
   else if (act === 'fxlive') { S.sim.rateAuto = true; applyFx(); }
   else if (act === 'proofauto') { S.sim.proofAuto = true; S.sim.proof = fundsAmt(); render(true); }
   else if (act === 'sim-cur') { S.sim.cur = v; renderSimOut(); icons(); save(); }
-  else if (act === 'listedit') { LIST_EDIT = !LIST_EDIT; renderSimOut(); icons(); if (LIST_EDIT) { const f = document.getElementById('amt-tuition'); if (f) f.focus({preventScroll:true}); } }
+  else if (act === 'listedit') { LIST_EDIT = !LIST_EDIT; if (S.tab === 'costs') render(true); else { renderSimOut(); icons(); } if (LIST_EDIT) { const f = document.getElementById('amt-tuition'); if (f) f.focus({preventScroll:true}); } }
+  else if (act === 'costedit') { COST_EDIT = !COST_EDIT; render(true); if (COST_EDIT) { const f = document.querySelector('[data-cost]'); if (f) f.focus({preventScroll:true}); } }
+  else if (act === 'costdef') { if (S.costs) delete S.costs[v]; queueFlush(); }
+  else if (act === 'costreset') { if (confirm(T({en:'Clear every amount you typed on this page and go back to the estimates?', th:'ล้างยอดที่พิมพ์เองทั้งหมดในหน้านี้ และกลับไปใช้ค่าประมาณใช่ไหม'}))) { S.costs = {}; render(true); } }
   else if (act === 'amtdef') { amtDefault(v); queueFlush(); }
   else if (act === 'lcreset') { ['rentC','foodC','otherC','healthC'].forEach(k => { S.sim[k] = null; }); queueFlush(); }
   else if (act === 'refresh') { loadFx(true); loadLive(true); }
