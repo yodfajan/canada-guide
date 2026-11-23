@@ -353,10 +353,8 @@
   .cal-ev:focus-visible{outline:2px solid var(--blue)}
   .cal-ev.done{text-decoration:line-through;opacity:.55}
   .cal-ev svg{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:3px}
-  .cal-ev.rem{border-left-style:dashed;background:transparent;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 35%,transparent)}
-  .cal-dot.rem{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
-  .rem-panel{display:block;margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--bg);cursor:default}
-  .rem-panel svg{display:inline-block;vertical-align:-2px}
+  .gcal-frame{display:block;width:100%;height:640px;border:0;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+  @media (max-width:640px){.gcal-frame{height:540px}}
   .btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none;transform:none}
   .cal-more{font-size:11px;color:var(--ink3);padding-left:4px}
   .cal-dots{display:none;gap:3px;flex-wrap:wrap;padding:0 2px}
@@ -2991,19 +2989,11 @@ function gcalUrl(title, date, details){
   const d1 = date.replace(/-/g, ''), d2 = plusDays(date, 1).replace(/-/g, '');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(plainT(title)) + '&dates=' + d1 + '/' + d2 + '&details=' + encodeURIComponent(gBody(details));
 }
-/* A 15-minute event at a clock time in the viewer's own time zone; Google alerts on it with the calendar's default notification. */
-function gcalTimedUrl(title, date, time, details){
-  const [h, m] = String(time || '09:00').split(':').map(Number), st = parseD(date); st.setHours(h || 0, m || 0, 0, 0);
-  const en = new Date(st.getTime() + 15 * 6e4);
-  const f = d => isoD(d).replace(/-/g, '') + 'T' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + '00';
-  let tz = 'Asia/Bangkok'; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch (e) {}
-  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(plainT(title)) + '&dates=' + f(st) + '/' + f(en) + '&ctz=' + encodeURIComponent(tz) + '&details=' + encodeURIComponent(gBody(details));
-}
 const gSearchUrl = q => 'https://calendar.google.com/calendar/r/search?q=' + encodeURIComponent(plainT(q));
-/* What the user has sent to Google Calendar: added[id] = {date}, rem[id] = [{n, u, t, base, date}]; remDef = last reminder settings. */
+/* What the user has sent to Google Calendar: added[id] = {date}. */
 function planStore(){
   S.plan = S.plan || {}; const p = S.plan;
-  p.added = p.added || {}; p.rem = p.rem || {}; p.remDef = p.remDef || {n:1, u:'w', t:'09:00'};
+  p.added = p.added || {}; delete p.rem; delete p.remDef;   /* reminders were removed on 23 Nov 2026 */
   return p;
 }
 function planItem(id){
@@ -3012,34 +3002,14 @@ function planItem(id){
   const m = planMilestones().find(x => x.id === id);
   return m ? {id, ph:5, kind:'ms', title:T(m.t), date:m.date, d:T(m.d), why:'', details:T(m.d)} : null;
 }
-const REM_U = {d:{en:'days', th:'วัน'}, w:{en:'weeks', th:'สัปดาห์'}, m:{en:'months', th:'เดือน'}};
-function remDate(date, n, u){ const d = parseD(date); if (u === 'm') d.setMonth(d.getMonth() - n); else d.setDate(d.getDate() - n * (u === 'w' ? 7 : 1)); return isoD(d); }
-const remText = r => S.lang === 'th' ? `ก่อน ${r.n} ${T(REM_U[r.u])} เวลา ${r.t} (${fdateD(r.date)})` : `${r.n} ${T(REM_U[r.u])} before at ${r.t} (${fdateD(r.date)})`;
-/* Add or added state for one item, plus its reminder button. Adding twice is blocked until the item is removed. */
+/* Add or added state for one item. Adding twice is blocked until the item is removed. */
 function gcalControls(id){
   const U = PLAN_UI, st = planStore(), it = planItem(id); if (!it) return '';
-  const a = st.added[id], rems = st.rem[id] || [];
+  const a = st.added[id];
   const main = a
     ? `<span class="badge b-green">${ic('circle-check','icon-sm')}${T(U.gAdded)}</span>${a.date !== it.date ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : ''}<button class="linkbtn text-[13.5px]" data-act="g-del" data-v="${id}">${T(U.gDel)}</button>`
     : `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="g-add" data-v="${id}">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</button>`;
-  return `<span class="gc-ctl inline-flex flex-wrap items-center gap-2">${main}<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="rem-open" data-v="${id}" aria-expanded="${S.remOpen === id}">${ic(rems.length ? 'bell-ring' : 'bell-plus','icon-sm')}${T(U.remL)}${rems.length ? ` (${rems.length})` : ''}</button></span>`;
-}
-function remPanel(id){
-  if (S.remOpen !== id) return '';
-  const U = PLAN_UI, st = planStore(), it = planItem(id); if (!it) return '';
-  const d = st.remDef, rems = st.rem[id] || [], when = remDate(it.date, +d.n, d.u), past = when < isoD(new Date());
-  const dup = rems.some(r => +r.n === +d.n && r.u === d.u && r.t === d.t && r.base === it.date);
-  const n = `<input type="number" class="numin" style="width:72px" min="0" max="99" step="1" data-rem="n" value="${d.n}" aria-label="${esc(T(U.remHow))}">`;
-  const u = `<select class="numin" style="width:auto;text-align:left;padding-right:6px" data-rem="u" aria-label="${esc(T(U.remUnit))}">${['d','w','m'].map(k => `<option value="${k}" ${d.u === k ? 'selected' : ''}>${T(REM_U[k])}</option>`).join('')}</select>`;
-  const t = `<input type="time" class="numin" style="width:116px" data-rem="t" value="${d.t}" aria-label="${esc(T(U.remAt))}">`;
-  return `<span class="rem-panel">
-      <span class="block font-medium text-[14px]">${ic('bell','icon-sm')} ${T(U.remT)}: ${esc(it.title)}</span>
-      <span class="flex flex-wrap items-center gap-2 mt-2">${S.lang === 'th' ? `<span class="text-[14px]">${T(U.remBefore)}</span>${n}${u}` : `${n}${u}<span class="text-[14px]">${T(U.remBefore)}</span>`}<span class="text-[14px]">${T(U.remAt)}</span>${t}</span>
-      <span class="block text-[13.5px] mt-2 ${past ? 'neg' : 'muted'}">${past ? T(U.remPast) : T(U.remOn)(fdateD(when), d.t, fdateD(it.date))}</span>
-      <span class="flex flex-wrap gap-2 mt-2"><button class="btn btn-primary" style="padding:6px 14px;font-size:14px" data-act="rem-add" data-v="${id}" ${past || dup ? 'disabled' : ''}>${ic('bell-plus','icon-sm')}${T(dup ? U.remDup : U.remAdd)}</button></span>
-      ${rems.length ? `<span class="block mt-3">${rems.map((r, i) => `<span class="flex flex-wrap items-center gap-2 py-1.5" style="border-top:1px solid var(--line)"><span style="color:var(--blue)">${ic('bell','icon-sm')}</span><span class="text-[14px]">${remText(r)}</span>${r.base !== it.date ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : ''}<button class="linkbtn text-[13.5px]" data-act="rem-del" data-v="${id}|${i}">${T(U.gDel)}</button></span>`).join('')}</span>` : ''}
-      <span class="block faint text-[12.5px] mt-2">${T(U.remNote)}</span>
-    </span>`;
+  return `<span class="gc-ctl inline-flex flex-wrap items-center gap-2">${main}</span>`;
 }
 /* All-day events in one .ics file; lines folded at 75 bytes as the format requires. */
 function planIcs(){
@@ -3049,17 +3019,10 @@ function planIcs(){
     out.push(cur); return out.join('\r\n '); };
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z'), dates = planDates(), link = guideUrl();
   const tag = isoD(planIntake()).slice(0, 7).replace('-', '');   /* stable per step and intake, so a re-import is recognised */
-  /* alarms: the user's reminders for this item (minutes from the all-day start), else 3 days before */
-  const st = planStore(), alarms = (id, date, title) => {
-    const rs = st.rem[id] || [];
-    const trig = rs.length ? rs.map(r => { const [h, m] = r.t.split(':').map(Number), at = parseD(remDate(date, +r.n, r.u)); at.setHours(h, m);
-      const mins = Math.round((parseD(date) - at) / 6e4); return mins >= 0 ? 'TRIGGER:-PT' + mins + 'M' : 'TRIGGER:PT' + (-mins) + 'M'; }) : ['TRIGGER:-P3D'];
-    return trig.flatMap(tr => ['BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc2(title), tr, 'END:VALARM']);
-  };
   const ev = (id, title, date, details) => ['BEGIN:VEVENT', 'UID:' + id + '-' + tag + '@canada-guide', 'DTSTAMP:' + stamp,
     'DTSTART;VALUE=DATE:' + date.replace(/-/g, ''), 'DTEND;VALUE=DATE:' + plusDays(date, 1).replace(/-/g, ''),
     'SUMMARY:' + esc2(title), 'DESCRIPTION:' + esc2(plainT(details) + '\n\n' + T(PLAN_UI.from) + (link ? '\n' + link : '')),
-    ...alarms(id, date, title), 'END:VEVENT'];
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc2(title), 'TRIGGER:-P3D', 'END:VALARM', 'END:VEVENT'];
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Canada Guide//Plan//TH', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + esc2(T(PLAN_UI.calName))];
   CHECK.items.forEach((it, i) => lines.push(...ev(it.id, (i + 1) + '. ' + T(it.t), dates[it.id].date, T(it.d) + '\n\n' + T(CHECK.why) + ': ' + T(it.why))));
   planMilestones().forEach(m => lines.push(...ev(m.id, T(m.t), m.date, T(m.d))));
@@ -3084,7 +3047,7 @@ function plannerCard(){
         <div class="min-w-0" style="flex:1 1 200px"><div class="text-[14.5px] font-medium">${esc(plainT(title))}</div>${extra || ''}</div>
         <input type="date" class="numin" style="width:150px" data-plan="${id}" value="${date}" aria-label="${esc(T(U.planned))}">
       </div>
-      <div class="mt-2">${gcalControls(id)}</div>${remPanel(id)}</div>`;
+      <div class="mt-2">${gcalControls(id)}</div></div>`;
   return `
     <div class="card mb-4" id="planner">
       <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days')}</span>${T(U.title)}</h3>
@@ -3121,36 +3084,91 @@ Object.assign(PLAN_UI, {
   done:{en:'Done', th:'ทำแล้ว'}, markDone:{en:'Mark as done', th:'ทำเสร็จแล้ว'}, undo:{en:'Not done yet', th:'ยังไม่เสร็จ'},
   goStep:{en:'Show in checklist', th:'ดูในเช็กลิสต์'}, close:{en:'Close', th:'ปิด'}, step:{en:'Step', th:'ข้อ'}
 });
-/* Added-to-Google tracking and reminders (23 Nov 2026) */
+/* Added-to-Google tracking and the embedded Google Calendar (23 Nov 2026) */
 Object.assign(PLAN_UI, {
-  calSub:{en:'Shows only what you have added to Google Calendar, plus your reminders. Tap an item for details, or a day to see what is on it.', th:'แสดงเฉพาะรายการที่คุณเพิ่มลง Google Calendar แล้ว และการแจ้งเตือนที่ตั้งไว้ แตะรายการเพื่อดูรายละเอียด หรือแตะวันที่เพื่อดูว่าวันนั้นมีอะไรบ้าง'},
-  calEmpty:{en:'Your calendar is empty. Tap "Add to Google Calendar" on any step in the planner or checklist and it will appear here.', th:'ปฏิทินยังว่าง กด "เพิ่มลง Google Calendar" ที่ข้อไหนก็ได้ในแผนหรือเช็กลิสต์ รายการจะขึ้นที่นี่'},
+  calSub:{en:'Shows only what you have added to Google Calendar from this page. Tap an item for details, or a day to see what is on it.', th:'แสดงเฉพาะรายการที่คุณเพิ่มลง Google Calendar จากหน้านี้ แตะรายการเพื่อดูรายละเอียด หรือแตะวันที่เพื่อดูว่าวันนั้นมีอะไรบ้าง'},
+  calEmpty:{en:'Nothing added yet. Tap "Add to Google Calendar" on any step in the planner or checklist and it will appear here.', th:'ยังไม่มีรายการ กด "เพิ่มลง Google Calendar" ที่ข้อไหนก็ได้ในแผนหรือเช็กลิสต์ รายการจะขึ้นที่นี่'},
   nextItem:{en:'Next item', th:'รายการถัดไป'},
   gAdded:{en:'Added to Google', th:'เพิ่มใน Google แล้ว'}, gDel:{en:'Remove', th:'ลบ'},
   gMoved:{en:'Date changed: remove, then add again', th:'วันที่เปลี่ยนแล้ว: ลบแล้วเพิ่มใหม่'},
   gDelQ:{en:t => `Remove "${t}" from your added items?\n\nThis page cannot delete events inside Google Calendar. After you confirm, Google Calendar opens a search for this event so you can delete it there too.`, th:t => `ลบ "${t}" ออกจากรายการที่เพิ่มแล้ว?\n\nหน้านี้ลบกิจกรรมใน Google Calendar ให้ไม่ได้ เมื่อกดตกลง จะเปิด Google Calendar ค้นหากิจกรรมนี้ให้ เพื่อลบในนั้นด้วย`},
-  remL:{en:'Reminder', th:'แจ้งเตือน'}, remT:{en:'Remind me before', th:'ตั้งแจ้งเตือนก่อนวันครบกำหนด'},
-  remHow:{en:'How many', th:'จำนวน'}, remUnit:{en:'Unit', th:'หน่วย'}, remBefore:{en:'before', th:'ก่อน'}, remAt:{en:'at', th:'เวลา'},
-  remOn:{en:(d, t, due) => `Reminder on ${d} at ${t}, for the date ${due}.`, th:(d, t, due) => `จะแจ้งเตือนวันที่ ${d} เวลา ${t} สำหรับวันครบกำหนด ${due}`},
-  remPast:{en:'That reminder date has already passed. Choose a shorter time before.', th:'วันแจ้งเตือนนี้ผ่านไปแล้ว เลือกระยะที่สั้นลง'},
-  remAdd:{en:'Add reminder to Google', th:'เพิ่มการแจ้งเตือนลง Google'}, remDup:{en:'This reminder is already added', th:'เพิ่มการแจ้งเตือนนี้แล้ว'},
-  remNote:{en:'The reminder is a short event at the time you choose. Google alerts you with your calendar\'s default notification (often 30 minutes before); you can change it on the Google event page. To change a reminder, remove it and add a new one.', th:'การแจ้งเตือนคือกิจกรรมสั้น ๆ ตามเวลาที่เลือก Google จะเตือนตามการแจ้งเตือนเริ่มต้นของปฏิทินคุณ (มักเป็น 30 นาทีก่อน) เปลี่ยนได้ในหน้ากิจกรรมของ Google ถ้าจะแก้การแจ้งเตือน ให้ลบแล้วเพิ่มใหม่'},
-  remTitle:{en:t => `Reminder: ${t}`, th:t => `แจ้งเตือน: ${t}`},
-  remDue:{en:d => `Due ${d}`, th:d => `ครบกำหนดวันที่ ${d}`},
-  remDelL:{en:'Remove reminder', th:'ลบการแจ้งเตือน'},
-  privacy:{en:'Nothing is sent anywhere by this page. "Add to Google Calendar" opens Google Calendar in your own account with the event filled in; tap Save there. The page remembers what you added on this device; if you did not save it in Google, tap Remove and add it again.', th:'หน้านี้ไม่ได้ส่งข้อมูลไปที่ไหน ปุ่ม "เพิ่มลง Google Calendar" จะเปิดปฏิทินในบัญชี Google ของคุณเองพร้อมกรอกรายละเอียดให้ แล้วกด "บันทึก" ในนั้น หน้านี้จำไว้ในเครื่องว่าเพิ่มอะไรไปแล้ว ถ้าใน Google ไม่ได้กดบันทึก ให้กด "ลบ" แล้วเพิ่มใหม่'}
+  privacy:{en:'Nothing is sent anywhere by this page. "Add to Google Calendar" opens Google Calendar in your own account with the event filled in; tap Save there. The page remembers what you added on this device; if you did not save it in Google, tap Remove and add it again.', th:'หน้านี้ไม่ได้ส่งข้อมูลไปที่ไหน ปุ่ม "เพิ่มลง Google Calendar" จะเปิดปฏิทินในบัญชี Google ของคุณเองพร้อมกรอกรายละเอียดให้ แล้วกด "บันทึก" ในนั้น หน้านี้จำไว้ในเครื่องว่าเพิ่มอะไรไปแล้ว ถ้าใน Google ไม่ได้กดบันทึก ให้กด "ลบ" แล้วเพิ่มใหม่'},
+  calT:{en:'Calendar', th:'ปฏิทิน'},
+  viewG:{en:'My Google Calendar', th:'Google Calendar ของฉัน'}, viewA:{en:'Added from this page', th:'รายการที่เพิ่มจากหน้านี้'},
+  gcSetT:{en:'Show your Google Calendar on this page', th:'แสดง Google Calendar ของคุณในหน้านี้'},
+  gcSetSub:{en:'Paste your Calendar ID once. For your main calendar it is your Gmail address. It is saved only on this device and is never written into the page, so other visitors never see it.', th:'วาง Calendar ID ครั้งเดียว ถ้าเป็นปฏิทินหลัก Calendar ID คืออีเมล Gmail ของคุณ ระบบเก็บไว้ในเครื่องนี้เท่านั้น ไม่ได้บันทึกลงในหน้าเว็บ คนอื่นที่เปิดเว็บจึงไม่เห็น'},
+  gcLabel:{en:'Calendar ID or embed code', th:'Calendar ID หรือโค้ดฝังปฏิทิน'},
+  gcPh:{en:'yourname@gmail.com', th:'ชื่อของคุณ@gmail.com'},
+  gcSave:{en:'Show calendar', th:'แสดงปฏิทิน'}, gcCancel:{en:'Cancel', th:'ยกเลิก'}, gcForget:{en:'Forget this Calendar ID', th:'ลบ Calendar ID ออกจากเครื่องนี้'},
+  gcBad:{en:'That does not look like a Calendar ID. It should contain @, or be the embed code from Google Calendar settings.', th:'ดูเหมือนไม่ใช่ Calendar ID ควรมีเครื่องหมาย @ หรือเป็นโค้ดฝังจากหน้าตั้งค่าของ Google Calendar'},
+  gcHowT:{en:'How to find your Calendar ID', th:'วิธีหา Calendar ID'},
+  gcHow:[
+    {en:'Main calendar: the Calendar ID is simply the Gmail address you use for Google Calendar.', th:'ปฏิทินหลัก: Calendar ID คืออีเมล Gmail ที่ใช้กับ Google Calendar'},
+    {en:'Another calendar (for example one you made called "Canada plan"): open calendar.google.com on a computer, then Settings (gear), choose the calendar under "Settings for my calendars", open "Integrate calendar" and copy the Calendar ID. You can also paste the whole embed code from there.', th:'ปฏิทินอื่น (เช่นปฏิทินที่สร้างชื่อ "แผนแคนาดา"): เปิด calendar.google.com บนคอมพิวเตอร์ ไปที่การตั้งค่า (รูปเฟือง) เลือกปฏิทินใต้ "การตั้งค่าสำหรับปฏิทินของฉัน" เปิด "ผสานรวมปฏิทิน" แล้วคัดลอก "รหัสปฏิทิน" หรือวางโค้ดฝังทั้งหมดก็ได้'},
+    {en:'Several calendars: separate the IDs with commas.', th:'หลายปฏิทิน: คั่น Calendar ID ด้วยเครื่องหมายจุลภาค (,)'},
+    {en:'"Add to Google Calendar" saves to your main calendar unless you pick another calendar on the Google page before saving.', th:'ปุ่ม "เพิ่มลง Google Calendar" จะบันทึกลงปฏิทินหลัก เว้นแต่จะเลือกปฏิทินอื่นในหน้า Google ก่อนกดบันทึก'}
+  ],
+  gcHelpL:{en:'Google help: add a calendar to a website', th:'วิธีฝังปฏิทินจาก Google'},
+  gcReload:{en:'Refresh', th:'รีเฟรช'}, gcOpen:{en:'Open in Google Calendar', th:'เปิดใน Google Calendar'}, gcChange:{en:'Change calendar', th:'เปลี่ยนปฏิทิน'},
+  gcNote:{en:'Seeing a sign-in page or no events? A private calendar shows inside other sites only when you are signed in to Google in this browser and it allows Google\'s cookies here. Chrome on a computer usually works; Safari and some phones block it. Fix: allow cookies for calendar.google.com in your browser settings, or use "Open in Google Calendar". The view refreshes by itself when you come back after adding an event.', th:'ถ้าเห็นหน้าให้ลงชื่อเข้าใช้ หรือไม่มีรายการ: ปฏิทินส่วนตัวจะแสดงในเว็บอื่นได้ก็ต่อเมื่อเบราว์เซอร์นี้ลงชื่อเข้าใช้ Google อยู่ และอนุญาตคุกกี้ของ Google ในหน้านี้ Chrome บนคอมพิวเตอร์มักใช้ได้ ส่วน Safari และมือถือบางรุ่นจะบล็อก วิธีแก้: อนุญาตคุกกี้สำหรับ calendar.google.com ในการตั้งค่าเบราว์เซอร์ หรือกด "เปิดใน Google Calendar" ปฏิทินจะรีเฟรชเองเมื่อกลับมาหน้านี้หลังเพิ่มกิจกรรม'},
+  gcPrivacy:{en:'The Calendar ID stays in this browser on this device. Only Google receives it, to show your own calendar.', th:'Calendar ID เก็บไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น และส่งให้ Google เพื่อแสดงปฏิทินของคุณเท่านั้น'}
 });
-/* Only what the user has added to Google Calendar: the items (on the date they were added with) and their reminders. */
+/* Calendar ID from what the user pastes: an address, several addresses, an embed URL or the full iframe code. */
+function parseGcalId(raw){
+  let s = String(raw || '').trim(); if (!s) return '';
+  const m = s.match(/src=["']([^"']+)["']/); if (m) s = m[1];
+  if (/calendar\.google\.com\/calendar\/(embed|u\/\d+\/embed)/.test(s)) {
+    try { const u = new URL(s.replace(/&amp;/g, '&')); const srcs = u.searchParams.getAll('src'); if (srcs.length) s = srcs.join(','); } catch (e) {}
+  }
+  try { s = decodeURIComponent(s); } catch (e) {}
+  const ids = s.split(',').map(x => x.trim()).filter(Boolean);
+  return ids.length && ids.every(x => /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(x)) ? ids.join(',') : '';
+}
+function gcalEmbedUrl(){
+  const g = S.gcal || {}, ids = String(g.id || '').split(',').filter(Boolean); if (!ids.length) return '';
+  let tz = 'Asia/Bangkok'; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch (e) {}
+  const mode = innerWidth < 640 ? 'AGENDA' : 'MONTH';   /* Google's own toolbar lets the viewer switch views */
+  return 'https://calendar.google.com/calendar/embed?' + ids.map(id => 'src=' + encodeURIComponent(id)).join('&') +
+    `&ctz=${encodeURIComponent(tz)}&mode=${mode}&hl=${S.lang === 'th' ? 'th' : 'en'}&wkst=1&showTitle=0&showPrint=0&showCalendars=0&showTz=0`;
+}
+function reloadGcalFrame(){ const f = document.getElementById('gcal-frame'); if (f && f.src) f.src = f.src; }
+/* Only what the user has added to Google Calendar from this page, on the date it was added with. */
 function calEvents(){
   const st = planStore(), ev = [];
   Object.keys(st.added).forEach(id => { const it = planItem(id); if (!it) return; const a = st.added[id];
-    ev.push(Object.assign({}, it, {key:'a:' + id, date:a.date, done:it.kind === 'step' && !!S.check[id], moved:a.date !== it.date, isRem:false})); });
-  Object.keys(st.rem).forEach(id => { const it = planItem(id); if (!it) return;
-    (st.rem[id] || []).forEach((r, i) => ev.push(Object.assign({}, it, {key:'r:' + id + ':' + i, date:r.date, time:r.t, r, idx:i, base:r.base, isRem:true}))); });
-  return ev.sort((a, b) => (a.date + (a.time || '')) < (b.date + (b.time || '')) ? -1 : 1);
+    ev.push(Object.assign({}, it, {key:'a:' + id, date:a.date, done:it.kind === 'step' && !!S.check[id], moved:a.date !== it.date})); });
+  return ev.sort((a, b) => a.date < b.date ? -1 : 1);
 }
 const calColor = ph => `var(--s${Math.min(6, ph + 1)})`;
-function calendarCard(){
+function googleCalView(){
+  const U = PLAN_UI, g = S.gcal || {}, url = gcalEmbedUrl(), btn = 'padding:4px 10px;font-size:13.5px';
+  if (!url || g.editing) return `
+      <div class="mt-3 p-4" style="border-radius:12px;background:var(--bg)">
+        <div class="font-semibold text-[15.5px] flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days','icon-sm')}</span>${T(U.gcSetT)}</div>
+        <p class="muted text-[14px] mt-1">${T(U.gcSetSub)}</p>
+        <label for="gcal-id-in" class="block text-[13.5px] font-medium mt-3">${T(U.gcLabel)}</label>
+        <input id="gcal-id-in" class="gl-search" style="margin-top:6px" type="text" autocomplete="off" spellcheck="false" inputmode="email" placeholder="${esc(T(U.gcPh))}" value="${esc(g.id || '')}">
+        ${g.bad ? `<div class="text-[13.5px] mt-2 neg">${T(U.gcBad)}</div>` : ''}
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button class="btn btn-primary" style="padding:6px 16px;font-size:14px" data-act="gcal-save">${ic('calendar-check','icon-sm')}${T(U.gcSave)}</button>
+          ${g.editing ? `<button class="btn btn-ghost" style="padding:6px 16px;font-size:14px" data-act="gcal-cancel">${T(U.gcCancel)}</button><button class="linkbtn text-[13.5px]" data-act="gcal-forget">${T(U.gcForget)}</button>` : ''}
+        </div>
+        <details class="mt-3" data-field="gcHow" ${S.open && S.open.gcHow ? 'open' : ''}><summary class="text-[14px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(U.gcHowT)}</summary>
+          <ol class="howlist">${U.gcHow.map(x => `<li>${T(x)}</li>`).join('')}</ol>
+          <a class="text-[13.5px] inline-flex items-center gap-1" style="color:var(--blue)" href="https://support.google.com/calendar/answer/41207" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(U.gcHelpL)}</a>
+        </details>
+        <p class="faint text-[13px] mt-3 flex gap-2"><span style="margin-top:2px">${ic('lock','icon-sm')}</span><span>${T(U.gcPrivacy)}</span></p>
+      </div>`;
+  return `
+      <div class="flex flex-wrap items-center gap-2 mt-3">
+        <button class="btn btn-ghost whitespace-nowrap" style="${btn}" data-act="gcal-reload">${ic('refresh-cw','icon-sm')}${T(U.gcReload)}</button>
+        <a class="btn btn-ghost whitespace-nowrap" style="${btn}" href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(U.gcOpen)}</a>
+        <button class="linkbtn text-[13.5px] ml-auto" data-act="gcal-change">${T(U.gcChange)}</button>
+      </div>
+      <iframe id="gcal-frame" class="gcal-frame mt-3" src="${url}" title="${esc(T(U.viewG))}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <p class="faint text-[13px] mt-2 flex gap-2"><span style="margin-top:2px">${ic('info','icon-sm')}</span><span>${T(U.gcNote)}</span></p>`;
+}
+function appCalView(){
   const U = PLAN_UI, ev = calEvents(), loc = S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB';
   const todayS = isoD(new Date()), nextEv = ev.find(e => e.date >= todayS && !e.done);
   const ym = /^\d{4}-\d{2}$/.test(S.calMonth || '') ? S.calMonth : (nextEv ? nextEv.date : todayS).slice(0, 7);
@@ -3161,49 +3179,35 @@ function calendarCard(){
   const cells = Array.from({length:42}, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
   const lastRow = cells.slice(35).every(d => d.getMonth() !== Mo - 1) ? 35 : 42;   /* drop an empty sixth week */
   const sel = ev.find(e => e.key === S.calSel), day = S.calDay && S.calDay.slice(0, 7) === ym ? S.calDay : '';
-  const label = e => (e.isRem ? (e.time + ' ') : '') + (e.kind === 'step' ? e.n + '. ' : '') + e.title;
-  const chip = e => `<button class="cal-ev ${e.done ? 'done' : ''} ${e.isRem ? 'rem' : ''}" style="--c:${calColor(e.ph)}" data-act="cal-ev" data-v="${e.key}" title="${esc((e.isRem ? T(U.remL) + ': ' : '') + label(e))}">${e.isRem ? ic('bell','icon-sm') : ''}${esc(label(e))}</button>`;
+  const label = e => (e.kind === 'step' ? e.n + '. ' : '') + e.title;
+  const chip = e => `<button class="cal-ev ${e.done ? 'done' : ''}" style="--c:${calColor(e.ph)}" data-act="cal-ev" data-v="${e.key}" title="${esc(label(e))}">${esc(label(e))}</button>`;
   const list = (day ? (byDay[day] || []) : ev.filter(e => e.date.slice(0, 7) === ym));
   const shift = n => { const d = new Date(Y, Mo - 1 + n, 1); return isoD(d).slice(0, 7); };
   const firstTodo = CHECK.items.find(it => !S.check[it.id]);
   const btn = 'padding:6px 14px;font-size:14px';
-  const detail = !sel ? '' : sel.isRem ? `
-      <div class="mt-3 p-3" id="cal-detail" style="border-radius:12px;background:var(--bg);border-left:4px dashed ${calColor(sel.ph)}">
-        <div class="flex items-start gap-2"><div class="min-w-0"><div class="eyebrow">${ic('bell','icon-sm')} ${T(U.remL)} · ${fdateD(sel.date)} ${sel.time}</div>
-          <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}</div></div>
-          <button class="tb-btn ml-auto" style="width:30px;height:30px" data-act="cal-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
-        <p class="text-[14.5px] mt-2">${T(U.remDue)(fdateD(sel.base))} · ${remText(sel.r)}</p>
-        <div class="flex flex-wrap gap-2 mt-3">
-          <button class="btn btn-ghost" style="${btn}" data-act="rem-del" data-v="${sel.id}|${sel.idx}">${ic('bell-off','icon-sm')}${T(U.remDelL)}</button>
-          ${sel.kind === 'step' ? `<button class="btn btn-ghost" style="${btn}" data-act="cal-go" data-v="${sel.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}
-        </div>
-      </div>` : `
+  const detail = !sel ? '' : `
       <div class="mt-3 p-3" id="cal-detail" style="border-radius:12px;background:var(--bg);border-left:4px solid ${calColor(sel.ph)}">
         <div class="flex items-start gap-2"><div class="min-w-0"><div class="eyebrow">${sel.kind === 'step' ? T(U.step) + ' ' + sel.n + ' · ' + T(CHECK.phases[sel.ph].t) : T(U.keyMs)} · ${fdateD(sel.date)}</div>
           <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}${sel.done ? ` <span class="badge b-green">${T(U.done)}</span>` : ''}</div></div>
           <button class="tb-btn ml-auto" style="width:30px;height:30px" data-act="cal-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
         <p class="text-[14.5px] mt-2">${sel.d}</p>
         ${sel.why ? `<p class="muted text-[14px] mt-1"><strong>${T(CHECK.why)}:</strong> ${sel.why}</p>` : ''}
-        <div class="mt-3">${gcalControls(sel.id)}</div>${remPanel(sel.id)}
+        <div class="mt-3">${gcalControls(sel.id)}</div>
         <div class="flex flex-wrap gap-2 mt-3">
           ${sel.kind === 'step' ? `<button class="btn ${sel.done ? 'btn-ghost' : 'btn-primary'}" style="${btn}" data-act="cal-done" data-v="${sel.id}">${ic(sel.done ? 'rotate-ccw' : 'check','icon-sm')}${T(sel.done ? U.undo : U.markDone)}</button>` : ''}
           ${sel.kind === 'step' ? `<button class="btn btn-ghost" style="${btn}" data-act="cal-go" data-v="${sel.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}
         </div>
       </div>`;
   return `
-    <div class="card mb-4" id="calendar">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-range')}</span>${T(U.calT)}</h3>
-        <div class="flex flex-wrap items-center gap-1">
-          <button class="tb-btn" data-act="cal-month" data-v="${shift(-1)}" aria-label="${esc(T(U.prev))}">${ic('chevron-left')}</button>
-          <span class="font-semibold text-[15px] num whitespace-nowrap" style="min-width:120px;text-align:center" aria-live="polite">${monthName}</span>
-          <button class="tb-btn" data-act="cal-month" data-v="${shift(1)}" aria-label="${esc(T(U.next))}">${ic('chevron-right')}</button>
-          <button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-today">${T(U.today)}</button>
-          ${nextEv ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-next" data-v="${nextEv.key}">${T(U.nextItem)}</button>` : ''}
-        </div>
+      <div class="flex flex-wrap items-center gap-1 mt-3">
+        <button class="tb-btn" data-act="cal-month" data-v="${shift(-1)}" aria-label="${esc(T(U.prev))}">${ic('chevron-left')}</button>
+        <span class="font-semibold text-[15px] num whitespace-nowrap" style="min-width:120px;text-align:center" aria-live="polite">${monthName}</span>
+        <button class="tb-btn" data-act="cal-month" data-v="${shift(1)}" aria-label="${esc(T(U.next))}">${ic('chevron-right')}</button>
+        <button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-today">${T(U.today)}</button>
+        ${nextEv ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-next" data-v="${nextEv.key}">${T(U.nextItem)}</button>` : ''}
       </div>
-      <p class="muted text-[14px] mt-1">${T(U.calSub)}</p>
-      ${ev.length ? `<div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">${CHECK.phases.map((p, i) => `<span class="cal-key" style="--c:${calColor(i)}"><i></i>${i + 1}. ${T(p.t)}</span>`).join('')}<span class="cal-key" style="--c:${calColor(5)}"><i></i>${T(U.keyMs)}</span><span class="cal-key">${ic('bell','icon-sm')}${T(U.remL)}</span></div>`
+      <p class="muted text-[14px] mt-2">${T(U.calSub)}</p>
+      ${ev.length ? `<div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">${CHECK.phases.map((p, i) => `<span class="cal-key" style="--c:${calColor(i)}"><i></i>${i + 1}. ${T(p.t)}</span>`).join('')}<span class="cal-key" style="--c:${calColor(5)}"><i></i>${T(U.keyMs)}</span></div>`
         : `<div class="text-[14px] mt-3 flex flex-wrap items-center gap-2" style="background:var(--blue-soft);border-radius:10px;padding:10px 12px"><span style="color:var(--blue);margin-top:2px">${ic('calendar-plus','icon-sm')}</span><span style="flex:1 1 220px">${T(U.calEmpty)}</span>${firstTodo ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-go" data-v="${firstTodo.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}</div>`}
       <div class="cal-grid mt-3" role="grid" aria-label="${esc(monthName)}">
         ${wd.map(w => `<div class="cal-wd" role="columnheader">${w}</div>`).join('')}
@@ -3211,18 +3215,29 @@ function calendarCard(){
           return `<div class="cal-cell ${d.getMonth() !== Mo - 1 ? 'out' : ''} ${s === todayS ? 'today' : ''} ${s === day ? 'sel' : ''}" role="gridcell" data-act="cal-day" data-v="${s}">
             <button class="cal-dn" data-act="cal-day" data-v="${s}" aria-label="${esc(d.toLocaleDateString(loc, {day:'numeric', month:'long', year:'numeric'}))}${es.length ? ', ' + es.length : ''}">${d.getDate()}</button>
             ${es.slice(0, 2).map(chip).join('')}${es.length > 2 ? `<span class="cal-more">${T(U.more)(es.length - 2)}</span>` : ''}
-            ${es.length ? `<span class="cal-dots">${es.map(e => `<i class="cal-dot ${e.done ? 'done' : ''} ${e.isRem ? 'rem' : ''}" style="--c:${calColor(e.ph)}"></i>`).join('')}</span>` : ''}
+            ${es.length ? `<span class="cal-dots">${es.map(e => `<i class="cal-dot ${e.done ? 'done' : ''}" style="--c:${calColor(e.ph)}"></i>`).join('')}</span>` : ''}
           </div>`; }).join('')}
       </div>
       ${detail}
       ${ev.length ? `<div class="mt-4">
         <div class="eyebrow mb-1">${day ? T(U.dayT)(fdateD(day)) : T(U.monthT)(first.toLocaleDateString(loc, {month:'long'}))}</div>
-        ${list.length ? list.map(e => `<div class="cal-row" style="--c:${calColor(e.ph)}"><span class="cal-bar" ${e.isRem ? 'style="background:none;border-left:3px dashed var(--c)"' : ''}></span>
-            <div class="min-w-0" style="flex:1"><div class="faint text-[12.5px] num">${fdateD(e.date)}${e.isRem ? ' · ' + e.time + ' · ' + T(U.remL) : (e.kind === 'step' ? ' · ' + T(U.step) + ' ' + e.n : '')}</div>
+        ${list.length ? list.map(e => `<div class="cal-row" style="--c:${calColor(e.ph)}"><span class="cal-bar"></span>
+            <div class="min-w-0" style="flex:1"><div class="faint text-[12.5px] num">${fdateD(e.date)}${e.kind === 'step' ? ' · ' + T(U.step) + ' ' + e.n : ''}</div>
               <button class="linkbtn text-[14.5px] ${e.done ? 'line-through' : ''}" style="color:var(--ink);text-align:left" data-act="cal-ev" data-v="${e.key}">${esc(e.title)}</button>
               ${e.done ? ` <span class="badge b-green">${T(U.done)}</span>` : ''}${e.moved ? ` <span class="badge b-amber">${T(U.gMoved)}</span>` : ''}</div>
           </div>`).join('') : `<p class="muted text-[14px] py-2">${T(U.none)}</p>`}
-      </div>` : ''}
+      </div>` : ''}`;
+}
+/* The calendar card: your real Google Calendar embedded, or the items added from this page. */
+function calendarCard(){
+  const U = PLAN_UI, view = (S.gcal && S.gcal.view === 'app') ? 'app' : 'google';
+  return `
+    <div class="card mb-4" id="calendar">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-range')}</span>${T(U.calT)}</h3>
+        <div class="seg" role="tablist" aria-label="${esc(T(U.calT))}">${[['google', U.viewG], ['app', U.viewA]].map(([k, l]) => `<button role="tab" class="${view === k ? 'on' : ''}" aria-selected="${view === k}" data-act="gcal-view" data-v="${k}">${T(l)}</button>`).join('')}</div>
+      </div>
+      ${view === 'google' ? googleCalView() : appCalView()}
     </div>`;
 }
 function viewPrep(){
@@ -3267,7 +3282,7 @@ function viewPrep(){
               <input type="date" class="numin" style="width:150px" data-plan="${it.id}" value="${pd[it.id].date}" aria-label="${esc(T(U.planned) + ': ' + T(it.t))}">
               ${pd[it.id].late ? `<span class="badge b-amber">${T(U.late)}</span>` : ''}${pd[it.id].custom ? `<span class="badge b-blue">${T(U.mine)}</span>` : ''}
               ${gcalControls(it.id)}
-            </span>${remPanel(it.id)}</span>
+            </span></span>
         
         </label>`).join('')}</div>
     </div>`;
@@ -3776,7 +3791,8 @@ async function loadLive(force){
 /* Keep data fresh without wasting requests: check when the app comes back into view and every 30 minutes,
    but only fetch again once the day has changed (sources update daily or less often). */
 function autoRefresh(){ if (S.fx.day !== today()) loadFx(); if (LIVE.day !== today()) loadLive(); }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) autoRefresh(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { autoRefresh(); reloadGcalFrame(); } });   /* back from Google: show newly saved events */
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'gcal-id-in') { e.preventDefault(); const b = document.querySelector('[data-act="gcal-save"]'); if (b) b.click(); } });
 setInterval(autoRefresh, 30 * 60 * 1000);
 const fdate = d => { const t = new Date(d); return isNaN(t) ? d : t.toLocaleDateString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', year:'numeric'}); };
 function liveCard(){
@@ -3920,16 +3936,6 @@ function flushSim(){
 }
 function queueFlush(){ if (ptrDown) simPending = true; else setTimeout(flushSim, 0); }
 document.addEventListener('change', e => {
-  const rk = e.target.dataset && e.target.dataset.rem;
-  if (rk) {   /* reminder settings, remembered for the next reminder too */
-    const st = planStore(); let val2 = e.target.value;
-    if (rk === 'n') val2 = Math.max(0, Math.min(99, parseInt(val2, 10) || 0));
-    if (rk === 't' && !/^\d{2}:\d{2}$/.test(val2)) val2 = '09:00';
-    if (rk === 'u' && !['d','w','m'].includes(val2)) val2 = 'w';
-    st.remDef[rk] = val2; render(true);
-    const f = document.querySelector(`#app [data-rem="${rk}"]`); if (f) f.focus({preventScroll:true});
-    return;
-  }
   const pk = e.target.dataset && e.target.dataset.plan;
   if (pk) {   /* a planned date typed by the user; clearing the field goes back to the recommended date */
     S.plan = S.plan || {}; S.plan.dates = S.plan.dates || {};
@@ -4442,7 +4448,7 @@ function render(keepScroll){
 
 document.addEventListener('click', e => {
   /* calendar controls sit inside checklist labels: clicking their text must not tick the step */
-  if (e.target.closest('.rem-panel, .gc-ctl') && !e.target.closest('input, select, button, a, textarea')) e.preventDefault();
+  if (e.target.closest('.gc-ctl') && !e.target.closest('input, select, button, a, textarea')) e.preventDefault();
   const tm = e.target.closest('.term');
   if (tm) { e.preventDefault(); showTerm(tm); return; }
   if (TERM_BTN && !e.target.closest('#term-pop')) hideTerm();
@@ -4510,21 +4516,16 @@ document.addEventListener('click', e => {
     delete st.added[v]; window.open(gSearchUrl(it.title), '_blank', 'noopener');
     if (S.calSel === 'a:' + v) S.calSel = ''; render(true);
   }
-  else if (act === 'rem-open') { S.remOpen = S.remOpen === v ? '' : v; render(true); }
-  else if (act === 'rem-add') {
-    const st = planStore(), it = planItem(v), d = st.remDef; if (!it) return;
-    const when = remDate(it.date, +d.n, d.u), rems = st.rem[v] = st.rem[v] || [];
-    if (when < isoD(new Date()) || rems.some(r => +r.n === +d.n && r.u === d.u && r.t === d.t && r.base === it.date)) return;
-    window.open(gcalTimedUrl(T(PLAN_UI.remTitle)(it.title), when, d.t, T(PLAN_UI.remDue)(fdateD(it.date)) + '\n\n' + it.details), '_blank', 'noopener');
-    rems.push({n:+d.n, u:d.u, t:d.t, base:it.date, date:when, at:Date.now()}); render(true);
+  else if (act === 'gcal-view') { S.gcal = Object.assign({}, S.gcal, {view:v}); render(true); }
+  else if (act === 'gcal-save') {   /* keep only a clean Calendar ID; nothing else is stored */
+    const inp = document.getElementById('gcal-id-in'), id = parseGcalId(inp ? inp.value : '');
+    S.gcal = Object.assign({}, S.gcal, id ? {id, editing:false, bad:false, view:'google'} : {bad:true});
+    render(true); if (!id) { const f = document.getElementById('gcal-id-in'); if (f) f.focus(); }
   }
-  else if (act === 'rem-del') {
-    const [id, i] = String(v).split('|'), st = planStore(), it = planItem(id), r = (st.rem[id] || [])[+i]; if (!it || !r) return;
-    if (!confirm(T(PLAN_UI.gDelQ)(T(PLAN_UI.remTitle)(it.title) + ' (' + remText(r) + ')'))) return;
-    st.rem[id].splice(+i, 1); if (!st.rem[id].length) delete st.rem[id];
-    window.open(gSearchUrl(T(PLAN_UI.remTitle)(it.title)), '_blank', 'noopener');
-    S.calSel = ''; render(true);
-  }
+  else if (act === 'gcal-cancel') { S.gcal = Object.assign({}, S.gcal, {editing:false, bad:false}); render(true); }
+  else if (act === 'gcal-change') { S.gcal = Object.assign({}, S.gcal, {editing:true, bad:false}); render(true); }
+  else if (act === 'gcal-forget') { S.gcal = {view:'google'}; render(true); }
+  else if (act === 'gcal-reload') { reloadGcalFrame(); }
   else if (act === 'cal-close') { S.calSel = ''; render(true); }
   else if (act === 'cal-done') { S.check[v] = !S.check[v]; render(true); }
   else if (act === 'cal-go') { const el = document.getElementById('ck-' + v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); } }
