@@ -466,7 +466,7 @@
 /* ============================== STATE ============================== */
 const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
-  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', open:{}, scenario:'safe',
+  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', open:{}, scenario:'safe', plan:{y:null, m:9, dates:{}},
   sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0,
         cur:'both', proofAuto:true, travel:2500, setup:2000, rentC:null, foodC:null, otherC:null, healthC:null, tips:0 },
   fx:{ rate:null, date:null, day:null, src:'' }
@@ -2888,8 +2888,142 @@ function checkStats(){
   const all = CHECK.items, done = all.filter(i => S.check[i.id]).length;
   return {done, total:all.length, pct:Math.round(done/all.length*100), next:all.find(i => !S.check[i.id])};
 }
+/* ---------- calendar planner: recommended dates from the intake, Google Calendar links, .ics export ---------- */
+const PLAN_UI = {
+  title:{en:'Plan it in your calendar (Google Calendar)', th:'วางแผนลงปฏิทิน (Google Calendar)'},
+  sub:{en:'Choose your intake and every step gets a recommended date. Change any date in the list below, then add steps to Google Calendar one by one, or download the whole plan and import it at once.', th:'เลือกรอบเปิดเรียน ระบบจะใส่วันที่แนะนำให้ทุกข้อ แก้วันที่ได้ในแต่ละข้อด้านล่าง แล้วกดเพิ่มลง Google Calendar ทีละข้อ หรือดาวน์โหลดทั้งแผนไปนำเข้าทีเดียว'},
+  intake:{en:'Intake', th:'รอบเปิดเรียน'}, months:[[1,{en:'January', th:'มกราคม'}],[5,{en:'May', th:'พฤษภาคม'}],[9,{en:'September', th:'กันยายน'}]],
+  keyT:{en:'Key dates', th:'วันสำคัญ'}, upT:{en:'Coming up next', th:'ข้อที่ต้องทำเร็ว ๆ นี้'},
+  planned:{en:'Planned date', th:'วันที่วางแผน'}, gcal:{en:'Add to Google Calendar', th:'เพิ่มลง Google Calendar'}, gcalS:{en:'Google Calendar', th:'Google Calendar'},
+  late:{en:'Should have started', th:'ควรเริ่มแล้ว'}, mine:{en:'Your date', th:'วันที่คุณตั้ง'},
+  lateNote:{en:n => `${n} step${n > 1 ? 's' : ''} should already have started for this intake, so they are moved to start from today.`, th:n => `มี ${n} ข้อที่ควรเริ่มแล้วสำหรับรอบนี้ ระบบจึงเลื่อนให้เริ่มตั้งแต่วันนี้`},
+  tight:{en:'This intake is less than 6 months away: there may not be enough time for admission and the study permit. Consider the next intake.', th:'รอบนี้เหลือเวลาไม่ถึง 6 เดือน อาจไม่ทันสมัครเรียนและขอ Study Permit ควรพิจารณารอบถัดไป'},
+  ics:{en:'Download the whole plan (.ics)', th:'ดาวน์โหลดทั้งแผน (.ics)'}, reset:{en:'Use recommended dates', th:'ใช้วันที่แนะนำทั้งหมด'},
+  howT:{en:'How to import the plan into Google Calendar', th:'วิธีนำเข้าแผนทั้งหมดลง Google Calendar'},
+  how:[
+    {en:'Tap "Download the whole plan" to save a .ics file.', th:'กด "ดาวน์โหลดทั้งแผน" จะได้ไฟล์ .ics'},
+    {en:'On a computer, open calendar.google.com (the phone app cannot import files).', th:'เปิด calendar.google.com บนคอมพิวเตอร์ (แอปในมือถือนำเข้าไฟล์ไม่ได้)'},
+    {en:'Tip: first create a new calendar called "Canada plan" (Other calendars, then +), so you can hide or delete the whole plan at once.', th:'แนะนำ: สร้างปฏิทินใหม่ชื่อ "แผนแคนาดา" ก่อน (ปฏิทินอื่น ๆ แล้วกด +) จะซ่อนหรือลบทั้งแผนได้ในครั้งเดียว'},
+    {en:'Settings (gear) > Import and export > Select file from your computer > choose the calendar > Import.', th:'การตั้งค่า (รูปเฟือง) > นำเข้าและส่งออก > เลือกไฟล์จากคอมพิวเตอร์ > เลือกปฏิทิน > นำเข้า'},
+    {en:'On a phone, use the Google Calendar button on each step instead. On iPhone the .ics file can also open straight in the Calendar app.', th:'ถ้าใช้มือถือ ให้กดปุ่ม Google Calendar ทีละข้อแทน บน iPhone เปิดไฟล์ .ics เข้าแอปปฏิทินได้โดยตรง'}
+  ],
+  helpL:{en:'Google help: import events', th:'วิธีนำเข้าจาก Google'},
+  privacy:{en:'Nothing is sent anywhere by this page. The Google Calendar button opens Google Calendar in your own Google account with the event filled in; tap Save to add it. Dates are saved on this device.', th:'หน้านี้ไม่ได้ส่งข้อมูลไปที่ไหน ปุ่ม Google Calendar จะเปิดปฏิทินในบัญชี Google ของคุณเองพร้อมกรอกรายละเอียดให้ กด "บันทึก" เพื่อเพิ่ม วันที่ที่ตั้งไว้ถูกบันทึกในเครื่องนี้'},
+  calName:{en:'Canada study plan', th:'แผนเรียนต่อแคนาดา'},
+  from:{en:'From the Canada Work & Study to PR guide', th:'จากคู่มือ Work & Study สู่ PR แคนาดา'},
+  arriveT:{en:'Fly to Canada (about 2 weeks before classes)', th:'เดินทางถึงแคนาดา (ประมาณ 2 สัปดาห์ก่อนเปิดเรียน)'},
+  arriveD:{en:'Carry your passport, Letter of Introduction, LOA, PAL, proof of funds and tuition receipt in your hand luggage. Arrive early to find housing, get a SIN and a phone plan.', th:'พกพาสปอร์ต Letter of Introduction, LOA, PAL หลักฐานการเงิน และใบเสร็จค่าเรียนในกระเป๋าถือ มาถึงก่อนเพื่อหาที่พัก ขอ SIN และทำเบอร์โทรศัพท์'},
+  startT:{en:'Classes start (check the exact date on your LOA)', th:'เปิดเรียน (ดูวันที่จริงใน LOA)'},
+  startD:{en:'Orientation is usually in the week before. You may work off campus only after your program starts.', th:'ปฐมนิเทศมักอยู่สัปดาห์ก่อนเปิดเรียน ทำงานนอกสถาบันได้หลังหลักสูตรเริ่มแล้วเท่านั้น'},
+  gradT:{en:'Program ends (estimate from your budget settings)', th:'จบหลักสูตร (ประมาณจากค่าที่ตั้งในหน้างบ)'},
+  gradD:{en:'Ask the school for your final transcript and completion letter as soon as marks are out.', th:'ขอ Transcript ฉบับสุดท้ายและหนังสือรับรองการจบจากสถาบันทันทีที่ผลการเรียนออก'},
+  pgwpT:{en:'Apply for the PGWP', th:'ยื่นขอ PGWP'},
+  pgwpD:{en:'Apply within 180 days of your final marks, and before your study permit expires so you can keep working while you wait. Have your language test (CLB 5 college, CLB 7 degree) ready.', th:'ยื่นภายใน 180 วันหลังผลการเรียนสุดท้ายออก และควรยื่นก่อน Study Permit หมดอายุ เพื่อทำงานต่อได้ระหว่างรอผล เตรียมผลสอบภาษาให้พร้อม (CLB 5 สำหรับวิทยาลัย CLB 7 สำหรับปริญญา)'}
+};
+const PLAN_WIN = [[18,12],[12,9],[9,6],[6,4],[3,1]];   /* months before the intake for each checklist phase */
+const isoD = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const parseD = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+const plusDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate() + n); return isoD(d); };
+function planIntake(){ const p = S.plan || {}; return new Date(p.y || S.sim.intake || 2027, (p.m || 9) - 1, 1); }
+/* Recommended date for every checklist step: spread across its phase window; steps already overdue start from today. */
+function planDates(){
+  const intake = planIntake(), today = new Date(); today.setHours(0, 0, 0, 0);
+  const own = (S.plan && S.plan.dates) || {}, out = {};
+  let prev = null;   /* keep open steps in checklist order, at least 2 days apart, never before today */
+  CHECK.phases.forEach((ph, pi) => {
+    const its = CHECK.items.filter(it => it.ph === pi), [from, to] = PLAN_WIN[pi] || [3, 1];
+    its.forEach((it, k) => {
+      const d = new Date(intake); d.setDate(d.getDate() - Math.round((from - (from - to) * k / Math.max(1, its.length)) * 30.44));
+      let late = false;
+      if (!S.check[it.id]) {
+        if (d < today) { d.setTime(today.getTime()); late = true; }
+        if (prev && d.getTime() < prev + 2 * 864e5) d.setTime(prev + 2 * 864e5);
+        prev = d.getTime();
+      }
+      out[it.id] = own[it.id] ? {date:own[it.id], custom:true, late:false} : {date:isoD(d), custom:false, late};
+    });
+  });
+  return out;
+}
+function planMilestones(){
+  const U = PLAN_UI, intake = planIntake(), own = (S.plan && S.plan.dates) || {}, ms = [];
+  const arr = new Date(intake); arr.setDate(arr.getDate() - 14);
+  ms.push({id:'m-arrive', t:U.arriveT, d:U.arriveD, date:isoD(arr)}, {id:'m-start', t:U.startT, d:U.startD, date:isoD(intake)});
+  if (S.sim.type !== 'private') {
+    const g = new Date(intake); g.setMonth(g.getMonth() + planOf(S.sim).length);
+    ms.push({id:'m-grad', t:U.gradT, d:U.gradD, date:isoD(g)}, {id:'m-pgwp', t:U.pgwpT, d:U.pgwpD, date:plusDays(isoD(g), 14)});
+  }
+  return ms.map(m => own[m.id] ? Object.assign(m, {date:own[m.id], custom:true}) : m);
+}
+const plainT = s => String(s).replace(/\s?\[\[[a-z0-9_]+\]\]/gi, '').replace(/<[^>]+>/g, '').trim();
+const guideUrl = () => /^https?:/.test(location.protocol) ? location.origin + location.pathname : '';
+function gcalUrl(title, date, details){
+  const d1 = date.replace(/-/g, ''), d2 = plusDays(date, 1).replace(/-/g, ''), link = guideUrl();
+  const body = plainT(details) + '\n\n' + T(PLAN_UI.from) + (link ? '\n' + link : '');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(plainT(title)) + '&dates=' + d1 + '/' + d2 + '&details=' + encodeURIComponent(body);
+}
+/* All-day events in one .ics file; lines folded at 75 bytes as the format requires. */
+function planIcs(){
+  const esc2 = s => plainT(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  const enc = new TextEncoder(), fold = line => { const out = []; let cur = '', bytes = 0;
+    for (const ch of line) { const b = enc.encode(ch).length; if (bytes + b > (out.length ? 74 : 75)) { out.push(cur); cur = ''; bytes = 0; } cur += ch; bytes += b; }
+    out.push(cur); return out.join('\r\n '); };
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z'), dates = planDates(), link = guideUrl();
+  const tag = isoD(planIntake()).slice(0, 7).replace('-', '');   /* stable per step and intake, so a re-import is recognised */
+  const ev = (id, title, date, details) => ['BEGIN:VEVENT', 'UID:' + id + '-' + tag + '@canada-guide', 'DTSTAMP:' + stamp,
+    'DTSTART;VALUE=DATE:' + date.replace(/-/g, ''), 'DTEND;VALUE=DATE:' + plusDays(date, 1).replace(/-/g, ''),
+    'SUMMARY:' + esc2(title), 'DESCRIPTION:' + esc2(plainT(details) + '\n\n' + T(PLAN_UI.from) + (link ? '\n' + link : '')),
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc2(title), 'TRIGGER:-P3D', 'END:VALARM', 'END:VEVENT'];
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Canada Guide//Plan//TH', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:' + esc2(T(PLAN_UI.calName))];
+  CHECK.items.forEach((it, i) => lines.push(...ev(it.id, (i + 1) + '. ' + T(it.t), dates[it.id].date, T(it.d) + '\n\n' + T(CHECK.why) + ': ' + T(it.why))));
+  planMilestones().forEach(m => lines.push(...ev(m.id, T(m.t), m.date, T(m.d))));
+  lines.push('END:VCALENDAR');
+  return lines.map(fold).join('\r\n') + '\r\n';
+}
+function downloadIcs(){
+  const p = planIntake(), blob = new Blob([planIcs()], {type:'text/calendar;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `canada-plan-${p.getFullYear()}-${String(p.getMonth() + 1).padStart(2, '0')}.ics`;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+const fdateD = s => parseD(s).toLocaleDateString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', year:'numeric'});
+function plannerCard(){
+  const U = PLAN_UI, p = S.plan || {}, intake = planIntake(), y = intake.getFullYear(), m = intake.getMonth() + 1;
+  const dates = planDates(), ms = planMilestones(), lateN = Object.values(dates).filter(d => d.late).length;
+  const monthsAway = (intake - new Date()) / (30.44 * 864e5);
+  const years = [...new Set([...(SIMC.intakes || [2027, 2028]), y])].sort();
+  const up = CHECK.items.filter(it => !S.check[it.id]).sort((a, b) => dates[a.id].date < dates[b.id].date ? -1 : 1).slice(0, 3);
+  const row = (id, title, date, details, extra) => `<div class="flex flex-wrap items-center justify-between gap-2 py-2" style="border-top:1px solid var(--line)">
+      <div class="min-w-0" style="flex:1 1 220px"><div class="text-[14.5px] font-medium">${esc(plainT(title))}</div>${extra || ''}</div>
+      <div class="flex items-center gap-2"><input type="date" class="numin" style="width:150px" data-plan="${id}" value="${date}" aria-label="${esc(T(U.planned))}">
+      <a class="btn btn-ghost" style="padding:4px 10px;font-size:13.5px" href="${gcalUrl(title, date, details)}" target="_blank" rel="noopener noreferrer" title="${esc(T(U.gcal))}">${ic('calendar-plus','icon-sm')}${T(U.gcalS)}</a></div></div>`;
+  return `
+    <div class="card mb-4" id="planner">
+      <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days')}</span>${T(U.title)}</h3>
+      <p class="muted text-[14.5px] mt-1">${T(U.sub)}</p>
+      <div class="flex flex-wrap items-center gap-2 mt-3"><span class="text-[14px] font-medium">${T(U.intake)}</span>
+        <div class="seg">${U.months.map(([k, l]) => `<button class="${m === k ? 'on' : ''}" aria-pressed="${m === k}" data-act="plan-m" data-v="${k}">${T(l)}</button>`).join('')}</div>
+        <div class="seg">${years.map(k => `<button class="${y === k ? 'on' : ''}" aria-pressed="${y === k}" data-act="plan-y" data-v="${k}">${k}</button>`).join('')}</div>
+      </div>
+      ${monthsAway < 6 ? `<div class="text-[13.5px] mt-3 flex gap-2" style="background:var(--red-soft);color:var(--red);border-radius:10px;padding:8px 12px"><span style="margin-top:2px">${ic('octagon-alert','icon-sm')}</span><span>${T(U.tight)}</span></div>` : ''}
+      ${lateN ? `<div class="text-[13.5px] mt-3 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px"><span style="color:var(--amber);margin-top:2px">${ic('triangle-alert','icon-sm')}</span><span>${T(U.lateNote)(lateN)}</span></div>` : ''}
+      <div class="grid md:grid-cols-2 gap-x-8 mt-3">
+        <div><div class="eyebrow mt-2 mb-1">${T(U.upT)}</div>${up.map(it => row(it.id, T(it.t), dates[it.id].date, T(it.d), dates[it.id].late ? `<span class="badge b-amber mt-1">${T(U.late)}</span>` : '')).join('')}</div>
+        <div><div class="eyebrow mt-2 mb-1">${T(U.keyT)}</div>${ms.map(x => row(x.id, T(x.t), x.date, T(x.d))).join('')}</div>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-4">
+        <button class="btn btn-primary" data-act="plan-ics">${ic('download','icon-sm')}${T(U.ics)}</button>
+        ${Object.keys(p.dates || {}).length ? `<button class="btn btn-ghost" data-act="plan-reset">${ic('rotate-ccw','icon-sm')}${T(U.reset)}</button>` : ''}
+      </div>
+      <details class="mt-3" data-field="planHow" ${S.open && S.open.planHow ? 'open' : ''}><summary class="text-[14px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(U.howT)}</summary>
+        <ol class="howlist">${U.how.map(x => `<li>${T(x)}</li>`).join('')}</ol>
+        <a class="text-[13.5px] inline-flex items-center gap-1" style="color:var(--blue)" href="https://support.google.com/calendar/answer/37118" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(U.helpL)}</a>
+      </details>
+      <p class="faint text-[13px] mt-3 flex gap-2"><span style="margin-top:2px">${ic('lock','icon-sm')}</span><span>${T(U.privacy)}</span></p>
+    </div>`;
+}
 function viewPrep(){
-  const C = CHECK, c = checkStats(), nx = c.next, idx = nx ? C.items.indexOf(nx) : -1;
+  const C = CHECK, c = checkStats(), nx = c.next, idx = nx ? C.items.indexOf(nx) : -1, pd = planDates(), U = PLAN_UI;
   const nextCard = nx ? `
     <div class="card mb-8 next-card">
       <div class="eyebrow flex items-center gap-1" style="color:var(--blue)">${ic('circle-arrow-right','icon-sm')}${T(C.next)} · <span class="num">${idx+1} / ${c.total}</span> · ${T(C.phases[nx.ph].m)}</div>
@@ -2924,7 +3058,13 @@ function viewPrep(){
         
             ${it.live === 'proc' && LIVE.pt ? `<span class="badge b-green mt-1">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(LIVE.pt.study)}</span>` : ''}
         
-            <span class="flex items-start gap-1.5 faint text-[13.5px] mt-1"><span style="margin-top:3px">${ic('lightbulb','icon-sm')}</span><span>${T(it.why)}</span></span></span>
+            <span class="flex items-start gap-1.5 faint text-[13.5px] mt-1"><span style="margin-top:3px">${ic('lightbulb','icon-sm')}</span><span>${T(it.why)}</span></span>
+            <span class="flex flex-wrap items-center gap-2 mt-2">
+              <span class="faint text-[13px] inline-flex items-center gap-1">${ic('calendar','icon-sm')}<span>${T(U.planned)}</span></span>
+              <input type="date" class="numin" style="width:150px" data-plan="${it.id}" value="${pd[it.id].date}" aria-label="${esc(T(U.planned) + ': ' + T(it.t))}">
+              ${pd[it.id].late ? `<span class="badge b-amber">${T(U.late)}</span>` : ''}${pd[it.id].custom ? `<span class="badge b-blue">${T(U.mine)}</span>` : ''}
+              <a class="linkbtn text-[13.5px] inline-flex items-center gap-1" href="${gcalUrl(T(it.t), pd[it.id].date, T(it.d) + '\n\n' + T(C.why) + ': ' + T(it.why))}" target="_blank" rel="noopener noreferrer">${ic('calendar-plus','icon-sm')}<span>${T(U.gcal)}</span></a>
+            </span></span>
         
         </label>`).join('')}</div>
     </div>`;
@@ -2938,6 +3078,7 @@ function viewPrep(){
       <div class="flex justify-between items-baseline mb-2"><span class="font-medium">${T(C.progress)}</span><span class="num font-semibold">${c.done} / ${c.total} ${T(C.done)}</span></div>
       <div class="bar"><i style="width:${c.pct}%;background:var(--green)"></i></div>
     </div>
+    ${plannerCard()}
     ${nextCard}
     <section class="mb-10">${list}</section>
     <section id="tests" class="mb-10">${viewTests()}</section>
@@ -3575,6 +3716,12 @@ function flushSim(){
 }
 function queueFlush(){ if (ptrDown) simPending = true; else setTimeout(flushSim, 0); }
 document.addEventListener('change', e => {
+  const pk = e.target.dataset && e.target.dataset.plan;
+  if (pk) {   /* a planned date typed by the user; clearing the field goes back to the recommended date */
+    S.plan = S.plan || {}; S.plan.dates = S.plan.dates || {};
+    if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) S.plan.dates[pk] = e.target.value; else delete S.plan.dates[pk];
+    render(true); return;
+  }
   const sk = e.target.dataset && e.target.dataset.simc;
   if (sk) {   /* hours and wages typed in the "where from" panel: same limits as the sliders */
     const v = parseFloat(e.target.value), lim = {hours:[0,24], wage:[5,100], tips:[0,50], coopHours:[0,60], coopWage:[0,100], side:[0,24]}[sk];
@@ -4126,6 +4273,13 @@ document.addEventListener('click', e => {
   else if (act === 'gloss-cat') { GL_CAT = v; document.querySelectorAll('.gl-cats button').forEach(x => { x.classList.toggle('on', x.dataset.v === v); x.setAttribute('aria-pressed', x.dataset.v === v); }); renderGlossList(); const gl = document.getElementById('gloss-list'); if (gl) gl.scrollTop = 0; }
   else if (act === 'term-close') { hideTerm(); }
   else if (act === 'agent-city') { S.agentCity = v; render(true); }
+  else if (act === 'plan-m' || act === 'plan-y') {   /* a new intake: dates typed for the old one no longer fit */
+    S.plan = S.plan || {}; if (act === 'plan-m') S.plan.m = +v; else S.plan.y = +v;
+    if (!S.plan.y) S.plan.y = planIntake().getFullYear();
+    S.plan.dates = {}; render(true);
+  }
+  else if (act === 'plan-reset') { S.plan.dates = {}; render(true); }
+  else if (act === 'plan-ics') { downloadIcs(); }
   else if (act === 'focus') { const el = document.getElementById(v); if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'center'}); el.focus({preventScroll:true}); } }
 });
 document.addEventListener('input', e => {
