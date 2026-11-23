@@ -301,7 +301,7 @@
   .check.done .ckn{background:var(--green-soft);color:var(--green)}
   .check.is-next .ckn{background:var(--accent);color:#fff}
   .tprice{font-size:20px;font-weight:700;line-height:1.2}
-  section[id],div[id="masters"]{scroll-margin-top:80px}
+  section[id],div[id="masters"],div[id^="ckph-"],label.check[id]{scroll-margin-top:80px}
   /* ---------- Cities map ---------- */
   #cmap{height:440px;border-radius:16px;overflow:hidden;z-index:0;background:var(--gray-soft)}
   @media (max-width:767px){#cmap{height:340px}}
@@ -1993,7 +1993,7 @@ const START = {
      d:[{en:'Take the self-assessment quiz to see whether to start with a private Co-op (cheap trial, no PGWP) or a public Co-op diploma (leads to PR).', th:'ทำแบบประเมินเพื่อดูว่าควรเริ่มด้วย Co-op เอกชน (ทดลองราคาถูก ไม่มี PGWP) หรือ Diploma พร้อม Co-op ที่สถาบันรัฐ (ต่อยอดสู่ PR ได้)'},
         
         {en:'Pick a target intake: January, May, or September of 2027 or 2028.', th:'เลือกรอบเปิดเรียนเป้าหมาย: มกราคม พฤษภาคม หรือกันยายน ของปี 2027 หรือ 2028'}],
-     c:{en:'Free', th:'ไม่มีค่าใช้จ่าย'}, go:{tab:'ready', l:{en:'Take the quiz', th:'ทำแบบประเมิน'}}},
+     c:{en:'Free', th:'ไม่มีค่าใช้จ่าย'}, go:{tab:'ready', anchor:'quiz', l:{en:'Take the quiz', th:'ทำแบบประเมิน'}}},
     {id:'s2', icon:'wallet', m:{en:'12 months or more', th:'12 เดือนขึ้นไป'}, t:{en:'Check your money and start seasoning the bank account', th:'ตรวจสอบเงินทุน และเริ่มเดินบัญชีให้นิ่ง'},
      d:[{en:'Use the simulator to find how much you must show: first-year tuition plus the IRCC living-cost minimum. [[funds]]', th:'ใช้เครื่องจำลองเพื่อดูว่าต้องแสดงเงินเท่าไร: ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC [[funds]]'},
         
@@ -2035,7 +2035,7 @@ const START = {
         {en:'Letter of explanation: why this program, how it fits your career, and why you will follow the rules of your stay.', th:'Letter of Explanation: ทำไมเลือกหลักสูตรนี้ เชื่อมกับอาชีพอย่างไร และเหตุผลที่จะปฏิบัติตามเงื่อนไขการพำนัก'},
         
         {en:'Upfront medical exam with an IRCC panel physician (IOM Bangkok), digital photo, and English translations of Thai documents. [[docs]] [[med]]', th:'ตรวจสุขภาพล่วงหน้ากับแพทย์ที่ IRCC รับรอง (IOM กรุงเทพฯ) รูปถ่ายดิจิทัล และคำแปลภาษาอังกฤษของเอกสารภาษาไทย [[docs]] [[med]]'}],
-     c:() => T({en:'Medical about THB 5,000 to 8,000; translations THB 1,000 to 5,000', th:'ตรวจสุขภาพประมาณ 5,000 ถึง 8,000 บาท ค่าแปลเอกสาร 1,000 ถึง 5,000 บาท'}), go:{tab:'prep', l:{en:'Open the checklist', th:'เปิดเช็กลิสต์'}}, link:IRCC+'study-canada/study-permit/get-documents.html'},
+     c:() => T({en:'Medical about THB 5,000 to 8,000; translations THB 1,000 to 5,000', th:'ตรวจสุขภาพประมาณ 5,000 ถึง 8,000 บาท ค่าแปลเอกสาร 1,000 ถึง 5,000 บาท'}), go:{tab:'prep', anchor:'ckph-3', l:{en:'Open the document checklist', th:'เปิดเช็กลิสต์เอกสาร'}}, link:IRCC+'study-canada/study-permit/get-documents.html'},
     {id:'s8', icon:'stamp', m:{en:'4 to 6 months', th:'4 ถึง 6 เดือน'}, t:{en:'Apply online for the study permit', th:'ยื่นขอ Study Permit ออนไลน์'},
      d:[{en:'Create an IRCC secure account, answer the questionnaire, upload everything, and pay online.', th:'สร้างบัญชี IRCC ตอบแบบสอบถาม อัปโหลดเอกสารทั้งหมด และชำระเงินออนไลน์'},
         
@@ -3142,7 +3142,7 @@ function viewRoad(){
         <button class="btn btn-primary mt-5" data-act="tab" data-v="costs">${T(tabL('costs'))}${ic('arrow-right','icon-sm')}</button>
       </div>
     </div>
-    <section class="card mt-8">
+    <section class="card mt-8" id="draws">
       <h2 class="text-[20px] font-semibold flex items-center gap-2"><span class="dot" aria-hidden="true"></span>${T(LIVE_UI.drawsT)}</h2>
       <p class="muted text-[14.5px] mt-1 mb-3">${T(LIVE_UI.drawsSub)} [[draws]] [[eecat]]</p>
       ${drawsTable()}
@@ -3510,7 +3510,7 @@ function viewPrep(){
     </div>` : `<div class="card mb-8 flex gap-3 items-start"><span style="color:var(--green)">${ic('party-popper')}</span><p class="text-[15px]">${T(C.allDone)}</p></div>`;
   const list = C.phases.map((ph, pi) => {
     const its = C.items.map((it, i) => ({it, i})).filter(x => x.it.ph === pi);
-    return `<div class="mb-6">
+    return `<div class="mb-6" id="ckph-${pi}">
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2"><h3 class="text-[18px] font-semibold"><span class="num muted">${pi+1}.</span> ${T(ph.t)}</h3><span class="badge b-blue">${ic('clock','icon-sm')}${T(ph.m)}</span></div>
       <div class="card" style="padding:4px 18px">${its.map(({it, i}) => `
         
@@ -4068,7 +4068,7 @@ function liveCard(){
     ${row('wallet', T(U.funds), `CAD ${fmt(fundsAmt())} <span class="muted text-[14px] font-medium">(${thb(fundsAmt() * (S.sim.rate || 24))})</span>`, (LIVE.funds ? '' : msg + ' · ') + T(U.fundsSub)(fdate(fundsEff() + 'T00:00:00')), 'funds')}
     ${e ? row('trophy', T(U.draw), `CRS ${e.crs} · ${fmt(+String(e.size).replace(/,/g,''))} ${T(U.inv)}`, fdate(e.d) + ' · ' + esc(e.name), 'draws') : row('trophy', T(U.draw), '...', msg, 'draws')}
     <div class="flex flex-wrap items-center gap-2 mt-2">
-      <button class="btn btn-ghost" style="font-size:14px" data-act="tab" data-v="roadmap">${T(U.more)}${ic('arrow-right','icon-sm')}</button>
+      <button class="btn btn-ghost" style="font-size:14px" data-act="tab" data-v="roadmap" data-anchor="draws">${T(U.more)}${ic('arrow-right','icon-sm')}</button>
       <button class="btn btn-ghost" style="font-size:14px" data-act="refresh">${ic('refresh-cw','icon-sm')}${T(liveState === 'loading' ? SIM_UI.refreshing : SIM_UI.refresh)}</button>
       ${LIVE.at ? `<span class="faint text-[13px]">${T(SIM_UI.checkedAt)} ${new Date(LIVE.at).toLocaleString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</span>` : ''}
     </div>`;
@@ -4718,8 +4718,16 @@ function render(keepScroll){
   linkTerms(app, '#sim-out');
   const gd = document.getElementById('gloss-dlg');
   if (gd && gd.open) { gd.innerHTML = glossShell(); renderGlossList(); icons(); }
-  if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
+  window.scrollTo({top: keepScroll ? y : 0, behavior:'instant'});   /* new page content: jump, do not animate */
   save();
+}
+/* After a button switches tabs, land on the section it names instead of the top of the page.
+   Checked again once late layout (icons, glossary links, embeds) has settled. */
+function goAnchor(id){
+  const jump = () => { const t = document.getElementById(id); if (t) t.scrollIntoView({block:'start', behavior:'instant'}); return t; };
+  const t = jump(); if (!t) return;
+  setTimeout(() => { if (Math.abs(t.getBoundingClientRect().top - 80) > 12) jump(); }, 300);
+  if (t.matches('label.check')) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); }
 }
 
 document.addEventListener('click', e => {
@@ -4741,7 +4749,7 @@ document.addEventListener('click', e => {
   const act = b.dataset.act, v = b.dataset.v;
   if (act === 'lang') { S.lang = v; render(true); }
   else if (act === 'theme') { S.theme = S.theme === 'dark' ? 'light' : 'dark'; render(true); }
-  else if (act === 'tab') { S.tab = v; render(false); if (b.dataset.anchor) setTimeout(() => { const t = document.getElementById(b.dataset.anchor); if (t) t.scrollIntoView({block:'start'}); }, 60); }
+  else if (act === 'tab') { S.tab = v; render(false); if (b.dataset.anchor) goAnchor(b.dataset.anchor); }
   else if (act === 'quiz') { S.quiz[b.dataset.q] = +b.dataset.o; render(true); }
   else if (act === 'quizreset') { S.quiz = {}; render(true); }
   else if (act === 'goroad') { S.scenario = v; S.tab = 'roadmap'; render(false); }
