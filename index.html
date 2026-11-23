@@ -410,6 +410,23 @@
   .ctbl tbody tr:hover td{background:var(--hover)}
   .ctbl th button{all:unset;cursor:pointer}
   .ctbl th button.on{color:var(--blue)}
+  /* program links: school name, program name, arrow. In tables the school opens its international page and the program its official page. */
+  .plist li + li{border-top:.5px solid var(--line)}
+  .plist a{display:grid;grid-template-columns:minmax(88px,30%) 1fr auto;gap:2px 12px;align-items:baseline;padding:9px 0;color:var(--ink);text-decoration:none}
+  .pl-s{font-weight:600;font-size:14.5px}
+  .pl-p{color:var(--blue);font-size:14.5px;min-width:0}
+  .pl-n{display:block;color:var(--ink3);font-size:12.5px;margin-top:1px}
+  .pl-ic{color:var(--blue);display:inline-flex;align-self:center}
+  .plist a:hover .pl-p,.plist a:focus-visible .pl-p{text-decoration:underline}
+  .tlink{color:var(--ink);text-decoration:none}
+  .prog-tbl td:nth-child(2) .tlink{color:var(--blue)}
+  .prog-tbl td{white-space:normal;vertical-align:top}
+  .prog-tbl td:first-child{min-width:130px}
+  .prog-tbl td:nth-child(3){min-width:110px}
+  .prog-tbl td:nth-child(4),.prog-tbl td:last-child{white-space:nowrap}
+  .tlink .pl-ic{vertical-align:-2px;margin-left:3px}
+  .tlink:hover,.tlink:focus-visible{text-decoration:underline}
+  @media (pointer:coarse){.plist a{min-height:44px;align-items:center}}
   .hscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;min-width:0}
   #sim-out,#sim-out>*,.grid>.card{min-width:0}
   .sim-mini{position:sticky;top:calc(60px + env(safe-area-inset-top));z-index:20;display:flex;justify-content:space-between;gap:12px;
@@ -502,7 +519,7 @@
 /* ============================== STATE ============================== */
 const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
-  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', open:{}, scenario:'safe', plan:{y:null, m:9, dates:{}},
+  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', progOpt:'A', open:{}, scenario:'safe', plan:{y:null, m:9, dates:{}},
   sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0,
         cur:'both', proofAuto:true, travel:2500, setup:2000, rentC:null, foodC:null, otherC:null, healthC:null, tips:0 },
   fx:{ rate:null, date:null, day:null, src:'' }
@@ -680,7 +697,7 @@ const OPTIONS = [
      {k:{en:'Purpose', th:'จุดประสงค์'}, v:{en:'Test living in Canada while studying a specialized tech or data track that can qualify for a PGWP and counts toward PR.', th:'ทดลองใช้ชีวิตในแคนาดาไปพร้อมกับเรียนสายเทคหรือดาต้าเฉพาะทาง ที่มีสิทธิ์ขอ PGWP และนับต่อยอดสู่ PR ได้'}},
      {k:{en:'Tuition', th:'ค่าเล่าเรียน'}, v:() => inline(18000,24000) + T({en:' per year', th:' ต่อปี'})},
      {k:{en:'Popular programs', th:'หลักสูตรยอดนิยม'}, v:{en:'Health Informatics, Data Analytics, Business Intelligence, AI', th:'Health Informatics, Data Analytics, Business Intelligence, AI'}},
-     {k:{en:'Example schools', th:'ตัวอย่างสถาบัน'}, v:{en:'BCIT, Langara, Douglas, George Brown, Seneca, Humber', th:'BCIT, Langara, Douglas, George Brown, Seneca, Humber'}}
+     {k:{en:'Example schools', th:'ตัวอย่างสถาบัน'}, v:{en:'BCIT, Langara, Douglas, Seneca, Humber, Conestoga and more: see the program list below, with links', th:'BCIT, Langara, Douglas, Seneca, Humber, Conestoga และอื่น ๆ ดูรายการหลักสูตรพร้อมลิงก์ด้านล่าง'}}
    ],
    pros:[
      {en:'Corporate and technical Co-op placements: hospitals, tech firms, banks', th:'ที่ฝึกงาน Co-op เป็นงานองค์กรและงานเทคนิค เช่น โรงพยาบาล บริษัทเทค ธนาคาร'},
@@ -997,7 +1014,7 @@ const FIELDS = [
    coop:{en:'Clinical lab placements in hospitals and private labs.', th:'ฝึกงานในห้องปฏิบัติการของโรงพยาบาลและแล็บเอกชน'},
    schools:'BCIT, Michener (UHN), NAIT, Saskatchewan Polytechnic',
    pr:{en:'Express Entry Healthcare category, CEC, PNP health streams.', th:'Express Entry หมวด Healthcare, CEC, PNP สายสุขภาพ'},
-   note:{en:'Practising usually needs national certification and provincial registration.', th:'การทำงานจริงโดยทั่วไปต้องสอบใบรับรองระดับประเทศและขึ้นทะเบียนกับมณฑล'}},
+   note:{en:'Practising usually needs national certification and provincial registration. BCIT\'s program is not open to international students (checked 23 November 2026).', th:'การทำงานจริงโดยทั่วไปต้องสอบใบรับรองระดับประเทศและขึ้นทะเบียนกับมณฑล หลักสูตรของ BCIT ไม่รับนักศึกษาต่างชาติ (ตรวจเมื่อ 23 พฤศจิกายน 2026)'}},
   {id:'ss', g:'health', icon:'users', pg:'yes', cip:'44.0000, 44.0701', noc:['42201'], cat:'hc',
    t:{en:'Social & Community Services', th:'งานบริการสังคมและชุมชน'},
    why:{en:'Human services (CIP 44.0000) is on the PGWP list, and NOC 42201 is in the Healthcare and social services category.', th:'สาขา Human Services (CIP 44.0000) อยู่ในรายการ PGWP และ NOC 42201 อยู่ในหมวดสุขภาพและบริการสังคม'},
@@ -1076,7 +1093,8 @@ const FIELDS = [
    why:{en:'NOC 72410 is in the 2026 Transport category. On the PGWP list, the general automotive code (47.0604) is missing but 47.0617 is listed, so the exact code matters.', th:'NOC 72410 อยู่ในหมวด Transport ปี 2026 ในรายการ PGWP รหัสช่างยนต์ทั่วไป (47.0604) ไม่อยู่ในรายการ แต่ 47.0617 อยู่ในรายการ รหัสที่แน่นอนจึงสำคัญ'},
    coop:{en:'Apprentice technician at dealerships and repair shops.', th:'ช่างฝึกหัดในศูนย์บริการและอู่ซ่อมรถ'},
    schools:'Centennial, Fanshawe, SAIT, BCIT',
-   pr:{en:'Express Entry Transport category, CEC, PNP.', th:'Express Entry หมวด Transport, CEC, PNP'}},
+   pr:{en:'Express Entry Transport category, CEC, PNP.', th:'Express Entry หมวด Transport, CEC, PNP'},
+   note:{en:'Checked 23 November 2026: Centennial, SAIT and BCIT each mark their automotive diploma as not PGWP-eligible. Get the CIP code and PGWP status from the school in writing before you apply. [[pgwpfos]]', th:'ตรวจเมื่อ 23 พฤศจิกายน 2026: Centennial, SAIT และ BCIT ต่างระบุว่า Diploma สายยานยนต์ของตนไม่มีสิทธิ์ PGWP ควรขอรหัส CIP และสถานะ PGWP จากสถาบันเป็นลายลักษณ์อักษรก่อนสมัคร [[pgwpfos]]'}},
 
   /* ---------- Education ---------- */
   {id:'ece', g:'edu', icon:'baby', pg:'yes', cip:'13.1210', noc:['42202'], cat:'edu',
@@ -1111,8 +1129,8 @@ const FIELDS = [
 const FIELD_UI = {
   title:{en:'Target Study Fields & PR Eligibility Matrix', th:'สาขาเป้าหมายและตารางสิทธิ์ PR'},
   sub:{en:'fields compared on Co-op job reality, PGWP eligibility (CIP code), the occupations you can work in (NOC) and the 2026 Express Entry category each one feeds. Tap a field to open it.', th:'สาขา เปรียบเทียบงาน Co-op ที่ได้จริง สิทธิ์ PGWP (รหัส CIP) อาชีพที่ทำได้ (NOC) และหมวด Express Entry ปี 2026 ที่แต่ละสาขาต่อยอดได้ แตะสาขาเพื่อเปิดดู'},
-  checked:{en:'PGWP list, NOC titles and 2026 categories checked on official pages on 18 November 2026. [[pgwpfos]] [[cip]] [[noc]] [[eecat]] [[dli]]', th:'รายการ PGWP ชื่ออาชีพ NOC และหมวดปี 2026 ตรวจกับหน้าเว็บทางการเมื่อ 18 พฤศจิกายน 2026 [[pgwpfos]] [[cip]] [[noc]] [[eecat]] [[dli]]'},
-  why:{en:'Why it works', th:'ทำไมจึงน่าสนใจ'}, schools:{en:'Example schools to research', th:'ตัวอย่างสถาบันที่ควรศึกษา'},
+  checked:{en:'PGWP list, NOC titles and 2026 categories checked on official pages on 18 November 2026; school program links checked on 23 November 2026. Programs can pause for international students between intakes, so confirm on the program page. [[pgwpfos]] [[cip]] [[noc]] [[eecat]] [[dli]]', th:'รายการ PGWP ชื่ออาชีพ NOC และหมวดปี 2026 ตรวจกับหน้าเว็บทางการเมื่อ 18 พฤศจิกายน 2026 ลิงก์หลักสูตรของสถาบันตรวจเมื่อ 23 พฤศจิกายน 2026 หลักสูตรอาจพักรับนักศึกษาต่างชาติในบางรอบ ควรยืนยันในหน้าหลักสูตร [[pgwpfos]] [[cip]] [[noc]] [[eecat]] [[dli]]'},
+  why:{en:'Why it works', th:'ทำไมจึงน่าสนใจ'}, schools:{en:'Example schools to research (tap to open the program page)', th:'ตัวอย่างสถาบันที่ควรศึกษา (แตะเพื่อเปิดหน้าหลักสูตร)'},
   coop:{en:'Co-op job reality', th:'งาน Co-op ที่ได้จริง'}, pgwp:{en:'PGWP', th:'PGWP'},
   pr:{en:'PR pathway', th:'เส้นทาง PR'}, noc:{en:'NOC occupations (tap for the official profile)', th:'อาชีพตามรหัส NOC (แตะเพื่อดูหน้าทางการ)'},
   cip:{en:'CIP code to ask the school for', th:'รหัส CIP ที่ควรถามสถาบัน'},
@@ -2223,18 +2241,29 @@ const TESTS = [
    note:{en:'Taken online at home. Only some schools accept it, and IRCC does not. Check each school first.', th:'สอบออนไลน์ที่บ้าน มีบางสถาบันเท่านั้นที่รับ และ IRCC ไม่รับ ควรตรวจกับแต่ละสถาบันก่อน'},
    links:[{u:'https://englishtest.duolingo.com/applicants', l:{en:'Take the test', th:'สมัครสอบ'}}]}
 ];
+/* International or graduate admissions pages, opened from the university name (checked 23 Nov 2026; uOttawa blocks automated reads, URL taken from search results). */
+const UNI = {
+  wat:'https://uwaterloo.ca/future-graduate-students/', uft:'https://www.sgs.utoronto.ca/future-students/', sfu:'https://www.sfu.ca/gradstudies/apply/applying.html',
+  mcm:'https://gs.mcmaster.ca/future-students/', dal:'https://www.dal.ca/faculty/gradstudies/apply-graduate-studies.html', uo:'https://www.uottawa.ca/graduate-studies/international',
+  qu:'https://smith.queensu.ca/grad_studies/index.php', ubc:'https://www.grad.ubc.ca/prospective-students/international-students', york:'https://schulich.yorku.ca/student-life-services/international-relations/international-students/'
+};
 const MASTERS = [
-  {u:'University of Waterloo', city:'Waterloo, ON', p:'Master of Data Science and Artificial Intelligence (MDSAI), co-op', len:{en:'16 months', th:'16 เดือน'}, coop:true, fee:56448, est:true, url:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/math/data-science-and-artificial-intelligence-co-op-master-data'},
-  {u:'University of Toronto', city:'Toronto, ON', p:'MSc in Applied Computing (MScAC), 8-month paid internship', len:{en:'16 months', th:'16 เดือน'}, coop:true, fee:90050, url:'https://mscac.utoronto.ca/apply/'},
-  {u:'Simon Fraser University', city:'Burnaby, BC', p:'Professional Master\'s in Big Data, paid co-op', len:{en:'16 to 20 months', th:'16 ถึง 20 เดือน'}, coop:true, fee:55425, url:'https://www.sfu.ca/fas/study/future-graduates/programs/master-big-data.html'},
-  {u:'McMaster University', city:'Hamilton, ON', p:'MSc eHealth (health informatics), 8-month internship', len:{en:'5 terms', th:'5 เทอม'}, coop:true, fee:37965, url:'https://ehealth.mcmaster.ca/apply/'},
-  {u:'Dalhousie University', city:'Halifax, NS', p:'Master of Applied Computer Science, paid internship stream', len:{en:'About 16 months', th:'ประมาณ 16 เดือน'}, coop:true, url:'https://www.dal.ca/study/program-sites/applied-computer-science/internship.html'},
-  {u:'University of Ottawa', city:'Ottawa, ON', p:'MEng Electrical and Computer Engineering, optional co-op', len:{en:'5 terms', th:'5 เทอม'}, coop:true, url:'https://www.uottawa.ca/study/career-experiential-learning/coop/coop-programs/electrical-and-computer-engineering-meng'},
-  {u:'University of Waterloo', city:'Waterloo, ON', p:'Master of Management Sciences (MMSc), co-op', len:{en:'5 terms (2 years)', th:'5 เทอม (2 ปี)'}, coop:true, feeNote:{en:'CAD 17,400 per term', th:'CAD 17,400 ต่อเทอม'}, url:'https://uwaterloo.ca/management-science-engineering/future-graduate-students/master-management-sciences-mmsc'},
-  {u:'Queen\'s University (Smith)', city:'Toronto, ON', p:'Master of Management Analytics, with internship', len:{en:'16 months', th:'16 เดือน'}, coop:true, fee:85685, url:'https://smith.queensu.ca/grad_studies/mma-ft/program-details/fees.php'},
-  {u:'University of British Columbia', city:'Vancouver, BC', p:'Master of Data Science, 8-week capstone', len:{en:'10 months', th:'10 เดือน'}, coop:false, fee:59768, url:'https://masterdatascience.ubc.ca/admissions/tuition-and-financial-aid'},
-  {u:'York University (Schulich)', city:'Toronto, ON', p:'Master of Business Analytics, consulting capstone', len:{en:'12 months', th:'12 เดือน'}, coop:false, fee:92960, est:true, url:'https://schulich.yorku.ca/programs/mban/'},
-  {u:'University of Waterloo', city:'Waterloo, ON', p:'Master of Management Sciences (MMSc), regular', len:{en:'12 to 16 months', th:'12 ถึง 16 เดือน'}, coop:false, feeNote:{en:'CAD 17,400 per term', th:'CAD 17,400 ต่อเทอม'}, url:'https://uwaterloo.ca/management-science-engineering/future-graduate-students/master-management-sciences-mmsc'}
+  {u:'University of Waterloo', home:UNI.wat, city:'Waterloo, ON', p:'Master of Data Science and Artificial Intelligence (MDSAI), co-op', len:{en:'16 months', th:'16 เดือน'}, coop:true, fee:56448, est:true, url:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/math/data-science-and-artificial-intelligence-co-op-master-data'},
+  {u:'University of Toronto', home:UNI.uft, city:'Toronto, ON', p:'MSc in Applied Computing (MScAC), 8-month paid internship', len:{en:'16 months', th:'16 เดือน'}, coop:true, fee:90050, url:'https://mscac.utoronto.ca/apply/'},
+  {u:'Simon Fraser University', home:UNI.sfu, city:'Burnaby, BC', p:'Professional Master\'s in Big Data, paid co-op', len:{en:'16 to 20 months', th:'16 ถึง 20 เดือน'}, coop:true, fee:55425, url:'https://www.sfu.ca/fas/study/future-graduates/programs/master-big-data.html'},
+  {u:'McMaster University', home:UNI.mcm, city:'Hamilton, ON', p:'MSc eHealth (health informatics), 8-month internship', len:{en:'5 terms', th:'5 เทอม'}, coop:true, fee:37965, url:'https://ehealth.mcmaster.ca/apply/'},
+  {u:'Dalhousie University', home:UNI.dal, city:'Halifax, NS', p:'Master of Applied Computer Science, paid internship stream', len:{en:'About 16 months', th:'ประมาณ 16 เดือน'}, coop:true, url:'https://www.dal.ca/study/program-sites/applied-computer-science/internship.html'},
+  {u:'University of Ottawa', home:UNI.uo, city:'Ottawa, ON', p:'MEng Electrical and Computer Engineering, optional co-op', len:{en:'5 terms', th:'5 เทอม'}, coop:true, url:'https://www.uottawa.ca/study/career-experiential-learning/coop/coop-programs/electrical-and-computer-engineering-meng'},
+  {u:'University of Waterloo', home:UNI.wat, city:'Waterloo, ON', p:'Master of Management Sciences (MMSc), co-op', len:{en:'5 terms (2 years)', th:'5 เทอม (2 ปี)'}, coop:true, feeNote:{en:'CAD 17,400 per term', th:'CAD 17,400 ต่อเทอม'}, url:'https://uwaterloo.ca/management-science-engineering/future-graduate-students/master-management-sciences-mmsc'},
+  {u:'Queen\'s University (Smith)', home:UNI.qu, city:'Toronto, ON', p:'Master of Management Analytics, with internship', len:{en:'16 months', th:'16 เดือน'}, coop:true, fee:85685, url:'https://smith.queensu.ca/grad_studies/mma-ft/program-details/fees.php'},
+  {u:'Simon Fraser University', home:UNI.sfu, city:'Vancouver, BC', p:'Full-Time MBA, 4-month paid internship', len:{en:'16 months', th:'16 เดือน'}, coop:true, fee:74790, url:'https://sfu.ca/beedie/programs/graduate/full-time-mba.html'},
+  {u:'McMaster University', home:UNI.mcm, city:'Burlington, ON', p:'Full-time MBA with Co-op (12 months of paid co-op)', len:{en:'28 months', th:'28 เดือน'}, coop:true, fee:114200, url:'https://mbarecruit.degroote.mcmaster.ca/programs/co-op-program/'},
+  {u:'Wilfrid Laurier University', city:'Waterloo, ON', p:'Master of Applied Computing, co-op option (8 months paid)', note:{en:'5 terms × CAD 9,692 (2026 to 2027 rate). Needs a computing degree', th:'5 เทอม × CAD 9,692 (อัตราปี 2026 ถึง 2027) ต้องจบสายคอมพิวเตอร์'}, len:{en:'About 20 months', th:'ประมาณ 20 เดือน'}, coop:true, fee:48460, est:true, url:'https://www.wlu.ca/programs/science/graduate/applied-computing-mac/index.html'},
+  {u:'University of Manitoba', city:'Winnipeg, MB', p:'Master of Supply Chain Management and Logistics, co-op or applied project', note:{en:'Total program cost estimate shown by the university, including the co-op fee. Fits business graduates', th:'ยอดประมาณการรวมทั้งหลักสูตรที่มหาวิทยาลัยแสดง รวมค่า Co-op แล้ว เหมาะกับผู้จบสายธุรกิจ'}, len:{en:'2 to 4 years', th:'2 ถึง 4 ปี'}, coop:true, coopL:{en:'Co-op or project', th:'Co-op หรือโปรเจกต์'}, fee:59146, url:'https://umanitoba.ca/graduate-studies/admissions/programs-of-study/supply-chain-management-and-logistics-mscm'},
+  {u:'University of Calgary', city:'Calgary, AB', p:'MEng Software (course-based), optional paid internship', note:{en:'Tuition is in the university\'s fee estimator, not on the program page', th:'ค่าเล่าเรียนอยู่ในเครื่องคำนวณค่าเรียนของมหาวิทยาลัย ไม่อยู่ในหน้าหลักสูตร'}, len:{en:'2 years (8 to 12 months possible)', th:'2 ปี (เร่งเหลือ 8 ถึง 12 เดือนได้)'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, url:'https://grad.ucalgary.ca/future-students/graduate/discover-opportunities/explore-programs/electrical-and-computer-engineering-meng-software-course'},
+  {u:'University of British Columbia', home:UNI.ubc, city:'Vancouver, BC', p:'Master of Data Science, 8-week capstone', len:{en:'10 months', th:'10 เดือน'}, coop:false, fee:59768, url:'https://masterdatascience.ubc.ca/admissions/tuition-and-financial-aid'},
+  {u:'York University (Schulich)', home:UNI.york, city:'Toronto, ON', p:'Master of Business Analytics, consulting capstone', len:{en:'12 months', th:'12 เดือน'}, coop:false, fee:92960, est:true, url:'https://schulich.yorku.ca/programs/mban/'},
+  {u:'University of Waterloo', home:UNI.wat, city:'Waterloo, ON', p:'Master of Management Sciences (MMSc), regular', len:{en:'12 to 16 months', th:'12 ถึง 16 เดือน'}, coop:false, feeNote:{en:'CAD 17,400 per term', th:'CAD 17,400 ต่อเทอม'}, url:'https://uwaterloo.ca/management-science-engineering/future-graduate-students/master-management-sciences-mmsc'}
 ];
 MASTER_UI.rules = [
   {en:'A master\'s of at least 8 months can give a 3-year PGWP, even if it is shorter than 2 years. [[pgwpabout]]', th:'ปริญญาโทที่ยาวอย่างน้อย 8 เดือน ได้ PGWP 3 ปีได้ แม้หลักสูตรจะสั้นกว่า 2 ปี [[pgwpabout]]'},
@@ -2244,6 +2273,196 @@ MASTER_UI.rules = [
   {en:'Programs taught more than half online are not PGWP-eligible. Check the delivery mode before you apply. [[pgwp]]', th:'หลักสูตรที่เรียนออนไลน์เกินครึ่งหนึ่งไม่มีสิทธิ์ PGWP ควรตรวจรูปแบบการเรียนก่อนสมัคร [[pgwp]]'},
   {en:'Universities usually ask for IELTS Academic 6.5 to 7.5 and a B or B+ average. The PGWP later needs CLB 7 on IELTS General Training, CELPIP or PTE Core, so you may take two tests. [[pgwplang]]', th:'มหาวิทยาลัยมักขอ IELTS Academic 6.5 ถึง 7.5 และเกรดเฉลี่ย B หรือ B+ ส่วน PGWP ภายหลังต้องใช้ CLB 7 จาก IELTS General Training, CELPIP หรือ PTE Core จึงอาจต้องสอบสองครั้ง [[pgwplang]]'}
 ];
+/* Ready tab: rules and example programs for all three options. Program links checked on official pages on 23 November 2026. */
+const PROG_UI = {
+  title:{en:'Rules and example programs for each option', th:'กฎสำคัญและตัวอย่างหลักสูตร ครบทั้ง 3 ทางเลือก'},
+  sub:{en:'Choose an option. Tap a school name to open its page for international students, or a program name to open the official program page.', th:'เลือกทางเลือกด้านล่าง แตะชื่อสถาบันเพื่อเปิดหน้าสำหรับนักศึกษาต่างชาติ หรือแตะชื่อหลักสูตรเพื่อเปิดหน้าหลักสูตรทางการ'},
+  school:{en:'School', th:'สถาบัน'},
+  checked:{en:'Program links checked on official pages on 23 November 2026.', th:'ลิงก์หลักสูตรตรวจกับหน้าเว็บทางการเมื่อ 23 พฤศจิกายน 2026'},
+  opts:{
+    A:{icon:'building-2', color:'var(--amber)', seg:{en:'A: Private Co-op', th:'A: Co-op เอกชน'},
+       t:{en:'Private career college Co-op: rules and example programs', th:'Co-op วิทยาลัยอาชีพเอกชน: กฎสำคัญและตัวอย่างหลักสูตร'},
+       sub:{en:'For testing life in Canada on a smaller budget. These programs do not lead to a PGWP.', th:'สำหรับทดลองใช้ชีวิตในแคนาดาด้วยงบที่น้อยกว่า หลักสูตรเหล่านี้ไม่ได้สิทธิ์ PGWP'},
+       warn:{en:'Private schools can close or be suspended at short notice: ILAC and Tamwood closed in September 2026. Confirm the school is operating before you pay, and keep every receipt. [[ptiru]]', th:'สถาบันเอกชนอาจปิดตัวหรือถูกระงับได้โดยแจ้งล่วงหน้าไม่นาน เช่น ILAC และ Tamwood ปิดตัวเมื่อกันยายน 2026 ควรตรวจว่าสถาบันยังเปิดอยู่ก่อนจ่ายเงิน และเก็บใบเสร็จทุกใบ [[ptiru]]'},
+       note:{en:'Examples only, not recommendations. Tuition is the amount shown on each school\'s official page when checked; it changes every year and may not include fees, books or the application fee.', th:'เป็นเพียงตัวอย่าง ไม่ใช่คำแนะนำ ค่าเล่าเรียนคือยอดที่แสดงในหน้าทางการของแต่ละสถาบันเมื่อตรวจสอบ ซึ่งเปลี่ยนทุกปี และอาจยังไม่รวมค่าธรรมเนียม ค่าหนังสือ หรือค่าสมัคร'}},
+    B:{icon:'landmark', color:'var(--green)', seg:{en:'B: Public college', th:'B: วิทยาลัยรัฐ'},
+       t:{en:'Public college programs with Co-op: rules and example programs', th:'หลักสูตรพร้อม Co-op ที่วิทยาลัยรัฐ: กฎสำคัญและตัวอย่างหลักสูตร'},
+       sub:{en:'These can lead to a PGWP when the program\'s CIP code is on IRCC\'s eligible list.', th:'หลักสูตรเหล่านี้ต่อยอดสู่ PGWP ได้ เมื่อรหัส CIP ของหลักสูตรอยู่ในรายการที่ IRCC กำหนด'},
+       note:{en:'≈ means an estimate calculated from per-term or per-year fees. Examples only, not recommendations. Tuition changes every year: confirm the amount, the Co-op terms, the CIP code and the admission requirements on the program page.', th:'≈ หมายถึงค่าประมาณที่คำนวณจากค่าเรียนต่อเทอมหรือต่อปี เป็นเพียงตัวอย่าง ไม่ใช่คำแนะนำ ค่าเล่าเรียนเปลี่ยนทุกปี ควรยืนยันยอดเงิน เงื่อนไข Co-op รหัส CIP และคุณสมบัติผู้สมัครในหน้าหลักสูตร'}},
+    C:{icon:'graduation-cap', color:'var(--blue)', seg:{en:'C: Master\'s', th:'C: ปริญญาโท'}, t:MASTER_UI.title, sub:MASTER_UI.sub}
+  }
+};
+const PROGS = {
+  A:{rules:[
+    {en:'Private career colleges do not lead to a PGWP. When the program ends, so does your right to work, unless you move on to a public school with a new study permit. [[pgwp]]', th:'วิทยาลัยอาชีพเอกชนไม่ได้สิทธิ์ PGWP เมื่อจบหลักสูตร สิทธิ์ทำงานก็สิ้นสุดด้วย เว้นแต่จะย้ายไปเรียนต่อที่สถาบันรัฐด้วย Study Permit ใบใหม่ [[pgwp]]'},
+    {en:'Before you pay, check that the school has a DLI number on IRCC\'s list and is still operating. [[dli]]', th:'ก่อนจ่ายเงิน ตรวจว่าสถาบันมีเลข DLI ในรายชื่อของ IRCC และยังเปิดดำเนินการอยู่ [[dli]]'},
+    {en:'The Co-op term must be a required part of the program and no longer than half of the whole program. [[coop]]', th:'เทอม Co-op ต้องเป็นส่วนบังคับของหลักสูตร และยาวไม่เกินครึ่งหนึ่งของหลักสูตรทั้งหมด [[coop]]'},
+    {en:'You still need a Provincial Attestation Letter (PAL); the school arranges it after you accept the offer. [[pal]]', th:'ยังต้องมี Provincial Attestation Letter (PAL) โดยสถาบันจะดำเนินการให้หลังคุณตอบรับข้อเสนอ [[pal]]'},
+    {en:'During study terms you can work off campus up to 24 hours a week; during the Co-op term there is no weekly limit. [[offc]] [[coop]]', th:'ช่วงเทอมเรียนทำงานนอกสถาบันได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ ส่วนช่วง Co-op ไม่จำกัดชั่วโมงต่อสัปดาห์ [[offc]] [[coop]]'}
+  ], rows:[
+    {u:'Greystone College', home:'https://www.ilsc.com/greystone-college/canada', city:'Vancouver, BC', p:'Diploma in Digital Marketing Professional (Co-op)', note:{en:'DLI O19352522932. Plus CAD 1,450 materials; price for registrations until 31 Dec 2026. Evening classes', th:'DLI O19352522932 บวกค่าอุปกรณ์การเรียน CAD 1,450 ราคานี้สำหรับผู้ลงทะเบียนภายใน 31 ธ.ค. 2026 เรียนช่วงเย็น'}, len:{en:'About 2.5 years: 54 weeks study + 54 weeks Co-op + breaks', th:'ประมาณ 2.5 ปี: เรียน 54 สัปดาห์ + Co-op 54 สัปดาห์ + ช่วงพัก'}, coop:true, fee:13350, url:'https://www.ilsc.com/greystone-college/canada/programs/diploma-digital-marketing-professional'},
+    {u:'Greystone College', home:'https://www.ilsc.com/greystone-college/canada', city:'Vancouver, BC', p:'Diploma in Project Management Co-op', note:{en:'Plus CAD 1,350 materials; price for registrations until 31 Dec 2026. Evening classes', th:'บวกค่าอุปกรณ์การเรียน CAD 1,350 ราคานี้สำหรับผู้ลงทะเบียนภายใน 31 ธ.ค. 2026 เรียนช่วงเย็น'}, len:{en:'About 2.2 years: 64 weeks study + 50 weeks Co-op', th:'ประมาณ 2.2 ปี: เรียน 64 สัปดาห์ + Co-op 50 สัปดาห์'}, coop:true, fee:17000, url:'https://www.ilsc.com/greystone-college/canada/programs/diploma-in-project-management'},
+    {u:'Sprott Shaw College', home:'https://sprottshaw.com/', city:'BC, several campuses', p:'Business Administration Management with Co-op (Diploma)', note:{en:'DLI O19278865162. Tuition not shown on the page: ask the international office', th:'DLI O19278865162 หน้าหลักสูตรไม่แสดงค่าเรียน ต้องสอบถามฝ่ายนักศึกษาต่างชาติ'}, len:{en:'94 weeks: about 49 study + 45 Co-op', th:'94 สัปดาห์: เรียนประมาณ 49 + Co-op 45'}, coop:true, url:'https://sprottshaw.com/business/business-administration-management-with-co-op/'},
+    {u:'Sprott Shaw College', home:'https://sprottshaw.com/', city:'BC, several campuses', p:'Tourism / Hospitality Management with Co-op (Diploma)', note:{en:'Tuition not shown on the page: ask the international office', th:'หน้าหลักสูตรไม่แสดงค่าเรียน ต้องสอบถามฝ่ายนักศึกษาต่างชาติ'}, len:{en:'62 weeks: about 37 study + 25 Co-op', th:'62 สัปดาห์: เรียนประมาณ 37 + Co-op 25'}, coop:true, url:'https://sprottshaw.com/administration/tourism-hospitality-management-with-co-op/'}
+  ]},
+  B:{rules:[
+    {en:'For college programs the field must be on IRCC\'s eligible list, matched by CIP code. Ask the school for the program\'s CIP code in writing. [[pgwpfos]]', th:'หลักสูตรวิทยาลัยต้องเป็นสาขาที่อยู่ในรายการของ IRCC โดยดูจากรหัส CIP ควรขอรหัส CIP ของหลักสูตรจากสถาบันเป็นลายลักษณ์อักษร [[pgwpfos]]'},
+    {en:'PGWP length follows program length: 8 months to under 2 years gives a permit about as long as the program; 2 years or more gives 3 years. [[pgwpabout]]', th:'อายุ PGWP ขึ้นกับความยาวหลักสูตร: หลักสูตร 8 เดือนถึงไม่ถึง 2 ปี ได้ใบอนุญาตยาวประมาณเท่าหลักสูตร ส่วนหลักสูตร 2 ปีขึ้นไปได้ 3 ปี [[pgwpabout]]'},
+    {en:'You need a Provincial Attestation Letter (PAL); the college arranges it after you accept the offer. [[pal]]', th:'ต้องมี Provincial Attestation Letter (PAL) โดยวิทยาลัยจะดำเนินการให้หลังคุณตอบรับข้อเสนอ [[pal]]'},
+    {en:'The PGWP needs CLB 5 in all four skills for college graduates, from IELTS General Training, CELPIP or PTE Core. [[pgwp]]', th:'PGWP ของผู้จบวิทยาลัยต้องได้ CLB 5 ครบทั้ง 4 ทักษะ จาก IELTS General Training, CELPIP หรือ PTE Core [[pgwp]]'},
+    {en:'Programs taught more than half online are not PGWP-eligible. [[pgwp]]', th:'หลักสูตรที่เรียนออนไลน์เกินครึ่งหนึ่งไม่มีสิทธิ์ PGWP [[pgwp]]'},
+    {en:'Since the international student caps, many colleges have paused programs for international students. Check on the program page that your intake is open before you apply.', th:'ตั้งแต่มีการจำกัดจำนวนนักศึกษาต่างชาติ วิทยาลัยหลายแห่งพักการรับนักศึกษาต่างชาติในบางหลักสูตร ควรตรวจในหน้าหลักสูตรว่ารอบที่จะสมัครยังเปิดรับอยู่'}
+  ], rows:[
+    {u:'Langara College', home:'https://langara.ca/why-langara/international-student-experience', city:'Vancouver, BC', p:'Data Analytics [Work Experience] Post-Degree Diploma', note:{en:'Langara\'s total estimated cost for the shortest duration. September 2027 deadline: 30 Apr 2027', th:'ยอดประมาณการรวมของ Langara สำหรับระยะเวลาสั้นที่สุด รอบกันยายน 2027 ปิดรับ 30 เม.ย. 2027'}, len:{en:'16 months + a full-time work term', th:'16 เดือน + เทอมทำงานเต็มเวลา'}, coop:true, fee:29428, url:'https://langara.ca/programs-courses/data-analytics-work-experience-post-degree-diploma-we'},
+    {u:'Douglas College', home:'https://www.douglascollege.ca/international-students', city:'New Westminster, BC', p:'Computer and Information Systems (Post-Baccalaureate Diploma), Data Analytics stream', note:{en:'60 credits × CAD 682.40 (fall 2026 rate), before the co-op fee (CAD 1,300 per co-op term) and other fees', th:'60 หน่วยกิต × CAD 682.40 (อัตรา fall 2026) ยังไม่รวมค่า Co-op (CAD 1,300 ต่อเทอม Co-op) และค่าธรรมเนียมอื่น'}, len:{en:'2 years + optional co-op', th:'2 ปี + Co-op ให้เลือก'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, fee:40944, est:true, url:'https://www.douglascollege.ca/program/pbdcis'},
+    {u:'BCIT', home:'https://www.bcit.ca/international-applicants/', city:'Burnaby, BC', p:'Computer Systems Technology (Diploma)', note:{en:'BCIT\'s cost estimate; the page does not say whether it is per year or for the whole program. PGWP-eligible per BCIT', th:'ค่าประมาณของ BCIT หน้าหลักสูตรไม่ระบุว่าต่อปีหรือทั้งหลักสูตร BCIT ระบุว่ามีสิทธิ์ PGWP'}, len:{en:'2 years (about 3 with co-op)', th:'2 ปี (ประมาณ 3 ปีถ้ามี Co-op)'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, fee:52000, est:true, url:'https://www.bcit.ca/programs/computer-systems-technology-diploma-full-time-5500dipma/'},
+    {u:'Seneca Polytechnic', home:'https://www.senecapolytechnic.ca/international.html', city:'Toronto, ON', p:'Data Analytics, optional work term (graduate certificate)', note:{en:'CIP 30.7101. 2 semesters × CAD 10,044 tuition and fees (2026 to 2027)', th:'รหัส CIP 30.7101 คิดจาก 2 เทอม × CAD 10,044 รวมค่าธรรมเนียม (ปี 2026 ถึง 2027)'}, len:{en:'8 months + optional work term', th:'8 เดือน + เทอมทำงานให้เลือก'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, fee:20087, est:true, url:'https://www.senecapolytechnic.ca/programs/fulltime/DAS.html'},
+    {u:'Humber Polytechnic', home:'https://humber.ca/international/', city:'Toronto, ON', p:'Information Technology Solutions, optional co-op (graduate certificate)', note:{en:'CIP 11.0103. 2 × CAD 24,714 per two semesters (2026 to 2027)', th:'รหัส CIP 11.0103 คิดจาก 2 × CAD 24,714 ต่อ 2 เทอม (ปี 2026 ถึง 2027)'}, len:{en:'4 semesters + optional co-op', th:'4 เทอม + Co-op ให้เลือก'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, fee:49429, est:true, url:'https://humber.ca/explore-programs/programs/information-technology-solutions'},
+    {u:'Conestoga College', home:'https://www.conestogac.on.ca/international', city:'Waterloo, ON', p:'Applied Artificial Intelligence and Machine Learning (optional co-op)', note:{en:'CIP 11.0102. 2026 to 2027 fees with co-op; September 2027 intake open', th:'รหัส CIP 11.0102 ค่าเรียนปี 2026 ถึง 2027 แบบมี Co-op รอบกันยายน 2027 เปิดรับ'}, len:{en:'1 year + optional co-op term', th:'1 ปี + เทอม Co-op ให้เลือก'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, fee:21192, url:'https://www.conestogac.on.ca/fulltime/applied-artificial-intelligence-machine-learning'},
+    {u:'Lambton College', home:'https://www.lambtoncollege.ca/international', city:'Sarnia, ON', p:'Artificial Intelligence and Machine Learning (graduate certificate)', note:{en:'CIP 11.0102. Total includes fees and health insurance', th:'รหัส CIP 11.0102 ยอดรวมค่าธรรมเนียมและประกันสุขภาพแล้ว'}, len:{en:'2 years (3 terms + co-op)', th:'2 ปี (เรียน 3 เทอม + Co-op)'}, coop:true, fee:28757, url:'https://www.lambtoncollege.ca/programs/international/AIMS'},
+    {u:'Centennial College', home:'https://centennialcollege.ca/international-education', city:'Toronto, ON', p:'Software Engineering Technology: Artificial Intelligence (Fast-Track), optional co-op', note:{en:'CIP 11.0102. Needs a prior IT degree or diploma. 2 × CAD 21,173 per two semesters (fall 2026)', th:'รหัส CIP 11.0102 ต้องจบสายไอทีมาก่อน คิดจาก 2 × CAD 21,173 ต่อ 2 เทอม (fall 2026)'}, len:{en:'2 years + optional co-op', th:'2 ปี + Co-op ให้เลือก'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, fee:42346, est:true, url:'https://www.centennialcollege.ca/programs-courses/full-time/artificial-intelligence-fast-track'},
+    {u:'Durham College', home:'https://durhamcollege.ca/info-for/international', city:'Oshawa, ON', p:'Cybersecurity (graduate certificate)', note:{en:'Page says PGWP eligible. A 4-month paid work term is optional', th:'หน้าหลักสูตรระบุว่ามีสิทธิ์ PGWP มีเทอมทำงานแบบได้ค่าจ้าง 4 เดือนให้เลือก'}, len:{en:'8 months + optional co-op', th:'8 เดือน + Co-op ให้เลือก'}, coop:true, coopL:{en:'Optional', th:'เลือกได้'}, url:'https://durhamcollege.ca/programs/cybersecurity'},
+    {u:'Fanshawe College', home:'https://www.fanshawec.ca/international', city:'London, ON', p:'Cyber Security (Co-op), advanced diploma', note:{en:'Total cost of the program as shown by Fanshawe', th:'ยอดรวมทั้งหลักสูตรตามที่ Fanshawe แสดง'}, len:{en:'3 years', th:'3 ปี'}, coop:true, fee:54635, url:'https://www.fanshawec.ca/programs/cyb1-cyber-security-co-op/next'}
+  ]},
+  C:{rules:MASTER_UI.rules, rows:MASTERS}
+};
+/* Fields tab: one program page per example school, checked 23 November 2026. */
+const FIELD_PROGS = {
+  da:[
+    {s:'Langara', p:'Data Analytics (Post-Degree Diploma)', u:'https://langara.ca/programs-courses/data-analytics-post-degree-diploma', n:{en:'Post-degree diploma, 16 months; a version with a work-experience term also exists', th:'Post-Degree Diploma 16 เดือน มีอีกแบบที่เพิ่มเทอมทำงาน'}},
+    {s:'Douglas', p:'Data Analytics (Post-Degree Diploma)', u:'https://www.douglascollege.ca/program/pddata', n:{en:'Post-degree diploma, 1 year. For co-op, see the Computer and Information Systems diploma (data analytics stream)', th:'Post-Degree Diploma 1 ปี ถ้าต้องการ Co-op ดู Diploma สาย Computer and Information Systems (Data Analytics)'}},
+    {s:'Conestoga', p:'Bachelor of Data Analytics', u:'https://www.conestogac.on.ca/fulltime/bachelor-of-data-analytics', n:{en:'Bachelor\'s, 3 years, one paid co-op term. The 1-year Business Analytics certificate is not taking applications', th:'ปริญญาตรี 3 ปี มี Co-op แบบได้ค่าจ้าง 1 เทอม ส่วน Certificate สาย Business Analytics 1 ปีปิดรับสมัคร'}},
+    {s:'Seneca', p:'Data Analytics', u:'https://www.senecapolytechnic.ca/programs/fulltime/DAS.html', n:{en:'Graduate certificate, 8 months, optional work term, CIP 30.7101', th:'Graduate Certificate 8 เดือน มีเทอมทำงานให้เลือก รหัส CIP 30.7101'}},
+    {s:'SFU', p:'Professional Master\'s in Big Data', u:'https://sfu.ca/fas/study/future-graduates/programs/master-big-data.html', n:{en:'Closest match at SFU: master\'s, 16 to 20 months, paid co-op', th:'หลักสูตรที่ใกล้ที่สุดของ SFU: ปริญญาโท 16 ถึง 20 เดือน มี Co-op แบบได้ค่าจ้าง'}}],
+  ds:[
+    {s:'UBC', p:'Master of Data Science', u:'https://masterdatascience.ubc.ca/programs/vancouver', n:{en:'Master\'s, 10 months, 8-week capstone instead of co-op', th:'ปริญญาโท 10 เดือน มีโปรเจกต์ Capstone 8 สัปดาห์แทน Co-op'}},
+    {s:'SFU', p:'Professional Master\'s in Big Data', u:'https://sfu.ca/fas/study/future-graduates/programs/master-big-data.html', n:{en:'Master\'s, 16 to 20 months, paid co-op', th:'ปริญญาโท 16 ถึง 20 เดือน มี Co-op แบบได้ค่าจ้าง'}},
+    {s:'Waterloo', p:'Master of Data Science and Artificial Intelligence (Co-op)', u:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/math/data-science-and-artificial-intelligence-co-op-master-data', n:{en:'Master\'s, 16 months, co-op, fall start only', th:'ปริญญาโท 16 เดือน มี Co-op เปิดเฉพาะรอบ fall'}},
+    {s:'Toronto Metropolitan', p:'MSc Data Science and Analytics', u:'https://torontomu.ca/graduate/programs/data-science-analytics', n:{en:'Master\'s, 1 year. Page says it can be fully virtual: confirm in-person study for the PGWP', th:'ปริญญาโท 1 ปี หน้าหลักสูตรระบุว่าอาจเรียนออนไลน์ทั้งหมด ควรยืนยันว่าเรียนในห้องได้ เพื่อสิทธิ์ PGWP'}},
+    {s:'Humber', p:'Data Analytics', u:'https://humber.ca/explore-programs/programs/data-analytics', n:{en:'Closest match (no data science program): graduate certificate, 2 semesters, CIP 30.7101', th:'หลักสูตรที่ใกล้ที่สุด (ไม่มีหลักสูตร Data Science) Graduate Certificate 2 เทอม รหัส CIP 30.7101'}}],
+  de:[
+    {s:'BCIT', p:'Computer Systems Technology (Database, Cloud or Predictive Analytics option)', u:'https://www.bcit.ca/programs/computer-systems-technology-diploma-full-time-5500dipma/', n:{en:'Closest match: diploma, 2 years, optional co-op', th:'หลักสูตรที่ใกล้ที่สุด Diploma 2 ปี มี Co-op ให้เลือก'}},
+    {s:'Seneca', p:'Cloud Architecture and Administration', u:'https://senecapolytechnic.ca/programs/fulltime/CAA.html', n:{en:'Closest open program: graduate certificate, 8 months, optional work term, CIP 11.0902', th:'หลักสูตรที่ใกล้ที่สุดที่ยังเปิดรับ Graduate Certificate 8 เดือน มีเทอมทำงานให้เลือก รหัส CIP 11.0902'}},
+    {s:'Lambton', p:'Artificial Intelligence and Machine Learning', u:'https://www.lambtoncollege.ca/programs/international/AIMS', n:{en:'Closest match: covers big data, PySpark and cloud. Graduate certificate with a co-op term, Sarnia', th:'หลักสูตรที่ใกล้ที่สุด ครอบคลุม Big Data, PySpark และคลาวด์ Graduate Certificate มีเทอม Co-op ที่ซาร์เนีย'}},
+    {s:'Waterloo', p:'Master of Data Science and Artificial Intelligence (Co-op)', u:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/math/data-science-and-artificial-intelligence-co-op-master-data', n:{en:'Closest match: no data engineering master\'s at Waterloo', th:'หลักสูตรที่ใกล้ที่สุด Waterloo ไม่มีปริญญาโทสาย Data Engineering โดยตรง'}}],
+  ai:[
+    {s:'Humber', p:'Artificial Intelligence with Machine Learning', u:'https://humber.ca/explore-programs/programs/artificial-intelligence-with-machine-learning', n:{en:'Graduate certificate, 2 semesters, CIP 11.0102', th:'Graduate Certificate 2 เทอม รหัส CIP 11.0102'}},
+    {s:'Centennial', p:'Software Engineering Technology: Artificial Intelligence (Fast-Track)', u:'https://www.centennialcollege.ca/programs-courses/full-time/artificial-intelligence-fast-track', n:{en:'Advanced diploma, 2 years, optional co-op, CIP 11.0102. Needs a prior IT or CS degree or diploma', th:'Advanced Diploma 2 ปี มี Co-op ให้เลือก รหัส CIP 11.0102 ต้องจบสายไอทีหรือคอมพิวเตอร์มาก่อน'}},
+    {s:'SFU', p:'Professional Master\'s in Visual Computing', u:'https://www.sfu.ca/fas/study/future-graduates/programs/master-visual-computing.html', n:{en:'Closest match: machine learning and deep learning, 16 to 20 months, paid co-op', th:'หลักสูตรที่ใกล้ที่สุด เน้น Machine Learning และ Deep Learning 16 ถึง 20 เดือน มี Co-op แบบได้ค่าจ้าง'}},
+    {s:'Waterloo', p:'Master of Data Science and Artificial Intelligence (Co-op)', u:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/math/data-science-and-artificial-intelligence-co-op-master-data', n:{en:'Master\'s, 16 months, co-op', th:'ปริญญาโท 16 เดือน มี Co-op'}}],
+  sd:[
+    {s:'BCIT', p:'Computer Systems Technology', u:'https://www.bcit.ca/programs/computer-systems-technology-diploma-full-time-5500dipma/', n:{en:'Diploma, 2 years, optional co-op; PGWP-eligible per BCIT', th:'Diploma 2 ปี มี Co-op ให้เลือก BCIT ระบุว่ามีสิทธิ์ PGWP'}},
+    {s:'Conestoga', p:'Computer Programming and Analysis', u:'https://www.conestogac.on.ca/fulltime/computer-programming-and-analysis', n:{en:'Advanced diploma, 3 years, optional co-op', th:'Advanced Diploma 3 ปี มี Co-op ให้เลือก'}},
+    {s:'Sheridan', p:'Computer Systems Technology: Software Development and Network Engineering', u:'https://www.sheridancollege.ca/programs/computer-systems-technology-software-development-and-network-engineering', n:{en:'Advanced diploma, 3 years, optional co-op', th:'Advanced Diploma 3 ปี มี Co-op ให้เลือก'}},
+    {s:'Seneca', p:'Computer Programming', u:'https://www.senecapolytechnic.ca/programs/fulltime/CPP.html', n:{en:'Diploma, 2 years, CIP 11.0201', th:'Diploma 2 ปี รหัส CIP 11.0201'}},
+    {s:'Waterloo', p:'MEng Electrical and Computer Engineering (Co-op), software specialization', u:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/engineering/electrical-and-computer-engineering-co-op-master-engineering', n:{en:'Master\'s, 20 to 24 months, paid co-op', th:'ปริญญาโท 20 ถึง 24 เดือน มี Co-op แบบได้ค่าจ้าง'}},
+    {s:'SFU', p:'Master\'s in Professional Computer Science', u:'https://sfu.ca/fas/study/future-graduates/programs/mpcs.html', n:{en:'Master\'s, 16 to 20 months, paid co-op', th:'ปริญญาโท 16 ถึง 20 เดือน มี Co-op แบบได้ค่าจ้าง'}}],
+  cy:[
+    {s:'Fanshawe', p:'Cyber Security (Co-op)', u:'https://www.fanshawec.ca/programs/cyb1-cyber-security-co-op/next', n:{en:'Advanced diploma, 3 years, 3 co-op placements', th:'Advanced Diploma 3 ปี มี Co-op 3 ครั้ง'}},
+    {s:'Algonquin', p:'Cyber Security Analysis', u:'https://www.algonquincollege.com/sat/program/cyber-security-analysis/', n:{en:'Graduate certificate, 1 year, CIP 11.1003 (PGWP eligible)', th:'Graduate Certificate 1 ปี รหัส CIP 11.1003 (มีสิทธิ์ PGWP)'}},
+    {s:'Seneca', p:'Cybersecurity and Threat Management', u:'https://www.senecapolytechnic.ca/programs/fulltime/CYT.html', n:{en:'Graduate certificate, 8 months, optional work term, CIP 11.1003', th:'Graduate Certificate 8 เดือน มีเทอมทำงานให้เลือก รหัส CIP 11.1003'}},
+    {s:'BCIT', p:'Digital Forensics and Cybersecurity (Bachelor of Technology)', u:'https://www.bcit.ca/programs/forensic-investigation-digital-forensics-and-cybersecurity-option-bachelor-of-technology-full-time-part-time-847cbtech/', n:{en:'Bachelor\'s, 2 years; needs 60 prior IT credits or an IT diploma or degree', th:'ปริญญาตรีต่อเนื่อง 2 ปี ต้องมีหน่วยกิตไอที 60 หน่วยหรือจบ Diploma หรือปริญญาสายไอทีมาก่อน'}},
+    {s:'Durham', p:'Cybersecurity', u:'https://durhamcollege.ca/programs/cybersecurity', n:{en:'Graduate certificate, 8 months, optional 4-month paid co-op', th:'Graduate Certificate 8 เดือน มี Co-op แบบได้ค่าจ้าง 4 เดือนให้เลือก'}}],
+  cl:[
+    {s:'BCIT', p:'Computer Information Systems Administration', u:'https://www.bcit.ca/programs/computer-information-systems-administration-diploma-full-time-1930dipma/', n:{en:'Diploma, 2 years: networking, Linux, Azure and AWS. Page says the program is under review', th:'Diploma 2 ปี เครือข่าย Linux, Azure และ AWS หน้าหลักสูตรระบุว่ากำลังปรับปรุงหลักสูตร'}},
+    {s:'Sheridan', p:'Computer Systems Technician: IT Infrastructure and Services', u:'https://www.sheridancollege.ca/programs/computer-systems-technician-information-technology-infrastructure-services', n:{en:'Diploma, 2 years, optional co-op; page says PGWP-aligned', th:'Diploma 2 ปี มี Co-op ให้เลือก หน้าหลักสูตรระบุว่าตรงกับรายการ PGWP'}},
+    {s:'Humber', p:'Computer Systems Technician: IT Infrastructure and Services', u:'https://humber.ca/explore-programs/programs/computer-systems-technician-information-technology-infrastructure-and-services', n:{en:'Diploma, 4 semesters, CIP 11.1001. The Cloud Computing certificate is suspended', th:'Diploma 4 เทอม รหัส CIP 11.1001 ส่วน Certificate สาย Cloud Computing ถูกระงับ'}},
+    {s:'Georgian', p:'Computer Systems Technician: Cloud Technologies', u:'https://www.georgiancollege.ca/programs/computer-systems-technician-cloud-technologies/', n:{en:'Diploma with co-op, 2 years, CIP 11.1001', th:'Diploma พร้อม Co-op 2 ปี รหัส CIP 11.1001'}},
+    {s:'Red River', p:'Network and Systems Administrator', u:'https://catalogue.rrc.ca/Programs/WPG/Fulltime/NESAF-DP', n:{en:'Diploma, 2 years, with a work-integrated term', th:'Diploma 2 ปี มีช่วงฝึกงาน'}}],
+  ba:[
+    {s:'Seneca', p:'Project Management: Information Technology', u:'https://www.senecapolytechnic.ca/programs/fulltime/PMC.html', n:{en:'Closest match (careers include systems analyst): graduate certificate, 8 months, CIP 11.1005', th:'หลักสูตรที่ใกล้ที่สุด (อาชีพรวมถึง System Analyst) Graduate Certificate 8 เดือน รหัส CIP 11.1005'}},
+    {s:'Humber', p:'Information Technology Solutions', u:'https://humber.ca/explore-programs/programs/information-technology-solutions', n:{en:'Closest open program (IT Systems Analyst is suspended): graduate certificate, 4 semesters, optional co-op, CIP 11.0103', th:'หลักสูตรที่ใกล้ที่สุดที่ยังเปิดรับ (IT Systems Analyst ถูกระงับ) Graduate Certificate 4 เทอม มี Co-op ให้เลือก รหัส CIP 11.0103'}},
+    {s:'Douglas', p:'Information Technology Project Management (Post-Baccalaureate Diploma)', u:'https://www.douglascollege.ca/program/pbditpm', n:{en:'Closest match (careers include IT business analyst): 2 years, optional co-op', th:'หลักสูตรที่ใกล้ที่สุด (อาชีพรวมถึง IT Business Analyst) 2 ปี มี Co-op ให้เลือก'}},
+    {s:'Toronto Metropolitan', p:'MSc Data Science and Analytics', u:'https://torontomu.ca/graduate/programs/data-science-analytics', n:{en:'Closest match: master\'s, 1 year, built with the business school', th:'หลักสูตรที่ใกล้ที่สุด ปริญญาโท 1 ปี ร่วมพัฒนากับคณะบริหารธุรกิจ'}}],
+  dt:[
+    {s:'BCIT', p:'Business Information Technology Management (Enterprise Systems option)', u:'https://www.bcit.ca/programs/business-information-technology-management-enterprise-systems-management-option-diploma-full-time-623bdipma/', n:{en:'Diploma, 2 years: ERP (SAP) and business processes', th:'Diploma 2 ปี ระบบ ERP (SAP) และกระบวนการธุรกิจ'}},
+    {s:'Seneca', p:'Business Information Technology', u:'https://www.senecapolytechnic.ca/programs/fulltime/BTT.html', n:{en:'Graduate certificate, 16 months, optional work term, CIP 11.0103', th:'Graduate Certificate 16 เดือน มีเทอมทำงานให้เลือก รหัส CIP 11.0103'}},
+    {s:'Conestoga', p:'Information Technology Project Management', u:'https://www.conestogac.on.ca/fulltime/information-technology-project-management', n:{en:'Closest open program (Digital Solutions Management is not taking applications). Ask for the CIP code', th:'หลักสูตรที่ใกล้ที่สุดที่ยังเปิดรับ (Digital Solutions Management ปิดรับสมัคร) ควรถามรหัส CIP'}},
+    {s:'Douglas', p:'Information and Communication Technology (Post-Degree Diploma)', u:'https://www.douglascollege.ca/program/pdict', n:{en:'Closest match: systems analysis, cloud and enterprise applications, 1 year', th:'หลักสูตรที่ใกล้ที่สุด เน้น System Analysis คลาวด์ และ Enterprise Applications 1 ปี'}}],
+  hi:[
+    {s:'George Brown', p:'Health Informatics (Postgraduate)', u:'https://www.georgebrown.ca/programs/health-informatics-program-postgraduate-t419', n:{en:'Graduate certificate, 1 year. Ask for the CIP code: health information codes are not on the PGWP list', th:'Graduate Certificate 1 ปี ควรถามรหัส CIP เพราะรหัสสาย Health Information ไม่อยู่ในรายการ PGWP'}},
+    {s:'McMaster', p:'MSc eHealth', u:'https://ehealth.mcmaster.ca/program-options/', n:{en:'Master\'s, 5 terms with an 8-month internship', th:'ปริญญาโท 5 เทอม มีฝึกงาน 8 เดือน'}},
+    {s:'UVic', p:'MSc Health Informatics', u:'https://www.uvic.ca/graduate/programs/graduate-programs/credential-pages/health-information-science-cred/health-informatics-msc.php', n:{en:'Master\'s with optional co-op. Many classes are online: check it is not more than half online', th:'ปริญญาโท มี Co-op ให้เลือก วิชาจำนวนมากเรียนออนไลน์ ควรตรวจว่าไม่เกินครึ่งหนึ่ง'}}],
+  rn:[
+    {s:'Conestoga', p:'Practical Nursing', u:'https://www.conestogac.on.ca/fulltime/practical-nursing', n:{en:'Diploma, 2 years. International students must first finish the Pre-Health Sciences pathway', th:'Diploma 2 ปี นักศึกษาต่างชาติต้องเรียน Pre-Health Sciences Pathway ให้จบก่อน'}},
+    {s:'Bow Valley', p:'Practical Nurse', u:'https://bowvalleycollege.ca/programs/practical-nurse', n:{en:'Diploma, 5 terms; international intake on a waitlist for 2027', th:'Diploma 5 เทอม รอบนักศึกษาต่างชาติปี 2027 อยู่ในรายชื่อรอ'}},
+    {s:'Sask Polytech', p:'Practical Nursing', u:'https://saskpolytech.ca/programs-and-courses/programs/Practical-Nursing.aspx', n:{en:'Diploma, 2 years; international deadline 31 Dec for September', th:'Diploma 2 ปี นักศึกษาต่างชาติต้องสมัครภายใน 31 ธ.ค. สำหรับรอบกันยายน'}}],
+  psw:[
+    {s:'Conestoga', p:'Personal Support Worker (International)', u:'https://www.conestogac.on.ca/fulltime/personal-support-worker-international', n:{en:'Certificate, 1 year', th:'Certificate 1 ปี'}},
+    {s:'Fanshawe', p:'Personal Support Worker', u:'https://www.fanshawec.ca/programs/psw6-personal-support-worker/next', n:{en:'Certificate, 30 weeks', th:'Certificate 30 สัปดาห์'}},
+    {s:'Bow Valley', p:'Health Care Aide', u:'https://bowvalleycollege.ca/programs/health-care-aide', n:{en:'Certificate, 2 terms, with clinical placements', th:'Certificate 2 เทอม มีฝึกปฏิบัติในสถานพยาบาล'}},
+    {s:'VCC', p:'Health Care Assistant (International Cohort)', u:'https://vcc.ca/international/programs/programs-ie/health-care-assistant', n:{en:'Diploma, 2 years; PGWP-eligible per VCC. 2027 intakes are closed or waitlisted', th:'Diploma 2 ปี VCC ระบุว่ามีสิทธิ์ PGWP รอบปี 2027 ปิดรับหรืออยู่ในรายชื่อรอ'}}],
+  mlt:[
+    {s:'Michener (UHN)', p:'Medical Laboratory Science', u:'https://michener.ca/program/medical-laboratory-science', n:{en:'Advanced diploma, 3 years, accepts international applicants', th:'Advanced Diploma 3 ปี รับนักศึกษาต่างชาติ'}},
+    {s:'NAIT', p:'Medical Laboratory Technology', u:'https://nait.ca/programs/medical-laboratory-technology', n:{en:'Diploma, 2 years; accepting international applications', th:'Diploma 2 ปี เปิดรับนักศึกษาต่างชาติ'}},
+    {s:'Sask Polytech', p:'Medical Laboratory Technology', u:'https://saskpolytech.ca/programs-and-courses/programs/Medical-Laboratory-Technology.aspx', n:{en:'Advanced diploma, 2.5 years, 31 weeks of clinical placement', th:'Advanced Diploma 2.5 ปี ฝึกในสถานพยาบาล 31 สัปดาห์'}}],
+  ss:[
+    {s:'George Brown', p:'Social Service Worker', u:'https://www.georgebrown.ca/programs/social-service-worker-program-c119', n:{en:'Diploma, 2 years, year-long field placement', th:'Diploma 2 ปี ฝึกงานภาคสนามตลอดปี'}},
+    {s:'Humber', p:'Social Service Worker', u:'https://humber.ca/explore-programs/programs/social-service-worker', n:{en:'Diploma, 4 semesters, CIP 44.0000', th:'Diploma 4 เทอม รหัส CIP 44.0000'}},
+    {s:'Douglas', p:'Child and Youth Care (Diploma)', u:'https://www.douglascollege.ca/program/dpcycc', n:{en:'Closest match: diploma, 2 years with 2 practicums. Ask for the CIP code', th:'หลักสูตรที่ใกล้ที่สุด Diploma 2 ปี ฝึกปฏิบัติ 2 ครั้ง ควรถามรหัส CIP'}},
+    {s:'Bow Valley', p:'Disability Studies', u:'https://bowvalleycollege.ca/programs/disability-studies', n:{en:'Diploma, 16 months. The Social Work diploma is for domestic students only; ask for this program\'s CIP code', th:'Diploma 16 เดือน ส่วน Diploma สาย Social Work รับเฉพาะนักศึกษาในประเทศ ควรถามรหัส CIP ของหลักสูตรนี้'}}],
+  sc:[
+    {s:'Seneca', p:'Supply Chain Management: Global Logistics', u:'https://www.senecapolytechnic.ca/programs/fulltime/SCM.html', n:{en:'Graduate certificate, 8 months, optional work term, CIP 52.0203', th:'Graduate Certificate 8 เดือน มีเทอมทำงานให้เลือก รหัส CIP 52.0203'}},
+    {s:'Humber', p:'Supply Chain Management', u:'https://humber.ca/explore-programs/programs/supply-chain-management', n:{en:'Graduate certificate, 2 semesters, CIP 52.0203. Some campus intakes are suspended', th:'Graduate Certificate 2 เทอม รหัส CIP 52.0203 บางวิทยาเขตบางรอบถูกระงับ'}},
+    {s:'Conestoga', p:'Supply Chain Management: Global', u:'https://www.conestogac.on.ca/fulltime/supply-chain-management-global', n:{en:'Graduate certificate, 1 year', th:'Graduate Certificate 1 ปี'}},
+    {s:'BCIT', p:'Global Supply Chain Management', u:'https://www.bcit.ca/programs/global-supply-chain-management-diploma-full-time-7475dipma/', n:{en:'Diploma, 2 years; PGWP-eligible per BCIT', th:'Diploma 2 ปี BCIT ระบุว่ามีสิทธิ์ PGWP'}},
+    {s:'Douglas', p:'Advanced Supply Chain Management (Post-Baccalaureate Diploma)', u:'https://www.douglascollege.ca/program/pbdadvscm', n:{en:'2 years, optional co-op. A 1-year post-degree diploma also exists', th:'2 ปี มี Co-op ให้เลือก มีแบบ Post-Degree Diploma 1 ปีด้วย'}}],
+  fin:[
+    {s:'SFU', p:'MSc Finance', u:'https://sfu.ca/beedie/programs/graduate/master-of-science-in-finance.html', n:{en:'Master\'s, 16 months, downtown Vancouver', th:'ปริญญาโท 16 เดือน วิทยาเขตใจกลางแวนคูเวอร์'}},
+    {s:'UBC', p:'UBC MBA (finance track)', u:'https://www.sauder.ubc.ca/programs/masters-degrees/ubc-mba', n:{en:'MBA, 16 months', th:'MBA 16 เดือน'}},
+    {s:'Waterloo', p:'Master of Quantitative Finance', u:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/mathematics/quantitative-finance-master-quantitative-finance-mqf', n:{en:'Master\'s, 16 months, very quantitative', th:'ปริญญาโท 16 เดือน เน้นคณิตศาสตร์มาก'}},
+    {s:'Toronto Metropolitan', p:'Ted Rogers MBA', u:'https://www.torontomu.ca/mba/', n:{en:'MBA; TMU has no MFin or MPAcc', th:'MBA เนื่องจาก TMU ไม่มี MFin หรือ MPAcc'}}],
+  mk:[
+    {s:'Humber', p:'Marketing Management', u:'https://humber.ca/explore-programs/programs/marketing-management', n:{en:'Graduate certificate, 3 semesters with a work placement, CIP 52.1404', th:'Graduate Certificate 3 เทอม มีฝึกงาน รหัส CIP 52.1404'}},
+    {s:'Seneca', p:'Digital and Social Media Marketing', u:'https://www.senecapolytechnic.ca/programs/fulltime/DMM.html', n:{en:'Graduate certificate, 8 months, optional work term, CIP 52.1404', th:'Graduate Certificate 8 เดือน มีเทอมทำงานให้เลือก รหัส CIP 52.1404'}},
+    {s:'Conestoga', p:'Social Media Marketing', u:'https://www.conestogac.on.ca/fulltime/social-media-marketing', n:{en:'Graduate certificate, 1 year', th:'Graduate Certificate 1 ปี'}},
+    {s:'Douglas', p:'Digital Marketing (Post-Baccalaureate Diploma)', u:'https://www.douglascollege.ca/program/pbdmark', n:{en:'2 years, optional co-op', th:'2 ปี มี Co-op ให้เลือก'}}],
+  mg:[
+    {s:'SFU', p:'Full-Time MBA', u:'https://sfu.ca/beedie/programs/graduate/full-time-mba.html', n:{en:'MBA, 16 months with a 4-month paid internship', th:'MBA 16 เดือน มีฝึกงานแบบได้ค่าจ้าง 4 เดือน'}},
+    {s:'UVic', p:'Master in Management', u:'https://www.uvic.ca/gustavson/programs/graduate/mm/index.php', n:{en:'Master\'s, 12 to 16 months, optional paid work term', th:'ปริญญาโท 12 ถึง 16 เดือน มีเทอมทำงานแบบได้ค่าจ้างให้เลือก'}},
+    {s:'McMaster', p:'Full-time MBA with Co-op', u:'https://mbarecruit.degroote.mcmaster.ca/programs/co-op-program/', n:{en:'MBA, 28 months including 12 months of paid co-op', th:'MBA 28 เดือน รวม Co-op แบบได้ค่าจ้าง 12 เดือน'}}],
+  et:[
+    {s:'BCIT', p:'Electrical and Computer Engineering Technology (Electrical Power and Industrial Control)', u:'https://www.bcit.ca/programs/electrical-and-computer-engineering-technology-electrical-power-and-industrial-control-option-diploma-full-time-534bdipma/', n:{en:'Diploma, 2 years, optional paid co-op; PGWP-eligible per BCIT', th:'Diploma 2 ปี มี Co-op แบบได้ค่าจ้างให้เลือก BCIT ระบุว่ามีสิทธิ์ PGWP'}},
+    {s:'SAIT', p:'Civil Engineering Technology (Construction Management)', u:'https://www.sait.ca/programs-and-courses/diplomas/civil-engineering-technology-construction-management', n:{en:'Diploma, 2 years; page header says PGWP eligible', th:'Diploma 2 ปี หน้าหลักสูตรระบุว่ามีสิทธิ์ PGWP'}},
+    {s:'NAIT', p:'Electrical Engineering Technology', u:'https://nait.ca/programs/electrical-engineering-technology', n:{en:'Diploma, 2 years', th:'Diploma 2 ปี'}},
+    {s:'Conestoga', p:'Mechanical Engineering Technology: Design and Analysis', u:'https://www.conestogac.on.ca/fulltime/mechanical-engineering-technology-design-and-analysis', n:{en:'Advanced diploma, 3 years, optional co-op', th:'Advanced Diploma 3 ปี มี Co-op ให้เลือก'}},
+    {s:'Mohawk', p:'Civil Engineering Technology', u:'https://www.mohawkcollege.ca/programs/technology/civil-engineering-technology-534', n:{en:'Advanced diploma, 3 years plus mandatory co-op, CIP 15.0201', th:'Advanced Diploma 3 ปี และ Co-op บังคับ รหัส CIP 15.0201'}},
+    {s:'Sheridan', p:'Electrical Engineering Technician', u:'https://www.sheridancollege.ca/programs/electrical-engineering-technician', n:{en:'Diploma, 2 years', th:'Diploma 2 ปี'}}],
+  eng:[
+    {s:'Waterloo', p:'MEng Electrical and Computer Engineering (Co-op)', u:'https://uwaterloo.ca/future-graduate-students/programs/by-faculty/engineering/electrical-and-computer-engineering-co-op-master-engineering', n:{en:'MEng, 20 to 24 months, paid co-op', th:'MEng 20 ถึง 24 เดือน มี Co-op แบบได้ค่าจ้าง'}},
+    {s:'UBC', p:'Master of Engineering (all disciplines)', u:'https://engineering.ubc.ca/master-of-engineering', n:{en:'MEng, 12 or 16 months, co-op optional in most', th:'MEng 12 หรือ 16 เดือน ส่วนใหญ่มี Co-op ให้เลือก'}},
+    {s:'Toronto Metropolitan', p:'MEng Electrical and Computer Engineering', u:'https://www.torontomu.ca/graduate/programs/electrical-computer-engineering/', n:{en:'MEng with AI or energy systems fields', th:'MEng มีสาย AI หรือระบบพลังงาน'}},
+    {s:'Concordia', p:'MEng Electrical and Computer Engineering', u:'https://www.concordia.ca/academics/graduate/electrical-engineering-meng.html', n:{en:'MEng, 1 to 2 years, optional paid co-op. Quebec: CAQ needed', th:'MEng 1 ถึง 2 ปี มี Co-op แบบได้ค่าจ้างให้เลือก อยู่ในควิเบกจึงต้องขอ CAQ'}},
+    {s:'Ottawa', p:'MEng Electrical and Computer Engineering', u:'https://www.uottawa.ca/faculty-engineering/graduate-studies/programs/electrical-computer-engineering', n:{en:'MEng with a competitive co-op option', th:'MEng มี Co-op ให้เลือกแบบคัดเลือก'}},
+    {s:'Windsor', p:'Master of Engineering', u:'https://www.future.uwindsor.ca/program/master-of-engineering-meng/', n:{en:'MEng, 3 or 4 terms, course-based', th:'MEng 3 หรือ 4 เทอม เรียนรายวิชา'}}],
+  tr:[
+    {s:'SAIT', p:'Welding and Fabrication Technology', u:'https://www.sait.ca/programs-and-courses/diplomas/welding-and-fabrication-technology', n:{en:'Diploma, 2 years; page header says PGWP eligible', th:'Diploma 2 ปี หน้าหลักสูตรระบุว่ามีสิทธิ์ PGWP'}},
+    {s:'NAIT', p:'Electrical Installations Technology', u:'https://www.nait.ca/programs/electrical-installations-technology', n:{en:'Diploma, 2 years; a route into the trade for international students', th:'Diploma 2 ปี เป็นทางเข้าสายช่างสำหรับนักศึกษาต่างชาติ'}},
+    {s:'Red River', p:'Electrical Trades', u:'https://catalogue.rrc.ca/Programs/WPG/FullTime/ELTRF-CT', n:{en:'Certificate, 1 year (new, opens for fall 2027)', th:'Certificate 1 ปี (หลักสูตรใหม่ เปิดรับรอบ fall 2027)'}},
+    {s:'Conestoga', p:'Electrical Techniques', u:'https://www.conestogac.on.ca/fulltime/electrical-techniques', n:{en:'Certificate, 1 year', th:'Certificate 1 ปี'}},
+    {s:'Fanshawe', p:'Electrical Techniques', u:'https://www.fanshawec.ca/programs/elt1-electrical-techniques/next', n:{en:'Certificate, 30 weeks. Welding, carpentry and plumbing are also offered', th:'Certificate 30 สัปดาห์ มีสายเชื่อม ช่างไม้ และประปาด้วย'}}],
+  au:[
+    {s:'Centennial', p:'Automotive: Motive Power Technician', u:'https://www.centennialcollege.ca/programs-courses/full-time/automotive-motive-power-technician-technical', n:{en:'Diploma, 2 years. Centennial marks it "PGWP aligned: No"', th:'Diploma 2 ปี Centennial ระบุว่า "ไม่ตรงกับรายการ PGWP"'}},
+    {s:'Fanshawe', p:'Motive Power Technician (Automotive)', u:'https://www.fanshawec.ca/programs/mta7-motive-power-technician-automotive/next', n:{en:'Diploma, 2 years', th:'Diploma 2 ปี'}},
+    {s:'SAIT', p:'Automotive Service Technology', u:'https://sait.ca/programs-and-courses/diplomas/automotive-service-technology', n:{en:'Diploma, 2 years. SAIT marks it "Not PGWP eligible"', th:'Diploma 2 ปี SAIT ระบุว่าหลักสูตรนี้ไม่มีสิทธิ์ PGWP'}},
+    {s:'BCIT', p:'Automotive Service Technician and Operations', u:'https://www.bcit.ca/programs/automotive-service-technician-and-operations-diploma-full-time-1430dipma/', n:{en:'Diploma, 2 years with paid co-op. BCIT marks it not PGWP-eligible', th:'Diploma 2 ปี มี Co-op แบบได้ค่าจ้าง BCIT ระบุว่าไม่มีสิทธิ์ PGWP'}}],
+  ece:[
+    {s:'George Brown', p:'Early Childhood Education', u:'https://www.georgebrown.ca/programs/early-childhood-education-program-c100', n:{en:'Diploma, on the school\'s PGWP list', th:'Diploma อยู่ในรายการ PGWP ของสถาบัน'}},
+    {s:'Humber', p:'Early Childhood Education', u:'https://humber.ca/explore-programs/programs/early-childhood-education', n:{en:'Diploma, 4 semesters, CIP 19.0709', th:'Diploma 4 เทอม รหัส CIP 19.0709'}},
+    {s:'Douglas', p:'Early Childhood Education (Diploma)', u:'https://www.douglascollege.ca/program/dpeces', n:{en:'Diploma, 2 years, 2 practicums', th:'Diploma 2 ปี ฝึกปฏิบัติ 2 ครั้ง'}},
+    {s:'Bow Valley', p:'Early Childhood Education and Development', u:'https://www.bowvalleycollege.ca/programs/early-childhood-education-and-development-diploma', n:{en:'Diploma, 4 terms, a practicum each term', th:'Diploma 4 เทอม ฝึกปฏิบัติทุกเทอม'}},
+    {s:'Red River', p:'Early Childhood Education', u:'https://www.rrc.ca/explore/program/early-childhood-education/', n:{en:'Diploma, 2 years, two practicums', th:'Diploma 2 ปี ฝึกปฏิบัติ 2 ครั้ง'}}],
+  gd:[
+    {s:'Sheridan', p:'Graphic Design: Creative Practice', u:'https://www.sheridancollege.ca/programs/graphic-design-creative-practice', n:{en:'Diploma, 2 years', th:'Diploma 2 ปี'}},
+    {s:'Humber', p:'Advertising and Graphic Design', u:'https://humber.ca/explore-programs/programs/advertising-graphic-design', n:{en:'Diploma, 4 semesters, CIP 50.0409', th:'Diploma 4 เทอม รหัส CIP 50.0409'}},
+    {s:'George Brown', p:'Graphic Design', u:'https://www.georgebrown.ca/programs/graphic-design-program-g122', n:{en:'Advanced diploma, 3 years', th:'Advanced Diploma 3 ปี'}},
+    {s:'Emily Carr', p:'Communication Design (Bachelor of Design)', u:'https://ecuad.ca/degree-programs/undergraduate/communication-design/', n:{en:'Bachelor\'s, 4 years (degree: no field-of-study rule)', th:'ปริญญาตรี 4 ปี (ระดับปริญญา จึงไม่มีกฎสาขาวิชา)'}}],
+  cu:[
+    {s:'George Brown', p:'Culinary Management', u:'https://www.georgebrown.ca/programs/culinary-management-program-h100', n:{en:'Diploma, 2 years with a co-op semester', th:'Diploma 2 ปี มีเทอม Co-op'}},
+    {s:'Humber', p:'Culinary Skills', u:'https://humber.ca/explore-programs/programs/culinary-skills', n:{en:'Certificate, 2 semesters, PGWP-eligible per Humber. The Culinary Management diploma shows PGWP "N/A"', th:'Certificate 2 เทอม Humber ระบุว่ามีสิทธิ์ PGWP ส่วน Diploma สาย Culinary Management แสดงสถานะ PGWP เป็น "N/A"'}},
+    {s:'SAIT', p:'Culinary Arts', u:'https://sait.ca/programs-and-courses/diplomas/culinary-arts', n:{en:'Diploma, 2 years, paid internship; page header says PGWP eligible', th:'Diploma 2 ปี มีฝึกงานแบบได้ค่าจ้าง หน้าหลักสูตรระบุว่ามีสิทธิ์ PGWP'}},
+    {s:'VCC', p:'Culinary Arts (International Cohort)', u:'https://www.vcc.ca/international/programs/programs-ie/culinary-arts/', n:{en:'Diploma, 17 months; PGWP-eligible per VCC', th:'Diploma 17 เดือน VCC ระบุว่ามีสิทธิ์ PGWP'}}]
+};
 AGENT_UI.tools = [
   {u:'https://register.college-ic.ca/', l:{en:'CICC public register', th:'ทะเบียนสาธารณะของ CICC'}, d:{en:'Search any immigration consultant (RCIC) by name or company.', th:'ค้นหาที่ปรึกษาด้านการย้ายถิ่นฐาน (RCIC) จากชื่อหรือบริษัท'}},
   {u:IRCC+'immigration-citizenship-representative/choose/authorized.html', l:{en:'IRCC: is this representative authorized?', th:'IRCC: ตัวแทนรายนี้ได้รับอนุญาตหรือไม่'}, d:{en:'Who may charge you for immigration advice.', th:'ใครบ้างที่เก็บเงินค่าคำแนะนำด้านการย้ายถิ่นฐานได้'}},
@@ -2748,7 +2967,7 @@ function viewReady(){
       <h2 class="text-[26px] font-semibold">${T(R.cmp)}</h2>
       <p class="muted mt-1 mb-5">${T(R.cmpSub)}</p>
       <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">${opts}</div>
-      <div class="card mt-4" id="masters">${viewMasters()}</div>
+      <div class="card mt-4" id="masters">${viewPrograms()}</div>
     </section>
     <section id="quiz">${viewQuiz()}</section>`;
 }
@@ -2809,6 +3028,12 @@ function viewQuiz(){
     </div>`;
 }
 
+/* Example schools for a field: each row opens that school's matching program page. Free-text advice (fin, mg...) stays above the links. */
+function fieldProgs(f){
+  const list = FIELD_PROGS[f.id] || [], text = `<p class="text-[15px] mt-1">${T(f.schools)}</p>`;
+  if (!list.length) return text;
+  return (typeof f.schools === 'object' ? text : '') + `<ul class="plist mt-1">${list.map(p => `<li><a href="${p.u}" target="_blank" rel="noopener noreferrer"><span class="pl-s">${esc(p.s)}</span><span class="pl-p">${esc(p.p)}${p.n ? `<span class="pl-n">${T(p.n)}</span>` : ''}</span><span class="pl-ic" aria-hidden="true">${ic('arrow-up-right','icon-sm')}</span></a></li>`).join('')}</ul>`;
+}
 function viewFields(){
   const F = FIELD_UI;
   if (!FILTERS.some(x => x.id === S.filter)) S.filter = 'all';
@@ -2860,7 +3085,7 @@ function viewFields(){
         
         <div><div class="eyebrow">${T(F.pr)}</div><p class="text-[15px] mt-1">${T(f.pr)}</p></div>
         
-        <div><div class="eyebrow">${T(F.schools)}</div><p class="text-[15px] mt-1">${T(f.schools)}</p></div>
+        <div><div class="eyebrow">${T(F.schools)}</div>${fieldProgs(f)}</div>
         
         ${f.note?`<p class="faint text-[13.5px] flex gap-2">${ic('info','icon-sm')}<span>${T(f.note)}</span></p>`:''}
       </div>
@@ -3379,21 +3604,32 @@ function viewTests(){
     </div>
     <p class="faint text-[13.5px] flex gap-2 mt-3" style="max-width:90ch">${ic('info','icon-sm')}<span>${T(U.priceNote)}</span></p>`;
 }
-function viewMasters(){
-  const U = MASTER_UI;
+/* Rules and example programs for the three options (A private Co-op, B public college, C master's).
+   School names open the school's international page, program names open the official program page. */
+function progTable(rows){
+  const U = MASTER_UI, P = PROG_UI;
+  const ext = `<span class="pl-ic" aria-hidden="true">${ic('arrow-up-right','icon-sm')}</span>`;
+  return `<div class="hscroll"><table class="ctbl prog-tbl"><thead><tr><th>${T(P.school)}</th><th>${T(U.prog)}</th><th>${T(U.len)}</th><th>Co-op</th><th style="text-align:right">${T(U.fee)}</th></tr></thead>
+    <tbody>${rows.map(m => `<tr style="cursor:default">
+      <td><a class="tlink" href="${m.home || m.url}" target="_blank" rel="noopener noreferrer"><strong>${esc(m.u)}</strong>${ext}</a><div class="faint text-[12.5px]">${esc(m.city)}</div></td>
+      <td style="white-space:normal;min-width:220px"><a class="tlink" href="${m.url}" target="_blank" rel="noopener noreferrer">${esc(m.p)}${ext}</a>${m.note ? `<div class="faint text-[12.5px] mt-0.5">${T(m.note)}</div>` : ''}</td>
+      <td>${T(m.len)}</td>
+      <td>${m.coop ? `<span class="badge b-green">${T(m.coopL || U.yes)}</span>` : `<span class="badge b-gray">${T(U.no)}</span>`}</td>
+      <td style="text-align:right">${m.fee ? (m.est ? '≈ ' : '') + 'CAD ' + fmt(m.fee) + `<div class="faint text-[12.5px]">${m.feeNote ? T(m.feeNote) : thb(m.fee * S.sim.rate)}</div>` : (m.feeNote ? T(m.feeNote) : `<span class="faint">${T(U.noFee)}</span>`)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function viewPrograms(){
+  const P = PROG_UI, k = PROGS[S.progOpt] ? S.progOpt : 'A', o = P.opts[k], d = PROGS[k];
   return `
-    <h3 class="text-[20px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('graduation-cap')}</span>${T(U.title)}</h3>
-    <p class="muted text-[14.5px] mt-1 mb-3">${T(U.sub)}</p>
-    <ul class="clean mb-4">${U.rules.map(x => `<li><span style="color:var(--blue)">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
-    <div class="hscroll"><table class="ctbl"><thead><tr><th>${T(U.uni)}</th><th>${T(U.prog)}</th><th>${T(U.len)}</th><th>Co-op</th><th style="text-align:right">${T(U.fee)}</th><th></th></tr></thead>
-      <tbody>${MASTERS.map(m => `<tr style="cursor:default"><td><strong>${m.u}</strong><div class="faint text-[12.5px]">${m.city}</div></td><td style="white-space:normal;min-width:200px">${m.p}</td><td>${T(m.len)}</td>
-        
-        <td>${m.coop ? `<span class="badge b-green">${T(U.yes)}</span>` : `<span class="badge b-gray">${T(U.no)}</span>`}</td>
-        
-        <td style="text-align:right">${m.fee ? (m.est ? '≈ ' : '') + 'CAD ' + fmt(m.fee) + `<div class="faint text-[12.5px]">${thb(m.fee * S.sim.rate)}</div>` : (m.feeNote ? T(m.feeNote) : `<span class="faint">${T(U.noFee)}</span>`)}</td>
-        
-        <td><a href="${m.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1" style="color:var(--blue)">${ic('external-link','icon-sm')}${T(U.page)}</a></td></tr>`).join('')}</tbody></table></div>
-    <p class="faint text-[13.5px] mt-3">${T(U.note)}</p>`;
+    <h3 class="text-[20px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('list-checks')}</span>${T(P.title)}</h3>
+    <p class="muted text-[14.5px] mt-1 mb-3">${T(P.sub)}</p>
+    <div class="seg mb-4" role="group" aria-label="${esc(T(P.title))}">${['A','B','C'].map(x => `<button class="${k === x ? 'on' : ''}" data-act="prog-opt" data-v="${x}" aria-pressed="${k === x}">${T(P.opts[x].seg)}</button>`).join('')}</div>
+    <h4 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:${o.color}">${ic(o.icon,'icon-sm')}</span>${T(o.t)}</h4>
+    <p class="muted text-[14.5px] mt-1 mb-3">${T(o.sub)}</p>
+    ${o.warn ? `<p class="text-[14px] flex gap-2 mb-3" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px">${ic('triangle-alert','icon-sm')}<span>${T(o.warn)}</span></p>` : ''}
+    <ul class="clean mb-4">${d.rules.map(x => `<li><span style="color:${o.color}">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
+    ${progTable(d.rows)}
+    <p class="faint text-[13.5px] mt-3">${T(o.note || MASTER_UI.note)}</p>
+    <p class="faint text-[13.5px] mt-1 flex gap-2">${ic('badge-check','icon-sm')}<span>${T(P.checked)}</span></p>`;
 }
 /* Named agencies in Thailand that pass checks a reader can verify (ICEF accreditation, listed by Canadian public schools).
    Evidence links are kept with each entry; this is not an endorsement or a ranking. */
@@ -4511,6 +4747,7 @@ document.addEventListener('click', e => {
   else if (act === 'quizreset') { S.quiz = {}; render(true); }
   else if (act === 'goroad') { S.scenario = v; S.tab = 'roadmap'; render(false); }
   else if (act === 'filter') { S.filter = v; render(true); }
+  else if (act === 'prog-opt') { S.progOpt = v; render(true); }
   else if (act === 'thai') { showThai(+v); }
   else if (act === 'city') { selectCity(v, b.dataset.fly === '1'); }
   else if (act === 'csort') { S.csort = v; render(true); }
