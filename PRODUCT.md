@@ -74,7 +74,7 @@ Undecided: whether and where the app will be published online.
 
 - Visual style, binding, in the user's words: "Apple glass Minimal Classic".
 - Visual language, binding, requested on 14 November 2026: Apple AppKit (macOS), per https://developer.apple.com/documentation/appkit. The earlier card-based look was rejected as too plain. It must use the Liquid Glass material (floating translucent sidebar, toolbar items, and tab bar over a soft wallpaper); a flat AppKit rendition was rejected for not looking like Liquid Glass.
-- The original specification is `Canada_plan.md`.
+- The original specification is `Canada_plan.md` (its design section predates the Liquid Glass change). The current visual system is documented in `DESIGN.md`, with its machine-readable companion in `.impeccable/design.json`.
 - Organization rule: never use em dashes or en dashes in any text; use "to" for ranges.
 
 ## Evidence on Hand
