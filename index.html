@@ -438,6 +438,8 @@
   @media (pointer:coarse){.end-tg{min-height:40px}}
   #cash-list{scroll-margin-top:130px;border-radius:10px;transition:background .6s}
   #cash-list.flash{background:var(--blue-soft)}
+  /* Budget, wide screens: the controls card runs the full height of the results, and the controls inside follow the scroll (see sideFollow) */
+  @media (min-width:1024px){ .sim-ctl{position:sticky;top:72px} }
   /* All Costs edit mode: the input takes both amount columns */
   .trow .cost-edit{grid-column:1 / -1;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}
   .trow .cost-edit .msub{display:block}
@@ -3895,8 +3897,8 @@ function viewBudget(){
       <p class="muted mt-3 text-[17px]">${T(M.sub)}</p>
     </section>
     <div id="sim-mini" class="sim-mini" aria-live="polite"></div>
-    <div class="grid lg:grid-cols-5 gap-4 items-start">
-      <div class="card lg:col-span-2 grid gap-6 lg:sticky" style="top:72px">
+    <div class="grid lg:grid-cols-5 gap-4 items-start lg:items-stretch">
+      <div class="card lg:col-span-2 sim-side"><div class="grid gap-6 sim-ctl" id="sim-ctl">
         ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l])), T(ty.desc))}
         ${field(T(M.intakeQ), segB('sim-intake', s.intake, SIMC.intakes.map(y => [y, String(y)])), T(M.intakeNote))}
         ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]]))}
@@ -3920,8 +3922,8 @@ function viewBudget(){
           <div class="flex justify-between items-center gap-3"><label for="sim-proof" class="font-medium text-[15px]">${T(M.proof)}</label><input class="numin num" type="number" id="sim-proof" data-sim="proof" min="10000" max="70000" step="1" value="${Math.round(val(s.proof, fundsAmt()) * simFac('proof', c0))}"></div>
           <div class="faint text-[13px] mt-1" id="proof-status">${proofStatusHtml()}</div>
         </div>
-      </div>
-      <div class="lg:col-span-3 grid gap-4" id="sim-out"></div>
+      </div></div>
+      <div class="lg:col-span-3 grid gap-4 content-start" id="sim-out"></div>
     </div>
     <details class="card mt-4">
       <summary class="font-semibold text-[17px] cursor-pointer">${ic('book-search','icon-sm')} ${T(M.glossT)}</summary>
@@ -4836,8 +4838,25 @@ function render(keepScroll){
   const gd = document.getElementById('gloss-dlg');
   if (gd && gd.open) { gd.innerHTML = glossShell(); renderGlossList(); icons(); }
   window.scrollTo({top: keepScroll ? y : 0, behavior:'instant'});   /* new page content: jump, do not animate */
+  if (!keepScroll) SIDE.off = null;
+  SIDE.y = window.scrollY; sideFollow();
   save();
 }
+/* Budget page, wide screens: the controls panel is taller than the window, so it follows the scroll both ways.
+   Scrolling down moves it up with the page until its last control is in view, then it holds; scrolling up moves it
+   back down until its first control is in view. Done by changing the sticky top inside the allowed range. */
+const SIDE = {off:null, y:0};
+function sideFollow(){
+  const el = document.getElementById('sim-ctl');
+  if (!el || window.innerWidth < 1024) { SIDE.y = window.scrollY; return; }
+  const topGap = 72, botGap = 100, lowest = Math.min(topGap, window.innerHeight - botGap - el.offsetHeight);
+  if (SIDE.off == null) SIDE.off = topGap;
+  SIDE.off = Math.max(lowest, Math.min(topGap, SIDE.off - (window.scrollY - SIDE.y)));
+  SIDE.y = window.scrollY;
+  el.style.top = SIDE.off + 'px';
+}
+window.addEventListener('scroll', sideFollow, {passive:true});
+window.addEventListener('resize', () => { SIDE.off = null; SIDE.y = window.scrollY; sideFollow(); });
 /* After a button switches tabs, land on the section it names instead of the top of the page.
    Checked again once late layout (icons, glossary links, embeds) has settled. */
 function goAnchor(id){
