@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Canada Work &amp; Study to PR Guide 2027 to 2028</title>
+<title>Canada Work &amp; Study to PR Guide 2027 to 2033</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -675,8 +675,8 @@ const UI = {
 
 const PHASES = [
   {icon:'waves', c:'b-blue', t:{en:'Phase 1: Test the Waters', th:'ระยะที่ 1: ลองใช้ชีวิตจริง'},
-   d:{en:'Start with a Work & Study (Co-op) program in 2027 or 2028. Live there, work part-time, and find out if Canada suits you while keeping the budget risk small.',
-      th:'เริ่มจากโปรแกรม Work & Study (Co-op) ในปี 2027 หรือ 2028 ไปใช้ชีวิตจริง ทำงานพาร์ตไทม์ และดูว่าแคนาดาเหมาะกับเราไหม โดยคุมความเสี่ยงด้านงบประมาณให้น้อยที่สุด'}},
+   d:{en:'Start with a Work & Study (Co-op) program in any year from 2027 to 2033. Live there, work part-time, and find out if Canada suits you while keeping the budget risk small.',
+      th:'เริ่มจากโปรแกรม Work & Study (Co-op) ในปีใดก็ได้ตั้งแต่ 2027 ถึง 2033 ไปใช้ชีวิตจริง ทำงานพาร์ตไทม์ และดูว่าแคนาดาเหมาะกับเราไหม โดยคุมความเสี่ยงด้านงบประมาณให้น้อยที่สุด'}},
   {icon:'git-branch', c:'b-amber', t:{en:'Phase 2: Academic & Career Pivot', th:'ระยะที่ 2: ปรับสายเรียนและอาชีพ'},
    d:{en:'Move into a specialized field: Health Informatics, Data Analytics, BI, Digital Transformation, AI, or Management.',
       th:'ต่อยอดสู่สาขาเฉพาะทาง เช่น Health Informatics, Data Analytics, BI, Digital Transformation, AI หรือ Management'}},
@@ -1165,6 +1165,8 @@ const FIELD_UI = {
   ]
 };
 
+/* Roadmap year labels follow the start year chosen on the Budget or Roadmap page (Y = the year classes start). */
+const ry = (en, th) => () => { const Y = (S.sim && S.sim.intake) || 2027; return {en:en(Y), th:th(Y)}; };
 const ROAD = {
   title:{en:'The Bridge Roadmap', th:'แผนเส้นทางสู่ PR'},
   sub:{en:'Two ways to get from Year 0 in Thailand to Permanent Residency. Pick a scenario to see each step.', th:'สองวิธีจากปีที่ 0 ในไทยไปสู่ Permanent Residency เลือกสถานการณ์เพื่อดูแต่ละขั้น'},
@@ -1178,23 +1180,23 @@ const ROAD = {
       best:{en:'People who are unsure about living abroad, have lower savings today, or need time on the ground to raise their English.', th:'ผู้ที่ยังไม่แน่ใจเรื่องการใช้ชีวิตต่างประเทศ มีเงินเก็บน้อยกว่าในตอนนี้ หรือต้องการเวลาในพื้นที่จริงเพื่อพัฒนาภาษาอังกฤษ'},
       steps:[
         
-        {y:{en:'Year 0 · 2026 to 2027', th:'ปีที่ 0 · 2026 ถึง 2027'}, t:{en:'Prepare in Thailand', th:'เตรียมตัวที่ไทย'},
+        {y:ry(Y => `Year 0 · ${Y - 1} to ${Y}`, Y => `ปีที่ 0 · ${Y - 1} ถึง ${Y}`), t:{en:'Prepare in Thailand', th:'เตรียมตัวที่ไทย'},
         
          d:{en:'Choose a private Co-op program, pay the deposit, gather financial proof, and apply for the study permit. Start IELTS preparation now even if the college does not require it.', th:'เลือกหลักสูตร Co-op เอกชน จ่ายมัดจำ รวบรวมหลักฐานการเงิน และยื่น Study Permit เริ่มเตรียม IELTS ตั้งแต่ตอนนี้แม้สถาบันจะไม่บังคับ'}},
         
-        {y:{en:'Year 1 · 2027 to 2028', th:'ปีที่ 1 · 2027 ถึง 2028'}, t:{en:'Private Co-op: study term, then work term', th:'Co-op เอกชน: เทอมเรียน แล้วต่อด้วยเทอมทำงาน'},
+        {y:ry(Y => `Year 1 · ${Y} to ${Y + 1}`, Y => `ปีที่ 1 · ${Y} ถึง ${Y + 1}`), t:{en:'Private Co-op: study term, then work term', th:'Co-op เอกชน: เทอมเรียน แล้วต่อด้วยเทอมทำงาน'},
         
          d:{en:'Six months of classes with part-time work, then six months of paid Co-op. You may work full time in the Co-op if the employer offers it, but many schools only require about 20 hours a week, so confirm the hours before counting on the income. Use this year to adapt, build a Canadian resume and references, and sit IELTS Academic for 6.5.', th:'เรียน 6 เดือนพร้อมทำงานพาร์ตไทม์ แล้วทำ Co-op แบบได้ค่าจ้างอีก 6 เดือน ช่วง Co-op ทำงานเต็มเวลาได้ถ้านายจ้างให้ แต่หลายโรงเรียนกำหนดขั้นต่ำแค่ประมาณ 20 ชั่วโมงต่อสัปดาห์ จึงควรยืนยันชั่วโมงก่อนนับเป็นรายได้ ใช้ปีนี้ปรับตัว สร้างเรซูเม่และผู้รับรองในแคนาดา และสอบ IELTS Academic ให้ได้ 6.5'}},
         
-        {y:{en:'Decision point · mid 2028', th:'จุดตัดสินใจ · กลางปี 2028'}, risk:true, t:{en:'The Bridge: stay or go home', th:'Bridge: อยู่ต่อหรือกลับบ้าน'},
+        {y:ry(Y => `Decision point · mid ${Y + 1}`, Y => `จุดตัดสินใจ · กลางปี ${Y + 1}`), risk:true, t:{en:'The Bridge: stay or go home', th:'Bridge: อยู่ต่อหรือกลับบ้าน'},
         
          d:{en:'If you stay, apply to a public college or university in an eligible STEM or Healthcare field at least 8 months before your permit expires. Changing schools now requires a new study permit, usually a new provincial attestation letter, and fresh proof of funds. If you go home, your total loss is one year of low tuition. [[pal]]', th:'ถ้าอยู่ต่อ ให้สมัครสถาบันรัฐในสาขา STEM หรือ Healthcare ที่มีสิทธิ์ อย่างน้อย 8 เดือนก่อน Permit หมดอายุ ปัจจุบันการย้ายสถาบันต้องขอ Study Permit ใหม่ โดยทั่วไปต้องมีหนังสือรับรองจากมณฑลฉบับใหม่ และหลักฐานการเงินรอบใหม่ ถ้ากลับบ้าน สิ่งที่เสียทั้งหมดคือค่าเล่าเรียนราคาต่ำ 1 ปี [[pal]]'}},
         
-        {y:{en:'Years 2 to 3 · 2028 to 2030', th:'ปีที่ 2 ถึง 3 · 2028 ถึง 2030'}, t:{en:'Public PG diploma or master\'s with Co-op', th:'PG Diploma หรือปริญญาโทพร้อม Co-op ที่สถาบันรัฐ'},
+        {y:ry(Y => `Years 2 to 3 · ${Y + 1} to ${Y + 3}`, Y => `ปีที่ 2 ถึง 3 · ${Y + 1} ถึง ${Y + 3}`), t:{en:'Public PG diploma or master\'s with Co-op', th:'PG Diploma หรือปริญญาโทพร้อม Co-op ที่สถาบันรัฐ'},
         
          d:{en:'Study Health Informatics, Data Analytics, BI, or AI. Aim for a corporate or hospital Co-op placement that can turn into a job offer. A 2-year program unlocks the 3-year PGWP.', th:'เรียน Health Informatics, Data Analytics, BI หรือ AI ตั้งเป้าได้ที่ฝึก Co-op ในองค์กรหรือโรงพยาบาลที่ต่อยอดเป็นข้อเสนองานได้ หลักสูตร 2 ปีจะปลดล็อก PGWP 3 ปี'}},
         
-        {y:{en:'Years 4 to 5 · 2030 onward', th:'ปีที่ 4 ถึง 5 · 2030 เป็นต้นไป'}, t:{en:'PGWP and skilled work', th:'PGWP และงานทักษะ'},
+        {y:ry(Y => `Years 4 to 5 · ${Y + 3} onward`, Y => `ปีที่ 4 ถึง 5 · ${Y + 3} เป็นต้นไป`), t:{en:'PGWP and skilled work', th:'PGWP และงานทักษะ'},
         
          d:{en:'Work full time in a skilled occupation (TEER 0 to 3). One year of this work makes you eligible for the Canadian Experience Class. [[findnoc]] [[cec]]', th:'ทำงานเต็มเวลาในอาชีพทักษะ (TEER 0 ถึง 3) ทำครบ 1 ปีจะมีสิทธิ์ยื่น Canadian Experience Class [[findnoc]] [[cec]]'}},
         
@@ -1209,19 +1211,19 @@ const ROAD = {
       best:{en:'People with IELTS 6.5 within reach, a data or tech background, a sponsor who can show the higher funds, and a clear PR goal.', th:'ผู้ที่ IELTS 6.5 อยู่ไม่ไกล มีพื้นฐานดาต้าหรือเทค มีสปอนเซอร์ที่แสดงเงินจำนวนสูงกว่าได้ และมีเป้าหมาย PR ชัดเจน'},
       steps:[
         
-        {y:{en:'Year 0 · 2026 to 2027', th:'ปีที่ 0 · 2026 ถึง 2027'}, t:{en:'Prepare in Thailand', th:'เตรียมตัวที่ไทย'},
+        {y:ry(Y => `Year 0 · ${Y - 1} to ${Y}`, Y => `ปีที่ 0 · ${Y - 1} ถึง ${Y}`), t:{en:'Prepare in Thailand', th:'เตรียมตัวที่ไทย'},
         
          d:{en:'Reach IELTS Academic 6.5, shortlist public programs and confirm each CIP code, apply 9 to 12 months before intake, then secure the attestation letter and apply for the study permit.', th:'ทำ IELTS Academic ให้ได้ 6.5 คัดหลักสูตรสถาบันรัฐและยืนยันรหัส CIP ของแต่ละแห่ง สมัครล่วงหน้า 9 ถึง 12 เดือนก่อนเปิดเทอม แล้วขอหนังสือรับรองจากมณฑลและยื่น Study Permit'}},
         
-        {y:{en:'Years 1 to 2 · 2027 to 2029', th:'ปีที่ 1 ถึง 2 · 2027 ถึง 2029'}, t:{en:'Public PG diploma or master\'s with Co-op', th:'PG Diploma หรือปริญญาโทพร้อม Co-op ที่สถาบันรัฐ'},
+        {y:ry(Y => `Years 1 to 2 · ${Y} to ${Y + 2}`, Y => `ปีที่ 1 ถึง 2 · ${Y} ถึง ${Y + 2}`), t:{en:'Public PG diploma or master\'s with Co-op', th:'PG Diploma หรือปริญญาโทพร้อม Co-op ที่สถาบันรัฐ'},
         
          d:{en:'Study terms with part-time work, plus one or two paid Co-op terms in a hospital, bank, or tech firm. You test daily life in Canada in the same year that counts toward the PGWP.', th:'เทอมเรียนพร้อมงานพาร์ตไทม์ และ Co-op แบบได้ค่าจ้าง 1 ถึง 2 เทอมในโรงพยาบาล ธนาคาร หรือบริษัทเทค คุณได้ทดลองใช้ชีวิตในแคนาดาในปีเดียวกับที่นับต่อยอดสู่ PGWP'}},
         
-        {y:{en:'Graduation · 2029', th:'จบการศึกษา · 2029'}, t:{en:'Apply for the PGWP', th:'ยื่นขอ PGWP'},
+        {y:ry(Y => `Graduation · ${Y + 2}`, Y => `จบการศึกษา · ${Y + 2}`), t:{en:'Apply for the PGWP', th:'ยื่นขอ PGWP'},
         
          d:{en:'Apply within 180 days of your final marks with a valid language test. A 2-year program or a master\'s gives a 3-year open work permit. [[pgwp]]', th:'ยื่นภายใน 180 วันหลังผลการเรียนสุดท้ายออก พร้อมผลสอบภาษาที่ยังไม่หมดอายุ หลักสูตร 2 ปีหรือปริญญาโทได้ Open Work Permit 3 ปี [[pgwp]]'}},
         
-        {y:{en:'Year 3 · 2029 to 2030', th:'ปีที่ 3 · 2029 ถึง 2030'}, t:{en:'One year of skilled Canadian work', th:'ทำงานทักษะในแคนาดา 1 ปี'},
+        {y:ry(Y => `Year 3 · ${Y + 2} to ${Y + 3}`, Y => `ปีที่ 3 · ${Y + 2} ถึง ${Y + 3}`), t:{en:'One year of skilled Canadian work', th:'ทำงานทักษะในแคนาดา 1 ปี'},
         
          d:{en:'Twelve months in a TEER 0 to 3 job qualifies you for CEC. Combined with your Thai work experience, it also adds skill-transferability points to your CRS score. [[cec]] [[crs]]', th:'ทำงาน 12 เดือนในตำแหน่ง TEER 0 ถึง 3 จะมีสิทธิ์ CEC และเมื่อรวมกับประสบการณ์ทำงานที่ไทย จะได้คะแนน Skill Transferability เพิ่มใน CRS ด้วย [[cec]] [[crs]]'}},
         
@@ -1318,7 +1320,7 @@ const IELTSQ = {
 };
 
 const SIMC = {
-  base:2026, intakes:[2027, 2028],
+  base:2026, intakes:[2027, 2028, 2029, 2030, 2031, 2032, 2033],
   types:{
     private:{l:{en:'Private Work & Study', th:'Work & Study เอกชน'}, min:6000, max:18000, def:12000, coopWage:18.25, coopH:35, fees:500,
       cwNote:{en:'Private Co-op jobs are entry-level or service work. Schools publish no wage data, so minimum wage is a safe estimate. Some placements in Ontario can be unpaid. [[minw]]', th:'งาน Co-op ของหลักสูตรเอกชนเป็นงานระดับเริ่มต้นหรืองานบริการ สถาบันไม่เผยแพร่ข้อมูลค่าจ้าง จึงควรประมาณด้วยค่าแรงขั้นต่ำ บางที่ในออนแทรีโออาจไม่ได้รับค่าจ้าง [[minw]]'},
@@ -1347,6 +1349,8 @@ const SIM_UI = {
   sub:{en:'Choose the program, start year and length, then move the sliders. The page shows how much cash to prepare, whether pay covers living costs, and how your money changes month by month, in plain words.', th:'เลือกประเภทหลักสูตร ปีที่เริ่มเรียน และระยะเวลา แล้วปรับแถบเลื่อน หน้านี้จะบอกว่าต้องเตรียมเงินเท่าไร รายได้พอค่าครองชีพไหม และเงินจะเปลี่ยนไปอย่างไรในแต่ละเดือน อธิบายเป็นภาษาง่าย ๆ'},
   type:{en:'Program type', th:'ประเภทหลักสูตร'},
   intakeQ:{en:'Start year', th:'ปีที่เริ่มเรียน'},
+  roadYears:{en:'The years in this roadmap count from the start year you pick (the same setting as the Budget page).', th:'ปีในแผนนี้นับจากปีที่เริ่มเรียนที่เลือก (ใช้ค่าเดียวกับหน้างบ)'},
+  farNote:{en:(y, n) => `A ${y} start is ${n} years away. The amounts are rough projections from today's prices, and IRCC rules, school programs and fees are likely to change before then. Check again each year.`, th:(y, n) => `เริ่มเรียนปี ${y} คือล่วงหน้า ${n} ปี ตัวเลขเงินเป็นการคาดการณ์คร่าว ๆ จากราคาปัจจุบัน และกฎของ IRCC หลักสูตร และค่าเรียนมีแนวโน้มเปลี่ยนก่อนถึงตอนนั้น ควรกลับมาเช็คทุกปี`},
   intakeNote:{en:'Assumes a September start. Every money amount on this page is for your start year: the defaults already add estimated yearly increases to today\'s prices, so the sliders, the typed amounts and the results show the same numbers.', th:'สมมติเปิดเรียนเดือนกันยายน ตัวเลขเงินทุกช่องในหน้านี้เป็นยอดของปีที่เริ่มเรียน ค่าเริ่มต้นบวกอัตราเพิ่มรายปีโดยประมาณจากราคาปัจจุบันแล้ว แถบเลื่อน ช่องใส่ยอดเอง และผลลัพธ์จึงแสดงตัวเลขเดียวกัน'},
   lenQ:{en:'Program length', th:'ระยะเวลาหลักสูตร'},
   len1:{en:'1 year', th:'1 ปี'}, len2:{en:'2 years', th:'2 ปี'},
@@ -2036,7 +2040,7 @@ const START = {
     {id:'s1', icon:'signpost', m:{en:'12 to 18 months', th:'12 ถึง 18 เดือน'}, t:{en:'Decide which path fits you', th:'ตัดสินใจว่าเส้นทางไหนเหมาะกับคุณ'},
      d:[{en:'Take the self-assessment quiz to see whether to start with a private Co-op (cheap trial, no PGWP) or a public Co-op diploma (leads to PR).', th:'ทำแบบประเมินเพื่อดูว่าควรเริ่มด้วย Co-op เอกชน (ทดลองราคาถูก ไม่มี PGWP) หรือ Diploma พร้อม Co-op ที่สถาบันรัฐ (ต่อยอดสู่ PR ได้)'},
         
-        {en:'Pick a target intake: January, May, or September of 2027 or 2028.', th:'เลือกรอบเปิดเรียนเป้าหมาย: มกราคม พฤษภาคม หรือกันยายน ของปี 2027 หรือ 2028'}],
+        {en:'Pick a target intake: January, May, or September, in any year from 2027 to 2033.', th:'เลือกรอบเปิดเรียนเป้าหมาย: มกราคม พฤษภาคม หรือกันยายน ของปีใดก็ได้ตั้งแต่ 2027 ถึง 2033'}],
      c:{en:'Free', th:'ไม่มีค่าใช้จ่าย'}, go:{tab:'ready', anchor:'quiz', l:{en:'Take the quiz', th:'ทำแบบประเมิน'}}},
     {id:'s2', icon:'wallet', m:{en:'12 months or more', th:'12 เดือนขึ้นไป'}, t:{en:'Check your money and start seasoning the bank account', th:'ตรวจสอบเงินทุน และเริ่มเดินบัญชีให้นิ่ง'},
      d:[{en:'Use the simulator to find how much you must show: first-year tuition plus the IRCC living-cost minimum. [[funds]]', th:'ใช้เครื่องจำลองเพื่อดูว่าต้องแสดงเงินเท่าไร: ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC [[funds]]'},
@@ -3186,6 +3190,15 @@ function viewFields(){
     </div>`;
 }
 
+/* Start year picker shared by the Budget and Roadmap pages, and a caution when the start year is far away. */
+function yearSeg(){
+  const Y = S.sim.intake || 2027;
+  return `<div class="seg" role="group" aria-label="${esc(T(SIM_UI.intakeQ))}">${SIMC.intakes.map(y => `<button class="${Y === y ? 'on' : ''}" aria-pressed="${Y === y}" data-act="sim-intake" data-v="${y}">${y}</button>`).join('')}</div>`;
+}
+function farBox(){
+  const Y = S.sim.intake || 2027, n = Y - SIMC.base;
+  return n >= 3 ? `<div class="text-[13.5px] mt-2 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px"><span style="color:var(--amber);margin-top:2px">${ic('triangle-alert','icon-sm')}</span><span>${T(SIM_UI.farNote)(Y, n)}</span></div>` : '';
+}
 function viewRoad(){
   const R = ROAD, sc = R.sc[S.scenario] || R.sc.safe;
   const stats = ['time','tuition','permits','risk'].map(k => `
@@ -3208,7 +3221,10 @@ function viewRoad(){
       <p class="muted mt-3 text-[17px]">${T(R.sub)}</p>
     </section>
     <div class="seg mb-4" role="group">${Object.keys(R.sc).map(k => `<button class="${S.scenario===k?'on':''}" data-act="scenario" data-v="${k}">${T(R.sc[k].l)}</button>`).join('')}</div>
-    <p class="text-[16px] font-medium mb-5">${T(sc.flow)}</p>
+    <div class="flex flex-wrap items-center gap-2"><span class="text-[14px] font-medium">${T(SIM_UI.intakeQ)}</span>${yearSeg()}</div>
+    <p class="faint text-[13px] mt-1">${T(SIM_UI.roadYears)}</p>
+    ${farBox()}
+    <p class="text-[16px] font-medium mb-5 mt-4">${T(sc.flow)}</p>
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">${stats}</div>
     <div class="grid lg:grid-cols-3 gap-6 items-start">
       <div class="lg:col-span-2 tl fade">${steps}</div>
@@ -3900,7 +3916,7 @@ function viewBudget(){
     <div class="grid lg:grid-cols-5 gap-4 items-start lg:items-stretch">
       <div class="card lg:col-span-2 sim-side"><div class="grid gap-6 sim-ctl" id="sim-ctl">
         ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l])), T(ty.desc))}
-        ${field(T(M.intakeQ), segB('sim-intake', s.intake, SIMC.intakes.map(y => [y, String(y)])), T(M.intakeNote))}
+        ${field(T(M.intakeQ), yearSeg() + farBox(), T(M.intakeNote))}
         ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]]))}
         ${field(T(M.coopQ), priv ? `<div class="text-[14px] flex gap-2" style="background:var(--blue-soft);border-radius:10px;padding:8px 12px">${ic('lock','icon-sm')}<span>${T(M.coopFixed)}</span></div>`
                                  : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]]))}
@@ -4805,7 +4821,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && TERM_BTN) 
 function render(keepScroll){
   if (!VIEWS[S.tab]) S.tab = 'ready';
   document.documentElement.lang = S.lang;
-  document.title = S.lang === 'th' ? 'คู่มือ Work & Study สู่ PR แคนาดา 2027 ถึง 2028' : 'Canada Work & Study to PR Guide 2027 to 2028';
+  document.title = S.lang === 'th' ? 'คู่มือ Work & Study สู่ PR แคนาดา 2027 ถึง 2033' : 'Canada Work & Study to PR Guide 2027 to 2033';
   document.getElementById('brand').textContent = T(UI.brand);
   for (const l of ['th','en']) {
     const b = document.getElementById('lang-' + l);
