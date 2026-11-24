@@ -432,6 +432,9 @@
   .ctbl tr.calc td:first-child{padding-left:22px}
   .ctbl tr.calc td{border-bottom-style:dashed}
   .ctbl tr.calc-end td{border-top:1.5px solid var(--line2)}
+  .ctbl tr.calc-after td{border-top:1.5px solid var(--line2)}
+  .end-tg{display:flex;align-items:center;gap:4px;font-weight:500;margin-top:3px;min-height:28px}
+  @media (pointer:coarse){.end-tg{min-height:40px}}
   #cash-list{scroll-margin-top:130px;border-radius:10px;transition:background .6s}
   #cash-list.flash{background:var(--blue-soft)}
   /* All Costs edit mode: the input takes both amount columns */
@@ -1537,6 +1540,7 @@ Object.assign(SIM_UI, {
   cTotalEq:{en:s => `= money to show + setup reserve ${s}`, th:s => `= เงินที่ต้องแสดง + เงินสำรองตั้งตัว ${s}`},
   cSeeAbove:{en:'See each line in the list above', th:'ดูรายการละเอียดด้านบน'},
   cWhyEnd:{en:'Where the money at the end comes from', th:'เงินคงเหลือตอนจบมาจากไหน'},
+  cEndShow:{en:'See how it is worked out', th:'ดูที่มาของตัวเลข'}, cEndHide:{en:'Hide the breakdown', th:'ซ่อนที่มา'},
   cStart:{en:'Start: living money you bring (the IRCC amount)', th:'เริ่มต้น: เงินค่าครองชีพที่นำไป (ยอดของ IRCC)'},
   cStartN:{en:'Year-1 tuition and travel are already paid out of the money to show', th:'ค่าเล่าเรียนปีแรกและค่าเดินทาง จ่ายไปแล้วจากเงินที่ต้องแสดง'},
   cIncAll:{en:'+ Take-home pay, all months', th:'+ รายได้สุทธิรวมทุกเดือน'},
@@ -4010,7 +4014,7 @@ function compareTypes(cur){
   const tr = (label, f, cls) => `<tr style="cursor:default" class="${cls || ''}"><td style="white-space:normal;min-width:200px">${label}</td>${rows.map(f).join('')}</tr>`;
   /* parts of the money at the end, straight from each month of the plan: start + pay − living costs − year-2 tuition = end */
   rows.forEach(r => { const ms = r.c.months; r.inc = ms.reduce((a, m) => a + m.inc, 0); r.paid = ms.reduce((a, m) => a + m.paid, 0); r.spend = r.c.exp * r.c.N; });
-  const anyY2 = rows.some(r => r.paid > 0), cu1 = {cur:curOf() === 'thb' ? 'thb' : 'cad'};
+  const anyY2 = rows.some(r => r.paid > 0), cu1 = {cur:curOf() === 'thb' ? 'thb' : 'cad'}, endOpen = !!(S.open && S.open.endWhy);
   const lab = (t, sub, link) => `${t}<span class="block faint text-[12.5px]" style="font-weight:400">${sub}</span>${link ? `<button class="linkbtn text-[12.5px] mt-0.5" style="font-weight:500;display:inline-flex;align-items:center;gap:4px" data-act="jump" data-v="cash-list">${ic('arrow-up','icon-sm')}<span>${T(M.cSeeAbove)}</span></button>` : ''}`;
   const c0 = rows[0].c;
   return `
@@ -4026,15 +4030,15 @@ function compareTypes(cur){
       ${tr(T(M.cCoopHW), r => td(r, r.c.mC ? `${r.c.ftH} ${T(M.wkU)}<span class="msub">× ${mny(r.c.cw, {dec:true, cur:curOf() === 'thb' ? 'thb' : 'cad'})}${T(M.hr)}</span>` : '-'))}
       ${tr(T(M.cNetS), r => td(r, mny(r.c.netS, {sign:true, stack:true}), r.c.netS < 0 ? 'neg' : 'pos'))}
       ${tr(T(M.cNetC), r => td(r, r.c.mC ? mny(r.c.netC, {sign:true, stack:true}) : '-', r.c.mC ? (r.c.netC < 0 ? 'neg' : 'pos') : ''))}
-      <tr style="cursor:default" class="calc-h"><td colspan="${rows.length + 1}"><span class="inline-flex items-center gap-1.5">${ic('calculator','icon-sm')}<span>${T(M.cWhyEnd)}</span></span></td></tr>
-      ${tr(lab(T(M.cStart), T(M.cStartN)), r => td(r, mny(r.c.proof, {stack:true})), 'calc')}
+      ${tr(`<strong>${T(M.cEnd)}</strong><button class="linkbtn text-[12.5px] end-tg" data-act="endwhy" aria-expanded="${endOpen}" aria-label="${esc(T(M.cWhyEnd))}">${ic('calculator','icon-sm')}<span>${T(endOpen ? M.cEndHide : M.cEndShow)}</span>${ic(endOpen ? 'chevron-up' : 'chevron-down','icon-sm')}</button>`, r => td(r, `<strong>${mny(r.c.end, {sign:true, stack:true})}</strong>`, r.c.end < 0 ? 'neg' : ''), 'calc-end')}
+      ${endOpen ? `
+      ${tr(lab('= ' + T(M.cStart), T(M.cStartN)), r => td(r, mny(r.c.proof, {stack:true})), 'calc')}
       ${tr(lab(T(M.cIncAll), T(M.cIncN)), r => td(r, mny(r.inc, {sign:true, stack:true}), 'pos'), 'calc')}
       ${tr(T(M.cExpAll), r => td(r, `${mny(-r.spend, {sign:true, stack:true})}<span class="msub">${r.c.N} ${T(M.months)} × ${mny(r.c.exp, cu1)}</span>`, 'neg'), 'calc')}
-      ${anyY2 ? tr(T(M.cTu2All), r => td(r, r.paid > 0 ? mny(-r.paid, {sign:true, stack:true}) : '-', r.paid > 0 ? 'neg' : ''), 'calc') : ''}
-      ${tr(`<strong>= ${T(M.cEnd)}</strong>`, r => td(r, `<strong>${mny(r.c.end, {sign:true, stack:true})}</strong>`, r.c.end < 0 ? 'neg' : ''), 'calc-end')}
-      ${tr(T(M.cExtra), r => td(r, r.c.extra > 0 ? mny(r.c.extra, {stack:true}) : '0', r.c.extra > 0 ? 'neg' : ''))}
+      ${anyY2 ? tr(T(M.cTu2All), r => td(r, r.paid > 0 ? mny(-r.paid, {sign:true, stack:true}) : '-', r.paid > 0 ? 'neg' : ''), 'calc') : ''}` : ''}
+      ${tr(T(M.cExtra), r => td(r, r.c.extra > 0 ? mny(r.c.extra, {stack:true}) : '0', r.c.extra > 0 ? 'neg' : ''), endOpen ? 'calc-after' : '')}
     </tbody></table></div>
-    <p class="faint text-[13px] mt-2">${T(M.cEndNote)}</p>
+    ${endOpen ? `<p class="faint text-[13px] mt-2">${T(M.cEndNote)}</p>` : ''}
     <p class="faint text-[13px] mt-2">${T(M.cNote)}</p>
   </div>`;
 }
@@ -4868,6 +4872,10 @@ document.addEventListener('click', e => {
   else if (act === 'proofauto') { S.sim.proofAuto = true; S.sim.proof = fundsAmt(); render(true); }
   else if (act === 'sim-cur') { S.sim.cur = v; renderSimOut(); icons(); save(); }
   else if (act === 'listedit') { LIST_EDIT = !LIST_EDIT; if (S.tab === 'costs') render(true); else { renderSimOut(); icons(); } if (LIST_EDIT) { const f = document.getElementById('amt-tuition'); if (f) f.focus({preventScroll:true}); } }
+  else if (act === 'endwhy') {   /* open or close the "money at the end" breakdown in the compare table; remembered on the device */
+    S.open = S.open || {}; S.open.endWhy = !S.open.endWhy; renderSimOut(); icons(); save();
+    const t = document.querySelector('[data-act="endwhy"]'); if (t) t.focus({preventScroll:true});
+  }
   else if (act === 'costedit') { COST_EDIT = !COST_EDIT; render(true); if (COST_EDIT) { const f = document.querySelector('[data-cost]'); if (f) f.focus({preventScroll:true}); } }
   else if (act === 'costdef') { if (S.costs) delete S.costs[v]; queueFlush(); }
   else if (act === 'costreset') { if (confirm(T({en:'Clear every amount you typed on this page and go back to the estimates?', th:'ล้างยอดที่พิมพ์เองทั้งหมดในหน้านี้ และกลับไปใช้ค่าประมาณใช่ไหม'}))) { S.costs = {}; render(true); } }
