@@ -618,6 +618,7 @@ const LINKS = {
     {u:IRCC+'immigrate-canada/express-entry/rounds-invitations.html', l:{en:'Express Entry: latest draws and CRS cut-offs', th:'Express Entry: รอบคัดเลือกล่าสุดและคะแนน CRS'}},
     {u:IRCC+'immigrate-canada/express-entry/submit-profile/rounds-invitations/category-based-selection.html', l:{en:'Express Entry: category-based selection (Healthcare, STEM)', th:'Express Entry: รอบเฉพาะหมวด (Healthcare, STEM)'}},
     {u:IRCC+'immigrate-canada/express-entry/check-score.html', l:{en:'CRS score calculator', th:'เครื่องคำนวณคะแนน CRS'}},
+    {u:IRCC+'immigrate-canada/express-entry/check-score/crs-criteria.html', l:{en:'CRS criteria: how many points each factor gives', th:'เกณฑ์คะแนน CRS: แต่ละหมวดได้กี่คะแนน'}},
     {u:IRCC+'immigrate-canada/provincial-nominees.html', l:{en:'Provincial Nominee Program', th:'Provincial Nominee Program'}},
     {u:'https://ircc.canada.ca/english/information/fees/fees.asp', l:{en:'IRCC fee list: every application fee', th:'รายการค่าธรรมเนียม IRCC: ค่าธรรมเนียมทุกประเภท'}},
     {u:IRCC+'application/check-processing-times.html', l:{en:'Current processing times', th:'ระยะเวลาดำเนินการปัจจุบัน'}},
@@ -645,6 +646,7 @@ const SRC = {
   draws:{u:IRCC+'immigrate-canada/express-entry/rounds-invitations.html', o:IRCCN, l:{en:'Express Entry: rounds of invitations and CRS cut-offs', th:'Express Entry: รอบเชิญและคะแนน CRS ขั้นต่ำ'}},
   cec:{u:IRCC+'immigrate-canada/express-entry/who-can-apply/canadian-experience-class.html', o:IRCCN, l:{en:'Canadian Experience Class: who can apply', th:'Canadian Experience Class: ผู้มีสิทธิ์ยื่น'}},
   crs:{u:IRCC+'immigrate-canada/express-entry/check-score.html', o:IRCCN, l:{en:'Comprehensive Ranking System (CRS) calculator', th:'เครื่องคำนวณคะแนน CRS'}},
+  crscrit:{u:IRCC+'immigrate-canada/express-entry/check-score/crs-criteria.html', o:IRCCN, l:{en:'CRS criteria: points for each factor (updated 3 November 2026)', th:'เกณฑ์คะแนน CRS: คะแนนแต่ละหมวด (ปรับใหม่ 3 พฤศจิกายน 2026)'}},
   lang:{u:IRCC+'immigrate-canada/express-entry/documents/language-test.html', o:IRCCN, l:{en:'Express Entry: approved language tests', th:'Express Entry: ข้อสอบภาษาที่ได้รับการรับรอง'}},
   eca:{u:IRCC+'immigrate-canada/express-entry/documents/education-assessment.html', o:IRCCN, l:{en:'Educational Credential Assessment (ECA)', th:'Educational Credential Assessment (ECA)'}},
   pnp:{u:IRCC+'immigrate-canada/provincial-nominees.html', o:IRCCN, l:{en:'Provincial Nominee Program', th:'Provincial Nominee Program'}},
@@ -1250,7 +1252,7 @@ const ROAD = {
         
         {y:ry(Y => `Year 3 · ${Y + 2} to ${Y + 3}`, Y => `ปีที่ 3 · ${Y + 2} ถึง ${Y + 3}`), t:{en:'One year of skilled Canadian work', th:'ทำงานทักษะในแคนาดา 1 ปี'},
         
-         d:{en:'Twelve months in a TEER 0 to 3 job qualifies you for CEC. Combined with your Thai work experience, it also adds skill-transferability points to your CRS score. [[cec]] [[crs]]', th:'ทำงาน 12 เดือนในตำแหน่ง TEER 0 ถึง 3 จะมีสิทธิ์ CEC และเมื่อรวมกับประสบการณ์ทำงานที่ไทย จะได้คะแนน Skill Transferability เพิ่มใน CRS ด้วย [[cec]] [[crs]]'}},
+         d:{en:'Twelve months in a TEER 0 to 3 job qualifies you for CEC. Under the CRS rules from 3 November 2026, one year of Canadian work gives 40 core points (35 with a spouse), plus 20 to 70 more if the job is in a high-wage occupation. Combined with your Thai work experience, it also adds skill-transferability points. [[cec]] [[crscrit]]', th:'ทำงาน 12 เดือนในตำแหน่ง TEER 0 ถึง 3 จะมีสิทธิ์ CEC ตามเกณฑ์ CRS ที่ใช้ตั้งแต่ 3 พฤศจิกายน 2026 ประสบการณ์ทำงานในแคนาดา 1 ปีได้คะแนนหลัก 40 (ถ้ามีคู่สมรสมาด้วยได้ 35) และได้เพิ่มอีก 20 ถึง 70 ถ้าเป็นอาชีพค่าจ้างสูง เมื่อรวมกับประสบการณ์ทำงานที่ไทย จะได้คะแนน Skill Transferability เพิ่มด้วย [[cec]] [[crscrit]]'}},
         
         {y:{en:'Goal', th:'เป้าหมาย'}, goal:true, t:{en:'Permanent Residency', th:'Permanent Residency'},
         
@@ -1718,9 +1720,9 @@ const GLOSS = [
   {k:'Express Entry', c:'pr', s:'draws', m:['Express Entry'],
    th:'ระบบออนไลน์ของ IRCC สำหรับคัดเลือกผู้ยื่น PR กลุ่มแรงงานทักษะ สร้างโปรไฟล์แล้วได้คะแนน CRS จากนั้น IRCC จะส่งคำเชิญให้ยื่น PR เป็นรอบ ๆ ให้คนที่คะแนนถึงเกณฑ์',
    en:"IRCC's online system for skilled-worker PR. You create a profile, get a CRS score, and IRCC invites the top scorers to apply in regular rounds."},
-  {k:'CRS', f:'Comprehensive Ranking System', c:'pr', s:'crs',
-   th:'คะแนนจัดอันดับใน Express Entry (เต็ม 1,200) คิดจากอายุ การศึกษา ผลภาษา และประสบการณ์ทำงาน ยิ่งสูงยิ่งมีโอกาสได้คำเชิญ',
-   en:'The Express Entry score out of 1,200, from age, education, language and work experience. Higher scores get invited first.'},
+  {k:'CRS', f:'Comprehensive Ranking System', c:'pr', s:'crscrit',
+   th:'คะแนนจัดอันดับใน Express Entry เต็ม 1,270 (ปรับใหม่ตั้งแต่ 3 พฤศจิกายน 2026 เดิมเต็ม 1,200) แบ่งเป็น 3 ส่วน: (1) คะแนนหลัก สูงสุด 570 จากอายุ การศึกษา ผลภาษา และประสบการณ์ทำงานในแคนาดาหรือข้อเสนองานค่าจ้างสูง (นับอย่างใดอย่างหนึ่ง) ถ้าคู่สมรสมาด้วยจะเป็น 530 บวกคะแนนคู่สมรสอีกไม่เกิน 40 (2) Skill Transferability สูงสุด 100 (3) คะแนนพิเศษสูงสุด 600 เช่น การเสนอชื่อจากมณฑล (PNP) 600 ภาษาฝรั่งเศส 50 วุฒิการศึกษาในแคนาดา 30 พี่น้องในแคนาดา 15 ยิ่งสูงยิ่งมีโอกาสได้คำเชิญ',
+   en:'The Express Entry score, out of 1,270 since 3 November 2026 (it was 1,200 before). It has 3 parts: (1) core points, up to 570, from age, education, language, and Canadian work experience or a high-wage job offer (one or the other, not both); with a spouse coming along it is 530 plus up to 40 for the spouse; (2) skill transferability, up to 100; (3) additional points, up to 600, such as a provincial nomination 600, French 50, Canadian study 30, a sibling in Canada 15. Higher scores get invited first.'},
   {k:{en:'Draw and invitation (ITA)', th:'รอบคัดเลือกและคำเชิญ (ITA)'}, c:'pr', s:'draws', m:['รอบคัดเลือก','คำเชิญ','ITA','draws','draw'],
    th:'รอบคัดเลือกคือครั้งที่ IRCC ส่งคำเชิญ (Invitation to Apply) ให้คนในระบบ Express Entry ที่คะแนน CRS ถึงขั้นต่ำของรอบนั้น ได้คำเชิญแล้วต้องยื่นเอกสาร PR ภายใน 60 วัน',
    en:"A draw is a round in which IRCC sends Invitations to Apply to Express Entry candidates at or above that round's CRS cut-off. You then have 60 days to submit the PR application."},
