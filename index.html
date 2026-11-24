@@ -427,6 +427,13 @@
   .tlink .pl-ic{vertical-align:-2px;margin-left:3px}
   .tlink:hover,.tlink:focus-visible{text-decoration:underline}
   @media (pointer:coarse){.plist a{min-height:44px;align-items:center}}
+  /* Budget compare table: the parts of "money at the end" read as one sum, and a jump target for "see each line above" */
+  .ctbl tr.calc-h td{padding-top:14px;font-size:12.5px;font-weight:600;color:var(--ink2);border-bottom:none;white-space:normal}
+  .ctbl tr.calc td:first-child{padding-left:22px}
+  .ctbl tr.calc td{border-bottom-style:dashed}
+  .ctbl tr.calc-end td{border-top:1.5px solid var(--line2)}
+  #cash-list{scroll-margin-top:130px;border-radius:10px;transition:background .6s}
+  #cash-list.flash{background:var(--blue-soft)}
   /* All Costs edit mode: the input takes both amount columns */
   .trow .cost-edit{grid-column:1 / -1;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}
   .trow .cost-edit .msub{display:block}
@@ -1334,25 +1341,25 @@ const SIM_UI = {
   sub:{en:'Choose the program, start year and length, then move the sliders. The page shows how much cash to prepare, whether pay covers living costs, and how your money changes month by month, in plain words.', th:'เลือกประเภทหลักสูตร ปีที่เริ่มเรียน และระยะเวลา แล้วปรับแถบเลื่อน หน้านี้จะบอกว่าต้องเตรียมเงินเท่าไร รายได้พอค่าครองชีพไหม และเงินจะเปลี่ยนไปอย่างไรในแต่ละเดือน อธิบายเป็นภาษาง่าย ๆ'},
   type:{en:'Program type', th:'ประเภทหลักสูตร'},
   intakeQ:{en:'Start year', th:'ปีที่เริ่มเรียน'},
-  intakeNote:{en:'Assumes a September start. Amounts in the sliders are today\'s prices; the results add estimated yearly increases up to the start year.', th:'สมมติเปิดเรียนเดือนกันยายน ตัวเลขในแถบเลื่อนเป็นราคาปัจจุบัน ผลลัพธ์จะบวกอัตราเพิ่มรายปีโดยประมาณจนถึงปีที่เริ่มเรียน'},
+  intakeNote:{en:'Assumes a September start. Every money amount on this page is for your start year: the defaults already add estimated yearly increases to today\'s prices, so the sliders, the typed amounts and the results show the same numbers.', th:'สมมติเปิดเรียนเดือนกันยายน ตัวเลขเงินทุกช่องในหน้านี้เป็นยอดของปีที่เริ่มเรียน ค่าเริ่มต้นบวกอัตราเพิ่มรายปีโดยประมาณจากราคาปัจจุบันแล้ว แถบเลื่อน ช่องใส่ยอดเอง และผลลัพธ์จึงแสดงตัวเลขเดียวกัน'},
   lenQ:{en:'Program length', th:'ระยะเวลาหลักสูตร'},
   len1:{en:'1 year', th:'1 ปี'}, len2:{en:'2 years', th:'2 ปี'},
   len1p:{en:'1 year (6 + 6 months)', th:'1 ปี (เรียน 6 + Co-op 6 เดือน)'}, len2p:{en:'2 years (12 + 12 months)', th:'2 ปี (เรียน 12 + Co-op 12 เดือน)'},
   coopQ:{en:'Does the program include a paid Co-op term?', th:'หลักสูตรมีเทอม Co-op แบบได้ค่าจ้างไหม'},
   coopYes:{en:'Yes, with Co-op', th:'มี Co-op'}, coopNo:{en:'No Co-op', th:'ไม่มี Co-op'},
   coopFixed:{en:'Work & Study programs always include a Co-op term, so this is fixed.', th:'หลักสูตร Work & Study มีเทอม Co-op เสมอ จึงล็อกไว้'},
-  tuition:{en:'Tuition per year (today\'s price)', th:'ค่าเล่าเรียนต่อปี (ราคาปัจจุบัน)'},
+  tuition:{en:'Tuition per year (start year)', th:'ค่าเล่าเรียนต่อปี (ปีที่เริ่มเรียน)'},
   living:{en:'Housing', th:'ที่พัก'},
   hours:{en:'Work hours in study terms', th:'ชั่วโมงทำงานช่วงเทอมเรียน'},
   hoursNote:{en:'Part-time job while classes run. IRCC allows up to 24 hours a week off campus during academic terms. [[offc]]', th:'งานพาร์ตไทม์ระหว่างที่มีเรียน IRCC อนุญาตทำงานนอกสถาบันได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ในช่วงเทอมเรียน [[offc]]'},
   coopHours:{en:'Work hours in Co-op or break months', th:'ชั่วโมงทำงานช่วง Co-op หรือปิดเทอม'},
   ftNote:{en:'Co-op term: the placement has no weekly hour limit, but private-college Co-ops are often about 20 hours a week while college and university Co-ops are usually full time (35 to 40). Scheduled breaks of 7 days or more: full time allowed, up to 180 days a year. [[coop]] [[offcbrk]]', th:'เทอม Co-op: งาน Co-op ไม่มีขีดจำกัดชั่วโมงต่อสัปดาห์ แต่ Co-op ของวิทยาลัยเอกชนมักประมาณ 20 ชั่วโมงต่อสัปดาห์ ส่วนของวิทยาลัยรัฐและมหาวิทยาลัยมักเป็นเต็มเวลา (35 ถึง 40) ช่วงปิดเทอมตามตารางที่ยาว 7 วันขึ้นไป: ทำงานเต็มเวลาได้ สูงสุด 180 วันต่อปี [[coop]] [[offcbrk]]'},
-  wage:{en:'Part-time hourly wage (today)', th:'ค่าจ้างงานพาร์ตไทม์ต่อชั่วโมง (ปัจจุบัน)'},
-  coopWage:{en:'Co-op hourly wage (today)', th:'ค่าจ้างงาน Co-op ต่อชั่วโมง (ปัจจุบัน)'},
+  wage:{en:'Part-time hourly wage (start year)', th:'ค่าจ้างงานพาร์ตไทม์ต่อชั่วโมง (ปีที่เริ่มเรียน)'},
+  coopWage:{en:'Co-op hourly wage (start year)', th:'ค่าจ้างงาน Co-op ต่อชั่วโมง (ปีที่เริ่มเรียน)'},
   brkS:{en:'Break', th:'ปิดเทอม'},
   wageNote:{en:'Typical student jobs pay about minimum wage: the median for food service is CAD 18.25 in Vancouver and 17.95 in Toronto; retail 19.50 and 18.00. Minimum wages range from 15.00 (Alberta) to 18.25 (BC). [[jobbank]] [[minw]]', th:'งานนักศึกษาทั่วไปได้ค่าจ้างประมาณค่าแรงขั้นต่ำ ค่ามัธยฐานงานร้านอาหาร CAD 18.25 ในแวนคูเวอร์ และ 17.95 ในโตรอนโต งานขายปลีก 19.50 และ 18.00 ค่าแรงขั้นต่ำอยู่ระหว่าง 15.00 (อัลเบอร์ตา) ถึง 18.25 (บริติชโคลัมเบีย) [[jobbank]] [[minw]]'},
   rate:{en:'Exchange rate (THB per CAD)', th:'อัตราแลกเปลี่ยน (บาทต่อ CAD)'},
-  proof:{en:'IRCC living-cost proof (CAD, today)', th:'ค่าครองชีพที่ IRCC กำหนด (CAD ปัจจุบัน)'},
+  proof:{en:'IRCC living-cost proof (CAD, when you apply)', th:'ค่าครองชีพที่ IRCC กำหนด (CAD ตอนยื่น)'},
   proofNote:{en:'CAD 23,448 for one person from 1 September 2026. IRCC updates it every year. [[funds]]', th:'CAD 23,448 สำหรับ 1 คน ตั้งแต่ 1 กันยายน 2026 IRCC ปรับยอดนี้ทุกปี [[funds]]'},
   wk:{en:'hrs/wk', th:'ชม./สัปดาห์'}, mo:{en:'/month', th:'/เดือน'}, hr:{en:'/hr', th:'/ชม.'},
   lTotal:{en:'Cash to have ready before you go', th:'เงินสดที่ต้องเตรียมก่อนไป'},
@@ -1426,7 +1433,7 @@ const SIM_UI = {
 /* Simulator text, revised 19 Nov 2026 after an audit against IRCC, CRA and school pages. */
 Object.assign(SIM_UI, {
   lTuitionFees:{en:'Tuition and compulsory fees, year 1', th:'ค่าเล่าเรียนและค่าธรรมเนียมบังคับ ปีแรก'},
-  feesL:{en:'Compulsory school fees per year (today)', th:'ค่าธรรมเนียมบังคับของสถาบันต่อปี (ปัจจุบัน)'},
+  feesL:{en:'Compulsory school fees per year (start year)', th:'ค่าธรรมเนียมบังคับของสถาบันต่อปี (ปีที่เริ่มเรียน)'},
   feesNote:{en:'Student, technology and other fees charged on top of tuition. Check the amount on your Letter of Acceptance. Public colleges often charge CAD 1,500 to 2,700 a year. If your school bundles health insurance or a transit pass, lower this so it is not counted twice.', th:'ค่าธรรมเนียมนักศึกษา ค่าเทคโนโลยี และค่าอื่น ๆ ที่เก็บเพิ่มจากค่าเล่าเรียน ตรวจยอดใน Letter of Acceptance วิทยาลัยรัฐมักเก็บปีละ CAD 1,500 ถึง 2,700 ถ้าสถาบันรวมประกันสุขภาพหรือบัตรโดยสารไว้แล้ว ให้ลดยอดนี้เพื่อไม่ให้นับซ้ำ'},
   lTravel:{en:'Travel to and from Canada', th:'ค่าเดินทางไปและกลับแคนาดา'},
   lShow:{en:'Money to show in the bank (for IRCC)', th:'เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)'},
@@ -1512,7 +1519,7 @@ Object.assign(SIM_UI, {
   incEdit:{en:'Change these with the sliders:', th:'เปลี่ยนตัวเลขเหล่านี้ได้ที่แถบเลื่อน:'},
   goHours:{en:'Study-term hours', th:'ชั่วโมงช่วงเรียน'}, goWage:{en:'Part-time wage', th:'ค่าจ้างพาร์ตไทม์'},
   goCoopH:{en:'Co-op or full-time hours', th:'ชั่วโมง Co-op หรือเต็มเวลา'}, goCoopW:{en:'Co-op wage', th:'ค่าจ้าง Co-op'},
-  wageProj:{en:(y, a, b) => `Wages for a ${y} start: today's CAD ${a} an hour plus about 2% a year, so CAD ${b}.`, th:(y, a, b) => `ค่าจ้างสำหรับเริ่มเรียนปี ${y}: ค่าจ้างวันนี้ CAD ${a} ต่อชั่วโมง บวกประมาณ 2% ต่อปี จึงเป็น CAD ${b}`},
+  wageProj:{en:(y) => `Wages are for a ${y} start: the defaults add about 2% a year to today's wages.`, th:(y) => `ค่าจ้างเป็นของปีที่เริ่มเรียน ${y} ค่าเริ่มต้นบวกประมาณ 2% ต่อปีจากค่าจ้างวันนี้แล้ว`},
   m1Half:{en:'Month 1 counts half pay while you get a SIN and find a job.', th:'เดือนแรกคิดรายได้ครึ่งเดียว เพราะต้องขอ SIN และหางาน'},
   noPay:{en:'no work allowed', th:'ทำงานไม่ได้'},
   whyExpT:{en:'2. Living costs per month (type your own)', th:'2. ค่าครองชีพต่อเดือน (พิมพ์ยอดเองได้)'},
@@ -1524,7 +1531,19 @@ Object.assign(SIM_UI, {
   cmpSub:{en:'The column marked ● is your current choice and uses every setting you made, so it matches the results above. The other two use their own typical tuition, fees, Co-op hours and Co-op wage; everything else (start year, length, housing and living costs, part-time work, travel, setup reserve, IRCC amount, exchange rate) is the same as yours.', th:'คอลัมน์ที่มี ● คือประเภทที่เลือกอยู่ ใช้ทุกค่าที่คุณตั้ง จึงตรงกับผลลัพธ์ด้านบน อีก 2 ประเภทใช้ค่าเล่าเรียน ค่าธรรมเนียม ชั่วโมง Co-op และค่าจ้าง Co-op ทั่วไปของประเภทนั้น ส่วนค่าอื่นทั้งหมด (ปีที่เริ่มเรียน ระยะเวลา ที่พักและค่าครองชีพ งานพาร์ตไทม์ ค่าเดินทาง เงินสำรอง ยอดของ IRCC อัตราแลกเปลี่ยน) ใช้ค่าเดียวกับของคุณ'},
   cMine:{en:'your settings', th:'ค่าที่คุณตั้ง'}, cTyp:{en:'typical values', th:'ค่าทั่วไป'}, cTry:{en:'Try this type', th:'ลองประเภทนี้'},
   cTuY:{en:'Tuition, year 1', th:'ค่าเล่าเรียนปีแรก'}, cFeesY:{en:'School fees, year 1', th:'ค่าธรรมเนียมปีแรก'},
-  cTotal:{en:'Cash to have ready', th:'เงินสดที่ต้องเตรียมก่อนไป'},
+  cTotal:{en:'Cash to have ready before you go', th:'เงินสดที่ต้องเตรียมก่อนไป'},
+  cShow:{en:'Money to show in the bank (for IRCC)', th:'เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)'},
+  cShowEq:{en:(p, t) => `= tuition + fees (the two rows above) + IRCC living cost ${p} + travel ${t}`, th:(p, t) => `= ค่าเล่าเรียน + ค่าธรรมเนียม (2 แถวด้านบน) + ค่าครองชีพของ IRCC ${p} + ค่าเดินทาง ${t}`},
+  cTotalEq:{en:s => `= money to show + setup reserve ${s}`, th:s => `= เงินที่ต้องแสดง + เงินสำรองตั้งตัว ${s}`},
+  cSeeAbove:{en:'See each line in the list above', th:'ดูรายการละเอียดด้านบน'},
+  cWhyEnd:{en:'Where the money at the end comes from', th:'เงินคงเหลือตอนจบมาจากไหน'},
+  cStart:{en:'Start: living money you bring (the IRCC amount)', th:'เริ่มต้น: เงินค่าครองชีพที่นำไป (ยอดของ IRCC)'},
+  cStartN:{en:'Year-1 tuition and travel are already paid out of the money to show', th:'ค่าเล่าเรียนปีแรกและค่าเดินทาง จ่ายไปแล้วจากเงินที่ต้องแสดง'},
+  cIncAll:{en:'+ Take-home pay, all months', th:'+ รายได้สุทธิรวมทุกเดือน'},
+  cIncN:{en:'Study, Co-op, break and after-graduation months; the first month counts half (getting a SIN, finding a job)', th:'เดือนเรียน Co-op ปิดเทอม และหลังเรียนจบ เดือนแรกนับครึ่งเดียว (ขอ SIN และหางาน)'},
+  cExpAll:{en:'− Living costs, all months', th:'− ค่าครองชีพรวมทุกเดือน'},
+  cTu2All:{en:'− Tuition and fees, year 2', th:'− ค่าเล่าเรียนและค่าธรรมเนียมปีที่ 2'},
+  cEndNote:{en:'Money at the end = the IRCC living money you bring + take-home pay over all months − living costs over all months − year-2 tuition and fees. The setup reserve is not counted: it is spent on settling in. Each type uses its own months: see the "Study / Co-op / break" row.', th:'เงินคงเหลือตอนจบ = เงินค่าครองชีพที่นำไป (ยอดของ IRCC) + รายได้สุทธิรวมทุกเดือน − ค่าครองชีพรวมทุกเดือน − ค่าเล่าเรียนปีที่ 2 โดยไม่นับเงินสำรองตั้งตัว เพราะใช้ไปกับการตั้งตัวช่วงแรก แต่ละประเภทมีจำนวนเดือนต่างกัน ดูแถว "เรียน / Co-op / ปิดเทอม"'},
   cCoopHW:{en:'Co-op hours and wage', th:'ชั่วโมงและค่าจ้าง Co-op'},
   cNetC:{en:'Per month in Co-op terms', th:'ต่อเดือนช่วง Co-op'},
   cNote:{en:'Study-month numbers match across types because they depend only on part-time work and living costs. The differences come from tuition, fees, Co-op hours and wage, and the number of Co-op, break and after-graduation months.', th:'ตัวเลขของเดือนที่เรียนเท่ากันทุกประเภท เพราะขึ้นกับงานพาร์ตไทม์และค่าครองชีพเท่านั้น ส่วนที่ต่างกันมาจากค่าเล่าเรียน ค่าธรรมเนียม ชั่วโมงและค่าจ้าง Co-op และจำนวนเดือน Co-op ปิดเทอม หรือหลังเรียนจบ'}
@@ -1856,12 +1875,12 @@ Object.assign(SRC, {
   tipscra:{u:'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-10400-other-employment-income.html', o:{en:'Canada Revenue Agency', th:'กรมสรรพากรแคนาดา (CRA)'}, l:{en:'Line 10400: tips and gratuities are taxable income', th:'Line 10400: ทิปเป็นรายได้ที่ต้องเสียภาษี'}}
 });
 Object.assign(SIM_UI, {
-  tipsL:{en:'Tips per hour, if your job gets them (today)', th:'ทิปเฉลี่ยต่อชั่วโมง ถ้างานได้ทิป (ปัจจุบัน)'},
+  tipsL:{en:'Tips per hour, if your job gets them (start year)', th:'ทิปเฉลี่ยต่อชั่วโมง ถ้างานได้ทิป (ปีที่เริ่มเรียน)'},
   tipsNote:{en:'Tipping is common in Canadian restaurants, bars and cafés (customers often add about 15 to 20% of the bill), but what staff actually receive varies a lot by place and role, and some places share tips with the kitchen. There is no official figure, so this starts at 0; enter what a real employer tells you. Tips count for part-time hours (study months, extra job, breaks) and are taxable income. [[tipscra]]', th:'ร้านอาหาร บาร์ และร้านกาแฟในแคนาดานิยมให้ทิป (ลูกค้ามักให้ประมาณ 15 ถึง 20% ของบิล) แต่ทิปที่พนักงานได้จริงต่างกันมากตามร้านและตำแหน่ง บางร้านแบ่งทิปให้ครัวด้วย ไม่มีตัวเลขทางการ ค่าเริ่มต้นจึงเป็น 0 ถ้านายจ้างจริงบอกตัวเลขค่อยใส่ ทิปคิดกับชั่วโมงงานพาร์ตไทม์ (เดือนที่เรียน งานเสริม ปิดเทอม) และเป็นรายได้ที่ต้องเสียภาษี [[tipscra]]'},
   tipsU:{en:'tips', th:'ทิป'},
   rent:{en:'Rent, including water, electricity and heat', th:'ค่าเช่า (รวมค่าน้ำ ค่าไฟ ค่าฮีตเตอร์)'},
   whyExp:{en:'Defaults come from your housing choice, using Toronto and Vancouver figures raised to your start year. Rent here already includes water, electricity and heat: most shared rooms include them. If a place you find charges electricity separately (often about CAD 50 to 80 a month for a studio, an estimate), add it to rent. Type what you expect to pay in your city. Picking a housing option again puts its defaults back.', th:'ค่าเริ่มต้นมาจากตัวเลือกที่พัก ใช้ตัวเลขของโตรอนโตและแวนคูเวอร์ ปรับเป็นราคาของปีที่เริ่มเรียนแล้ว ค่าเช่าในแอปนี้รวมค่าน้ำ ค่าไฟ และค่าฮีตเตอร์แล้ว (ห้องแชร์ส่วนใหญ่รวมให้) ถ้าห้องที่เจอเก็บค่าไฟแยก (ห้องสตูดิโอมักประมาณ CAD 50 ถึง 80 ต่อเดือน เป็นค่าประมาณ) ให้บวกเพิ่มในช่องค่าเช่า พิมพ์ยอดที่คาดว่าจะจ่ายจริงในเมืองของคุณได้เลย ถ้ากดเลือกที่พักใหม่ ค่าจะกลับเป็นค่าเริ่มต้นของที่พักนั้น'},
-  incEdit:{en:"Type new numbers here (today's amounts; the results adjust them to your start year). The sliders change too.", th:'พิมพ์ตัวเลขใหม่ได้ตรงนี้เลย (เป็นค่าของวันนี้ ผลลัพธ์จะปรับเป็นปีที่เริ่มเรียนให้) แถบเลื่อนจะเปลี่ยนตามด้วย'},
+  incEdit:{en:'Type new numbers here (start-year amounts, the same as the sliders). The sliders change too.', th:'พิมพ์ตัวเลขใหม่ได้ตรงนี้เลย (เป็นยอดของปีที่เริ่มเรียน เหมือนแถบเลื่อน) แถบเลื่อนจะเปลี่ยนตามด้วย'},
   inHours:{en:'Study-term hours a week', th:'ชั่วโมงทำงานช่วงเรียนต่อสัปดาห์'},
   inWage:{en:'Part-time wage per hour', th:'ค่าจ้างพาร์ตไทม์ต่อชั่วโมง'},
   inTips:{en:'Tips per hour', th:'ทิปต่อชั่วโมง'},
@@ -1965,7 +1984,7 @@ SIM_UI.gloss = [
   {k:{en:'Travel to and from Canada', th:'ค่าเดินทางไปและกลับแคนาดา'}, v:{en:'IRCC asks you to show money for the trip there and back. The estimate is CAD 2,500; type your own flight quote if you have one.', th:'IRCC ให้แสดงเงินค่าเดินทางไปและกลับด้วย ค่าประมาณคือ CAD 2,500 ถ้ามีราคาตั๋วจริงพิมพ์ใส่เองได้'}},
   {k:{en:'Setup reserve', th:'เงินสำรองตั้งตัว'}, v:{en:'Money for your first weeks: rent deposit, household items, winter clothes. Not required by IRCC, but you will need it.', th:'เงินใช้ช่วงแรกที่ไปถึง เช่น เงินประกันห้อง ของใช้ในบ้าน เสื้อกันหนาว IRCC ไม่ได้บังคับ แต่ต้องใช้จริง'}},
   SIM_UI.gloss.find(g => T(g.k) === T(SIM_UI.health)) || {k:SIM_UI.health, v:{en:'Included at CAD 80 a month.', th:'รวมไว้ที่เดือนละ CAD 80'}},
-  {k:{en:"Today's price and start year", th:'ราคาปัจจุบัน กับ ปีที่เริ่มเรียน'}, v:{en:"Sliders use today's prices. The results add estimated yearly increases up to your start year. Amounts you type in the results are taken as start-year amounts.", th:'แถบเลื่อนใช้ราคาปัจจุบัน ผลลัพธ์จะบวกอัตราเพิ่มรายปีโดยประมาณจนถึงปีที่เริ่มเรียน ส่วนยอดที่พิมพ์เองในผลลัพธ์ถือเป็นยอดของปีที่เริ่มเรียน'}},
+  {k:{en:"Today's price and start year", th:'ราคาปัจจุบัน กับ ปีที่เริ่มเรียน'}, v:{en:'Every money amount, in the sliders, the typed boxes and the results, is for your start year. The defaults start from today\'s prices and add estimated yearly increases up to that year.', th:'ตัวเลขเงินทุกช่อง ทั้งแถบเลื่อน ช่องพิมพ์ และผลลัพธ์ เป็นยอดของปีที่เริ่มเรียน ค่าเริ่มต้นคิดจากราคาปัจจุบันบวกอัตราเพิ่มรายปีโดยประมาณจนถึงปีนั้น'}},
   {k:{en:'Your amount', th:'ยอดที่คุณใส่'}, v:{en:'A line you typed over with your own quote. Tap "Use default" to return to the estimate.', th:'รายการที่คุณพิมพ์ยอดจริงทับไว้ กด "ใช้ค่าเริ่มต้น" เพื่อกลับไปใช้ค่าประมาณ'}},
   {k:{en:'Live exchange rate', th:'อัตราแลกเปลี่ยนล่าสุด'}, v:{en:'Read automatically every day, so every THB amount follows it. Type your own rate to use your bank\'s.', th:'ดึงอัตโนมัติทุกวัน ตัวเลขเงินบาททุกยอดจึงปรับตาม พิมพ์อัตราเองได้ถ้าจะใช้อัตราของธนาคารคุณ'}}
 ];
@@ -3759,6 +3778,12 @@ function proofYears(intake){
   const eff = new Date(fundsEff() + 'T00:00:00'), app = new Date((intake || 2027) + '-04-01T00:00:00');
   return Math.max(0, Math.floor((app - eff) / (365.25 * 864e5)));
 }
+/* Every money control (sliders, number boxes, typed amounts) shows and takes the start-year amount, the same number the
+   results use. The state keeps today's price, so a control divides by this factor when it writes and multiplies when it reads. */
+function simFac(k, c){
+  c = c || simCalc();
+  return ({tuition:c.fac.tuition, fees:c.fac.tuition, wage:c.fac.wage, tips:c.fac.wage, coopWage:c.fac.wage, proof:c.fac.proof})[k] || 1;
+}
 /* Amounts the user can type in the results: stored as today's price, shown for the start year (value × factor). */
 function amtMeta(k, c){
   const s = c.s, ty = c.ty, L0 = SIMC.living[s.living] || SIMC.living.shared, F = c.fac;
@@ -3831,14 +3856,17 @@ function simCalc(o){
 }
 
 function viewBudget(){
-  const M = SIM_UI, s = S.sim, ty = SIMC.types[s.type], priv = s.type === 'private';
+  const M = SIM_UI, s = S.sim, ty = SIMC.types[s.type], priv = s.type === 'private', c0 = simCalc();
   const segB = (act, cur, items) => `<div class="seg">${items.map(([v, l]) => `<button class="${String(cur)===String(v)?'on':''}" data-act="${act}" data-v="${v}">${T(l)}</button>`).join('')}</div>`;
-  const slider = (key, label, min, max, step, note, def) => `
+  /* min and max are today's prices; the slider itself runs in start-year amounts on a whole-step grid, like the results */
+  const slider = (key, label, min, max, step, note, def) => {
+    const F = simFac(key, c0), lo = Math.floor(min * F / step) * step, hi = Math.ceil(max * F / step) * step;
+    return `
     <div>
       <div class="flex justify-between items-baseline gap-3"><label for="sim-${key}" class="font-medium text-[15px]">${label}</label><span id="lab-${key}" class="num font-semibold text-[15px]"></span></div>
-      <input type="range" id="sim-${key}" data-sim="${key}" min="${min}" max="${max}" step="${step}" value="${val(s[key], def)}">
+      <input type="range" id="sim-${key}" data-sim="${key}" min="${lo}" max="${hi}" step="${step}" value="${val(s[key], def) * F}">
       ${note ? `<div class="faint text-[13px] mt-1">${note}</div>` : ''}
-    </div>`;
+    </div>`; };
   const field = (label, body, note) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? `<div class="faint text-[13px] mt-2">${note}</div>` : ''}</div>`;
   const plan = planOf(s), hasFT = plan.some(p => p !== 'S'), hasC = plan.includes('C'), hasG = plan.includes('G');
   return `
@@ -3857,14 +3885,14 @@ function viewBudget(){
         ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]]))}
         ${field(T(M.coopQ), priv ? `<div class="text-[14px] flex gap-2" style="background:var(--blue-soft);border-radius:10px;padding:8px 12px">${ic('lock','icon-sm')}<span>${T(M.coopFixed)}</span></div>`
                                  : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]]))}
-        ${slider('tuition', T(M.tuition), Math.min(ty.min, Math.floor(s.tuition)), Math.max(ty.max, Math.ceil(s.tuition)), 500, T(ty.tuNote))}
-        ${slider('fees', T(M.feesL), 0, Math.max(4000, Math.ceil(val(s.fees, ty.fees))), 100, T(M.feesNote), ty.fees)}
+        ${slider('tuition', T(M.tuition), Math.min(ty.min, Math.floor(s.tuition)), Math.max(ty.max, Math.ceil(s.tuition)), 50, T(ty.tuNote))}
+        ${slider('fees', T(M.feesL), 0, Math.max(4000, Math.ceil(val(s.fees, ty.fees))), 10, T(M.feesNote), ty.fees)}
         ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l])), T(SIMC.living[s.living].note))}
         ${slider('hours', T(M.hours), 0, 24, 1, T(M.hoursNote))}
-        ${slider('wage', T(M.wage), 15, 25, 0.25, T(M.wageNote))}
-        ${slider('tips', T(M.tipsL), 0, 15, 0.5, T(M.tipsNote), 0)}
+        ${slider('wage', T(M.wage), 15, 25, 0.05, T(M.wageNote))}
+        ${slider('tips', T(M.tipsL), 0, 15, 0.05, T(M.tipsNote), 0)}
         ${hasFT ? slider('coopHours', T(M.coopHours), 10, 40, 1, T(priv ? M.ftNotePriv : M.ftNote), ty.coopH) : ''}
-        ${hasC ? slider('coopWage', T(M.coopWage), 0, 40, 0.25, T(ty.cwNote), ty.coopWage) : ''}
+        ${hasC ? slider('coopWage', T(M.coopWage), 0, 40, 0.05, T(ty.cwNote), ty.coopWage) : ''}
         ${hasC ? slider('side', T(M.sideL), 0, 24, 1, T(M.sideNote), 0) : ''}
         ${hasG ? field(T(M.pgwpQ), segB('sim-pgwp', s.pgwp === false ? 'no' : 'yes', [['yes', M.pgwpYes], ['no', M.pgwpNo]]), T(s.type === 'public' ? M.pgwpNotePub : M.pgwpNoteMa)) : ''}
         <div>
@@ -3872,7 +3900,7 @@ function viewBudget(){
           <div id="fx-status" class="faint text-[13px] mt-2" aria-live="polite"></div>
         </div>
         <div>
-          <div class="flex justify-between items-center gap-3"><label for="sim-proof" class="font-medium text-[15px]">${T(M.proof)}</label><input class="numin num" type="number" id="sim-proof" data-sim="proof" min="10000" max="60000" step="1" value="${Math.round(val(s.proof, fundsAmt()))}"></div>
+          <div class="flex justify-between items-center gap-3"><label for="sim-proof" class="font-medium text-[15px]">${T(M.proof)}</label><input class="numin num" type="number" id="sim-proof" data-sim="proof" min="10000" max="70000" step="1" value="${Math.round(val(s.proof, fundsAmt()) * simFac('proof', c0))}"></div>
           <div class="faint text-[13px] mt-1" id="proof-status">${proofStatusHtml()}</div>
         </div>
       </div>
@@ -3979,7 +4007,12 @@ function compareTypes(cur){
     return {k, mine:false, c:simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop})};
   });
   const td = (r, html, cls) => `<td style="text-align:right" class="${r.mine ? 'cur-col ' : ''}${cls || ''}">${html}</td>`;
-  const tr = (label, f) => `<tr style="cursor:default"><td style="white-space:normal;min-width:150px">${label}</td>${rows.map(f).join('')}</tr>`;
+  const tr = (label, f, cls) => `<tr style="cursor:default" class="${cls || ''}"><td style="white-space:normal;min-width:200px">${label}</td>${rows.map(f).join('')}</tr>`;
+  /* parts of the money at the end, straight from each month of the plan: start + pay − living costs − year-2 tuition = end */
+  rows.forEach(r => { const ms = r.c.months; r.inc = ms.reduce((a, m) => a + m.inc, 0); r.paid = ms.reduce((a, m) => a + m.paid, 0); r.spend = r.c.exp * r.c.N; });
+  const anyY2 = rows.some(r => r.paid > 0), cu1 = {cur:curOf() === 'thb' ? 'thb' : 'cad'};
+  const lab = (t, sub, link) => `${t}<span class="block faint text-[12.5px]" style="font-weight:400">${sub}</span>${link ? `<button class="linkbtn text-[12.5px] mt-0.5" style="font-weight:500;display:inline-flex;align-items:center;gap:4px" data-act="jump" data-v="cash-list">${ic('arrow-up','icon-sm')}<span>${T(M.cSeeAbove)}</span></button>` : ''}`;
+  const c0 = rows[0].c;
   return `
   <div class="card">
     <h3 class="text-[17px] font-semibold">${T(M.cmpT)}</h3>
@@ -3987,15 +4020,21 @@ function compareTypes(cur){
     <div class="hscroll"><table class="ctbl" style="min-width:600px"><thead><tr><th></th>${rows.map(r => `<th style="text-align:right;white-space:normal" class="${r.mine ? 'cur-col' : ''}">${T(SIMC.types[r.k].l)}${r.mine ? ' ●' : ''}<div class="faint" style="font-weight:400">${T(r.mine ? M.cMine : M.cTyp)}</div>${r.mine ? '' : `<button class="linkbtn" style="font-size:12.5px" data-act="sim-type" data-v="${r.k}">${T(M.cTry)}</button>`}</th>`).join('')}</tr></thead><tbody>
       ${tr(T(M.cTuY), r => td(r, mny(r.c.tuY, {stack:true})))}
       ${tr(T(M.cFeesY), r => td(r, mny(r.c.fees, {stack:true})))}
-      ${tr(T(M.cShow), r => td(r, `<strong>${mny(r.c.show, {stack:true})}</strong>`))}
-      ${tr(T(M.cTotal), r => td(r, `<strong>${mny(r.c.total, {stack:true})}</strong>`))}
+      ${tr(lab(`<strong>${T(M.cShow)}</strong>`, T(M.cShowEq)(mny(c0.proof, cu1), mny(c0.travel, cu1)), true), r => td(r, `<strong>${mny(r.c.show, {stack:true})}</strong>`))}
+      ${tr(lab(`<strong>${T(M.cTotal)}</strong>`, T(M.cTotalEq)(mny(c0.setup, cu1)), true), r => td(r, `<strong>${mny(r.c.total, {stack:true})}</strong>`))}
       ${tr(T(M.cMonths), r => td(r, `${r.c.mS} / ${r.c.mC} / ${r.c.mB + r.c.mG}`))}
       ${tr(T(M.cCoopHW), r => td(r, r.c.mC ? `${r.c.ftH} ${T(M.wkU)}<span class="msub">× ${mny(r.c.cw, {dec:true, cur:curOf() === 'thb' ? 'thb' : 'cad'})}${T(M.hr)}</span>` : '-'))}
       ${tr(T(M.cNetS), r => td(r, mny(r.c.netS, {sign:true, stack:true}), r.c.netS < 0 ? 'neg' : 'pos'))}
       ${tr(T(M.cNetC), r => td(r, r.c.mC ? mny(r.c.netC, {sign:true, stack:true}) : '-', r.c.mC ? (r.c.netC < 0 ? 'neg' : 'pos') : ''))}
-      ${tr(T(M.cEnd), r => td(r, mny(r.c.end, {sign:true, stack:true}), r.c.end < 0 ? 'neg' : ''))}
+      <tr style="cursor:default" class="calc-h"><td colspan="${rows.length + 1}"><span class="inline-flex items-center gap-1.5">${ic('calculator','icon-sm')}<span>${T(M.cWhyEnd)}</span></span></td></tr>
+      ${tr(lab(T(M.cStart), T(M.cStartN)), r => td(r, mny(r.c.proof, {stack:true})), 'calc')}
+      ${tr(lab(T(M.cIncAll), T(M.cIncN)), r => td(r, mny(r.inc, {sign:true, stack:true}), 'pos'), 'calc')}
+      ${tr(T(M.cExpAll), r => td(r, `${mny(-r.spend, {sign:true, stack:true})}<span class="msub">${r.c.N} ${T(M.months)} × ${mny(r.c.exp, cu1)}</span>`, 'neg'), 'calc')}
+      ${anyY2 ? tr(T(M.cTu2All), r => td(r, r.paid > 0 ? mny(-r.paid, {sign:true, stack:true}) : '-', r.paid > 0 ? 'neg' : ''), 'calc') : ''}
+      ${tr(`<strong>= ${T(M.cEnd)}</strong>`, r => td(r, `<strong>${mny(r.c.end, {sign:true, stack:true})}</strong>`, r.c.end < 0 ? 'neg' : ''), 'calc-end')}
       ${tr(T(M.cExtra), r => td(r, r.c.extra > 0 ? mny(r.c.extra, {stack:true}) : '0', r.c.extra > 0 ? 'neg' : ''))}
     </tbody></table></div>
+    <p class="faint text-[13px] mt-2">${T(M.cEndNote)}</p>
     <p class="faint text-[13px] mt-2">${T(M.cNote)}</p>
   </div>`;
 }
@@ -4218,12 +4257,12 @@ function whyPanel(c, one, unit){
   if (c.mC) inc.push([T(M.coop), `(${c.ftH} ${T(M.wkU)} × ${hr(c.cw)}${c.side ? ` + ${c.side} ${T(M.wkU)} ${T(M.sideU)} × ${ptRate}` : ''}) × ${wk} ${T(M.weeksU)}` + res(c.gC, c.incC)]);
   if (c.mB) inc.push([T(M.brkS), `${c.ftH} ${T(M.wkU)} × ${ptRate} × ${wk} ${T(M.weeksU)}` + res(c.gB, c.incB)]);
   if (c.mG) inc.push([T(M.gradS), s.pgwp === false ? `${T(M.noPay)}` + res(0, 0) : `${c.ftH} ${T(M.wkU)} × ${ptRate} × ${wk} ${T(M.weeksU)}` + res(c.gG, c.incG)]);
-  /* type hours and wages right here (today's values, same as the sliders) */
+  /* type hours and wages right here (start-year amounts, the same numbers as the sliders and the formulas above) */
   const box = (k, label, v, step, u) => `<label class="inbox"><span class="text-[13px] muted">${label}</span><span class="flex items-center gap-1"><input class="numin num" type="number" inputmode="decimal" min="0" step="${step}" data-simc="${k}" value="${v}">${u ? `<span class="faint text-[12px]">${u}</span>` : ''}</span></label>`;
-  const ty = c.ty, cadHr = 'CAD' + T(M.hr);
-  const boxes = [box('hours', T(M.inHours), s.hours, 1, T(M.wkU)), box('wage', T(M.inWage), Number(s.wage), 0.25, cadHr), box('tips', T(M.inTips), val(s.tips, 0), 0.5, cadHr)];
+  const ty = c.ty, cadHr = 'CAD' + T(M.hr), r2 = v => Math.round(v * 100) / 100;
+  const boxes = [box('hours', T(M.inHours), s.hours, 1, T(M.wkU)), box('wage', T(M.inWage), r2(c.wage), 0.05, cadHr), box('tips', T(M.inTips), r2(c.tips), 0.05, cadHr)];
   if (c.plan.some(p => p !== 'S')) boxes.push(box('coopHours', T(M.inCoopH), c.ftH, 1, T(M.wkU)));
-  if (c.mC) boxes.push(box('coopWage', T(M.inCoopW), val(s.coopWage, ty.coopWage), 0.25, cadHr), box('side', T(M.inSide), c.side, 1, T(M.wkU)));
+  if (c.mC) boxes.push(box('coopWage', T(M.inCoopW), r2(c.cw), 0.05, cadHr), box('side', T(M.inSide), c.side, 1, T(M.wkU)));
   const lc = [['rentC', M.rent], ['foodC', M.food], ['otherC', M.other], ['healthC', M.health]];
   const anyLc = lc.some(([k]) => S.sim[k] != null);
   const nets = [[T(M.study), c.incS, c.netS]];
@@ -4270,7 +4309,7 @@ document.addEventListener('change', e => {
   const sk = e.target.dataset && e.target.dataset.simc;
   if (sk) {   /* hours and wages typed in the "where from" panel: same limits as the sliders */
     const v = parseFloat(e.target.value), lim = {hours:[0,24], wage:[5,100], tips:[0,50], coopHours:[0,60], coopWage:[0,100], side:[0,24]}[sk];
-    if (isFinite(v) && lim) S.sim[sk] = Math.min(lim[1], Math.max(lim[0], v));
+    if (isFinite(v) && lim) S.sim[sk] = Math.min(lim[1], Math.max(lim[0], v)) / simFac(sk);   /* typed as start-year wages, like the sliders */
     queueFlush(); return;
   }
   const ck = e.target.dataset && e.target.dataset.cost;
@@ -4309,24 +4348,25 @@ function renderSimOut(){
   const out = document.getElementById('sim-out'); if (!out) return;
   updateChip();
   const pst = document.getElementById('proof-status'); if (pst) pst.innerHTML = proofStatusHtml();
-  /* keep the controls in step with amounts typed in the results (or loaded live) */
+  const M = SIM_UI, s = S.sim, c = simCalc();
+  /* keep the controls in step with amounts typed in the results (or loaded live); money controls show start-year amounts */
   document.querySelectorAll('input[data-sim]').forEach(el => {
     if (el === document.activeElement) return;
-    const v = S.sim[el.dataset.sim]; if (v == null || v === '' || isNaN(v)) return;
-    if (el.type === 'range') { if (+v > +el.max) el.max = Math.ceil(v); if (+v < +el.min) el.min = Math.floor(v); }
-    if (Math.abs(+el.value - v) > (el.type === 'range' ? +el.step / 2 : 0.004)) el.value = el.type === 'range' ? v : Math.round(v * 100) / 100;
+    const k = el.dataset.sim, raw = S.sim[k]; if (raw == null || raw === '' || isNaN(raw)) return;
+    const v = raw * simFac(k, c), st = +el.step || 1;
+    if (el.type === 'range') { if (v > +el.max) el.max = Math.ceil(v / st) * st; if (v < +el.min) el.min = Math.floor(v / st) * st; }
+    if (Math.abs(+el.value - v) > (el.type === 'range' ? st / 2 : 0.004)) el.value = el.type === 'range' ? v : (k === 'proof' ? Math.round(v) : Math.round(v * 100) / 100);
   });
   document.querySelectorAll('input[type=range]').forEach(r => r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'));
-  const M = SIM_UI, s = S.sim, c = simCalc();
   const set =(id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
-  set('lab-tuition', cad(s.tuition));
+  set('lab-tuition', cad(c.tuY));
   set('lab-hours', s.hours + ' ' + T(M.wk));
   set('lab-coopHours', c.ftH + ' ' + T(M.wk));
   set('lab-side', c.side + ' ' + T(M.wk));
-  set('lab-fees', cad(c.s.fees === undefined ? SIMC.types[s.type].fees : c.s.fees));
-  set('lab-wage', 'CAD ' + Number(s.wage).toFixed(2) + T(M.hr));
-  set('lab-tips', 'CAD ' + val(s.tips, 0).toFixed(2) + T(M.hr));
-  set('lab-coopWage', 'CAD ' + val(s.coopWage, SIMC.types[s.type].coopWage).toFixed(2) + T(M.hr));
+  set('lab-fees', cad(c.fees));
+  set('lab-wage', 'CAD ' + c.wage.toFixed(2) + T(M.hr));
+  set('lab-tips', 'CAD ' + c.tips.toFixed(2) + T(M.hr));
+  set('lab-coopWage', 'CAD ' + c.cw.toFixed(2) + T(M.hr));
   const cu = curOf(), r = s.rate || 24;
   /* one currency for short lines: THB when the user picked THB, otherwise CAD */
   const one = (v, o = {}) => mny(v, Object.assign({cur:cu === 'thb' ? 'thb' : 'cad'}, o));
@@ -4349,7 +4389,7 @@ function renderSimOut(){
         ${cu === 'both' ? `<div class="text-[18px] font-semibold muted num">${cad(c.total)}</div>` : ''}
       </div>
       <div class="faint text-[13.5px] mb-3">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
-      ${cashList(c)}
+      <div id="cash-list" data-flash="1">${cashList(c)}</div>
       ${c.extra > 0 ? `<div class="row font-semibold neg"><span>${T(M.lExtra)}</span><span class="num">${mny(c.extra, {stack:true})}</span></div>` : ''}
       <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(M.sameNote)}</span></p>
       <div class="autoline" id="auto-line">${autoLineHtml()}</div>
@@ -4821,7 +4861,7 @@ document.addEventListener('click', e => {
   else if (act === 'sim-pgwp') { S.sim.pgwp = v === 'yes'; render(true); }
   else if (act === 'sim-coop') { S.sim.hasCoop = v === 'yes'; render(true); }
   else if (act === 'ckdone') { S.check[v] = true; render(true); }
-  else if (act === 'jump') { const t = document.getElementById(v); if (t) t.scrollIntoView({behavior:'smooth', block:'start'}); }
+  else if (act === 'jump') { const t = document.getElementById(v); if (t) { t.scrollIntoView({behavior:'smooth', block:'start'}); if (t.dataset.flash) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1800); } } }
   else if (act === 'sim-living') { S.sim.living = v; S.sim.rentC = S.sim.foodC = S.sim.otherC = null; render(true); }
   else if (act === 'simreset') { S.sim = Object.assign({}, DEFAULTS.sim); LIST_EDIT = false; if (S.fx.rate) S.sim.rate = +S.fx.rate.toFixed(2); applyFunds(); render(true); }
   else if (act === 'fxlive') { S.sim.rateAuto = true; applyFx(); }
@@ -4880,7 +4920,7 @@ document.addEventListener('input', e => {
   const k = e.target.dataset.sim; if (!k) return;
   const v = parseFloat(e.target.value);
   if (!isFinite(v) || v < 0 || (v === 0 && !['hours','coopWage','fees','side','tips'].includes(k))) return;
-  S.sim[k] = v; if (k === 'rate') S.sim.rateAuto = false; if (k === 'proof') S.sim.proofAuto = false;
+  S.sim[k] = v / simFac(k); if (k === 'rate') S.sim.rateAuto = false; if (k === 'proof') S.sim.proofAuto = false;   /* controls show start-year amounts */
   saveSoon(); queueSim();
 });
 document.addEventListener('input', e => {
