@@ -219,11 +219,11 @@ A cool, misty neutral world with a single system-blue accent, soft tinted wallpa
 
 ## Layout
 
-A single centred column (max width 1040px) inside the window, with 16px side padding on phones and 28px from 1024px. Pages are stacks of cards with 16px gaps (`gap-4`) and 24px between major groups. Two-column and three-column grids appear from 768px (`md`) and 1024px (`lg`), for example the budget simulator's controls (2 of 5 columns, sticky) beside its results (3 of 5).
+A single centred column (max width 1040px) inside the window, with 16px side padding on phones and 28px from 1024px. Pages are stacks of cards with 16px gaps (`gap-4`) and 24px between major groups. Two-column and three-column grids appear from 768px (`md`) and 1024px (`lg`), for example the budget simulator's controls (2 of 5 columns) beside its results (3 of 5): the controls card runs the full height of the results, and the controls inside follow the scroll both ways (sticky with a top that moves within range), so every control stays reachable even when the panel is taller than the window.
 
 The toolbar is a 56px sticky strip whose background blurs and fades out with a mask as content scrolls under it. Navigation is a floating tab dock: a full-width rounded bar 10px from the bottom on phones and tablets, and a centred dock (max width 1010px, 16px from the bottom) on computers, where icons and labels sit side by side. The body keeps 88px of bottom padding so the dock never covers content.
 
-Breakpoints: 400px (smaller dock labels), 640px (tables gain column headers, calendar shows chips instead of dots), 768px (multi-column grids), 1024px (centred dock, sticky simulator controls, mini summary bar hidden). Under 1024px or on coarse pointers, every control grows to a 44px touch target and text inputs use 16px text to avoid zoom on focus.
+Breakpoints: 400px (smaller dock labels), 640px (tables gain column headers, calendar shows chips instead of dots), 768px (multi-column grids), 1024px (centred dock, scroll-following simulator controls, mini summary bar hidden). Under 1024px or on coarse pointers, every control grows to a 44px touch target and text inputs use 16px text to avoid zoom on focus.
 
 ## Elevation & Depth
 
