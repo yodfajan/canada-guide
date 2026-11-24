@@ -433,6 +433,7 @@
   .ctbl tr.calc td{border-bottom-style:dashed}
   .ctbl tr.calc-end td{border-top:1.5px solid var(--line2)}
   .ctbl tr.calc-after td{border-top:1.5px solid var(--line2)}
+  .ctbl tr.calc-sub td{border-top:1.5px solid var(--line2);border-bottom-style:solid}
   .end-tg{display:flex;align-items:center;gap:4px;font-weight:500;margin-top:3px;min-height:28px}
   @media (pointer:coarse){.end-tg{min-height:40px}}
   #cash-list{scroll-margin-top:130px;border-radius:10px;transition:background .6s}
@@ -1541,13 +1542,25 @@ Object.assign(SIM_UI, {
   cSeeAbove:{en:'See each line in the list above', th:'ดูรายการละเอียดด้านบน'},
   cWhyEnd:{en:'Where the money at the end comes from', th:'เงินคงเหลือตอนจบมาจากไหน'},
   cEndShow:{en:'See how it is worked out', th:'ดูที่มาของตัวเลข'}, cEndHide:{en:'Hide the breakdown', th:'ซ่อนที่มา'},
+  cBank:{en:'Money in your bank (the money to show)', th:'เงินในบัญชีของคุณ (เงินที่ต้องแสดง)'},
+  cBankN:{en:'What you start with when you apply for the visa', th:'เงินตั้งต้นตอนยื่นวีซ่า'},
+  cPayTu1:{en:'− Tuition and fees, year 1', th:'− ค่าเล่าเรียนและค่าธรรมเนียมปีแรก'},
+  cPayTu1N:{en:'Paid to the school before classes start', th:'จ่ายให้สถาบันก่อนเริ่มเรียน'},
+  cPayTr:{en:'− Flights to and from Canada', th:'− ค่าตั๋วเครื่องบินไปและกลับแคนาดา'},
+  cPayTrN:{en:'Kept for your flights', th:'กันไว้สำหรับค่าตั๋ว'},
+  cLeft:{en:'= Money left for living when you arrive', th:'= เงินที่เหลือไว้ใช้ชีวิตตอนไปถึง'},
+  cLeftN:{en:'The same as the IRCC living-cost amount', th:'เท่ากับยอดค่าครองชีพที่ IRCC กำหนดพอดี'},
+  cExpN:{en:'Rent, food, transport, phone and health insurance', th:'ค่าเช่า ค่าอาหาร ค่าเดินทาง ค่าโทรศัพท์ และประกันสุขภาพ'},
+  cTu2N:{en:'Paid when year 2 starts, only in 2-year programs', th:'จ่ายตอนขึ้นปีที่ 2 เฉพาะหลักสูตร 2 ปี'},
+  cNoY2:{en:'None (1-year program)', th:'ไม่มี (หลักสูตร 1 ปี)'},
+  cEndEq:{en:'= Money at the end', th:'= เงินคงเหลือตอนจบ'},
   cStart:{en:'Start: living money you bring (the IRCC amount)', th:'เริ่มต้น: เงินค่าครองชีพที่นำไป (ยอดของ IRCC)'},
   cStartN:{en:'Year-1 tuition and travel are already paid out of the money to show', th:'ค่าเล่าเรียนปีแรกและค่าเดินทาง จ่ายไปแล้วจากเงินที่ต้องแสดง'},
-  cIncAll:{en:'+ Take-home pay, all months', th:'+ รายได้สุทธิรวมทุกเดือน'},
-  cIncN:{en:'Study, Co-op, break and after-graduation months; the first month counts half (getting a SIN, finding a job)', th:'เดือนเรียน Co-op ปิดเทอม และหลังเรียนจบ เดือนแรกนับครึ่งเดียว (ขอ SIN และหางาน)'},
+  cIncAll:{en:'+ Pay from work, all months', th:'+ รายได้จากการทำงานรวมทุกเดือน'},
+  cIncN:{en:'Part-time and Co-op pay after tax. The first month counts half, while you get a SIN and find a job', th:'ค่าจ้างงานพาร์ตไทม์และ Co-op หลังหักภาษี เดือนแรกนับครึ่งเดียว เพราะต้องขอ SIN และหางาน'},
   cExpAll:{en:'− Living costs, all months', th:'− ค่าครองชีพรวมทุกเดือน'},
   cTu2All:{en:'− Tuition and fees, year 2', th:'− ค่าเล่าเรียนและค่าธรรมเนียมปีที่ 2'},
-  cEndNote:{en:'Money at the end = the IRCC living money you bring + take-home pay over all months − living costs over all months − year-2 tuition and fees. The setup reserve is not counted: it is spent on settling in. Each type uses its own months: see the "Study / Co-op / break" row.', th:'เงินคงเหลือตอนจบ = เงินค่าครองชีพที่นำไป (ยอดของ IRCC) + รายได้สุทธิรวมทุกเดือน − ค่าครองชีพรวมทุกเดือน − ค่าเล่าเรียนปีที่ 2 โดยไม่นับเงินสำรองตั้งตัว เพราะใช้ไปกับการตั้งตัวช่วงแรก แต่ละประเภทมีจำนวนเดือนต่างกัน ดูแถว "เรียน / Co-op / ปิดเทอม"'},
+  cEndNote:{en:'Read it from top to bottom: start with the money in your bank, take off year-1 tuition and the flights, and what is left is your living money when you arrive. Then add the pay from work and take off the living costs, month by month until the program ends (and year-2 tuition if the program is 2 years). What remains is the money at the end. The setup reserve (rent deposit, first purchases) is separate money and is not part of this sum.', th:'อ่านจากบนลงล่าง: เริ่มจากเงินในบัญชี หักค่าเล่าเรียนปีแรกและค่าตั๋วเครื่องบินออก ส่วนที่เหลือคือเงินไว้ใช้ชีวิตตอนไปถึง จากนั้นบวกรายได้จากการทำงาน และหักค่าครองชีพ ทุกเดือนจนจบหลักสูตร (ถ้าเรียน 2 ปี หักค่าเล่าเรียนปีที่ 2 ด้วย) ที่เหลือคือเงินคงเหลือตอนจบ ส่วนเงินสำรองตั้งตัว (เงินประกันห้อง ของใช้ช่วงแรก) เป็นเงินอีกก้อน ไม่ได้อยู่ในการคำนวณนี้'},
   cCoopHW:{en:'Co-op hours and wage', th:'ชั่วโมงและค่าจ้าง Co-op'},
   cNetC:{en:'Per month in Co-op terms', th:'ต่อเดือนช่วง Co-op'},
   cNote:{en:'Study-month numbers match across types because they depend only on part-time work and living costs. The differences come from tuition, fees, Co-op hours and wage, and the number of Co-op, break and after-graduation months.', th:'ตัวเลขของเดือนที่เรียนเท่ากันทุกประเภท เพราะขึ้นกับงานพาร์ตไทม์และค่าครองชีพเท่านั้น ส่วนที่ต่างกันมาจากค่าเล่าเรียน ค่าธรรมเนียม ชั่วโมงและค่าจ้าง Co-op และจำนวนเดือน Co-op ปิดเทอม หรือหลังเรียนจบ'}
@@ -4014,7 +4027,7 @@ function compareTypes(cur){
   const tr = (label, f, cls) => `<tr style="cursor:default" class="${cls || ''}"><td style="white-space:normal;min-width:200px">${label}</td>${rows.map(f).join('')}</tr>`;
   /* parts of the money at the end, straight from each month of the plan: start + pay − living costs − year-2 tuition = end */
   rows.forEach(r => { const ms = r.c.months; r.inc = ms.reduce((a, m) => a + m.inc, 0); r.paid = ms.reduce((a, m) => a + m.paid, 0); r.spend = r.c.exp * r.c.N; });
-  const anyY2 = rows.some(r => r.paid > 0), cu1 = {cur:curOf() === 'thb' ? 'thb' : 'cad'}, endOpen = !!(S.open && S.open.endWhy);
+  const cu1 = {cur:curOf() === 'thb' ? 'thb' : 'cad'}, endOpen = !!(S.open && S.open.endWhy);
   const lab = (t, sub, link) => `${t}<span class="block faint text-[12.5px]" style="font-weight:400">${sub}</span>${link ? `<button class="linkbtn text-[12.5px] mt-0.5" style="font-weight:500;display:inline-flex;align-items:center;gap:4px" data-act="jump" data-v="cash-list">${ic('arrow-up','icon-sm')}<span>${T(M.cSeeAbove)}</span></button>` : ''}`;
   const c0 = rows[0].c;
   return `
@@ -4032,10 +4045,14 @@ function compareTypes(cur){
       ${tr(T(M.cNetC), r => td(r, r.c.mC ? mny(r.c.netC, {sign:true, stack:true}) : '-', r.c.mC ? (r.c.netC < 0 ? 'neg' : 'pos') : ''))}
       ${tr(`<strong>${T(M.cEnd)}</strong><button class="linkbtn text-[12.5px] end-tg" data-act="endwhy" aria-expanded="${endOpen}" aria-label="${esc(T(M.cWhyEnd))}">${ic('calculator','icon-sm')}<span>${T(endOpen ? M.cEndHide : M.cEndShow)}</span>${ic(endOpen ? 'chevron-up' : 'chevron-down','icon-sm')}</button>`, r => td(r, `<strong>${mny(r.c.end, {sign:true, stack:true})}</strong>`, r.c.end < 0 ? 'neg' : ''), 'calc-end')}
       ${endOpen ? `
-      ${tr(lab('= ' + T(M.cStart), T(M.cStartN)), r => td(r, mny(r.c.proof, {stack:true})), 'calc')}
-      ${tr(lab(T(M.cIncAll), T(M.cIncN)), r => td(r, mny(r.inc, {sign:true, stack:true}), 'pos'), 'calc')}
-      ${tr(T(M.cExpAll), r => td(r, `${mny(-r.spend, {sign:true, stack:true})}<span class="msub">${r.c.N} ${T(M.months)} × ${mny(r.c.exp, cu1)}</span>`, 'neg'), 'calc')}
-      ${anyY2 ? tr(T(M.cTu2All), r => td(r, r.paid > 0 ? mny(-r.paid, {sign:true, stack:true}) : '-', r.paid > 0 ? 'neg' : ''), 'calc') : ''}` : ''}
+      ${tr(lab(T(M.cBank), T(M.cBankN)), r => td(r, mny(r.c.show, {stack:true})), 'calc')}
+      ${tr(lab(T(M.cPayTu1), T(M.cPayTu1N)), r => td(r, mny(-r.c.tu1, {sign:true, stack:true}), 'neg'), 'calc')}
+      ${tr(lab(T(M.cPayTr), T(M.cPayTrN)), r => td(r, mny(-r.c.travel, {sign:true, stack:true}), 'neg'), 'calc')}
+      ${tr(lab(`<strong>${T(M.cLeft)}</strong>`, T(M.cLeftN)), r => td(r, `<strong>${mny(r.c.proof, {stack:true})}</strong>`), 'calc calc-sub')}
+      ${tr(lab(T(M.cIncAll), T(M.cIncN)), r => td(r, `${mny(r.inc, {sign:true, stack:true})}<span class="msub">${r.c.N} ${T(M.months)}</span>`, 'pos'), 'calc')}
+      ${tr(lab(T(M.cExpAll), T(M.cExpN)), r => td(r, `${mny(-r.spend, {sign:true, stack:true})}<span class="msub">${r.c.N} ${T(M.months)} × ${mny(r.c.exp, cu1)}</span>`, 'neg'), 'calc')}
+      ${tr(lab(T(M.cTu2All), T(M.cTu2N)), r => td(r, r.paid > 0 ? mny(-r.paid, {sign:true, stack:true}) : `<span class="faint">${T(M.cNoY2)}</span>`, r.paid > 0 ? 'neg' : ''), 'calc')}
+      ${tr(`<strong>${T(M.cEndEq)}</strong>`, r => td(r, `<strong>${mny(r.c.end, {sign:true, stack:true})}</strong>`, r.c.end < 0 ? 'neg' : ''), 'calc calc-sub')}` : ''}
       ${tr(T(M.cExtra), r => td(r, r.c.extra > 0 ? mny(r.c.extra, {stack:true}) : '0', r.c.extra > 0 ? 'neg' : ''), endOpen ? 'calc-after' : '')}
     </tbody></table></div>
     ${endOpen ? `<p class="faint text-[13px] mt-2">${T(M.cEndNote)}</p>` : ''}
