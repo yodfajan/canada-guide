@@ -301,7 +301,7 @@
   .check.done .ckn{background:var(--green-soft);color:var(--green)}
   .check.is-next .ckn{background:var(--accent);color:#fff}
   .tprice{font-size:20px;font-weight:700;line-height:1.2}
-  section[id],div[id="masters"],div[id^="ckph-"],label.check[id]{scroll-margin-top:80px}
+  section[id],div[id="masters"],div[id="planner"],div[id^="ckph-"],label.check[id]{scroll-margin-top:80px}
   /* ---------- Cities map ---------- */
   #cmap{height:440px;border-radius:16px;overflow:hidden;z-index:0;background:var(--gray-soft)}
   @media (max-width:767px){#cmap{height:340px}}
@@ -427,6 +427,11 @@
   .tlink .pl-ic{vertical-align:-2px;margin-left:3px}
   .tlink:hover,.tlink:focus-visible{text-decoration:underline}
   @media (pointer:coarse){.plist a{min-height:44px;align-items:center}}
+  /* Checklist: official pages under each item */
+  .ck-links{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:6px;font-size:13.5px}
+  .ck-links a{color:var(--blue);text-decoration:none;font-weight:500}
+  .ck-links a:hover,.ck-links a:focus-visible{text-decoration:underline}
+  @media (pointer:coarse){.ck-links a{padding:6px 0}}
   /* Budget compare table: the parts of "money at the end" read as one sum, and a jump target for "see each line above" */
   .ctbl tr.calc-h td{padding-top:14px;font-size:12.5px;font-weight:600;color:var(--ink2);border-bottom:none;white-space:normal}
   .ctbl tr.calc td:first-child{padding-left:22px}
@@ -553,6 +558,16 @@ try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o && o.sim 
 if (!S.steps) S.steps = {};
 /* The English test step was split in two on 23 Nov 2026: a ticked old step means preparation is done too. */
 if (S.check && S.check.ielts && S.check['ielts-prep'] === undefined) S.check['ielts-prep'] = true;
+/* Which Checklist items each Start step covers ('planner' = the intake planner). Steps 10 to 12 happen in Canada and have none. */
+const STEP_CK = {s1:'planner', s2:['season'], s3:['ielts-prep','ielts'], s4:['shortlist'], s5:['transcript','resume','apply'], s6:['loa','pal'], s7:['funds','translate','sop','medical'], s8:['permit','bio'], s9:['arrive']};
+/* Start page ticks moved to the Checklist on 24 Nov 2026: a step ticked earlier ticks the Checklist items it covers, once. */
+if (S.steps && !S.stepsMoved) {
+  S.check = S.check || {};
+  Object.keys(S.steps).forEach(k => { if (S.steps[k] && Array.isArray(STEP_CK[k])) STEP_CK[k].forEach(id => { S.check[id] = true; }); });
+  S.stepsMoved = true;
+}
+/* The education question gained GPA bands on 24 Nov 2026: keep an earlier answer (no degree / average / good grades). */
+if (S.quiz && S.quiz.degree != null && S.quiz.edu == null) { S.quiz.edu = ({0:0, 1:2, 2:3})[S.quiz.degree]; delete S.quiz.degree; }
 const T = o => (o == null ? '' : (typeof o === 'function' ? T(o()) : (typeof o === 'string' ? o : (o[S.lang] ?? o.en))));
 const rnd = (n, to) => Math.round(n / to) * to;
 const rangeStr = (a, b) => a === b ? fmt(a) : fmt(a) + (S.lang === 'th' ? ' ถึง ' : ' to ') + fmt(b);
@@ -748,6 +763,9 @@ const OPTIONS = [
    ]}
 ];
 
+/* Quiz amounts in THB at today's rate, rounded to 10,000: tuition defaults and the money to show from the Budget page. */
+const qTHB = cad => fmt(Math.round(cad * (S.sim.rate || 24) / 10000) * 10000);
+function qShow(k){ const ty = SIMC.types[k]; return simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:true}).show; }
 const QUIZ = [
   {id:'goal', icon:'target', cat:{en:'Goal', th:'เป้าหมาย'},
    q:{en:'What is your real goal for the first year?', th:'เป้าหมายจริงของปีแรกคืออะไร'},
@@ -758,6 +776,7 @@ const QUIZ = [
    ]},
   {id:'budget', icon:'wallet', cat:{en:'Budget Risk', th:'ความเสี่ยงด้านงบ'},
    q:{en:'How much can you (or your sponsor) show and commit for year one, tuition plus living?', th:'คุณ (หรือสปอนเซอร์) แสดงเงินและพร้อมใช้ในปีแรกได้เท่าไร รวมค่าเรียนและค่าครองชีพ'},
+   hint:() => { const sh = k => qTHB(qShow(k)); return {en:`For comparison, the Budget page works out the money to show as about THB ${sh('private')} for a private Co-op, ${sh('public')} for a public college and ${sh('masters')} for a master's.`, th:`เทียบ: หน้างบคำนวณเงินที่ต้องแสดงไว้ประมาณ ${sh('private')} บาท (Co-op เอกชน) ${sh('public')} บาท (วิทยาลัยรัฐ) และ ${sh('masters')} บาท (ปริญญาโท)`}; },
    o:[
      {a:3,b:0,c:0,l:{en:'Under THB 900,000', th:'ต่ำกว่า 900,000 บาท'}},
      {a:1,b:2,c:1,l:{en:'THB 900,000 to 1,300,000', th:'900,000 ถึง 1,300,000 บาท'}},
@@ -765,6 +784,7 @@ const QUIZ = [
    ]},
   {id:'english', icon:'languages', cat:{en:'English', th:'ภาษาอังกฤษ'},
    q:{en:'Where is your English today?', th:'ระดับภาษาอังกฤษของคุณตอนนี้'},
+   hint:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall. Private Co-op colleges often accept their own placement test.', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 ส่วนวิทยาลัย Co-op เอกชนมักใช้ข้อสอบวัดระดับของสถาบันเองแทนได้'},
    o:[
      {a:3,b:0,c:0,l:{en:'Below IELTS 6.0, or never tested', th:'ต่ำกว่า IELTS 6.0 หรือยังไม่เคยสอบ'}},
      {a:1,b:2,c:1,l:{en:'Around 6.0. I can reach 6.5 with a few months of prep.', th:'ประมาณ 6.0 เตรียมตัวอีกไม่กี่เดือนน่าจะถึง 6.5'}},
@@ -778,11 +798,12 @@ const QUIZ = [
      {a:0,b:3,c:3,l:{en:'Back-office technical work: data, BI, systems, analysis.', th:'งานเทคนิคหลังบ้าน เช่น Data, BI, ระบบ, งานวิเคราะห์'}}
    ]},
   {id:'risk', icon:'shield', cat:{en:'Budget Risk', th:'ความเสี่ยงด้านงบ'},
-   q:{en:'If you decide Canada is not for you, how much loss can you accept?', th:'ถ้าพบว่าแคนาดาไม่ใช่ที่ของเรา ยอมรับการสูญเสียได้แค่ไหน'},
+   q:{en:'Say you go, find Canada is not for you, and come home. The tuition you already paid is gone. How much of that could you accept?', th:'สมมติว่าไปแล้วพบว่าแคนาดาไม่ใช่ที่ของเรา และกลับไทย ค่าเรียนที่จ่ายไปแล้วจะไม่ได้คืน คุณรับได้มากแค่ไหน'},
+   hint:{en:'Think of it as the price of trying. Each amount is a typical year of tuition for that option, at today\'s exchange rate.', th:'ให้มองว่าเป็น "ค่าลองของ" ตัวเลขในแต่ละข้อคือค่าเรียนทั่วไป 1 ปีของทางเลือกนั้น คิดตามอัตราแลกเปลี่ยนวันนี้'},
    o:[
-     {a:3,b:0,c:0,l:{en:'As little as possible. I want the cheapest exit.', th:'น้อยที่สุด อยากให้ถอยได้โดยเสียเงินน้อยสุด'}},
-     {a:1,b:2,c:1,l:{en:'A moderate amount is acceptable if I gain skills.', th:'เสียปานกลางได้ ถ้าได้ทักษะกลับมา'}},
-     {a:0,b:3,c:3,l:{en:'I accept a bigger investment because the credential has value anywhere.', th:'ยอมลงทุนมากขึ้นได้ เพราะวุฒิมีมูลค่าไม่ว่าอยู่ที่ไหน'}}
+     {a:3,b:0,c:0,l:() => ({en:`A little: no more than about THB ${qTHB(SIMC.types.private.def)}, a year at a private Co-op college`, th:`รับได้น้อย: ไม่เกินประมาณ ${qTHB(SIMC.types.private.def)} บาท เท่ากับค่าเรียน Co-op เอกชน 1 ปี`})},
+     {a:1,b:2,c:1,l:() => ({en:`Some: about THB ${qTHB(SIMC.types.public.def)}, a year at a public college, because I would still come home with a diploma and work experience`, th:`รับได้ปานกลาง: ประมาณ ${qTHB(SIMC.types.public.def)} บาท เท่ากับค่าเรียนวิทยาลัยรัฐ 1 ปี เพราะยังได้ Diploma และประสบการณ์ทำงานกลับมา`})},
+     {a:0,b:3,c:3,l:() => ({en:`A lot: THB ${qTHB(SIMC.types.masters.def)} or more, a year of a master's, because a Canadian degree still counts back in Thailand`, th:`รับได้มาก: ${qTHB(SIMC.types.masters.def)} บาทขึ้นไป เท่ากับค่าเรียนปริญญาโท 1 ปี เพราะวุฒิจากแคนาดายังมีค่าเมื่อกลับมาทำงานที่ไทย`})}
    ]},
   {id:'skill', icon:'database', cat:{en:'Background', th:'พื้นฐาน'},
    q:{en:'How strong is your background in data or technology?', th:'พื้นฐานด้านดาต้าหรือเทคโนโลยีของคุณแข็งแค่ไหน'},
@@ -793,17 +814,21 @@ const QUIZ = [
    ]},
   {id:'time', icon:'hourglass', cat:{en:'Lifestyle', th:'ไลฟ์สไตล์'},
    q:{en:'How do you feel about adding one extra year before PR?', th:'รู้สึกอย่างไรถ้าต้องใช้เวลาเพิ่มอีก 1 ปีก่อนได้ PR'},
+   hint:{en:'Starting with a private Co-op (Option A) usually adds about a year before you can apply for PR, because you then need a second program at a public school.', th:'การเริ่มด้วย Co-op เอกชน (ทางเลือก A) มักทำให้ใช้เวลาเพิ่มประมาณ 1 ปีก่อนยื่น PR ได้ เพราะหลังจากนั้นต้องเรียนต่ออีกหลักสูตรที่สถาบันรัฐ'},
    o:[
      {a:3,b:0,c:0,l:{en:'Fine. A slow, gentle start matters more to me.', th:'ไม่เป็นไร การเริ่มต้นแบบค่อยเป็นค่อยไปสำคัญกว่า'}},
-     {a:1,b:1,c:1,l:{en:'Neutral', th:'เฉย ๆ'}},
+     {a:1,b:1,c:1,l:{en:'Not sure; either is fine', th:'ไม่แน่ใจ ได้ทั้งสองแบบ'}},
      {a:0,b:3,c:2,l:{en:'I want the fastest route. Age points in Express Entry drop every year after 29. [[crs]]', th:'อยากได้เส้นทางเร็วที่สุด เพราะคะแนนอายุใน Express Entry ลดลงทุกปีหลังอายุ 29 [[crs]]'}}
    ]},
-  {id:'degree', icon:'school', cat:{en:'Education', th:'การศึกษา'},
-   q:{en:'What is your highest education so far?', th:'วุฒิการศึกษาสูงสุดของคุณตอนนี้คืออะไร'},
+  {id:'edu', icon:'school', cat:{en:'Education', th:'การศึกษา'},
+   q:{en:'What is your highest education, and your grade average (GPA)?', th:'วุฒิการศึกษาสูงสุด และเกรดเฉลี่ย (GPA) ของคุณ'},
+   hint:{en:'Low grades do not close the door. Private Co-op colleges rarely look at grades, and most public college post-graduate programs mainly ask for a finished bachelor\'s degree (some set a minimum, so check the program page). Master\'s programs usually ask for about a B (3.0), and some also weigh work experience.', th:'เกรดน้อยก็ไปได้ วิทยาลัย Co-op เอกชนแทบไม่ดูเกรด หลักสูตร Post-Graduate ของวิทยาลัยรัฐส่วนใหญ่ขอหลัก ๆ แค่จบปริญญาตรี (บางแห่งกำหนดเกรดขั้นต่ำ ควรเช็คในหน้าหลักสูตร) ส่วนปริญญาโทมักขอเกรดประมาณ B (3.0) และบางแห่งพิจารณาประสบการณ์ทำงานประกอบด้วย'},
    o:[
-     {a:2,b:2,c:0,l:{en:'No bachelor\'s degree yet', th:'ยังไม่มีปริญญาตรี'}},
-     {a:1,b:3,c:1,l:{en:'Bachelor\'s degree, average grades', th:'ปริญญาตรี เกรดปานกลาง'}},
-     {a:0,b:2,c:3,l:{en:'Bachelor\'s degree with good grades (about B or 3.0 and above)', th:'ปริญญาตรี เกรดดี (ประมาณ B หรือ 3.0 ขึ้นไป)'}}
+     {a:2,b:2,c:0,l:{en:'No bachelor\'s degree yet (high school, vocational certificate or diploma)', th:'ยังไม่มีปริญญาตรี (ม.6 ปวช. หรือ ปวส.)'}},
+     {a:2,b:3,c:0,l:{en:'Bachelor\'s degree, GPA under 2.50', th:'ปริญญาตรี เกรดเฉลี่ยต่ำกว่า 2.50'}},
+     {a:1,b:3,c:1,l:{en:'Bachelor\'s degree, GPA 2.50 to 2.99', th:'ปริญญาตรี เกรดเฉลี่ย 2.50 ถึง 2.99'}},
+     {a:0,b:2,c:3,l:{en:'Bachelor\'s degree, GPA 3.00 or higher', th:'ปริญญาตรี เกรดเฉลี่ย 3.00 ขึ้นไป'}},
+     {a:0,b:3,c:2,l:{en:'A master\'s degree or higher already', th:'จบปริญญาโทขึ้นไปแล้ว'}}
    ]},
   {id:'family', icon:'users', cat:{en:'Family', th:'ครอบครัว'},
    q:{en:'Will a spouse or partner come to Canada with you?', th:'จะมีคู่สมรสหรือคู่ชีวิตไปแคนาดาด้วยไหม'},
@@ -1302,6 +1327,16 @@ const CHECK = {
      why:{en:'Booking before approval risks losing money if the permit is refused.', th:'ถ้าจองก่อนได้รับอนุมัติ อาจเสียเงินหาก Permit ถูกปฏิเสธ'}, go:'cities'}
   ]
 };
+/* Official pages for each Checklist item (keys in SRC). Items about your own papers (passport, transcripts, resume) have none. */
+CHECK.official = {en:'Official pages', th:'หน้าเว็บทางการ'};
+const CHECK_SRC = {season:['funds'], 'ielts-prep':['idp'], ielts:['idp','bcreg'], shortlist:['dli','pgwpfos'], apply:['educan','dli'], loa:['dli','docs'], pal:['pal'],
+  funds:['funds'], translate:['trguide'], sop:['docs'], medical:['med'], permit:['sp','fees','proc'], bio:['vac','vfsfees'], arrive:['arrive']};
+/* shorter or clearer link text where the source title needs its publisher to make sense on its own */
+const CHECK_LBL = {idp:{en:'IDP: IELTS fees and booking', th:'IDP: ค่าสอบและการจอง IELTS'}, vfsfees:{en:'VFS Global (Bangkok VAC): service charges', th:'VFS Global (ศูนย์รับคำร้องกรุงเทพฯ): ค่าบริการ'}, proc:{en:'IRCC: processing times', th:'IRCC: ระยะเวลาพิจารณา'}};
+function ckLinks(id){
+  const ks = (CHECK_SRC[id] || []).filter(k => SRC[k]); if (!ks.length) return '';
+  return `<span class="ck-links"><span class="faint inline-flex items-center gap-1">${ic('external-link','icon-sm')}${T(CHECK.official)}</span>${ks.map(k => `<a href="${SRC[k].u}" target="_blank" rel="noopener noreferrer">${T(CHECK_LBL[k] || SRC[k].l)}</a>`).join('')}</span>`;
+}
 
 const IELTSQ = {
   title:{en:'Studied an international program? Do you still need IELTS?', th:'จบหลักสูตรนานาชาติมา ยังต้องสอบ IELTS ไหม'},
@@ -1921,6 +1956,8 @@ GLOSS.push({k:{en:'Tips', th:'ทิป'}, c:'money', s:'tipscra', m:['ทิป
 Object.assign(SRC, {
   vac:{u:'https://www.canada.ca/en/immigration-refugees-citizenship/corporate/contact-ircc/offices/find-visa-application-centre.html', o:IRCCN, l:{en:'Find a visa application centre', th:'ค้นหาศูนย์รับคำร้องวีซ่า (VAC)'}},
   vfsfees:{u:'https://visa.vfsglobal.com/tha/en/can/service-charges', o:{en:'VFS Global, Canada VAC Thailand', th:'VFS Global ศูนย์รับคำร้องวีซ่าแคนาดาในไทย'}, l:{en:'Service charges from 1 November 2026', th:'ค่าบริการ มีผลตั้งแต่ 1 พฤศจิกายน 2026'}},
+  bcreg:{u:'https://ieltsregistration.britishcouncil.org/?country=TH', o:{en:'British Council Thailand', th:'British Council ประเทศไทย'}, l:{en:'Book IELTS with British Council', th:'จองสอบ IELTS กับ British Council'}},
+  educan:{u:'https://www.educanada.ca/thailand-thailande/index.aspx?lang=eng', o:{en:'Government of Canada (EduCanada)', th:'รัฐบาลแคนาดา (EduCanada)'}, l:{en:'EduCanada: studying in Canada from Thailand', th:'EduCanada: เรียนต่อแคนาดาสำหรับคนไทย'}},
   vfspass:{u:'https://visa.vfsglobal.com/tha/en/can/passport-submission', o:{en:'VFS Global, Canada VAC Thailand', th:'VFS Global ศูนย์รับคำร้องวีซ่าแคนาดาในไทย'}, l:{en:'Passport submission after approval', th:'การยื่นพาสปอร์ตหลังได้รับอนุมัติ'}},
   biovalid:{u:IRCC+'biometrics/when-to-give-temporary-residence.html', o:IRCCN, l:{en:'Biometrics are valid for 10 years (temporary residence)', th:'Biometrics ใช้ได้ 10 ปี (วีซ่าและใบอนุญาตชั่วคราว)'}},
   biopr:{u:IRCC+'biometrics/when-to-give-permanent-residence.html', o:IRCCN, l:{en:'Biometrics every time you apply for PR', th:'ต้องเก็บ Biometrics ทุกครั้งที่ยื่น PR'}},
@@ -2022,8 +2059,16 @@ const READY_UI = {
 
 const START = {
   h1:{en:'From zero to landing in Canada, in 12 steps', th:'จากศูนย์จนถึงวันลงเครื่องที่แคนาดา ใน 12 ขั้นตอน'},
-  lead:{en:'Follow the steps in order. Each one tells you when to do it, exactly what to do, what it costs, and where to go next. Tick a step when it is done; your progress is saved on this device.', th:'ทำตามทีละขั้นตามลำดับ แต่ละขั้นบอกว่าควรทำเมื่อไร ต้องทำอะไรบ้าง ใช้เงินเท่าไร และไปต่อที่ไหน ทำเสร็จแล้วติ๊กถูกได้เลย ความคืบหน้าจะถูกบันทึกไว้ในเครื่องนี้'},
-  progress:{en:'steps done', th:'ขั้นตอนที่ทำแล้ว'}, done:{en:'Done', th:'ทำแล้ว'}, cost:{en:'Cost', th:'ค่าใช้จ่าย'},
+  lead:{en:'Follow the steps in order. Each one tells you when to do it, what to do, what it costs, and where to go next. To tick off what you have done and find the official pages, open the matching items in the Checklist, which has more detail.', th:'ทำตามทีละขั้นตามลำดับ แต่ละขั้นบอกว่าควรทำเมื่อไร ต้องทำอะไรบ้าง ใช้เงินเท่าไร และไปต่อที่ไหน ส่วนการติ๊กว่าทำแล้วและลิงก์ไปหน้าเว็บทางการ อยู่ในหน้าเช็กลิสต์ซึ่งละเอียดกว่า กดปุ่มในแต่ละขั้นเพื่อไปที่ข้อที่ตรงกัน'},
+  progress:{en:'Your progress in the Checklist', th:'ความคืบหน้าในเช็กลิสต์'}, done:{en:'Done', th:'ทำแล้ว'}, cost:{en:'Cost', th:'ค่าใช้จ่าย'},
+  openCk:{en:'Open the Checklist', th:'เปิดเช็กลิสต์'},
+  seeCk:{en:n => `See in the Checklist: ${n}`, th:n => `ดูในเช็กลิสต์: ${n}`},
+  itemN:{en:(a, b) => b > a ? `items ${a} to ${b}` : `item ${a}`, th:(a, b) => b > a ? `ข้อ ${a} ถึง ${b}` : `ข้อ ${a}`},
+  planCk:{en:'Set your intake in the Checklist planner', th:'ตั้งรอบเปิดเรียนในตัววางแผนของเช็กลิสต์'},
+  ckDone:{en:'Done in the Checklist', th:'ทำแล้วในเช็กลิสต์'},
+  ckPart:{en:(d, n) => `${d} of ${n} done in the Checklist`, th:(d, n) => `ทำแล้ว ${d} จาก ${n} ข้อในเช็กลิสต์`},
+  /* which Checklist items each step covers; steps 10 to 12 happen in Canada and keep their official link here */
+  ckMap:STEP_CK,
   before:{en:'before classes start', th:'ก่อนเปิดเรียน'},
   glossT:{en:'Words you will see everywhere', th:'คำศัพท์ที่จะเจอบ่อย'},
   gloss:[
@@ -2083,7 +2128,7 @@ const START = {
         {en:'Letter of explanation: why this program, how it fits your career, and why you will follow the rules of your stay.', th:'Letter of Explanation: ทำไมเลือกหลักสูตรนี้ เชื่อมกับอาชีพอย่างไร และเหตุผลที่จะปฏิบัติตามเงื่อนไขการพำนัก'},
         
         {en:'Upfront medical exam with an IRCC panel physician (IOM Bangkok), digital photo, and English translations of Thai documents. [[docs]] [[med]]', th:'ตรวจสุขภาพล่วงหน้ากับแพทย์ที่ IRCC รับรอง (IOM กรุงเทพฯ) รูปถ่ายดิจิทัล และคำแปลภาษาอังกฤษของเอกสารภาษาไทย [[docs]] [[med]]'}],
-     c:() => T({en:'Medical about THB 5,000 to 8,000; translations THB 1,000 to 5,000', th:'ตรวจสุขภาพประมาณ 5,000 ถึง 8,000 บาท ค่าแปลเอกสาร 1,000 ถึง 5,000 บาท'}), go:{tab:'prep', anchor:'ckph-3', l:{en:'Open the document checklist', th:'เปิดเช็กลิสต์เอกสาร'}}, link:IRCC+'study-canada/study-permit/get-documents.html'},
+     c:() => T({en:'Medical about THB 5,000 to 8,000; translations THB 1,000 to 5,000', th:'ตรวจสุขภาพประมาณ 5,000 ถึง 8,000 บาท ค่าแปลเอกสาร 1,000 ถึง 5,000 บาท'}), link:IRCC+'study-canada/study-permit/get-documents.html'},
     {id:'s8', icon:'stamp', m:{en:'4 to 6 months', th:'4 ถึง 6 เดือน'}, t:{en:'Apply online for the study permit', th:'ยื่นขอ Study Permit ออนไลน์'},
      d:[{en:'Create an IRCC secure account, answer the questionnaire, upload everything, and pay online.', th:'สร้างบัญชี IRCC ตอบแบบสอบถาม อัปโหลดเอกสารทั้งหมด และชำระเงินออนไลน์'},
         
@@ -2807,13 +2852,18 @@ const COSTS = {
 const tabL = id => UI.tabs.find(t => t.id === id).l;
 
 function viewStart(){
-  const A = START, done = A.steps.filter(s => S.steps[s.id]).length, pct = Math.round(done/A.steps.length*100);
-  const steps = A.steps.map((s,i) => `
+  const A = START, cs = checkStats(), idxOf = id => CHECK.items.findIndex(it => it.id === id) + 1;
+  /* a step counts as done when every Checklist item it covers is ticked */
+  const stat = s => { const m = A.ckMap[s.id]; if (!Array.isArray(m)) return null; const d = m.filter(id => S.check[id]).length; return {d, n:m.length, all:d === m.length}; };
+  const ckBtn = s => { const m = A.ckMap[s.id]; if (!m) return '';
+    if (m === 'planner') return `<button class="btn btn-ghost" style="font-size:14px" data-act="tab" data-v="prep" data-anchor="planner">${ic('calendar-days','icon-sm')}${T(A.planCk)}</button>`;
+    const ns = m.map(idxOf); return `<button class="btn btn-ghost" style="font-size:14px" data-act="tab" data-v="prep" data-anchor="ck-${m[0]}">${ic('list-checks','icon-sm')}${T(A.seeCk)(T(A.itemN)(Math.min(...ns), Math.max(...ns)))}</button>`; };
+  const steps = A.steps.map((s,i) => { const st = stat(s); return `
     <div class="tl-step">
-      <div class="tl-dot ${S.steps[s.id]?'goal':''}">${S.steps[s.id]?ic('check','icon-sm'):i+1}</div>
+      <div class="tl-dot ${st && st.all?'goal':''}">${st && st.all?ic('check','icon-sm'):i+1}</div>
       <div class="card">
-        
-        <span class="badge b-blue">${ic('clock','icon-sm')}${T(s.m)}${i<9?' '+T(A.before):''}</span>
+
+        <div class="flex flex-wrap items-center gap-2"><span class="badge b-blue">${ic('clock','icon-sm')}${T(s.m)}${i<9?' '+T(A.before):''}</span>${st && st.d ? `<span class="badge ${st.all ? 'b-green' : 'b-gray'}">${ic(st.all ? 'circle-check' : 'circle-dashed','icon-sm')}${st.all ? T(A.ckDone) : T(A.ckPart)(st.d, st.n)}</span>` : ''}</div>
         
         <h2 class="text-[18px] font-semibold mt-3 flex items-start gap-2"><span style="color:var(--blue);margin-top:4px">${ic(s.icon)}</span><span>${T(s.t)}</span></h2>
         
@@ -2824,14 +2874,14 @@ function viewStart(){
         <div class="flex flex-wrap gap-2 mt-3">
         
           ${s.go?`<button class="btn btn-primary" style="padding:7px 16px;font-size:14px" data-act="tab" data-v="${s.go.tab}" ${s.go.anchor?`data-anchor="${s.go.anchor}"`:''}>${T(s.go.l)}${ic('arrow-right','icon-sm')}</button>`:''}
-        
-          ${s.link?`<a class="btn btn-ghost" style="font-size:14px" href="${s.link}" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T({en:'Official page', th:'หน้าเว็บทางการ'})}</a>`:''}
-        
+
+          ${ckBtn(s)}
+
+          ${s.link && !A.ckMap[s.id] ? `<a class="btn btn-ghost" style="font-size:14px" href="${s.link}" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T({en:'Official page', th:'หน้าเว็บทางการ'})}</a>` : ''}
+
         </div>
-        
-        <label class="check tap text-[15px] font-medium mt-3" style="display:flex;align-items:center;padding:10px 0 0;border-top:1px solid var(--line);width:100%"><input type="checkbox" style="margin:0" data-step="${s.id}" ${S.steps[s.id]?'checked':''}>${T(A.done)}</label>
       </div>
-    </div>`).join('');
+    </div>`; }).join('');
   return `
     <section class="mb-8" style="max-width:820px">
       <h1 class="text-[28px] sm:text-[42px] font-bold">${T(A.h1)}</h1>
@@ -2842,10 +2892,11 @@ function viewStart(){
         
         <div class="card mb-6">
         
-          <div class="flex justify-between text-[14px] mb-2"><span class="muted">${T(A.progress)}</span><span class="num font-semibold">${done} / ${A.steps.length}</span></div>
-        
-          <div class="bar"><i style="width:${pct}%;background:var(--green)"></i></div>
-        
+          <div class="flex justify-between text-[14px] mb-2"><span class="muted">${T(A.progress)}</span><span class="num font-semibold">${cs.done} / ${cs.total}</span></div>
+
+          <div class="bar"><i style="width:${cs.pct}%;background:var(--green)"></i></div>
+
+          <button class="btn btn-ghost mt-3" style="font-size:14px" data-act="tab" data-v="prep" ${cs.next ? `data-anchor="ck-${cs.next.id}"` : ''}>${ic('list-checks','icon-sm')}${T(A.openCk)}${ic('arrow-right','icon-sm')}</button>
         </div>
         
         <div class="tl">${steps}</div>
@@ -3070,7 +3121,8 @@ function viewQuiz(){
   const qs = QUIZ.map((q,qi) => `
     <div class="card">
       <div class="flex items-center gap-2 mb-2"><span class="badge b-gray">${ic(q.icon,'icon-sm')}${T(q.cat)}</span><span class="faint text-[13px] num">${qi+1} / ${QUIZ.length}</span></div>
-      <h3 class="text-[17px] font-semibold mb-3">${T(q.q)}</h3>
+      <h3 class="text-[17px] font-semibold ${q.hint ? 'mb-1' : 'mb-3'}">${T(q.q)}</h3>
+      ${q.hint ? `<p class="muted text-[13.5px] mb-3 flex gap-1.5"><span style="color:var(--blue);margin-top:2px">${ic('info','icon-sm')}</span><span>${T(q.hint)}</span></p>` : ''}
       <div class="grid gap-2">${q.o.map((o,oi) => `<button class="opt ${S.quiz[q.id]===oi?'on':''}" data-act="quiz" data-q="${q.id}" data-o="${oi}" aria-pressed="${S.quiz[q.id]===oi}">${T(o.l)}</button>`).join('')}</div>
     </div>`).join('');
   let res;
@@ -3593,6 +3645,7 @@ function viewPrep(){
       <h2 class="text-[22px] font-semibold mt-1">${T(nx.t)}</h2>
       <p class="text-[15px] mt-2">${T(nx.d)}</p>
       <p class="muted text-[14.5px] mt-2"><strong>${T(C.why)}:</strong> ${T(nx.why)}</p>
+      ${ckLinks(nx.id)}
       ${nx.live === 'proc' && LIVE.pt ? `<p class="mt-2"><span class="badge b-green">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(LIVE.pt.study)}</span></p>` : ''}
       <div class="flex flex-wrap gap-2 mt-4">
         
@@ -3622,6 +3675,7 @@ function viewPrep(){
             ${it.live === 'proc' && LIVE.pt ? `<span class="badge b-green mt-1">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(LIVE.pt.study)}</span>` : ''}
         
             <span class="flex items-start gap-1.5 faint text-[13.5px] mt-1"><span style="margin-top:3px">${ic('lightbulb','icon-sm')}</span><span>${T(it.why)}</span></span>
+            ${ckLinks(it.id)}
             <span class="flex flex-wrap items-center gap-2 mt-2">
               <span class="faint text-[13px] inline-flex items-center gap-1">${ic('calendar','icon-sm')}<span>${T(U.planned)}</span></span>
               <input type="date" class="numin" style="width:150px" data-plan="${it.id}" value="${pd[it.id].date}" aria-label="${esc(T(U.planned) + ': ' + T(it.t))}">
