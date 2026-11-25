@@ -33,7 +33,7 @@ colors:
   ink-dark: "rgba(255,255,255,.9)"
   hairline: "rgba(0,0,0,.09)"
   hairline-strong: "rgba(0,0,0,.15)"
-  series-blue: "#2a78d6"
+  series-blue: "#2672d0"
   series-orange: "#eb6834"
   series-green: "#1baf7a"
   series-amber: "#eda100"
@@ -59,6 +59,11 @@ typography:
     fontSize: "24px"
     fontWeight: 600
     lineHeight: 1.3
+  card-headline:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Inter, Sukhumvit Set, Noto Sans Thai, sans-serif"
+    fontSize: "20px"
+    fontWeight: 600
+    lineHeight: 1.3
   title:
     fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Inter, Sukhumvit Set, Noto Sans Thai, sans-serif"
     fontSize: "17px"
@@ -69,11 +74,31 @@ typography:
     fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.6
+  secondary:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Inter, Sukhumvit Set, Noto Sans Thai, sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.5
+  control:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Inter, Sukhumvit Set, Noto Sans Thai, sans-serif"
+    fontSize: "13.5px"
+    fontWeight: 500
+    lineHeight: 1.4
+  caption:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Inter, Sukhumvit Set, Noto Sans Thai, sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.5
   label:
     fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Inter, Sukhumvit Set, Noto Sans Thai, sans-serif"
     fontSize: "12.5px"
     fontWeight: 500
     lineHeight: 1.6
+  micro:
+    fontFamily: "-apple-system, BlinkMacSystemFont, SF Pro Text, Inter, Sukhumvit Set, Noto Sans Thai, sans-serif"
+    fontSize: "12px"
+    fontWeight: 600
+    lineHeight: 1.5
 rounded:
   chip: "5px"
   field: "10px"
@@ -193,7 +218,7 @@ A cool, misty neutral world with a single system-blue accent, soft tinted wallpa
 ### Named Rules
 **The One Accent Rule.** System blue is the only colour that means "act here". Green, amber and red are status, never decoration, and are never used for buttons.
 
-**The Fixed Series Rule.** The six data colours always appear in the same order with a legend or label beside them; colour alone never carries meaning. On the amber series colour, text is near-black (`#0b0b0b`), not white.
+**The Fixed Series Rule.** The six data colours always appear in the same order with a legend or label beside them; colour alone never carries meaning. On the amber series colour, text is near-black (`#0b0b0b`), not white. Series Blue is `#2672d0` so white labels on it reach 4.8:1; in the dark theme the blue and deep green are lighter, so their labels switch to near-black (5.4:1 and 5.8:1).
 
 ## Typography
 
@@ -206,11 +231,19 @@ A cool, misty neutral world with a single system-blue accent, soft tinted wallpa
 ### Hierarchy
 - **Hero** (700, 44px, 34px on phones, line height 1.1, tracking -0.02em): the one big money figure, such as the total savings goal.
 - **Display** (700, 30px on phones to 38px from 640px, line height 1.3): page titles, one per tab. The Start page title runs larger, 28px to 42px.
-- **Headline** (600, 20 to 24px, line height 1.3): section headings inside a page (agents, tests, master's examples).
-- **Title** (600, 17 to 18px): card headings and checklist phase headings.
-- **Body** (400, 15px, 16px for list rows on phones, line height 1.6): paragraphs, list items, table cells. Keep lead paragraphs near 62 to 75 characters wide.
-- **Label** (500, 12.5px, Ink Tertiary): eyebrows above values, column headers (12px, 600), small captions (13 to 13.5px).
+- **Headline** (600, 24px, line height 1.3): a section heading that sits between cards (All Costs by section, the three paths, the quiz, English tests, agents).
+- **Card headline** (600, 20px): the heading of a full-width card (PGWP rules, Express Entry draws, compare all cities, master's examples), a sheet title, and a verdict or "do this next" line (quiz result, Budget verdict, the Checklist's next item).
+- **Title** (600, 17px): every other card heading, including Start steps, Roadmap and Checklist phases, the three path cards, Fields cards and quiz questions. The lead paragraph under a page title is also 17px, at weight 400 in Ink Secondary.
+- **Body** (400, 15px, 16px for list rows on phones, line height 1.6): paragraphs, list items, notes in tinted boxes and the line under a section heading. Paragraphs in the page stop at 75 characters (`#app p{max-width:75ch}`), and lead paragraphs near 62.
+- **Secondary** (400, 14px): helper lines in cards, table cells and the reference list.
+- **Control** (500, 13.5px): buttons, segmented controls and chips (14.5px on touch screens).
+- **Caption** (400, 13px, Ink Tertiary): notes under a control or a figure.
+- **Label** (500, 12.5px, Ink Tertiary): eyebrows above values and the names of values in stacked rows; **Micro** (600, 12px) for column headers, units and badges.
 - **Values** (700, 20px in stat tiles): headline numbers inside tiles.
+
+No half sizes outside Control and Label: 14.5, 15.5, 17.5 and 19px were folded into the nearest step on 25 November 2026.
+
+**Thai line breaks.** Paragraphs, list items and definitions use `text-wrap: pretty` so a lone word never sits on the last line, and headings use `text-wrap: balance`. Where the browser's Thai dictionary splits a word it does not know (such as "เช็กลิสต์" or "ตัดสินใจ" in a large heading), the word is wrapped in a `whitespace-nowrap` span; a unit such as "ชม./สัปดาห์" never breaks.
 
 ### Named Rules
 **The Tabular Money Rule.** Every amount, count, date and chart label uses tabular figures so columns of money line up.
@@ -223,7 +256,7 @@ A single centred column (max width 1040px) inside the window, with 16px side pad
 
 The toolbar is a 56px sticky strip whose background blurs and fades out with a mask as content scrolls under it. Navigation is a floating tab dock: a full-width rounded bar 10px from the bottom on phones and tablets, and a centred dock (max width 1010px, 16px from the bottom) on computers, where icons and labels sit side by side. The body keeps 88px of bottom padding so the dock never covers content.
 
-Breakpoints: 400px (smaller dock icons; dock labels stay 11px and each dock cell is at least as wide as its label), 640px (tables gain column headers, calendar shows chips instead of dots), 768px (multi-column grids), 1024px (centred dock, scroll-following simulator controls, mini summary bar hidden). Under 1024px or on coarse pointers, every control grows to a 44px touch target and text inputs use 16px text to avoid zoom on focus.
+Breakpoints: 400px (smaller dock icons; dock labels stay 11px and each dock cell is at least as wide as its label), 640px (tables gain column headers, calendar shows chips instead of dots), 768px (multi-column grids), 1024px (centred dock, scroll-following simulator controls, mini summary bar hidden). Below 1024px the Budget reads goal card and verdict first, then the controls, then the month-by-month detail and charts; the mini summary bar floats under the toolbar only while the goal card is off screen. Under 1024px or on coarse pointers, every control grows to a 44px touch target and text inputs use 16px text to avoid zoom on focus.
 
 ## Elevation & Depth
 
@@ -256,9 +289,13 @@ Tactile glass pills that press in slightly.
 - **Link button:** unstyled text in Link Blue, medium weight, underline on hover, for inline actions such as "Use default".
 
 ### Segmented controls
-The main choice control (language, currency, program type, intake, filters).
+The main choice control for two to four short options (language, currency, program type, intake month, scenario).
 - **Track:** Gray Wash pill with a hairline inset ring, 3px padding.
 - **Segments:** transparent pills, 13.5px medium text; the selected segment becomes Glass Dense with a raised shadow. In the toolbar the whole control is glass.
+- **Never wraps:** a choice with more options (start year, Checklist intake year, Fields group and status filters, the city on Cities) uses the pop-up menu instead.
+
+### Pop-up menu
+A native select drawn as an AppKit pop-up button: Glass Dense pill, Glass Edge rim, raised-control shadow, 15px semibold text (16px and 44px tall on touch), a 14px chevron on the right in Ink Tertiary, focus ring as for buttons. A Checklist year not yet chosen shows a disabled "Choose a year" first option.
 
 ### Chips and badges
 - **Badges:** 12px semibold pills, 2px 10px padding, a soft wash with matching text (blue, green, amber, red, gray). Used for status ("official fee", "estimate", "should have started"), counts and evidence links.
@@ -290,6 +327,9 @@ The Calendar card switches between two views with a segmented control. "My Googl
 
 ### Add to Google control
 An item not yet added shows a glass "Add to Google Calendar" button; once added it becomes a green "Added to Google" badge with a Remove link (an amber badge appears if the planned date changed since).
+
+### Tables on phones
+Under 640px no table asks for sideways scrolling. The example programs table stacks each school into a block: school and program on top, then one row per value with its column name as a 12.5px Label on the left and the value on the right. The Budget compare table keeps its three program types as columns and puts each row name on its own full-width line above the three values, at 13.5px. Both keep `role` attributes (table, row, columnheader, rowheader, cell) so screen readers still read a table after CSS changes the display.
 
 ### Charts
 Line, bar and stacked bar charts drawn as inline SVG: 1px grid lines in a faint ink, 12px tabular axis labels in Ink Tertiary, a 2px series line with a 10% area fill, glass tooltips (10px radius, blur 20px), legends with 10px rounded swatches, and every chart offering a "show as a table" fallback.
