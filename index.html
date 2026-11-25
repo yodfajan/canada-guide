@@ -92,10 +92,25 @@
   .toolbar .seg button{min-height:28px}
   .toolbar .seg{flex:none;flex-wrap:nowrap}
   /* phones: the dock already names the current page, so the toolbar keeps its controls on one line instead of a clipped title */
-  @media (max-width:419px){.tb-title > *{display:none}}
+  @media (max-width:419px){.tb-title > *{display:none} .toolbar{column-gap:7px}}
+  .chip-unit{display:inline} @media (min-width:1024px){.chip-unit{display:none}}
   .tb-title{font-size:15px;font-weight:700;margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .wrap{max-width:1040px;margin:0 auto;padding:22px 16px}
-  #app h1{font-size:26px;font-weight:700}
+  #app h1{font-weight:700}
+  #app:focus,#app h1:focus{outline:none} #app h1:focus-visible{outline:3px solid var(--ring);outline-offset:4px;border-radius:6px}
+  /* keyboard and screen-reader helpers (26 Nov 2026) */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .skip-link{position:fixed;left:12px;top:-80px;z-index:200;padding:10px 16px;border-radius:12px;background:var(--glass-strong,#fff);color:var(--ink);font-weight:600;font-size:15px;box-shadow:0 10px 30px rgba(30,40,70,.18)}
+  .skip-link:focus{top:12px;outline:3px solid var(--ring);outline-offset:2px}
+  /* touch: toolbar controls stay small to the eye but take a 44px hit area */
+  @media (pointer:coarse),(max-width:1023px){
+    .tb-btn,.toolbar .seg button,#fx-chip{position:relative}
+    .tb-btn::after{content:'';position:absolute;inset:-5px}
+    .toolbar .seg button::after,#fx-chip::after{content:'';position:absolute;inset:-5px -2px}
+  }
+  /* dark mode: the open page's dock label in near-white (blue on glass was about 3.4:1); the icon keeps the blue */
+  :root[data-theme="dark"] .bnav button.on{color:#fff} :root[data-theme="dark"] .bnav button.on svg{color:var(--blue)}
+  html body input::placeholder,html body textarea::placeholder{color:var(--ink3);opacity:1}
   #app h1 + p{font-size:15px;margin-top:8px}
   @media (min-width:1024px){
     .toolbar{padding-left:28px;padding-right:28px}
@@ -124,6 +139,7 @@
   .b-amber{background:var(--amber-soft);color:var(--amber)}
   .b-red{background:var(--red-soft);color:var(--red)}
   .b-blue{background:var(--blue-soft);color:var(--blue)}
+  :root:not([data-theme="dark"]) .b-blue{color:#0058C2}   /* light mode: Link Blue on its own tint measured 4.49:1 at 12px */
   .b-gray{background:var(--gray-soft);color:var(--ink2)}
   /* Citations */
   sup.cite{font-size:.68em;line-height:0;vertical-align:super;margin-left:1px;white-space:nowrap}
@@ -146,6 +162,8 @@
   details.fcard>summary::-webkit-details-marker{display:none}
   details.fcard .chev{transition:transform .2s;color:var(--ink3)}
   details.fcard[open] .chev{transform:rotate(90deg)}
+  /* an opened field card takes the full row, so its neighbour is not left beside a tall empty gap */
+  .fgrid>details.fcard[open]{grid-column:1/-1}
   .grp-h{font-size:13px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;margin:26px 0 10px}
   .icon{width:18px;height:18px;flex:none} .icon-sm{width:14px;height:14px;flex:none}
   .tile{width:36px;height:36px;border-radius:11px;box-shadow:var(--specular);display:flex;align-items:center;justify-content:center;flex:none}
@@ -164,7 +182,9 @@
   .btn{border:1px solid var(--glass-border);border-radius:999px;min-height:32px;padding:4px 16px;font:inherit;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;
     display:inline-flex;align-items:center;gap:6px;text-decoration:none;background:var(--glass-strong);color:var(--ink);
     box-shadow:0 3px 10px rgba(30,40,70,.12),var(--specular);transition:transform .18s cubic-bezier(.2,.8,.2,1)}
-  .btn-primary{border-color:rgba(255,255,255,.28);background:var(--accent) linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,0) 55%);color:#fff;
+  /* primary: never lighter than the accent behind its white text (4.8:1); depth comes from a soft shade toward the
+     bottom and the 1px top rim, not a white sheen (the sheen dropped the text to 3.1 to 3.9:1) */
+  .btn-primary{border-color:rgba(255,255,255,.28);background:var(--accent) linear-gradient(rgba(0,0,0,0) 40%,rgba(0,0,0,.14));color:#fff;
     box-shadow:0 5px 14px rgba(0,90,200,.32),inset 0 1px 0 rgba(255,255,255,.5)}
   .btn:active{transform:scale(.97)}
   .btn-ghost{color:var(--ink)}
@@ -241,7 +261,7 @@
   @media (prefers-reduced-motion:reduce){.fade{animation:none}.bar>i{transition:none}html{scroll-behavior:auto}}
 
   /* ---------- phone and tablet: bottom tab bar ---------- */
-  .bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));
+  .bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(8,minmax(min-content,1fr));
     background:var(--toolbar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
     border-top:1px solid var(--line2);padding:4px max(4px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))}
   .bnav button{border:0;background:none;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
@@ -250,7 +270,7 @@
   .bnav button.on{color:var(--blue);font-weight:600}
   .bnav button:active{background:var(--hover)}
   .bnav svg{width:22px;height:22px}
-  @media (max-width:400px){.bnav button{font-size:10.5px}.bnav svg{width:21px;height:21px}}
+  @media (max-width:400px){.bnav svg{width:21px;height:21px}}
   /* ---------- Budget charts (dataviz reference palette, validated on the card surfaces) ---------- */
   :root{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--grid:rgba(0,0,0,.08);--axis:rgba(0,0,0,.22);--crit:#d03b3b;--warn:#b26b00;--good:#1D7A33}
   :root[data-theme="dark"]{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#0ca30c;--grid:rgba(255,255,255,.08);--axis:rgba(255,255,255,.22);--crit:#ff6f66;--warn:#ffa826;--good:#32d74b}
@@ -278,12 +298,12 @@
   .sw.s1,.segbar .s1{background:var(--s1)} .sw.s2,.segbar .s2{background:var(--s2)} .sw.s3,.segbar .s3{background:var(--s3)} .sw.s4,.segbar .s4{background:var(--s4)} .sw.s5,.segbar .s5{background:var(--s5)} .sw.s6,.segbar .s6{background:var(--s6)}
   .segbar{display:flex;gap:2px;height:28px}
   .segbar>div{border-radius:4px;min-width:3px;color:#fff;font-size:12.5px;font-weight:600;display:flex;align-items:center;padding-left:6px;font-variant-numeric:tabular-nums;cursor:default}
-  .segbar>.s4{color:#0b0b0b}
+  .segbar>.s2,.segbar>.s3,.segbar>.s4,.segbar>.s5{color:#0b0b0b}
   .segbar>div.hov{filter:brightness(1.08)}
   .tline{display:flex;gap:2px;height:30px}
   .tline>div{border-radius:4px;min-width:4px;display:flex;align-items:center;padding-left:6px;font-size:12.5px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap;cursor:default}
   .tline .ph-S,.sw.ph-S{background:var(--s1)} .tline .ph-C,.sw.ph-C{background:var(--s3)} .tline .ph-B,.sw.ph-B{background:var(--s4)}
-  .tline .ph-B{color:#0b0b0b}
+  .tline .ph-B,.tline .ph-C,.tline .ph-G{color:#0b0b0b}
   .tline .ph-G,.sw.ph-G{background:var(--s5)}
   .tline>div.hov{filter:brightness(1.08)}
   .viz .band-C{fill:var(--s3);opacity:.12} .viz .band-B{fill:var(--s4);opacity:.14} .viz .band-G{fill:var(--s5);opacity:.12}
@@ -291,9 +311,10 @@
   .viz .y2{stroke:var(--ink3);stroke-width:1;opacity:.6}
   #viz-tip{position:fixed;z-index:200;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--glass-strong);color:var(--ink);border:1px solid var(--glass-border);
     backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:500;box-shadow:var(--glass-shadow);max-width:280px}
-  .verdict{border-left:4px solid var(--good)}
-  .verdict.v-warn{border-left-color:var(--warn)} .verdict.v-crit{border-left-color:var(--crit)}
-  .verdict .vicon{color:var(--good)} .verdict.v-warn .vicon{color:var(--warn)} .verdict.v-crit .vicon{color:var(--crit)}
+  /* verdict status is carried by a tinted icon tile (no coloured side bar); "need" (short for year 2) reads as a warning */
+  .verdict .vicon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;flex:none;border-radius:11px;background:var(--green-soft);color:var(--good)}
+  .verdict.v-warn .vicon,.verdict.v-need .vicon{background:var(--amber-soft);color:var(--warn)}
+  .verdict.v-crit .vicon{background:var(--red-soft);color:var(--crit)}
   .analysis{margin:0;padding-left:1.25em;display:grid;gap:8px;font-size:15px}
   .analysis li::marker{color:var(--ink3);font-variant-numeric:tabular-nums}
   .next-card{border:1.5px solid var(--accent)}
@@ -301,7 +322,38 @@
   .check.done .ckn{background:var(--green-soft);color:var(--green)}
   .check.is-next .ckn{background:var(--accent);color:#fff}
   .tprice{font-size:20px;font-weight:700;line-height:1.2}
-  section[id],div[id="masters"],div[id="planner"],div[id^="ckph-"],label.check[id]{scroll-margin-top:80px}
+  section[id],div[id="masters"],div[id="planner"],div[id^="ckph-"],div[id="cost-items"],div[id="sim-ctl"],details[id="sim-why"],label.check[id]{scroll-margin-top:80px}
+  /* money ladder: prep (s1), money to show (s2), setup reserve (s3); a thin strip plus swatched labels, no text inside the colours */
+  .lbar{display:flex;gap:2px;height:10px;margin:10px 0 4px}
+  .lbar>div{border-radius:3px;min-width:6px}
+  .lbar>.s1{background:var(--s1)} .lbar>.s2{background:var(--s2)} .lbar>.s3{background:var(--s3)}
+  .lname{display:inline-flex;align-items:center;gap:8px}
+  .gbasis{margin-top:6px;font-size:13px;line-height:1.5;color:var(--ink2)}
+  .gbasis svg{color:var(--ink3);display:inline-block;vertical-align:-2px;margin-right:6px}
+  .gbasis .linkbtn{font-size:13px;margin-left:8px}
+  .lname .sw{flex:none}
+  .row.lgoal{border-top:2px solid var(--line)}
+  .row.lpart>:first-child{padding-left:18px}
+  .row>.num{white-space:nowrap;text-align:right}
+  /* quiz verdict: lead size, the answers behind it, and what still blocks the path (status colour on the icon only) */
+  .qlead{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:14.5px;border-radius:10px;padding:8px 12px}
+  .qlead svg,.qneed svg,.qnone svg{flex:none;margin-top:3px}
+  .qlead-close{background:var(--amber-soft)} .qlead-some,.qlead-clear{background:var(--gray-soft)}
+  .qsec{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+  .qsec h4{font-size:14px;font-weight:600;margin-bottom:6px}
+  .qwhy{display:grid;gap:5px;font-size:14px;list-style:none;padding:0;margin:0}
+  .qwhy li{position:relative;padding-left:14px}
+  .qwhy li::before{content:'';position:absolute;left:2px;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--ink3)}
+  .qneed{display:grid;gap:8px;font-size:14px;list-style:none;padding:0;margin:0}
+  .qneed li{display:flex;gap:8px;align-items:flex-start}
+  .qneed .n-block svg{color:var(--crit)} .qneed .n-check svg{color:var(--warn)}
+  .qnone{display:flex;gap:8px;font-size:14px} .qnone svg{color:var(--good)}
+  .bar i.fit-lead{background:var(--s1)} .bar i.fit-n{background:var(--ink3)}
+  #quiz-res-h:focus{outline:none} #quiz-res-h:focus-visible{outline:3px solid var(--ring);outline-offset:4px;border-radius:6px}
+  .lrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
+  .lrow .amtv{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+  .lrow .amtv .msub{display:block;font-weight:500}
+  .secnote{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 8px 2px;font-size:13px;color:var(--ink2)}
   /* ---------- Cities map ---------- */
   #cmap{height:440px;border-radius:16px;overflow:hidden;z-index:0;background:var(--gray-soft)}
   @media (max-width:767px){#cmap{height:340px}}
@@ -510,23 +562,26 @@
 </style>
 </head>
 <body>
+<a href="#app" class="skip-link" id="skip-main"></a>
+<a href="#btabs" class="skip-link" id="skip-nav"></a>
+<div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
 <div class="app">
   <div class="content">
     <header class="toolbar">
       <span class="appicon"><i data-lucide="book-open" class="icon-sm"></i></span>
       <div class="tb-title"><span id="brand" class="tb-full"></span><span id="tb-title"></span></div>
-      <button id="fx-chip" class="badge b-gray num" data-act="tab" data-v="costs" title="CAD to THB" aria-label="CAD to THB exchange rate, open All Costs"></button>
+      <button id="fx-chip" class="badge b-gray num" data-act="tab" data-v="costs"></button>
       <button id="gloss-btn" class="tb-btn" data-act="gloss-open"></button>
       <button id="theme-btn" class="tb-btn" data-act="theme"></button>
-      <div class="seg" role="group" aria-label="Language">
+      <div class="seg" role="group" id="lang-seg">
         
         <button data-act="lang" data-v="th" id="lang-th" aria-label="ภาษาไทย">TH</button>
         
         <button data-act="lang" data-v="en" id="lang-en" aria-label="English">EN</button>
       </div>
     </header>
-    <main id="app" class="wrap"></main>
+    <main id="app" class="wrap" tabindex="-1"></main>
     <footer class="wrap" style="padding-top:0">
       <div id="refs" class="card mb-5"></div>
       <div id="links" class="card mb-5"></div>
@@ -534,7 +589,7 @@
     </footer>
   </div>
 </div>
-<nav id="btabs" class="bnav" role="tablist" aria-label="Sections"></nav>
+<nav id="btabs" class="bnav"></nav>
 <dialog id="gloss-dlg" aria-labelledby="gloss-title"></dialog>
 
 <script>
@@ -581,21 +636,22 @@ function money(a, b, unit){
 }
 function stack(a, b){
   const m = money(a, b, 'cad');
-  return `CAD ${m.cad}<span class="stat-sub num">${S.lang === 'th' ? `ประมาณ ${m.thb} บาท` : `about THB ${m.thb}`}</span>`;
+  return `CAD ${m.cad}<span class="stat-sub num">${S.lang === 'th' ? `ประมาณ ${m.thb} บาท` : `about THB ${m.thb}`}</span>`;
 }
 function inline(a, b){
   const m = money(a, b == null ? a : b, 'cad');
-  return S.lang === 'th' ? `CAD ${m.cad} (ประมาณ ${m.thb} บาท)` : `CAD ${m.cad} (about THB ${m.thb})`;
+  return S.lang === 'th' ? `CAD ${m.cad} (ประมาณ ${m.thb} บาท)` : `CAD ${m.cad} (about THB ${m.thb})`;
 }
 const fmt = n => Math.round(n).toLocaleString('en-US');
-const cad = n => 'CAD ' + fmt(n);
-const thb = n => 'THB ' + fmt(n);
+/* a no-break space keeps the currency code and its number on one line */
+const cad = n => 'CAD ' + fmt(n);
+const thb = n => 'THB ' + fmt(n);
 /* Simulator display currency, chosen by the user: 'thb', 'cad' or 'both'. Values are always stored in CAD. */
 const curOf = () => (['thb','cad','both'].includes(S.sim.cur) ? S.sim.cur : 'both');
 function mny(v, o = {}){
   const r = S.sim.rate || 24, cu = o.cur || curOf(), a = Math.abs(v);
   const sg = o.sign ? (v < 0 ? '-' : '+') : (v < 0 ? '-' : '');
-  const C = sg + 'CAD ' + (o.dec ? a.toFixed(2) : fmt(a)), B = sg + 'THB ' + fmt(a * r);
+  const C = sg + 'CAD ' + (o.dec ? a.toFixed(2) : fmt(a)), B = sg + 'THB ' + fmt(a * r);
   if (cu === 'cad') return C;
   if (cu === 'thb') return B;
   return o.stack ? `${C}<span class="msub">${B}</span>` : `${C} <span class="msub-i">(${B})</span>`;
@@ -765,9 +821,51 @@ const OPTIONS = [
    ]}
 ];
 
-/* Quiz amounts in THB at today's rate, rounded to 10,000: tuition defaults and the money to show from the Budget page. */
+/* The money ladder (25 Nov 2026): three amounts with fixed names, used the same way on every page.
+   prep = Costs sections 1 and 2 (paid in Thailand before you apply), show = money to show IRCC,
+   setup = setup reserve. The savings goal is all three added together. */
+const MONEY = {
+  prep:{en:'Prep and visa costs', th:'ค่าเตรียมตัวและยื่นวีซ่า'},
+  show:{en:'Money to show', th:'เงินที่ต้องแสดง'},
+  /* the one definition of money to show, used wherever the app explains it (26 Nov 2026) */
+  showDef:{en:'first-year tuition and compulsory fees, the IRCC living-cost amount, and travel to and from Canada', th:'ค่าเล่าเรียนและค่าธรรมเนียมบังคับปีแรก ยอดค่าครองชีพของ IRCC และค่าเดินทางไปและกลับแคนาดา'},
+  /* what a savings goal is worked out from, shown under every goal figure */
+  basisL:{en:'Worked out for', th:'คิดจาก'}, change:{en:'Change', th:'เปลี่ยน'},
+  startY:{en:y => `start ${y}`, th:y => `เริ่มเรียน ${y}`},
+  yrs:{en:n => `${n}-year program`, th:n => `หลักสูตร ${n} ปี`},
+  house:{shared:{en:'shared room at Toronto rent', th:'ห้องแชร์ ค่าเช่าแบบโตรอนโต'}, studio:{en:'own studio, rent between Vancouver and Toronto', th:'สตูดิโอ ค่าเช่าระหว่างแวนคูเวอร์กับโตรอนโต'}, own:{en:'the rent you typed', th:'ค่าเช่าที่คุณใส่เอง'}},
+  perMo:{en:'/month', th:'/เดือน'},
+  setup:{en:'Setup reserve', th:'เงินสำรองตั้งตัว'},
+  goal:{en:'Total savings goal', th:'เป้าเงินเก็บทั้งหมด'},
+  goalN:{en:'The one number to save toward: the three amounts below added together.', th:'ตัวเลขเดียวที่ควรเก็บให้ถึง คือเงิน 3 ก้อนด้านล่างรวมกัน'},
+  prepN:{en:'Tests, documents, school application and visa fees (sections 1 and 2 on the All Costs page). Paid in Thailand before you apply, on top of the money to show.', th:'ค่าสอบ เอกสาร ค่าสมัครเรียน และค่าวีซ่า (หมวด 1 ถึง 2 ในหน้าค่าใช้จ่าย) จ่ายที่ไทยก่อนยื่นวีซ่า แยกจากเงินที่ต้องแสดง'},
+  prepR:{en:(a, b) => `Estimate ${a} to ${b}; the goal uses the high end.`, th:(a, b) => `ช่วงประมาณ ${a} ถึง ${b} เป้าใช้ยอดสูงไว้ก่อน`},
+  showN:{en:a => `Must be in your bank when you apply: first-year tuition and fees, the IRCC living-cost amount${a ? ` (CAD ${a}, read live from IRCC)` : ''}, and travel. Once you arrive it pays your flight, rent and food.`, th:a => `ต้องมีในบัญชีตอนยื่นวีซ่า: ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC${a ? ` (CAD ${a} อ่านจากเว็บ IRCC อัตโนมัติ)` : ''} และค่าเดินทาง เมื่อไปถึงแล้วเงินก้อนนี้ใช้จ่ายค่าตั๋ว ค่าเช่า และค่าอาหาร`},
+  setupN:{en:'Rent deposit and first purchases. IRCC does not ask for it, but you will need it.', th:'เงินประกันห้องและของใช้ช่วงแรก IRCC ไม่ได้ขอ แต่ควรมีไว้'},
+  setupD:{en:'(rent deposit, first purchases)', th:'(เงินประกันห้อง ของใช้ช่วงแรก)'},
+  eq:{en:(p, s) => `= prep and visa costs ${p} + money to show + setup reserve ${s}`, th:(p, s) => `= ค่าเตรียมตัวและยื่นวีซ่า ${p} + เงินที่ต้องแสดง + เงินสำรองตั้งตัว ${s}`},
+  editPrep:{en:'Enter your real prep costs', th:'ใส่ค่าเตรียมตัวจริง'}
+};
+/* Housing behind the rent in a simulation, e.g. "shared room at Toronto rent CAD 1,179/month". */
+function houseText(c){
+  const s = c.s, k = s.rentC != null && s.rentC !== '' && !isNaN(s.rentC) ? 'own' : (s.living === 'studio' ? 'studio' : 'shared');
+  return T(MONEY.house[k]) + ' CAD ' + fmt(c.lv.rent) + T(MONEY.perMo);
+}
+/* "Public college · start 2027 · 1-year program" (+ housing when full): the assumptions behind a savings goal. */
+function goalBasis(c, full){
+  const s = c.s, parts = [T(SIMC.types[s.type].l), T(MONEY.startY)(s.intake || SIMC.base + 1), T(MONEY.yrs)(s.years || 1)];
+  if (full) parts.push(houseText(c));
+  return parts.join(' · ');
+}
+/* One program type worked out the same way everywhere (Budget compare table, quiz hint): the selected type is
+   exactly your simulation; the others swap in their own typical tuition, fees, Co-op hours and Co-op wage. */
+function typeCalc(k){
+  const s = S.sim; if (k === s.type) return simCalc();
+  const ty = SIMC.types[k];
+  return simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop});
+}
+/* Quiz amounts in THB at today's rate, rounded to 10,000 (tuition defaults in the risk question). */
 const qTHB = cad => fmt(Math.round(cad * (S.sim.rate || 24) / 10000) * 10000);
-function qShow(k){ const ty = SIMC.types[k]; return simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:true}).show; }
 const QUIZ = [
   {id:'goal', icon:'target', cat:{en:'Goal', th:'เป้าหมาย'},
    q:{en:'What is your real goal for the first year?', th:'เป้าหมายจริงของปีแรกคืออะไร'},
@@ -776,9 +874,9 @@ const QUIZ = [
      {a:1,b:2,c:2,l:{en:'Try it first, but I want the PR door to stay open.', th:'ลองก่อน แต่อยากให้ประตูสู่ PR ยังเปิดอยู่'}},
      {a:0,b:3,c:3,l:{en:'PR is the goal. The first year is step one.', th:'เป้าหมายคือ PR ปีแรกคือก้าวแรก'}}
    ]},
-  {id:'budget', icon:'wallet', cat:{en:'Budget Risk', th:'ความเสี่ยงด้านงบ'},
+  {id:'budget', icon:'wallet', cat:{en:'Budget', th:'งบประมาณ'},
    q:{en:'How much can you (or your sponsor) show and commit for year one, tuition plus living?', th:'คุณ (หรือสปอนเซอร์) แสดงเงินและพร้อมใช้ในปีแรกได้เท่าไร รวมค่าเรียนและค่าครองชีพ'},
-   hint:() => { const sh = k => qTHB(qShow(k)); return {en:`For comparison, the Budget page works out the money to show as about THB ${sh('private')} for a private Co-op, ${sh('public')} for a public college and ${sh('masters')} for a master's.`, th:`เทียบ: หน้างบคำนวณเงินที่ต้องแสดงไว้ประมาณ ${sh('private')} บาท (Co-op เอกชน) ${sh('public')} บาท (วิทยาลัยรัฐ) และ ${sh('masters')} บาท (ปริญญาโท)`}; },
+   hint:() => { const sh = k => thb(typeCalc(k).total * (S.sim.rate || 24)), c = simCalc(), b = [T(MONEY.startY)(S.sim.intake), T(MONEY.yrs)(S.sim.years || 1), houseText(c)].join(' · '); return {en:`For comparison, the total savings goal on the Budget page (it includes the money to show) is ${sh('private')} for a private Co-op, ${sh('public')} for a public college and ${sh('masters')} for a master's (${b}).`, th:`เทียบ: เป้าเงินเก็บทั้งหมดในหน้างบ (รวมเงินที่ต้องแสดงแล้ว) คือ ${sh('private')} สำหรับ Co-op เอกชน ${sh('public')} สำหรับวิทยาลัยรัฐ และ ${sh('masters')} สำหรับปริญญาโท (${b})`}; },
    o:[
      {a:3,b:0,c:0,l:{en:'Under THB 900,000', th:'ต่ำกว่า 900,000 บาท'}},
      {a:1,b:2,c:1,l:{en:'THB 900,000 to 1,300,000', th:'900,000 ถึง 1,300,000 บาท'}},
@@ -854,31 +952,22 @@ const QUIZ_UI = {
   progress:{en:'answered', th:'ข้อที่ตอบแล้ว'},
   reset:{en:'Start over', th:'เริ่มใหม่'},
   pending:{en:'Answer every question to see your recommendation.', th:'ตอบให้ครบทุกข้อเพื่อดูคำแนะนำ'},
-  fitA:{en:'Fit for Option A', th:'ความเหมาะกับทางเลือก A'},
-  fitB:{en:'Fit for Option B', th:'ความเหมาะกับทางเลือก B'},
   recA:{t:{en:'Start with Option A: Private Co-op', th:'เริ่มด้วยทางเลือก A: Co-op เอกชน'},
         
-        d:{en:'Your answers point to a low-cost trial year. Treat it as a test only: it does not lead to a PGWP. Use the year to raise your IELTS to 6.5 and apply early to a public program, and budget for a second study permit application if you decide to stay.',
-        
-           th:'คำตอบของคุณชี้ไปที่ปีทดลองแบบต้นทุนต่ำ ให้มองว่าเป็นการทดลองเท่านั้น เพราะไม่นำไปสู่ PGWP ใช้ปีนี้ดัน IELTS ให้ถึง 6.5 และสมัครหลักสูตรสถาบันรัฐแต่เนิ่น ๆ พร้อมเผื่องบสำหรับการขอ Study Permit รอบสองถ้าตัดสินใจอยู่ต่อ'}},
+        d:{en:'A low-cost trial year. Treat it as a test only: it does not lead to a PGWP. Use the year to raise your IELTS to 6.5 and apply early to a public program, and budget for a second study permit application if you decide to stay.',
+
+           th:'ปีทดลองแบบต้นทุนต่ำ ให้มองว่าเป็นการทดลองเท่านั้น เพราะไม่นำไปสู่ PGWP ใช้ปีนี้ดัน IELTS ให้ถึง 6.5 และสมัครหลักสูตรสถาบันรัฐแต่เนิ่น ๆ พร้อมเผื่องบสำหรับการขอ Study Permit รอบสองถ้าตัดสินใจอยู่ต่อ'}},
   recB:{t:{en:'Go straight to Option B: Public Co-op Diploma', th:'ไปทางเลือก B เลย: Diploma พร้อม Co-op ที่สถาบันรัฐ'},
         
-        d:{en:'Your goal, budget, and skills support the direct route. You still get to test daily life in Canada, but every month also counts toward a PGWP and PR. Choose a 2-year program in an eligible STEM or Healthcare CIP code for the full 3-year permit.',
-        
-           th:'เป้าหมาย งบประมาณ และทักษะของคุณรองรับเส้นทางตรง คุณยังได้ทดลองใช้ชีวิตในแคนาดาเหมือนกัน แต่ทุกเดือนนับต่อยอดสู่ PGWP และ PR ด้วย ควรเลือกหลักสูตร 2 ปีในรหัส CIP สาย STEM หรือ Healthcare เพื่อให้ได้ใบอนุญาตเต็ม 3 ปี'}},
+        d:{en:'The direct route. You still get to test daily life in Canada, but every month also counts toward a PGWP and PR. Choose a 2-year program in an eligible STEM or Healthcare CIP code for the full 3-year permit.',
+
+           th:'เส้นทางตรง คุณยังได้ทดลองใช้ชีวิตในแคนาดาเหมือนกัน แต่ทุกเดือนนับต่อยอดสู่ PGWP และ PR ด้วย ควรเลือกหลักสูตร 2 ปีในรหัส CIP สาย STEM หรือ Healthcare เพื่อให้ได้ใบอนุญาตเต็ม 3 ปี'}},
   recC:{t:{en:'Go for Option C: a university master\'s degree', th:'เลือกทางเลือก C: ปริญญาโทของมหาวิทยาลัย'},
         
-        d:{en:'Your degree, budget and goals fit a master\'s. It gives a PGWP of up to 3 years in any field and the strongest credential for PR. Prefer a program with a paid Co-op term if you want Canadian work experience before graduating, and compare the master\'s list below.',
+        d:{en:'A master\'s gives a PGWP of up to 3 years in any field and the strongest credential for PR. Prefer a program with a paid Co-op term if you want Canadian work experience before graduating, and compare the master\'s list below.',
         
-           th:'วุฒิ งบประมาณ และเป้าหมายของคุณเหมาะกับปริญญาโท ซึ่งให้ PGWP สูงสุด 3 ปีในทุกสาขา และเป็นวุฒิที่แข็งที่สุดสำหรับ PR ถ้าอยากได้ประสบการณ์ทำงานในแคนาดาก่อนจบ ให้เลือกหลักสูตรที่มีเทอม Co-op แบบได้ค่าจ้าง และเปรียบเทียบกับรายการหลักสูตรปริญญาโทด้านล่าง'}},
-  fitC:{en:'Fit for Option C', th:'ความเหมาะกับทางเลือก C'},
+           th:'ปริญญาโทให้ PGWP สูงสุด 3 ปีในทุกสาขา และเป็นวุฒิที่แข็งที่สุดสำหรับ PR ถ้าอยากได้ประสบการณ์ทำงานในแคนาดาก่อนจบ ให้เลือกหลักสูตรที่มีเทอม Co-op แบบได้ค่าจ้าง และเปรียบเทียบกับรายการหลักสูตรปริญญาโทด้านล่าง'}},
   nA:{en:'Option A (private Co-op)', th:'ทางเลือก A (Co-op เอกชน)'}, nB:{en:'Option B (public college Co-op)', th:'ทางเลือก B (Co-op วิทยาลัยรัฐ)'}, nC:{en:'Option C (master\'s degree)', th:'ทางเลือก C (ปริญญาโท)'},
-  close:{en:x => `Close call: ${x} also fits you almost as well. Compare both cards above before deciding.`, th:x => `ใกล้เคียงกันมาก: ${x} ก็เหมาะกับคุณเกือบเท่ากัน ควรเปรียบเทียบทั้งสองการ์ดด้านบนก่อนตัดสินใจ`},
-  recMix:{t:{en:'Borderline: lean toward Option B if you can reach IELTS 6.5', th:'ก้ำกึ่ง: เอนไปทาง B ถ้าทำ IELTS 6.5 ได้'},
-        
-        d:{en:'You are close to the middle. The deciding factors are English and funds. If you can reach IELTS Academic 6.5 and show the higher funds within 6 to 9 months, Option B saves a year and a second permit. If not, Option A is a reasonable trial as long as you plan the bridge from day one.',
-        
-           th:'คะแนนของคุณอยู่ใกล้ตรงกลาง ตัวตัดสินคือภาษาอังกฤษและเงินทุน ถ้าทำ IELTS Academic 6.5 และแสดงเงินได้ภายใน 6 ถึง 9 เดือน ทางเลือก B จะประหยัดเวลาไป 1 ปีและไม่ต้องขอ Permit รอบสอง ถ้าไม่ได้ ทางเลือก A ก็เป็นการทดลองที่สมเหตุสมผล ตราบใดที่วางแผน Bridge ตั้งแต่วันแรก'}},
   city:{
     bc:{en:'City tip: look at Vancouver or Victoria (BCIT, Langara, Douglas, UVic). Winters are mild and rainy, rent is the highest in Canada.', th:'คำแนะนำเรื่องเมือง: ดูแวนคูเวอร์หรือวิกตอเรีย (BCIT, Langara, Douglas, UVic) ฤดูหนาวไม่หนาวจัดแต่ฝนเยอะ และค่าเช่าแพงที่สุดในแคนาดา'},
     on:{en:'City tip: Ontario opens the most choices (George Brown, Seneca, Humber, Conestoga, McMaster). Expect real snow and long winters.', th:'คำแนะนำเรื่องเมือง: ออนแทรีโอมีตัวเลือกมากที่สุด (George Brown, Seneca, Humber, Conestoga, McMaster) แต่เตรียมเจอหิมะจริงและฤดูหนาวยาว'},
@@ -886,6 +975,62 @@ const QUIZ_UI = {
   },
   go:{en:'See the matching roadmap', th:'ดูแผนเส้นทางที่ตรงกัน'}
 };
+/* Quiz verdict detail (25 Nov 2026): how clear the lead is, which answers drove it, and what in your answers still
+   blocks the recommended path. The facts come from the quiz's own hints and the live savings goal on the Budget page. */
+Object.assign(QUIZ_UI, {
+  lead:{
+    clear:{en:(n, g, p1, p2) => `Clear lead: ${g} points ahead of ${n} (${p1}% vs ${p2}%).`, th:(n, g, p1, p2) => `ผลชัดเจน: นำ${n} ${g} จุด (${p1}% กับ ${p2}%)`},
+    some:{en:(n, g, p1, p2) => `Moderate lead: ${g} points ahead of ${n} (${p1}% vs ${p2}%). Read that option's card too.`, th:(n, g, p1, p2) => `นำไม่มาก: นำ${n} ${g} จุด (${p1}% กับ ${p2}%) ควรอ่านการ์ดของทางนั้นประกอบด้วย`},
+    close:{en:(n, g, p1, p2) => `Close call: only ${g} points ahead of ${n} (${p1}% vs ${p2}%). Compare both cards above before deciding.`, th:(n, g, p1, p2) => `สูสีมาก: นำ${n} แค่ ${g} จุด (${p1}% กับ ${p2}%) ควรเปรียบเทียบทั้งสองการ์ดด้านบนก่อนตัดสินใจ`}
+  },
+  fitsIf:{en:n => `${n} fits best, once the blocking items are cleared`, th:n => `${n} เหมาะที่สุด ถ้าแก้ข้อที่ขวางได้`},
+  doneS:{en:'Your best fit', th:'ทางที่เหมาะกับคุณที่สุด'}, seeRes:{en:'See the result', th:'ดูผลแบบประเมิน'},
+  fitT:{en:'Fit for each option', th:'ความเหมาะกับแต่ละทางเลือก'}, bestB:{en:'Best fit', th:'เหมาะที่สุด'},
+  whyT:{en:'Because you answered', th:'เพราะคุณตอบว่า'},
+  needT:{en:'Before this path works', th:'ก่อนจะไปทางนี้ได้'},
+  needNone:{en:'Nothing in your answers blocks this path.', th:'จากคำตอบของคุณ ไม่มีข้อไหนขวางทางนี้'},
+  blockL:{en:'Blocks this path', th:'ขวางทางนี้'}, checkL:{en:'Check', th:'ต้องเช็ค'},
+  alt:{en:n => `If you cannot clear the blocking items in time, ${n} does not have them.`, th:n => `ถ้าแก้ข้อที่ขวางไม่ทัน ${n} ไม่ติดข้อเหล่านี้`},
+  useBudget:{en:'Use this type in the Budget', th:'ใช้ประเภทนี้ในหน้างบ'},
+  need:{
+    budShort:{en:(g, band, x) => `The total savings goal for this path is ${g}, above the budget you chose (${band}). You need about ${x} more.`, th:(g, band, x) => `เป้าเงินเก็บทั้งหมดของทางนี้คือ ${g} มากกว่างบที่คุณเลือก (${band}) ต้องหาเพิ่มประมาณ ${x}`},
+    budIn:{en:(g, band) => `The total savings goal for this path is ${g}, inside the range you chose (${band}). Make sure you reach at least that amount.`, th:(g, band) => `เป้าเงินเก็บทั้งหมดของทางนี้คือ ${g} อยู่ในช่วงที่คุณเลือก (${band}) ต้องมีให้ถึงยอดนี้`},
+    en0:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall. You answered below 6.0 or not tested yet, so you need 6.5 before you apply.', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 คุณตอบว่าต่ำกว่า 6.0 หรือยังไม่เคยสอบ จึงต้องได้ 6.5 ก่อนสมัคร'},
+    en1:{en:'Raise IELTS Academic from about 6.0 to 6.5 before you apply.', th:'ต้องดัน IELTS Academic จากประมาณ 6.0 ให้ถึง 6.5 ก่อนสมัคร'},
+    noDegC:{en:'A master\'s needs a finished bachelor\'s degree first.', th:'ปริญญาโทต้องจบปริญญาตรีก่อน'},
+    gpaLowC:{en:'Master\'s programs usually ask for about a B (3.0). With a GPA under 2.50, few programs will accept you.', th:'ปริญญาโทส่วนใหญ่ขอเกรดเฉลี่ยประมาณ B (3.0) เกรดต่ำกว่า 2.50 จึงเข้าเกณฑ์ได้น้อยหลักสูตร'},
+    gpaMidC:{en:'A GPA of 2.50 to 2.99 is below the 3.0 many master\'s programs ask for. Look for programs that also weigh work experience.', th:'เกรด 2.50 ถึง 2.99 ต่ำกว่าประมาณ 3.0 ที่หลายหลักสูตรขอ ให้มองหาหลักสูตรที่พิจารณาประสบการณ์ทำงานประกอบ'},
+    noDegB:{en:'Without a bachelor\'s degree, choose a regular 2-year diploma: post-graduate programs need a finished degree.', th:'ยังไม่มีปริญญาตรี ให้เลือก Diploma 2 ปีแบบปกติ เพราะหลักสูตร Post-Graduate ต้องจบปริญญาตรี'},
+    prA:{en:'This path does not lead to a PGWP. For PR you would need a second program at a public school and a second study permit.', th:'ทางนี้ไม่นำไปสู่ PGWP ถ้าจะไปถึง PR ต้องเรียนต่ออีกหลักสูตรที่สถาบันรัฐ และขอ Study Permit รอบสอง'},
+    timeA:{en:'Starting with a private Co-op usually adds about a year before you can apply for PR, and you said you want the fastest route.', th:'การเริ่มด้วย Co-op เอกชนมักเพิ่มเวลาประมาณ 1 ปีก่อนยื่น PR ได้ ซึ่งสวนกับที่คุณอยากได้เส้นทางเร็วที่สุด'},
+    spouseAB:{en:'Your spouse can get a work permit only if you study a master\'s of 16 months or longer, so on this path they could not work in Canada.', th:'คู่สมรสจะขอใบอนุญาตทำงานได้เมื่อคุณเรียนปริญญาโทที่ยาว 16 เดือนขึ้นไป ทางนี้คู่สมรสจึงทำงานที่แคนาดาไม่ได้'},
+    spouseC:{en:'Choose a master\'s of 16 months or longer so your spouse can apply for a work permit.', th:'เลือกปริญญาโทที่ยาว 16 เดือนขึ้นไป คู่สมรสจึงจะขอใบอนุญาตทำงานได้'}
+  }
+});
+/* quiz option to Budget program type */
+const QTYPE = {a:'private', b:'public', c:'masters'};
+/* What in the answers blocks (lv 'block') or needs checking (lv 'check') on path k. Budget uses the live savings goal. */
+function quizNeeds(k){
+  const A = S.quiz, N = QUIZ_UI.need, out = [], add = (lv, t) => out.push({lv, t});
+  const r = S.sim.rate || 24, bandMax = [900000, 1300000, Infinity], bandMin = [0, 900000, 1300000];
+  if (A.budget != null) {
+    const g = typeCalc(QTYPE[k]).total * r, band = T(QUIZ.find(q => q.id === 'budget').o[A.budget].l);
+    if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget])));
+    else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band));
+  }
+  if (k !== 'a') { if (A.english === 0) add('block', T(N.en0)); else if (A.english === 1) add('check', T(N.en1)); }
+  if (k === 'c') { if (A.edu === 0) add('block', T(N.noDegC)); else if (A.edu === 1) add('block', T(N.gpaLowC)); else if (A.edu === 2) add('check', T(N.gpaMidC)); }
+  if (k === 'b' && A.edu === 0) add('check', T(N.noDegB));
+  if (k === 'a') { if (A.goal === 2) add('check', T(N.prA)); if (A.time === 2) add('check', T(N.timeA)); }
+  if (A.family === 1) add(k === 'c' ? 'check' : 'block', T(k === 'c' ? N.spouseC : N.spouseAB));
+  return out.sort((x, y) => (x.lv === 'block' ? 0 : 1) - (y.lv === 'block' ? 0 : 1));
+}
+/* Up to three answers that favoured path k most over the other two. */
+function quizWhy(k){
+  return QUIZ.filter(q => !q.city && S.quiz[q.id] != null && q.o[S.quiz[q.id]])
+    .map(q => { const o = q.o[S.quiz[q.id]]; return {q, o, adv:(o[k] || 0) - Math.max(...['a','b','c'].filter(x => x !== k).map(x => o[x] || 0))}; })
+    .filter(x => x.adv > 0).sort((x, y) => y.adv - x.adv || (y.o[k] || 0) - (x.o[k] || 0)).slice(0, 3);
+}
 
 /* NOC 2021 Version 1.0 titles, checked on noc.esdc.gc.ca on 18 November 2026. TEER is the second digit of the code. */
 const NOCT = {
@@ -1201,7 +1346,7 @@ const ROAD = {
   best:{en:'Best for', th:'เหมาะกับ'},
   sc:{
     safe:{
-      l:{en:'Scenario 1: Safe Test', th:'สถานการณ์ 1: Safe Test'},
+      l:{en:'Scenario 1: Safe Test', th:'สถานการณ์ 1: ลองแบบปลอดภัย'},
       flow:{en:'1-year private Co-op → public PG diploma or master\'s → PGWP → PR', th:'Co-op เอกชน 1 ปี → PG Diploma หรือปริญญาโทที่สถาบันรัฐ → PGWP → PR'},
       stats:{time:{en:'About 5 to 6 years', th:'ประมาณ 5 ถึง 6 ปี'}, tuition:() => stack(47000,62000), permits:{en:'2 applications', th:'ยื่น 2 ครั้ง'}, risk:{en:'Second study permit may be refused', th:'Study Permit รอบสองอาจถูกปฏิเสธ'}},
       best:{en:'People who are unsure about living abroad, have lower savings today, or need time on the ground to raise their English.', th:'ผู้ที่ยังไม่แน่ใจเรื่องการใช้ชีวิตต่างประเทศ มีเงินเก็บน้อยกว่าในตอนนี้ หรือต้องการเวลาในพื้นที่จริงเพื่อพัฒนาภาษาอังกฤษ'},
@@ -1232,7 +1377,7 @@ const ROAD = {
          d:{en:'Apply through Express Entry (CEC, or a category draw if your job is on a 2026 category list) or a Provincial Nominee Program. Note that the private Co-op year does not add Canadian study points beyond what the public credential gives, and you are one year older in the CRS. [[eecat]] [[pnp]] Once your profile is in the pool, request the Thai police certificate (15 to 25 working days); after the invitation, do the PR medical exam with a panel physician in Canada and give new biometrics. See All Costs for the steps. [[pccee]] [[medpr]]', th:'ยื่นผ่าน Express Entry (CEC หรือรอบเฉพาะหมวด หากงานของคุณอยู่ในรายการหมวดปี 2026) หรือ Provincial Nominee Program ทั้งนี้ปี Co-op เอกชนไม่ได้เพิ่มคะแนนการศึกษาในแคนาดาเกินกว่าที่วุฒิจากสถาบันรัฐให้ และคุณจะอายุมากขึ้น 1 ปีในการคิดคะแนน CRS [[eecat]] [[pnp]] เมื่อโปรไฟล์อยู่ใน Pool แล้ว ให้ขอใบรับรองความประพฤติจากตำรวจไทยทันที (ใช้เวลา 15 ถึง 25 วันทำการ) หลังได้คำเชิญ ให้ตรวจสุขภาพกับแพทย์ที่ IRCC รับรองในแคนาดาและเก็บ Biometrics ใหม่ ดูขั้นตอนในหน้าค่าใช้จ่าย [[pccee]] [[medpr]]'}}
       ]},
     one:{
-      l:{en:'Scenario 2: One-Shot', th:'สถานการณ์ 2: One-Shot'},
+      l:{en:'Scenario 2: One-Shot', th:'สถานการณ์ 2: ไปทางตรงทีเดียว'},
       flow:{en:'Public Co-op PG diploma or master\'s → 3-year PGWP → CEC or PNP → PR', th:'PG Diploma พร้อม Co-op หรือปริญญาโทที่สถาบันรัฐ → PGWP 3 ปี → CEC หรือ PNP → PR'},
       stats:{time:{en:'About 3.5 to 4.5 years', th:'ประมาณ 3.5 ถึง 4.5 ปี'}, tuition:() => stack(36000,48000), permits:{en:'1 application', th:'ยื่น 1 ครั้ง'}, risk:{en:'Larger sunk cost if Canada does not suit you', th:'เสียเงินมากกว่าถ้าแคนาดาไม่เหมาะกับคุณ'}},
       best:{en:'People with IELTS 6.5 within reach, a data or tech background, a sponsor who can show the higher funds, and a clear PR goal.', th:'ผู้ที่ IELTS 6.5 อยู่ไม่ไกล มีพื้นฐานดาต้าหรือเทค มีสปอนเซอร์ที่แสดงเงินจำนวนสูงกว่าได้ และมีเป้าหมาย PR ชัดเจน'},
@@ -1280,7 +1425,7 @@ const CHECK = {
      d:{en:'It should stay valid for your whole program. Renew now if it expires within about 2 years.', th:'ควรมีอายุครอบคลุมตลอดหลักสูตร ถ้าจะหมดอายุภายในประมาณ 2 ปี ให้ต่ออายุตอนนี้'},
      why:{en:'Every later form asks for your passport number. Changing passports mid-process creates extra work.', th:'ทุกแบบฟอร์มหลังจากนี้ต้องใช้เลขพาสปอร์ต ถ้าเปลี่ยนเล่มกลางทางจะยุ่งยาก'}},
     {id:'season', ph:0, t:{en:'Put the money in one account and leave it', th:'รวมเงินไว้บัญชีเดียวและปล่อยให้นิ่ง'},
-     d:{en:'Tuition for year one plus the IRCC living-cost minimum. Keep it for 4 to 6 months; avoid large deposits you cannot explain. [[funds]]', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC คงเงินไว้ 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่ที่อธิบายที่มาไม่ได้ [[funds]]'},
+     d:{en:`The money to show: ${MONEY.showDef.en}. Keep it for 4 to 6 months; avoid large deposits you cannot explain. [[funds]]`, th:`เงินที่ต้องแสดง: ${MONEY.showDef.th} คงเงินไว้ 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่ที่อธิบายที่มาไม่ได้ [[funds]]`},
      why:{en:'Officers read your account history, not just today\'s balance. Time is the only way to build that history.', th:'เจ้าหน้าที่ดูประวัติบัญชี ไม่ใช่แค่ยอดวันนี้ และประวัตินี้สร้างได้ด้วยเวลาเท่านั้น'}, go:'budget'},
     {id:'ielts-prep', ph:0, t:{en:'English test: start preparing', th:'สอบภาษาอังกฤษ: เริ่มเตรียมตัว'},
      d:{en:'Check which test your schools accept: usually IELTS Academic, 6.5 overall with no band under 6.0 for public colleges; universities often ask more. Try the free practice material from IDP or British Council to see how far you are from that score, then study the weak skills.', th:'ตรวจว่าสถาบันที่สนใจรับข้อสอบแบบไหน โดยทั่วไปคือ IELTS Academic รวม 6.5 ไม่มีทักษะใดต่ำกว่า 6.0 สำหรับวิทยาลัยรัฐ มหาวิทยาลัยมักขอสูงกว่า ลองทำแบบฝึกฟรีจาก IDP หรือ British Council เพื่อดูว่ายังห่างจากคะแนนเป้าหมายแค่ไหน แล้วฝึกทักษะที่ยังอ่อน'},
@@ -1409,8 +1554,7 @@ const SIM_UI = {
   proof:{en:'IRCC living-cost proof (CAD, when you apply)', th:'ค่าครองชีพที่ IRCC กำหนด (CAD ตอนยื่น)'},
   proofNote:{en:'CAD 23,448 for one person from 1 September 2026. IRCC updates it every year. [[funds]]', th:'CAD 23,448 สำหรับ 1 คน ตั้งแต่ 1 กันยายน 2026 IRCC ปรับยอดนี้ทุกปี [[funds]]'},
   wk:{en:'hrs/wk', th:'ชม./สัปดาห์'}, mo:{en:'/month', th:'/เดือน'}, hr:{en:'/hr', th:'/ชม.'},
-  lTotal:{en:'Cash to have ready before you go', th:'เงินสดที่ต้องเตรียมก่อนไป'},
-  showNote:{en:'First-year tuition plus the IRCC living-cost minimum (the money to show), plus a setup reserve. [[funds]]', th:'ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC (เงินที่ต้องแสดง) บวกเงินสำรองตั้งตัว [[funds]]'},
+  lTotal:MONEY.goal,
   projNote:{en:y => `Amounts are estimated for a ${y} start.`, th:y => `ตัวเลขเป็นค่าประมาณสำหรับการเริ่มเรียนปี ${y}`},
   lTuition:{en:'Tuition', th:'ค่าเล่าเรียน'}, lProof:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'},
   lSetup:{en:'Setup reserve: flight, rent deposit, first purchases', th:'เงินสำรองตั้งตัว: ตั๋ว เงินประกันห้อง ของใช้ช่วงแรก'},
@@ -1443,7 +1587,9 @@ const SIM_UI = {
   vT:{en:'What your numbers mean', th:'ตัวเลขของคุณหมายความว่าอะไร'},
   verdict:{
     good:{icon:'circle-check', l:{en:'Healthy plan', th:'แผนการเงินแข็งแรง'}, d:{en:'Your money at the end is the same or higher than at the start, so you have a cushion for surprises.', th:'เงินตอนจบเท่าเดิมหรือมากกว่าตอนเริ่ม จึงมีเงินสำรองสำหรับเหตุไม่คาดฝัน'}},
-    warn:{icon:'triangle-alert', l:{en:'Works, but your savings shrink', th:'พอไหว แต่เงินเก็บลดลง'}, d:{en:'You do not run out, but you end with less than you started. Plan a buffer or more work hours.', th:'เงินไม่หมด แต่ตอนจบจะเหลือน้อยกว่าตอนเริ่ม ควรมีเงินสำรองเพิ่มหรือทำงานมากขึ้น'}},
+    warn:{icon:'triangle-alert', l:{en:'Works, but your savings shrink', th:'พอไหว แต่เงินเก็บลดลง'}, d:{en:'You do not run out, but you end with less than you started. Plan a buffer or more work hours.', th:'เงินไม่หมด แต่ตอนจบจะเหลือน้อยกว่าตอนเริ่ม ควรมีเงินสำรองเพิ่มหรือทำงานมากขึ้น'},
+      /* when breaking even needs more than the 24-hour study-term cap, "work more" is not an option */
+      dCap:{en:'You do not run out, but you end with less than you started. Study-term work is capped at 24 hours a week, so close the gap with cheaper housing, a better-paid job, Co-op or break months, or more savings.', th:'เงินไม่หมด แต่ตอนจบจะเหลือน้อยกว่าตอนเริ่ม ช่วงเทอมเรียนทำงานได้สูงสุด 24 ชั่วโมงต่อสัปดาห์ จึงควรปิดช่องว่างด้วยที่พักที่ถูกลง งานที่ค่าจ้างสูงขึ้น เดือน Co-op หรือปิดเทอม หรือเงินเก็บเพิ่ม'}},
     need:{icon:'wallet', l:{en:'You need extra money for year 2', th:'ต้องเตรียมเงินเพิ่มสำหรับปีที่ 2'}, d:{en:'Year one is covered, but paying the second year of tuition takes your balance below zero. Plan where the extra amount will come from before you go.', th:'ปีแรกเงินพอ แต่การจ่ายค่าเล่าเรียนปีที่ 2 ทำให้เงินติดลบ ควรวางแผนว่าเงินส่วนที่ขาดจะมาจากไหนก่อนเดินทาง'}},
     crit:{icon:'octagon-alert', l:{en:'Not enough money: change the plan', th:'เงินไม่พอ: ต้องปรับแผน'}, d:{en:'Your living money runs out within the first year. Choose cheaper housing or city, a program with Co-op, more work hours, or bring more savings.', th:'เงินค่าครองชีพจะหมดภายในปีแรก ลองเลือกที่พักหรือเมืองที่ถูกกว่า หลักสูตรที่มี Co-op ทำงานมากขึ้น หรือเตรียมเงินเก็บเพิ่ม'}}
   },
@@ -1464,7 +1610,7 @@ const SIM_UI = {
   a7:{en:(y, n) => `<b>Start year ${y}:</b> tuition, rent, living costs, wages and the IRCC amount are raised by estimated yearly increases for ${n} year${n > 1 ? 's' : ''}. Check the real figures when schools and IRCC publish them.`, th:(y, n) => `<b>เริ่มเรียนปี ${y}:</b> ค่าเล่าเรียน ค่าเช่า ค่าครองชีพ ค่าจ้าง และยอดของ IRCC ถูกปรับเพิ่มตามอัตราเพิ่มรายปีโดยประมาณ ${n} ปี ควรตรวจตัวเลขจริงเมื่อสถาบันและ IRCC ประกาศ`},
   glossT:{en:'What do these terms mean?', th:'คำศัพท์เหล่านี้หมายถึงอะไร'},
   gloss:[
-    {k:{en:'Money to show', th:'เงินที่ต้องแสดง'}, v:{en:'The amount that must be in the bank when you apply for the study permit: first-year tuition plus the IRCC living-cost minimum.', th:'ยอดเงินที่ต้องมีในบัญชีตอนยื่นขอ Study Permit คือค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC'}},
+    {k:MONEY.show, v:{en:`The amount that must be in the bank when you apply for the study permit: ${MONEY.showDef.en}.`, th:`ยอดเงินที่ต้องมีในบัญชีตอนยื่นขอ Study Permit คือ${MONEY.showDef.th}`}},
     {k:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'}, v:{en:'A fixed amount set by the government and updated every year (CAD 23,448 for one person from 1 September 2026). It is proof you can live a year, not a spending budget.', th:'ยอดที่รัฐบาลกำหนดและปรับทุกปี (CAD 23,448 สำหรับ 1 คน ตั้งแต่ 1 กันยายน 2026) เป็นหลักฐานว่าอยู่ได้ 1 ปี ไม่ใช่งบที่ต้องใช้จริง'}},
     {k:{en:'Study term', th:'เทอมเรียน'}, v:{en:'Months with classes. You may work off campus up to 24 hours a week.', th:'เดือนที่มีเรียน ทำงานนอกสถาบันได้สูงสุด 24 ชั่วโมงต่อสัปดาห์'}},
     {k:{en:'Co-op term', th:'เทอม Co-op'}, v:{en:'A paid work term that is part of the program, usually full time. Since 1 April 2026 you need only your study permit and a letter from your school.', th:'ช่วงทำงานแบบได้ค่าจ้างที่เป็นส่วนหนึ่งของหลักสูตร มักเป็นงานเต็มเวลา ตั้งแต่ 1 เมษายน 2026 ใช้แค่ Study Permit กับจดหมายจากสถาบัน'}},
@@ -1483,13 +1629,13 @@ Object.assign(SIM_UI, {
   feesL:{en:'Compulsory school fees per year (start year)', th:'ค่าธรรมเนียมบังคับของสถาบันต่อปี (ปีที่เริ่มเรียน)'},
   feesNote:{en:'Student, technology and other fees charged on top of tuition. Check the amount on your Letter of Acceptance. Public colleges often charge CAD 1,500 to 2,700 a year. If your school bundles health insurance or a transit pass, lower this so it is not counted twice.', th:'ค่าธรรมเนียมนักศึกษา ค่าเทคโนโลยี และค่าอื่น ๆ ที่เก็บเพิ่มจากค่าเล่าเรียน ตรวจยอดใน Letter of Acceptance วิทยาลัยรัฐมักเก็บปีละ CAD 1,500 ถึง 2,700 ถ้าสถาบันรวมประกันสุขภาพหรือบัตรโดยสารไว้แล้ว ให้ลดยอดนี้เพื่อไม่ให้นับซ้ำ'},
   lTravel:{en:'Travel to and from Canada', th:'ค่าเดินทางไปและกลับแคนาดา'},
-  lShow:{en:'Money to show in the bank (for IRCC)', th:'เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)'},
+  lShow:MONEY.show,
   lSetup:{en:'Setup reserve: rent deposit, first purchases', th:'เงินสำรองตั้งตัว: เงินประกันห้อง ของใช้ช่วงแรก'},
-  lReady:{en:'Cash to have ready before you go (money to show + setup reserve)', th:'เงินสดที่ต้องเตรียมก่อนไป (เงินที่ต้องแสดง + เงินสำรองตั้งตัว)'},
-  sameNote:{en:'The All Costs page shows the same money-to-show amount as the line above. The big number at the top also adds the setup reserve.', th:'หน้าค่าใช้จ่ายแสดงเงินที่ต้องแสดงในบัญชียอดเดียวกับบรรทัดด้านบน ส่วนตัวเลขใหญ่บนสุดบวกเงินสำรองตั้งตัวเพิ่มด้วย'},
+  lReady:MONEY.goal,
+  sameNote:{en:'The All Costs page shows the same three amounts and the same savings goal. Prep and visa costs come from sections 1 and 2 on that page, where you can type what you really paid.', th:'หน้าค่าใช้จ่ายแสดงเงิน 3 ก้อนและเป้าเงินเก็บชุดเดียวกันนี้ ค่าเตรียมตัวและยื่นวีซ่ามาจากหมวด 1 ถึง 2 ในหน้านั้น และใส่ยอดที่จ่ายจริงได้'},
   lTravelSetup:{en:'Travel and setup', th:'ค่าเดินทางและตั้งตัว'},
   health:{en:'Health insurance', th:'ประกันสุขภาพ'},
-  showNote:{en:'This total is the money to show in the bank (first-year tuition, living costs and travel, which IRCC asks you to prove) plus a setup reserve. The list below shows each part. [[funds]]', th:'ยอดนี้คือเงินที่ต้องแสดงในบัญชี (ค่าเล่าเรียนปีแรก ค่าครองชีพ และค่าเดินทาง ที่ IRCC ขอหลักฐาน) บวกเงินสำรองตั้งตัว รายการด้านล่างแสดงแต่ละส่วน [[funds]]'},
+  showNote:{en:'The one number to save toward: prep and visa costs, the money to show IRCC, and a setup reserve, added together. The list below shows each part. [[funds]]', th:'ตัวเลขเดียวที่ควรเก็บให้ถึง คือค่าเตรียมตัวและยื่นวีซ่า เงินที่ต้องแสดงต่อ IRCC และเงินสำรองตั้งตัว รวมกัน รายการด้านล่างแสดงแต่ละส่วน [[funds]]'},
   brk:{en:'Scheduled break', th:'ปิดเทอมตามตาราง'}, brkS:{en:'Break', th:'ปิดเทอม'},
   grad:{en:'After graduation (while waiting for a PGWP)', th:'หลังเรียนจบ (ระหว่างรอผล PGWP)'}, gradS:{en:'After graduation', th:'หลังเรียนจบ'},
   pgwpQ:{en:'After graduation, will you apply for a PGWP before your study permit expires?', th:'หลังเรียนจบ จะยื่นขอ PGWP ก่อน Study Permit หมดอายุไหม'},
@@ -1512,7 +1658,7 @@ Object.assign(SIM_UI, {
   a5up:{en:(n, st, en) => `<b>After ${n} months:</b> your money never drops below the starting ${st} and ends at ${en}.`, th:(n, st, en) => `<b>ครบ ${n} เดือน:</b> เงินไม่เคยต่ำกว่ายอดเริ่มต้น ${st} และจบที่ ${en}`},
   a6:{en:(tu, x) => `<b>Year two:</b> second-year tuition and fees of about ${tu} are due at the start of month 13. IRCC also asks how you will pay for the rest of a program longer than one year.${x ? ' After paying it you need about ' + x + ' extra.' : ' Your remaining money covers it.'}`, th:(tu, x) => `<b>ปีที่สอง:</b> ต้องจ่ายค่าเล่าเรียนและค่าธรรมเนียมปีที่ 2 ประมาณ ${tu} ตอนต้นเดือนที่ 13 และ IRCC จะถามด้วยว่าจะจ่ายค่าเรียนส่วนที่เหลือของหลักสูตรที่ยาวกว่า 1 ปีอย่างไร${x ? ' หลังจ่ายแล้วต้องหาเงินเพิ่มประมาณ ' + x : ' เงินที่เหลืออยู่พอจ่าย'}`}
 });
-SIM_UI.gloss[0] = {k:{en:'Money to show', th:'เงินที่ต้องแสดง'}, v:{en:'What must be in the bank when you apply for the study permit: first-year tuition and fees, the IRCC living-cost amount, and travel to and from Canada.', th:'ยอดเงินที่ต้องมีในบัญชีตอนยื่นขอ Study Permit คือค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC และค่าเดินทางไปและกลับแคนาดา'}};
+SIM_UI.gloss[0] = {k:MONEY.show, v:{en:`What must be in the bank when you apply for the study permit: ${MONEY.showDef.en}.`, th:`ยอดเงินที่ต้องมีในบัญชีตอนยื่นขอ Study Permit คือ${MONEY.showDef.th}`}};
 SIM_UI.gloss.push({k:{en:'Health insurance', th:'ประกันสุขภาพ'}, v:{en:'Included at CAD 80 a month. BC charges students CAD 75 a month for MSP after a waiting period; Ontario schools charge about CAD 935 to 950 a year (Seneca, UHIP). [[h_BC]] [[uhip]]', th:'รวมไว้ที่เดือนละ CAD 80 บริติชโคลัมเบียเก็บค่า MSP นักศึกษาเดือนละ CAD 75 หลังช่วงรอสิทธิ์ ส่วนสถาบันในออนแทรีโอเก็บประมาณปีละ CAD 935 ถึง 950 (Seneca, UHIP) [[h_BC]] [[uhip]]'}});
 SIM_UI.assume = {en:'Assumptions: 4.33 weeks per month. Take-home pay falls as monthly pay rises: 93% up to CAD 1,700 a month, 89% up to 2,400, 84% up to 3,000, 82% up to 3,600 and 80% above (CPP 5.95%, EI 1.63% and income tax withheld at 2026 rates; part may be refunded at tax time). Pay in month 1 is halved for getting a SIN and finding a job. Living costs include health insurance (CAD 80 a month). Travel to and from Canada is estimated at CAD 2,500. Yearly increases for later start years: tuition and fees 4%, rent 2.5%, other costs 2%, health insurance 5%, wages 2%; the IRCC amount is raised from 2028 because applications for a 2027 start use today\'s amount. Finding a job is not guaranteed, so do not count wages as proof of funds. [[payroll]] [[statcantu]] [[boc]] [[cmhc]] [[funds]]',
   th:'สมมติฐาน: เดือนละ 4.33 สัปดาห์ สัดส่วนรายได้สุทธิลดลงเมื่อรายได้ต่อเดือนสูงขึ้น: 93% ถ้าไม่เกิน CAD 1,700 ต่อเดือน 89% ถ้าไม่เกิน 2,400 84% ถ้าไม่เกิน 3,000 82% ถ้าไม่เกิน 3,600 และ 80% ถ้าสูงกว่านั้น (หัก CPP 5.95% EI 1.63% และภาษีเงินได้ตามอัตราปี 2026 บางส่วนอาจได้คืนตอนยื่นภาษี) รายได้เดือนแรกคิดครึ่งเดียว เพราะต้องขอ SIN และหางาน ค่าครองชีพรวมประกันสุขภาพ (เดือนละ CAD 80) ค่าเดินทางไปและกลับแคนาดาประมาณ CAD 2,500 อัตราเพิ่มรายปีสำหรับปีเริ่มเรียนถัดไป: ค่าเล่าเรียนและค่าธรรมเนียม 4% ค่าเช่า 2.5% ค่าใช้จ่ายอื่น 2% ประกันสุขภาพ 5% ค่าจ้าง 2% ส่วนยอดของ IRCC เริ่มปรับตั้งแต่ปี 2028 เพราะการยื่นสำหรับเริ่มเรียนปี 2027 ใช้ยอดปัจจุบัน การหางานได้ไม่ใช่เรื่องแน่นอน จึงไม่ควรนับค่าจ้างเป็นหลักฐานการเงิน [[payroll]] [[statcantu]] [[boc]] [[cmhc]] [[funds]]'};
@@ -1578,10 +1724,10 @@ Object.assign(SIM_UI, {
   cmpSub:{en:'The column marked ● is your current choice and uses every setting you made, so it matches the results above. The other two use their own typical tuition, fees, Co-op hours and Co-op wage; everything else (start year, length, housing and living costs, part-time work, travel, setup reserve, IRCC amount, exchange rate) is the same as yours.', th:'คอลัมน์ที่มี ● คือประเภทที่เลือกอยู่ ใช้ทุกค่าที่คุณตั้ง จึงตรงกับผลลัพธ์ด้านบน อีก 2 ประเภทใช้ค่าเล่าเรียน ค่าธรรมเนียม ชั่วโมง Co-op และค่าจ้าง Co-op ทั่วไปของประเภทนั้น ส่วนค่าอื่นทั้งหมด (ปีที่เริ่มเรียน ระยะเวลา ที่พักและค่าครองชีพ งานพาร์ตไทม์ ค่าเดินทาง เงินสำรอง ยอดของ IRCC อัตราแลกเปลี่ยน) ใช้ค่าเดียวกับของคุณ'},
   cMine:{en:'your settings', th:'ค่าที่คุณตั้ง'}, cTyp:{en:'typical values', th:'ค่าทั่วไป'}, cTry:{en:'Try this type', th:'ลองประเภทนี้'},
   cTuY:{en:'Tuition, year 1', th:'ค่าเล่าเรียนปีแรก'}, cFeesY:{en:'School fees, year 1', th:'ค่าธรรมเนียมปีแรก'},
-  cTotal:{en:'Cash to have ready before you go', th:'เงินสดที่ต้องเตรียมก่อนไป'},
-  cShow:{en:'Money to show in the bank (for IRCC)', th:'เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)'},
+  cTotal:MONEY.goal,
+  cShow:MONEY.show,
   cShowEq:{en:(p, t) => `= tuition + fees (the two rows above) + IRCC living cost ${p} + travel ${t}`, th:(p, t) => `= ค่าเล่าเรียน + ค่าธรรมเนียม (2 แถวด้านบน) + ค่าครองชีพของ IRCC ${p} + ค่าเดินทาง ${t}`},
-  cTotalEq:{en:s => `= money to show + setup reserve ${s}`, th:s => `= เงินที่ต้องแสดง + เงินสำรองตั้งตัว ${s}`},
+  cTotalEq:MONEY.eq,
   cSeeAbove:{en:'See each line in the list above', th:'ดูรายการละเอียดด้านบน'},
   cWhyEnd:{en:'Where the money at the end comes from', th:'เงินคงเหลือตอนจบมาจากไหน'},
   cEndShow:{en:'See how it is worked out', th:'ดูที่มาของตัวเลข'}, cEndHide:{en:'Hide the breakdown', th:'ซ่อนที่มา'},
@@ -1629,7 +1775,7 @@ const GLOSS = [
   {k:'IRCC', f:'Immigration, Refugees and Citizenship Canada', c:'permit', s:'sp',
    th:'กระทรวงตรวจคนเข้าเมืองของแคนาดา เป็นหน่วยงานที่พิจารณา Study Permit, Work Permit, PGWP และ PR ตัวเลขทางการในแอปนี้มาจากเว็บของ IRCC',
    en:'The Canadian immigration department. It decides study permits, work permits, PGWPs and PR, and publishes the official figures this app uses.'},
-  {k:'Study Permit', c:'permit', s:'sp', m:['Study Permit','study permit'],
+  {k:'Study Permit', c:'permit', s:'sp', m:['Study Permit','study permit','วีซ่านักเรียน','ใบอนุญาตเรียน','student visa'],
    th:'ใบอนุญาตให้เรียนในแคนาดา ยื่นออนไลน์จากไทย ถ้าผ่านจะได้ Letter of Introduction และวีซ่าเข้าประเทศ (TRV) ส่วน Study Permit ตัวจริงเจ้าหน้าที่จะพิมพ์ให้ที่สนามบินตอนเดินทางถึง',
    en:'Permission to study in Canada. You apply online from Thailand; if approved you get a Letter of Introduction and an entry visa (TRV), and the permit itself is printed at the airport when you land.'},
   {k:'Letter of Introduction', f:'Port of entry letter', c:'permit', s:'arrive', m:['Letter of Introduction'],
@@ -1654,8 +1800,8 @@ const GLOSS = [
    th:'หนังสือรับรองการเรียนของรัฐควิเบก ถ้าเรียนในควิเบกต้องได้ CAQ ก่อนยื่น Study Permit',
    en:"Quebec's acceptance certificate. If you study in Quebec you need it before applying for the study permit."},
   {k:{en:'Proof of funds', th:'หลักฐานการเงิน'}, c:'permit', s:'funds', m:['หลักฐานการเงิน','Proof of funds','proof of funds','เงินที่ต้องแสดง','Money to show','money to show'],
-   th:'หลักฐานว่ามีเงินพอจ่ายค่าเล่าเรียนปีแรก ค่าครองชีพตามยอดของ IRCC และค่าเดินทางไปและกลับ เช่น Statement หนังสือรับรองจากธนาคาร และเอกสารของสปอนเซอร์',
-   en:'Evidence that you can pay first-year tuition, the IRCC living-cost amount and travel to and from Canada: bank statements, a bank letter and sponsor documents.'},
+   th:`หลักฐานว่ามีเงินที่ต้องแสดงครบ คือ${MONEY.showDef.th} เช่น Statement หนังสือรับรองจากธนาคาร และเอกสารของสปอนเซอร์`,
+   en:`Evidence that you have the money to show, which is ${MONEY.showDef.en}: bank statements, a bank letter and sponsor documents.`},
   {k:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'}, c:'permit', s:'funds', m:['ค่าครองชีพขั้นต่ำของ IRCC','ค่าครองชีพที่ IRCC กำหนด','IRCC living-cost minimum','IRCC living-cost amount'],
    th:() => `ยอดค่าครองชีพที่ IRCC ให้แสดงสำหรับ 1 ปี ไม่รวมค่าเล่าเรียนและค่าเดินทาง ปัจจุบัน CAD ${fmt(fundsAmt())} สำหรับ 1 คน แอปอ่านยอดนี้จากเว็บ IRCC อัตโนมัติทุกวัน เป็นหลักฐานว่าอยู่ได้ 1 ปี ไม่ใช่งบที่ต้องใช้จริง`,
    en:() => `The living-cost amount IRCC asks you to show for one year, not counting tuition or travel. Now CAD ${fmt(fundsAmt())} for one person; the app reads it from the IRCC page every day. It is proof, not a spending budget.`},
@@ -1714,7 +1860,7 @@ const GLOSS = [
    th:'การรับรองเอเจนต์การศึกษาระดับนานาชาติ แสดงว่าเอเจนต์ผ่านการตรวจสอบ แต่ไม่ใช่ใบอนุญาตให้คำแนะนำด้านวีซ่า',
    en:'An international accreditation for education agents. It shows the agent was checked, but it is not a licence to give visa advice.'},
   /* ---- path to PR ---- */
-  {k:'PR', f:'Permanent Residency', c:'pr',
+  {k:'PR', f:'Permanent Residency', c:'pr', m:['PR','พีอาร์','ผู้มีถิ่นที่อยู่ถาวร'],
    th:'สถานะผู้มีถิ่นที่อยู่ถาวร อยู่ ทำงาน และเรียนที่ไหนในแคนาดาก็ได้ ได้สวัสดิการส่วนใหญ่เหมือนพลเมือง และยื่นขอสัญชาติได้ภายหลัง',
    en:'Permanent residence: live, work and study anywhere in Canada, get most benefits citizens get, and later apply for citizenship.'},
   {k:'Express Entry', c:'pr', s:'draws', m:['Express Entry'],
@@ -1794,7 +1940,7 @@ const GLOSS = [
    th:'ช่วงฝึกงานภาคปฏิบัติที่เป็นส่วนหนึ่งของหลักสูตร (ได้หรือไม่ได้ค่าจ้างก็ได้) เช่น ฝึกงานในโรงพยาบาลหรือโรงเรียน',
    en:'Hands-on work training that is part of a program, paid or unpaid, for example in a hospital or a school.'},
   /* ---- English tests ---- */
-  {k:'IELTS', f:'International English Language Testing System', c:'test', s:'idp', m:['IELTS Academic','IELTS General Training','IELTS'],
+  {k:'IELTS', f:'International English Language Testing System', c:'test', s:'idp', m:['IELTS Academic','IELTS General Training','IELTS','ไอเอลส์'],
    th:'สอบภาษาอังกฤษที่นิยมที่สุด มี 2 แบบ: Academic ใช้สมัครเรียน และ General Training ใช้กับ IRCC สำหรับ PGWP และ PR (IRCC ไม่รับแบบ Academic) ในไทยสอบด้วยคอมพิวเตอร์ ค่าสอบ THB 8,860',
    en:'The most common English test. Academic is for school admission; General Training is the one IRCC accepts for the PGWP and PR (IRCC does not accept Academic). In Thailand it is computer-based, THB 8,860.'},
   {k:'CELPIP-General', f:'Canadian English Language Proficiency Index Program', c:'test', s:'celpip', m:['CELPIP-General','CELPIP'],
@@ -1849,6 +1995,12 @@ const GLOSS = [
   {k:{en:'Setup reserve', th:'เงินสำรองตั้งตัว'}, c:'money', m:['เงินสำรองตั้งตัว','Setup reserve','setup reserve'],
    th:'เงินที่ควรเตรียมไว้ใช้ช่วงแรกที่ไปถึง เช่น เงินประกันห้อง ของใช้ในบ้าน และเสื้อกันหนาว แอปตั้งไว้ CAD 2,000 แก้เองได้ในหน้างบ',
    en:'Money for your first weeks: a rent deposit, household items and winter clothes. The app uses CAD 2,000; you can change it in the simulator.'},
+  {k:MONEY.goal, c:'money', m:['เป้าเงินเก็บทั้งหมด','Total savings goal','total savings goal'],
+   th:'ตัวเลขเดียวที่ควรเก็บเงินให้ถึง คือเงิน 3 ก้อนรวมกัน: ค่าเตรียมตัวและยื่นวีซ่า เงินที่ต้องแสดง และเงินสำรองตั้งตัว หน้างบและหน้าค่าใช้จ่ายแสดงยอดเดียวกัน',
+   en:'The one number to save toward: three amounts added together, prep and visa costs, the money to show, and the setup reserve. The Budget and All Costs pages show the same figure.'},
+  {k:MONEY.prep, c:'money', m:['ค่าเตรียมตัวและยื่นวีซ่า','Prep and visa costs','prep and visa costs'],
+   th:'ค่าสอบภาษา เอกสาร ค่าสมัครเรียน ค่า Study Permit ค่า Biometrics และค่าตรวจสุขภาพ ที่จ่ายที่ไทยก่อนยื่นวีซ่า (หมวด 1 ถึง 2 ในหน้าค่าใช้จ่าย) เป็นเงินแยกจากเงินที่ต้องแสดง',
+   en:'Language test, documents, school application, study permit, biometrics and medical exam, paid in Thailand before you apply (sections 1 and 2 on the All Costs page). Separate from the money to show.'},
   {k:'Job Bank', c:'money', s:'wages', m:['Job Bank'],
    th:'เว็บหางานและข้อมูลค่าจ้างของรัฐบาลแคนาดา ดูค่าจ้างของแต่ละอาชีพในแต่ละเมืองได้', en:"The Government of Canada's job board and wage data, by occupation and city."},
   /* ---- health insurance ---- */
@@ -2090,12 +2242,12 @@ const START = {
         {en:'Pick a target intake: January, May, or September, in any year from 2027 to 2033.', th:'เลือกรอบเปิดเรียนเป้าหมาย: มกราคม พฤษภาคม หรือกันยายน ของปีใดก็ได้ตั้งแต่ 2027 ถึง 2033'}],
      c:{en:'Free', th:'ไม่มีค่าใช้จ่าย'}, go:{tab:'ready', anchor:'quiz', l:{en:'Take the quiz', th:'ทำแบบประเมิน'}}},
     {id:'s2', icon:'wallet', m:{en:'12 months or more', th:'12 เดือนขึ้นไป'}, t:{en:'Check your money and start seasoning the bank account', th:'ตรวจสอบเงินทุน และเริ่มเดินบัญชีให้นิ่ง'},
-     d:[{en:'Use the simulator to find how much you must show: first-year tuition plus the IRCC living-cost minimum. [[funds]]', th:'ใช้เครื่องจำลองเพื่อดูว่าต้องแสดงเงินเท่าไร: ค่าเล่าเรียนปีแรก บวกค่าครองชีพขั้นต่ำของ IRCC [[funds]]'},
+     d:[{en:`Use the simulator to find how much you must show: ${MONEY.showDef.en}. [[funds]]`, th:`ใช้เครื่องจำลองเพื่อดูว่าต้องแสดงเงินเท่าไร: ${MONEY.showDef.th} [[funds]]`},
         
         {en:'Decide who the sponsor is (you, parents, or both) and put the money in one account.', th:'ตกลงว่าใครเป็นสปอนเซอร์ (ตัวเอง พ่อแม่ หรือทั้งคู่) และรวมเงินไว้ในบัญชีเดียว'},
         
         {en:'Leave it untouched for 4 to 6 months. Avoid sudden large deposits you cannot explain.', th:'คงเงินไว้ไม่แตะต้อง 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่กะทันหันที่อธิบายที่มาไม่ได้'}],
-     c:() => T({en:'Money to show: ', th:'เงินที่ต้องแสดง: '}) + inline(Math.round(simCalc().show)) + T({en:' (start ' + S.sim.intake + ')', th:' (เริ่มเรียน ' + S.sim.intake + ')'}), go:{tab:'budget', l:{en:'Open the budget simulator', th:'เปิดเครื่องจำลองงบประมาณ'}}},
+     c:() => { const c = simCalc(), r = S.sim.rate || 24, g = thb(c.total * r), sh = thb(c.show * r), b = goalBasis(c); return T({en:`total savings goal ${g}, of which the money to show is ${sh} (${b})`, th:`เป้าเงินเก็บทั้งหมด ${g} ในนี้เป็นเงินที่ต้องแสดง ${sh} (${b})`}); }, go:{tab:'budget', l:{en:'Open the budget simulator', th:'เปิดเครื่องจำลองงบประมาณ'}}},
     {id:'s3', icon:'languages', m:{en:'10 to 12 months', th:'10 ถึง 12 เดือน'}, t:{en:'Take the English test', th:'สอบภาษาอังกฤษ'},
      d:[{en:'Book IELTS Academic with IDP or the British Council in Thailand. Target 6.5 overall with no band under 6.0 for public programs.', th:'จองสอบ IELTS Academic กับ IDP หรือ British Council ในไทย ตั้งเป้ารวม 6.5 ไม่มีทักษะใดต่ำกว่า 6.0 สำหรับสถาบันรัฐ'},
         
@@ -2716,6 +2868,8 @@ const CITY_UI = {
   onMap:{en:'Show on map', th:'ดูบนแผนที่'},
   zoomTip:{en:'Scroll or pinch to zoom, drag to move.', th:'เลื่อนลูกกลิ้งเมาส์หรือใช้สองนิ้วเพื่อซูม ลากเพื่อเลื่อนแผนที่'},
   rent:{en:'Average rent, 1-bedroom', th:'ค่าเช่าเฉลี่ย ห้อง 1 ห้องนอน'}, rentNote:{en:'CMHC average', th:'ค่าเฉลี่ยของ CMHC'},
+  budgetNote:{en:h => `These figures are for comparing cities. The Budget page does not change with the city you pick here: it uses the housing chosen there (now ${h}). If you plan to study here, type the rent you expect on the Budget page.`, th:h => `ตัวเลขในหน้านี้ใช้เทียบเมือง หน้างบไม่ได้เปลี่ยนตามเมืองที่เลือกตรงนี้ แต่ใช้ที่พักที่เลือกในหน้างบ (ตอนนี้ ${h}) ถ้าจะเรียนเมืองนี้ ให้พิมพ์ค่าเช่าที่คาดว่าจะจ่ายในหน้างบ`},
+  toBudget:{en:'Type rent on the Budget page', th:'ใส่ค่าเช่าในหน้างบ'},
   mo:{en:'/mo', th:'/เดือน'}, hr:{en:'/hr', th:'/ชม.'}, hrs:{en:'hrs', th:'ชม.'},
   wage:{en:'Minimum wage', th:'ค่าแรงขั้นต่ำ'},
   hours:{en:'Work to pay rent', th:'ชั่วโมงงานเพื่อจ่ายค่าเช่า'}, hoursNote:{en:'Hours at minimum wage, before tax, for one month of 1-bedroom rent. A shared room costs much less.', th:'จำนวนชั่วโมงทำงานที่ค่าแรงขั้นต่ำ ก่อนหักภาษี เพื่อจ่ายค่าเช่าห้อง 1 ห้องนอน 1 เดือน ห้องแชร์ถูกกว่ามาก'},
@@ -2745,25 +2899,23 @@ const COSTS = {
   h1:{en:'Every cost, in CAD and THB', th:'ค่าใช้จ่ายทุกรายการ ทั้ง CAD และบาท'},
   lead:{en:'All amounts convert at today\'s live exchange rate. Official fees were checked against the IRCC website on 14 November 2026; other lines are estimates. [[fees]] [[funds]]', th:'ทุกยอดแปลงด้วยอัตราแลกเปลี่ยนล่าสุดของวันนี้ ค่าธรรมเนียมทางการตรวจสอบกับเว็บไซต์ IRCC เมื่อ 14 พฤศจิกายน 2026 ส่วนรายการอื่นเป็นค่าประมาณ [[fees]] [[funds]]'},
   conv:{en:'Currency converter', th:'เครื่องแปลงสกุลเงิน'},
-  item:{en:'Item', th:'รายการ'}, off:{en:'Official fee', th:'ค่าธรรมเนียมทางการ'}, est:{en:'Estimate', th:'ค่าประมาณ'},
+  item:{en:'Item', th:'รายการ'}, off:{en:'Official fee', th:'ค่าธรรมเนียมทางการ'}, est:{en:'Estimate', th:'ค่าประมาณ'}, free:{en:'Free by rule', th:'ไม่มีค่าใช้จ่ายตามกฎ'},
   sub:{en:'Subtotal', th:'รวมย่อย'}, verify:{en:'Verify', th:'ตรวจสอบ'},
-  totalT:{en:'Cash you spend before the first day of class', th:'เงินสดที่ต้องใช้จริงก่อนวันเปิดเรียน'},
-  totalN:{en:'Sections 1 to 4, not counting tuition or the money you must show in the bank.', th:'รวมหมวด 1 ถึง 4 ไม่นับค่าเล่าเรียนและเงินที่ต้องแสดงในบัญชี'},
   ownIncl:{en:'Uses the amounts you typed where you have them.', th:'ใช้ยอดที่คุณใส่เองในรายการที่ใส่ไว้'},
-  sameNote:{en:s => `Same amount as the "Money to show in the bank (for IRCC)" line on the Budget page, which follows your simulator settings. The big number at the top of the Budget page is the cash to have ready before you go: this amount plus a setup reserve of ${s}.`, th:s => `ยอดเดียวกับบรรทัด "เงินที่ต้องแสดงในบัญชี (ต่อ IRCC)" ในหน้างบ และเปลี่ยนตามค่าที่ตั้งในเครื่องจำลอง ส่วนตัวเลขใหญ่บนสุดของหน้างบคือเงินสดที่ต้องเตรียมก่อนไป คือยอดนี้บวกเงินสำรองตั้งตัว ${s}`},
+  sameNote:{en:'The same three amounts and savings goal as the Budget page; the money to show and the setup reserve follow your simulator settings.', th:'เงิน 3 ก้อนและเป้าเงินเก็บชุดเดียวกับหน้างบ เงินที่ต้องแสดงและเงินสำรองตั้งตัวเปลี่ยนตามค่าที่ตั้งในเครื่องจำลอง'},
+  secPrep:{en:'Counted in prep and visa costs', th:'นับอยู่ในค่าเตรียมตัวและยื่นวีซ่า'},
+  secPaid:{en:'Paid from the money to show and the setup reserve, so not counted again', th:'จ่ายจากเงินที่ต้องแสดงและเงินสำรองตั้งตัว จึงไม่นับซ้ำ'},
+  secLater:{en:'Later costs, not part of the savings goal', th:'ค่าใช้จ่ายภายหลัง ไม่รวมในเป้าเงินเก็บ'},
   itemsT:{en:'Costs by section', th:'ค่าใช้จ่ายแยกตามหมวด'},
   itemsSub:{en:'Ranges are estimates. Tap "Enter my own amounts" to type what you actually paid or were quoted in sections 1 to 4; it is saved on this device.', th:'ช่วงราคาเป็นค่าประมาณ กด "ใส่ยอดเอง" เพื่อพิมพ์ยอดที่คุณจ่ายจริงหรือได้ใบเสนอราคาในหมวด 1 ถึง 4 ยอดจะถูกบันทึกไว้ในเครื่องนี้'},
   editHint:{en:'Sections 1 to 4: type each amount in the currency shown (THB for costs in Thailand, CAD for costs in Canada), then press Enter or tap elsewhere. Leave a box empty to keep the estimate.', th:'หมวด 1 ถึง 4: พิมพ์ยอดในสกุลเงินที่แสดง (บาทสำหรับค่าใช้จ่ายในไทย CAD สำหรับค่าใช้จ่ายในแคนาดา) แล้วกด Enter หรือแตะที่อื่น ช่องที่เว้นว่างจะใช้ค่าประมาณเดิม'},
   ownPh:{en:'Your amount', th:'ยอดจริง'}, estIs:{en:'Estimate', th:'ค่าประมาณ'}, useEst:{en:'Use the estimate', th:'ใช้ค่าประมาณ'},
   resetOwn:{en:'Clear my amounts', th:'ล้างยอดที่ใส่เอง'},
-  showT:{en:'Money you must show in the bank', th:'เงินที่ต้องแสดงในบัญชี'},
-  showN:{en:'First-year tuition and fees, the IRCC living-cost amount, and travel to and from Canada, from the budget simulator.', th:'ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC และค่าเดินทางไปและกลับแคนาดา ตามเครื่องจำลองงบประมาณ'},
   open:{en:'Adjust in the simulator', th:'ปรับค่าในเครื่องจำลอง'},
   note:{en:'What updates automatically: the exchange rate and the IRCC living-cost amount are read every day (and again when you tap Check now), so every THB figure and the money to show move with them. The IRCC fee list and school prices block automatic reading, so each official line has a Verify link to the live source page.', th:'สิ่งที่อัปเดตอัตโนมัติ: อัตราแลกเปลี่ยนและยอดค่าครองชีพของ IRCC ถูกอ่านใหม่ทุกวัน (และทุกครั้งที่กด "อัปเดตตอนนี้") ตัวเลขเงินบาททุกรายการและเงินที่ต้องแสดงจึงปรับตาม ส่วนรายการค่าธรรมเนียมของ IRCC และราคาของสถาบันไม่เปิดให้ดึงข้อมูลอัตโนมัติ รายการทางการแต่ละรายการจึงมีลิงก์ "ตรวจสอบ" ไปยังหน้าเว็บต้นทาง'},
-  showLive:{en:a => `Includes the IRCC living-cost amount of CAD ${a}, read from the IRCC page automatically.`, th:a => `รวมยอดค่าครองชีพของ IRCC CAD ${a} ที่อ่านจากเว็บ IRCC อัตโนมัติ`},
   howT:{en:'Where this number comes from, and how to do it', th:'ตัวเลขนี้มาจากไหน และต้องทำอย่างไร'},
   secs:[
-    {sum:true, t:{en:'1. Preparing in Thailand', th:'1. เตรียมตัวที่ไทย'}, items:[
+    {sum:true, prep:true, t:{en:'1. Preparing in Thailand', th:'1. เตรียมตัวที่ไทย'}, items:[
       {t:{en:'IELTS Academic test (computer)', th:'ค่าสอบ IELTS Academic (คอมพิวเตอร์)'}, thb:[8860,8860], n:{en:'Per attempt, IDP and British Council Thailand, checked 19 Nov 2026', th:'ต่อครั้ง IDP และ British Council ประเทศไทย ตรวจสอบเมื่อ 19 พ.ย. 2026'}, r:'idp'},
       {t:{en:'Passport (new or renewal)', th:'พาสปอร์ต (ทำใหม่หรือต่ออายุ)'}, thb:[1000,1500], n:{en:'5-year or 10-year', th:'อายุ 5 ปี หรือ 10 ปี'}},
       {t:{en:'Transcript and degree certificate in English', th:'Transcript และใบปริญญาฉบับภาษาอังกฤษ'}, thb:[200,1000]},
@@ -2780,7 +2932,7 @@ const COSTS = {
        ]},
       {t:{en:'School application fee', th:'ค่าสมัครเรียน'}, cad:[100,200], n:{en:'Per school', th:'ต่อสถาบัน'}}
     ]},
-    {sum:true, t:{en:'2. Visa application', th:'2. การยื่นวีซ่า'}, items:[
+    {sum:true, prep:true, t:{en:'2. Visa application', th:'2. การยื่นวีซ่า'}, items:[
       {t:{en:'Study permit fee', th:'ค่าธรรมเนียม Study Permit'}, cad:[150,150], off:true, u:FEES_URL},
       {t:{en:'Biometrics', th:'ค่า Biometrics'}, cad:[85,85], off:true, u:FEES_URL, n:{en:'Paid to IRCC; valid 10 years for study and work permits', th:'จ่ายให้ IRCC ใช้ได้ 10 ปีสำหรับ Study Permit และ Work Permit'}},
       {t:{en:'Co-op work term', th:'เทอมทำงาน Co-op'}, cad:[0,0], n:{en:'No separate permit since 1 April 2026: a school letter is enough', th:'ไม่ต้องขอ Permit แยกตั้งแต่ 1 เมษายน 2026 ใช้จดหมายจากสถาบัน'}, u:IRCC+'study-canada/work/intern.html'},
@@ -2926,6 +3078,17 @@ function costRange(it){
   if (o != null) { const c = it.cad ? o : o / r; return [c, c]; }
   return it.cad ? it.cad : [it.thb[0]/r, it.thb[1]/r];
 }
+/* Prep and visa costs in CAD, [low, high]: the sections marked prep (1 and 2) on the All Costs page. */
+function prepCost(){
+  let a = 0, b = 0;
+  COSTS.secs.forEach(sec => { if (sec.prep) sec.items.forEach(it => { const r = costRange(it); a += r[0]; b += r[1]; }); });
+  return [a, b];
+}
+/* The money ladder as a thin proportion strip: prep, money to show, setup reserve, always in that order and colour. */
+function ladderBar(c){
+  const parts = [[MONEY.prep, c.prep, 's1'], [MONEY.show, c.show, 's2'], [MONEY.setup, c.setup, 's3']], tot = c.total || 1;
+  return `<div class="lbar" role="img" aria-label="${esc(parts.map(p => T(p[0]) + ' ' + Math.round(p[1] / tot * 100) + '%').join(', '))}">${parts.map(p => `<div class="${p[2]}" style="flex:${Math.max(p[1], 0)}"></div>`).join('')}</div>`;
+}
 function costCell(it){
   const C = COSTS, k = costKey(it), unit = it.cad ? 'cad' : 'thb', o = costOwn(it), r = S.sim.rate || 24;
   const est = it.cad ? money(it.cad[0], it.cad[1], 'cad') : money(it.thb[0], it.thb[1], 'thb');
@@ -2938,7 +3101,6 @@ function costCell(it){
 function viewCosts(){
   const C = COSTS, r = S.sim.rate || 24, M = SIM_UI;
   const anyOwn = C.secs.some(s => s.sum && s.items.some(it => costOwn(it) != null));
-  let tMin = 0, tMax = 0;
   const secs = C.secs.map(sec => {
     let a = 0, b = 0;
     const rows = sec.items.map(it => {
@@ -2955,7 +3117,7 @@ function viewCosts(){
         
             <div class="flex flex-wrap items-center gap-2 mt-1">
         
-              ${o != null ? `<span class="badge b-blue">${T(M.mine)}</span>` : `<span class="badge ${it.off?'b-green':'b-gray'}">${T(it.off?C.off:C.est)}</span>`}
+              ${o != null ? `<span class="badge b-blue">${T(M.mine)}</span>` : (!it.off && it.u && it.cad && !it.cad[0] && !it.cad[1]) ? `<span class="badge b-green">${T(C.free)}</span>` : `<span class="badge ${it.off?'b-green':'b-gray'}">${T(it.off?C.off:C.est)}</span>`}
         
               ${it.n?`<span class="faint text-[13px]">${T(it.n)}</span>`:''}
         
@@ -2973,13 +3135,13 @@ function viewCosts(){
 
         </div>`;
     }).join('');
-    if (sec.sum) { tMin += a; tMax += b; }
     const sm = money(rnd(a,5), rnd(b,5), 'cad');
     return `
       <section>
         
         <h2 class="grp">${T(sec.t)}</h2>
-        
+        <p class="secnote">${sec.prep ? `<i class="sw s1"></i>${T(C.secPrep)}` : sec.sum ? `<i class="sw s2"></i><i class="sw s3"></i>${T(C.secPaid)}` : T(C.secLater)}</p>
+
         <div class="card tbl">
         
           <div class="thead"><div>${T(C.item)}</div><div>CAD</div><div>THB</div></div>
@@ -2999,44 +3161,41 @@ function viewCosts(){
         </div>
       </section>`;
   }).join('');
-  const tot = money(rnd(tMin,10), rnd(tMax,10), 'cad'), c = simCalc(), show = c.show;
+  const c = simCalc(), prepOwn = C.secs.some(s => s.prep && s.items.some(it => costOwn(it) != null));
+  const lrow = (sw, name, note, v) => `<div class="lrow"><div class="min-w-0"><div class="lname font-medium text-[15px]"><i class="sw ${sw}"></i>${T(name)}</div><p class="faint text-[13px] mt-0.5">${note}</p></div><div class="amtv">${thb(v * r)}<span class="msub">${cad(v)}</span></div></div>`;
+  const prepNote = T(MONEY.prepN) + (c.prepR[1] - c.prepR[0] > 1 ? ' ' + T(MONEY.prepR)(thb(c.prepR[0] * r), thb(c.prepR[1] * r)) : '') + (prepOwn ? ' ' + T(C.ownIncl) : '');
+  const showNote = T(MONEY.showN)(c.s.proofAuto !== false && LIVE.funds ? fmt(fundsAmt()) : '');
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(C.h1)}</h1>
       <p class="muted mt-3 text-[17px]">${T(C.lead)}</p>
     </section>
-    <div class="grid lg:grid-cols-3 gap-4 mb-4">
+    <div class="grid lg:grid-cols-3 gap-4 mb-4 items-start">
       <div class="card">
-        
+
         <div class="eyebrow mb-2">${T(C.conv)}</div>
         
         <div class="flex items-center gap-2 mb-2"><span class="faint text-[13px] w-10">CAD</span><input class="numin num" style="width:100%" type="number" min="0" inputmode="decimal" aria-label="CAD" id="conv-cad" data-conv="cad" value="1000"></div>
         
         <div class="flex items-center gap-2"><span class="faint text-[13px] w-10">THB</span><input class="numin num" style="width:100%" type="number" min="0" inputmode="decimal" aria-label="THB" id="conv-thb" data-conv="thb" value="${Math.round(1000*r)}"></div>
-        
+        <div class="num font-semibold text-[14px] mt-2" id="conv-out" aria-live="polite">CAD 1,000 = THB ${Math.round(1000*r).toLocaleString('en-US')}</div>
         <div class="faint text-[13px] mt-3" id="fx-status"></div>
       </div>
-      <div class="card">
-        
-        <div class="eyebrow">${T(C.totalT)}</div>
-        
-        <div class="text-[24px] font-bold num mt-1">THB ${tot.thb}</div>
-        
-        <div class="muted num">CAD ${tot.cad}</div>
-        
-        <p class="faint text-[13px] mt-2">${T(C.totalN)}${anyOwn ? ' ' + T(C.ownIncl) : ''}</p>
-      </div>
-      <div class="card" id="cost-money">
-
-        <div class="eyebrow">${T(M.lShow)}</div>
-
-        <div class="text-[24px] font-bold num mt-1">${thb(show*r)}</div>
-
-        <div class="muted num">${cad(show)}</div>
-
-        <p class="faint text-[13px] mt-2">${T(C.showN)} ${c.s.proofAuto !== false && LIVE.funds ? T(C.showLive)(fmt(fundsAmt())) : ''}</p>
-        <p class="faint text-[13px] mt-2 flex gap-2"><span style="margin-top:2px">${ic('link','icon-sm')}</span><span>${T(C.sameNote)(inline(c.setup))}</span></p>
-
+      <div class="card lg:col-span-2 order-first lg:order-none" id="cost-money">
+        <div class="eyebrow">${T(MONEY.goal)}</div>
+        <div class="flex flex-wrap items-baseline gap-x-4 mt-1">
+          <div class="text-[28px] font-bold num">${thb(c.total * r)}</div>
+          <div class="muted num">${cad(c.total)}</div>
+        </div>
+        <p class="gbasis">${ic('sliders-horizontal','icon-sm')}<span>${T(MONEY.basisL)}: ${goalBasis(c, true)}</span><button class="linkbtn" data-act="tab" data-v="budget">${T(MONEY.change)}</button></p>
+        <p class="faint text-[13px] mt-1">${T(MONEY.goalN)}</p>
+        ${ladderBar(c)}
+        <div class="mt-2">
+          ${lrow('s1', MONEY.prep, prepNote, c.prep)}
+          ${lrow('s2', MONEY.show, showNote, c.show)}
+          ${lrow('s3', MONEY.setup, T(MONEY.setupN), c.setup)}
+        </div>
+        <p class="faint text-[13px] mt-3 flex gap-2"><span style="margin-top:2px">${ic('link','icon-sm')}</span><span>${T(C.sameNote)}</span></p>
         <button class="btn btn-ghost mt-1" style="padding:4px 8px;font-size:14px" data-act="tab" data-v="budget">${T(C.open)}${ic('arrow-right','icon-sm')}</button>
       </div>
     </div>
@@ -3094,7 +3253,7 @@ function viewReady(){
     </div>`).join('');
   return `
     <section class="mb-10 sm:mb-14" style="max-width:820px">
-      <h1 class="text-[28px] sm:text-[46px] font-bold">${T(R.h1)}</h1>
+      <h1 class="text-[30px] sm:text-[38px] font-bold">${T(R.h1)}</h1>
       <p class="muted text-[17px] sm:text-[19px] mt-4" style="max-width:62ch">${T(R.lead)}</p>
     </section>
     <section class="grid md:grid-cols-3 gap-4 mb-12">${phases}</section>
@@ -3123,28 +3282,47 @@ function viewQuiz(){
   const qs = QUIZ.map((q,qi) => `
     <div class="card">
       <div class="flex items-center gap-2 mb-2"><span class="badge b-gray">${ic(q.icon,'icon-sm')}${T(q.cat)}</span><span class="faint text-[13px] num">${qi+1} / ${QUIZ.length}</span></div>
-      <h3 class="text-[17px] font-semibold ${q.hint ? 'mb-1' : 'mb-3'}">${T(q.q)}</h3>
+      <h3 id="qq-${q.id}" class="text-[17px] font-semibold ${q.hint ? 'mb-1' : 'mb-3'}">${T(q.q)}</h3>
       ${q.hint ? `<p class="muted text-[13.5px] mb-3 flex gap-1.5"><span style="color:var(--blue);margin-top:2px">${ic('info','icon-sm')}</span><span>${T(q.hint)}</span></p>` : ''}
-      <div class="grid gap-2">${q.o.map((o,oi) => `<button class="opt ${S.quiz[q.id]===oi?'on':''}" data-act="quiz" data-q="${q.id}" data-o="${oi}" aria-pressed="${S.quiz[q.id]===oi}">${T(o.l)}</button>`).join('')}</div>
+      <div class="grid gap-2" role="group" aria-labelledby="qq-${q.id}">${q.o.map((o,oi) => `<button class="opt ${S.quiz[q.id]===oi?'on':''}" data-act="quiz" data-q="${q.id}" data-o="${oi}" aria-pressed="${S.quiz[q.id]===oi}">${T(o.l)}</button>`).join('')}</div>
     </div>`).join('');
-  let res;
+  /* The verdict gets the full width under the questions (26 Nov 2026); the sticky side card keeps progress and a link to it. */
+  let side, res = '';
   if (!r.done) {
-    res = `<p class="muted">${T(Q.pending)}</p>`;
+    side = `<p class="muted">${T(Q.pending)}</p>`;
   } else {
-    const [k1, k2] = r.rank, close = r.pct[k1] - r.pct[k2] < 8;
-    const rec = {a:Q.recA, b:Q.recB, c:Q.recC}[k1];
+    const [k1, k2] = r.rank, gap = r.pct[k1] - r.pct[k2], lvl = gap < 8 ? 'close' : gap < 20 ? 'some' : 'clear';
+    const rec = {a:Q.recA, b:Q.recB, c:Q.recC}[k1], NM = {a:Q.nA, b:Q.nB, c:Q.nC};
     const sc = k1 === 'a' ? 'safe' : 'one';
-    const bars = [['a', Q.fitA, 'var(--amber)'], ['b', Q.fitB, 'var(--green)'], ['c', Q.fitC, 'var(--blue)']];
+    const needs = quizNeeds(k1), blocks = needs.filter(x => x.lv === 'block').length, why = quizWhy(k1);
+    const alt = blocks > 0 && !quizNeeds(k2).some(x => x.lv === 'block');
+    const strip = s => String(s).replace(/\s*\[\[[^\]]+\]\]/g, '').replace(/ (บาท|THB)\b/g, ' $1');
+    side = `<div class="hidden lg:block">
+        <div class="text-[13.5px] muted">${T(Q.doneS)}</div>
+        <div class="font-semibold text-[15.5px] mt-0.5">${T(NM[k1])}</div>
+        <button class="btn btn-ghost mt-3" style="padding:4px 12px;font-size:14px" data-act="jump" data-v="quiz-result">${T(Q.seeRes)}${ic('arrow-down','icon-sm')}</button>
+      </div>`;
+    /* fit bars: one neutral colour, the leader in the first data colour and labelled, so colour is not the only cue */
+    const bars = ['a', 'b', 'c'].map(k => { const lead = k === k1; return `<div class="flex flex-col justify-between"><div class="flex justify-between items-baseline gap-2 text-[14px] mb-1"><span class="${lead ? 'font-semibold' : ''}">${T(NM[k])}${lead ? ` <span class="badge b-blue">${T(Q.bestB)}</span>` : ''}</span><span class="num font-semibold">${r.pct[k]}%</span></div><div class="bar"><i class="${lead ? 'fit-lead' : 'fit-n'}" style="width:${r.pct[k]}%"></i></div></div>`; }).join('');
     res = `
-      <h3 class="text-[22px] font-semibold">${T(rec.t)}</h3>
-      <p class="muted mt-2 text-[15px]">${T(rec.d)}</p>
-      ${close ? `<p class="text-[14.5px] mt-3 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px">${ic('scale','icon-sm')}<span>${T(Q.close)(T({a:Q.nA, b:Q.nB, c:Q.nC}[k2]))}</span></p>` : ''}
-      <div class="mt-5 grid gap-3">
-        
-        ${bars.map(([k, l, col]) => `<div><div class="flex justify-between text-[14px] mb-1"><span>${T(l)}</span><span class="num font-semibold">${r.pct[k]}%</span></div><div class="bar"><i style="width:${r.pct[k]}%;background:${col}"></i></div></div>`).join('')}
+    <section class="card mt-4" id="quiz-result" aria-labelledby="quiz-res-h">
+      <h3 id="quiz-res-h" tabindex="-1" class="text-[22px] font-semibold">${blocks ? T(Q.fitsIf)(T(NM[k1])) : T(rec.t)}</h3>
+      <p class="qlead qlead-${lvl}" style="max-width:72ch">${ic(lvl === 'clear' ? 'circle-check' : 'scale','icon-sm')}<span>${T(Q.lead[lvl])(T(NM[k2]), gap, r.pct[k1], r.pct[k2])}</span></p>
+      <p class="muted mt-3 text-[15px]" style="max-width:72ch">${T(rec.d)}</p>
+      <div class="grid md:grid-cols-2 gap-x-8">
+        ${why.length ? `<div class="qsec"><h4>${T(Q.whyT)}</h4><ul class="qwhy">${why.map(x => `<li><span class="muted">${T(x.q.cat)}:</span> "${strip(T(x.o.l))}"</li>`).join('')}</ul></div>` : ''}
+        <div class="qsec"><h4>${T(Q.needT)}</h4>
+          ${needs.length ? `<ul class="qneed">${needs.map(x => `<li class="n-${x.lv}">${ic(x.lv === 'block' ? 'circle-alert' : 'triangle-alert','icon-sm')}<span><b>${T(x.lv === 'block' ? Q.blockL : Q.checkL)}:</b> ${x.t}</span></li>`).join('')}</ul>` : `<p class="qnone">${ic('circle-check','icon-sm')}<span>${T(Q.needNone)}</span></p>`}
+          ${alt ? `<p class="muted text-[14px] mt-2">${T(Q.alt)(T(NM[k2]))}</p>` : ''}
+        </div>
       </div>
+      <div class="qsec"><h4>${T(Q.fitT)}</h4><div class="grid sm:grid-cols-3 gap-x-6 gap-y-3">${bars}</div></div>
       ${r.city ? `<p class="mt-5 text-[14.5px] flex gap-2"><span style="color:var(--blue)">${ic('map-pin','icon-sm')}</span><span>${T(Q.city[r.city])}</span></p>` : ''}
-      <button class="btn btn-primary mt-5" data-act="goroad" data-v="${sc}">${T(Q.go)}${ic('arrow-right','icon-sm')}</button>`;
+      <div class="flex flex-wrap gap-2 mt-5">
+        <button class="btn btn-primary" data-act="goroad" data-v="${sc}">${T(Q.go)}${ic('arrow-right','icon-sm')}</button>
+        <button class="btn btn-ghost" data-act="quiztype" data-v="${QTYPE[k1]}">${ic('calculator','icon-sm')}${T(Q.useBudget)}</button>
+      </div>
+    </section>`;
   }
   return `
     <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
@@ -3154,14 +3332,12 @@ function viewQuiz(){
     <div class="grid lg:grid-cols-3 gap-4 items-start">
       <div class="lg:col-span-2 grid gap-4">${qs}</div>
       <div class="card lg:sticky" style="top:72px">
-        
         <div class="flex justify-between text-[14px] mb-2"><span class="muted">${T(Q.progress)}</span><span class="num font-semibold">${r.n} / ${QUIZ.length}</span></div>
-        
-        <div class="bar mb-5"><i style="width:${r.n/QUIZ.length*100}%"></i></div>
-        
-        ${res}
+        <div class="bar mb-4"><i style="width:${r.n/QUIZ.length*100}%"></i></div>
+        ${side}
       </div>
-    </div>`;
+    </div>
+    ${res}`;
 }
 
 /* Example schools for a field: each row opens that school's matching program page. Free-text advice (fin, mg...) stays above the links. */
@@ -3228,14 +3404,14 @@ function viewFields(){
     </details>`; };
   const body = GROUPS.map(g => { const fs = list.filter(f => f.g === g.id); if (!fs.length) return '';
     return `<h2 class="grp-h flex items-center gap-2">${ic(g.icon,'icon-sm')}${T(g.l)} <span class="num">(${fs.length})</span></h2>
-      <div class="grid md:grid-cols-2 gap-4 items-start">${fs.map(card).join('')}</div>`; }).join('');
+      <div class="grid md:grid-cols-2 gap-4 items-start fgrid">${fs.map(card).join('')}</div>`; }).join('');
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(F.title)}</h1>
       <p class="muted mt-3 text-[17px]"><span class="num">${FIELDS.length}</span> ${T(F.sub)}</p>
       <p class="faint text-[13.5px] mt-2 flex gap-2">${ic('badge-check','icon-sm')}<span>${T(F.checked)}</span></p>
     </section>
-    <div class="seg mb-3" role="group">${FILTERS.map(x => `<button class="${S.filter===x.id?'on':''}" data-act="filter" data-v="${x.id}">${T(x.l)}</button>`).join('')}</div>
+    <div class="seg mb-3" role="group" aria-label="${esc(T({en:'Filter fields', th:'กรองสาขา'}))}">${FILTERS.map(x => `<button class="${S.filter===x.id?'on':''}" data-act="filter" data-v="${x.id}">${T(x.l)}</button>`).join('')}</div>
     <p class="text-[14px] muted mb-2 flex gap-2">${ic('graduation-cap','icon-sm')}<span>${T(F.degree)}</span></p>
     <div class="mb-8">${body || `<p class="muted mt-6">${T(F.none)}</p>`}</div>
     <div class="card">
@@ -3257,9 +3433,11 @@ function viewRoad(){
   const R = ROAD, sc = R.sc[S.scenario] || R.sc.safe;
   const stats = ['time','tuition','permits','risk'].map(k => `
     <div class="card" style="padding:18px 20px"><div class="eyebrow">${T(R.stat[k])}</div><div class="text-[17px] font-semibold mt-1">${T(sc.stats[k])}</div></div>`).join('');
-  const steps = sc.steps.map((s,i) => `
+  /* numbers count the ordinary steps only, so a decision point or the goal does not leave a gap (1, 2, !, 3) */
+  let stepNo = 0;
+  const steps = sc.steps.map(s => { const n = s.goal || s.risk ? 0 : ++stepNo; return `
     <div class="tl-step">
-      <div class="tl-dot ${s.goal?'goal':''} ${s.risk?'risk':''}">${s.goal?ic('flag','icon-sm'):(s.risk?ic('triangle-alert','icon-sm'):i+1)}</div>
+      <div class="tl-dot ${s.goal?'goal':''} ${s.risk?'risk':''}">${s.goal?ic('flag','icon-sm'):(s.risk?ic('triangle-alert','icon-sm'):n)}</div>
       <div class="card ${s.risk?'card-warn':''}">
         
         <span class="badge ${s.goal?'b-green':(s.risk?'b-amber':'b-gray')}">${T(s.y)}</span>
@@ -3268,13 +3446,13 @@ function viewRoad(){
         
         <p class="muted text-[15px] mt-2">${T(s.d)}</p>
       </div>
-    </div>`).join('');
+    </div>`; }).join('');
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(R.title)}</h1>
       <p class="muted mt-3 text-[17px]">${T(R.sub)}</p>
     </section>
-    <div class="seg mb-4" role="group">${Object.keys(R.sc).map(k => `<button class="${S.scenario===k?'on':''}" data-act="scenario" data-v="${k}">${T(R.sc[k].l)}</button>`).join('')}</div>
+    <div class="seg mb-4" role="group" aria-label="${esc(T({en:'Scenario', th:'สถานการณ์'}))}">${Object.keys(R.sc).map(k => `<button class="${S.scenario===k?'on':''}" aria-pressed="${S.scenario===k}" data-act="scenario" data-v="${k}">${T(R.sc[k].l)}</button>`).join('')}</div>
     <div class="flex flex-wrap items-center gap-2"><span class="text-[14px] font-medium">${T(SIM_UI.intakeQ)}</span>${yearSeg()}</div>
     <p class="faint text-[13px] mt-1">${T(SIM_UI.roadYears)}</p>
     ${farBox()}
@@ -3339,18 +3517,22 @@ const isoD = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0'
 const parseD = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
 const plusDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate() + n); return isoD(d); };
 function planIntake(){ const p = S.plan || {}; return new Date(p.y || S.sim.intake || 2027, (p.m || 9) - 1, 1); }
-/* Recommended date for every checklist step: spread across its phase window; steps already overdue start from today. */
+/* The user picked an intake on the Checklist (25 Nov 2026). Until then the dates use September of the Budget start
+   year, and no step is called late. */
+const planChosen = () => !!(S.plan && S.plan.y && S.plan.m);
+/* Recommended date for every checklist step: spread across its phase window; steps already overdue start from today.
+   Done steps never fall into the past and take no slot, so ticking one does not send its date backwards. */
 function planDates(){
   const intake = planIntake(), today = new Date(); today.setHours(0, 0, 0, 0);
-  const own = (S.plan && S.plan.dates) || {}, out = {};
+  const own = (S.plan && S.plan.dates) || {}, out = {}, chosen = planChosen();
   let prev = null;   /* keep open steps in checklist order, at least 2 days apart, never before today */
   CHECK.phases.forEach((ph, pi) => {
     const its = CHECK.items.filter(it => it.ph === pi), [from, to] = PLAN_WIN[pi] || [3, 1];
     its.forEach((it, k) => {
       const d = new Date(intake); d.setDate(d.getDate() - Math.round((from - (from - to) * k / Math.max(1, its.length)) * 30.44));
       let late = false;
+      if (d < today) { d.setTime(today.getTime()); late = chosen && !S.check[it.id]; }
       if (!S.check[it.id]) {
-        if (d < today) { d.setTime(today.getTime()); late = true; }
         if (prev && d.getTime() < prev + 2 * 864e5) d.setTime(prev + 2 * 864e5);
         prev = d.getTime();
       }
@@ -3392,9 +3574,9 @@ function planItem(id){
 /* Add or added state for one item. Adding twice is blocked until the item is removed. */
 function gcalControls(id){
   const U = PLAN_UI, st = planStore(), it = planItem(id); if (!it) return '';
-  const a = st.added[id];
+  const a = st.added[id], doneStep = it.kind === 'step' && !!S.check[id];
   const main = a
-    ? `<span class="badge b-green">${ic('circle-check','icon-sm')}${T(U.gAdded)}</span>${a.date !== it.date ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : ''}<button class="linkbtn text-[13.5px]" data-act="g-del" data-v="${id}">${T(U.gDel)}</button>`
+    ? `<span class="badge b-green">${ic('circle-check','icon-sm')}${T(U.gAdded)}</span>${a.date !== it.date && !doneStep ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : ''}<button class="linkbtn text-[13.5px]" data-act="g-del" data-v="${id}">${T(U.gDel)}</button>`
     : `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="g-add" data-v="${id}">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</button>`;
   return `<span class="gc-ctl inline-flex flex-wrap items-center gap-2">${main}</span>`;
 }
@@ -3423,11 +3605,43 @@ function downloadIcs(){
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 const fdateD = s => parseD(s).toLocaleDateString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', year:'numeric'});
-function plannerCard(){
-  const U = PLAN_UI, p = S.plan || {}, intake = planIntake(), y = intake.getFullYear(), m = intake.getMonth() + 1;
-  const dates = planDates(), ms = planMilestones(), lateN = Object.values(dates).filter(d => d.late).length;
-  const monthsAway = (intake - new Date()) / (30.44 * 864e5);
+Object.assign(PLAN_UI, {
+  intakeSub:{en:'Every step below gets a recommended date from this intake. You can change any date in the list.', th:'ทุกข้อด้านล่างได้วันที่แนะนำตามรอบนี้ แก้วันที่ของแต่ละข้อได้ในรายการ'},
+  notChosen:{en:(m, y) => `No intake chosen yet. For now the dates use ${m} ${y}, the start year on the Budget page. Pick your intake so they fit.`, th:(m, y) => `ยังไม่ได้เลือกรอบเปิดเรียน ตอนนี้วันที่ใช้รอบ${m} ${y} ตามปีที่เริ่มเรียนในหน้างบไปก่อน เลือกรอบของคุณเพื่อให้วันที่ตรง`},
+  moreT:{en:'Plan it in your calendar', th:'วางแผนลงปฏิทิน'},
+  moreSub:{en:'Steps coming up, key dates, the whole plan as a calendar file (.ics), and your Google Calendar on this page.', th:'ข้อที่ต้องทำเร็ว ๆ นี้ วันสำคัญ ดาวน์โหลดทั้งแผนเป็นไฟล์ปฏิทิน (.ics) และดู Google Calendar ของคุณในหน้านี้'}
+});
+/* An intake picked before 25 Nov 2026 could have a year without a month: September was what it showed. */
+if (S.plan && S.plan.y && !S.plan.m) S.plan.m = 9;
+/* Progress and intake, the first card on the Checklist (25 Nov 2026): the intake sets every date below it. */
+function progressCard(){
+  const U = PLAN_UI, C = CHECK, c = checkStats(), chosen = planChosen(), p = S.plan || {};
+  const intake = planIntake(), y = intake.getFullYear(), m = intake.getMonth() + 1;
+  const lateN = Object.values(planDates()).filter(d => d.late).length, monthsAway = (intake - new Date()) / (30.44 * 864e5);
   const years = [...new Set([...(SIMC.intakes || [2027, 2028]), y])].sort();
+  const mName = T((U.months.find(([k]) => k === m) || [0, {en:'', th:''}])[1]);
+  const note = (bg, col, icon, text) => `<div class="text-[13.5px] mt-3 flex gap-2" style="background:${bg};border-radius:10px;padding:8px 12px"><span style="color:${col};margin-top:2px">${ic(icon,'icon-sm')}</span><span>${text}</span></div>`;
+  return `
+    <div class="card mb-4" id="planner">
+      <div class="flex justify-between items-baseline mb-2"><span class="font-medium">${T(C.progress)}</span><span class="num font-semibold">${c.done} / ${c.total} ${T(C.done)}</span></div>
+      <div class="bar"><i style="width:${c.pct}%;background:var(--green)"></i></div>
+      <div class="mt-4 pt-4" style="border-top:1px solid var(--line)">
+        <div class="flex flex-wrap items-center gap-2"><span class="text-[14px] font-medium">${T(U.intake)}</span>
+          <div class="seg" role="group" aria-label="${esc(T({en:'Intake month', th:'เดือนที่เปิดเรียน'}))}">${U.months.map(([k, l]) => { const on = chosen && m === k; return `<button class="${on ? 'on' : ''}" aria-pressed="${on}" data-act="plan-m" data-v="${k}">${T(l)}</button>`; }).join('')}</div>
+          <div class="seg" role="group" aria-label="${esc(T({en:'Intake year', th:'ปีที่เปิดเรียน'}))}">${years.map(k => { const on = chosen && y === k; return `<button class="${on ? 'on' : ''}" aria-pressed="${on}" data-act="plan-y" data-v="${k}">${k}</button>`; }).join('')}</div>
+        </div>
+        <p class="muted text-[13.5px] mt-2">${T(U.intakeSub)}</p>
+        ${!chosen ? note('var(--blue-soft)', 'var(--blue)', 'calendar-search', T(U.notChosen)(mName, y))
+          : (monthsAway < 6 ? `<div class="text-[13.5px] mt-3 flex gap-2" style="background:var(--red-soft);color:var(--red);border-radius:10px;padding:8px 12px"><span style="margin-top:2px">${ic('octagon-alert','icon-sm')}</span><span>${T(U.tight)}</span></div>` : '')
+            + (lateN ? note('var(--amber-soft)', 'var(--amber)', 'triangle-alert', T(U.lateNote)(lateN)) : '')}
+        ${p.dates && Object.keys(p.dates).length ? `<button class="linkbtn text-[13.5px] mt-2" data-act="plan-reset">${T(U.reset)}</button>` : ''}
+      </div>
+    </div>`;
+}
+/* Everything else about dates, folded into one section: coming-up steps, key dates, .ics, and the calendar. */
+function plannerCard(){
+  const U = PLAN_UI, intake = planIntake(), y = intake.getFullYear(), m = intake.getMonth() + 1;
+  const dates = planDates(), ms = planMilestones();
   const up = CHECK.items.filter(it => !S.check[it.id]).sort((a, b) => dates[a.id].date < dates[b.id].date ? -1 : 1).slice(0, 3);
   const row = (id, title, date, details, extra) => `<div class="py-2" style="border-top:1px solid var(--line)">
       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -3436,29 +3650,26 @@ function plannerCard(){
       </div>
       <div class="mt-2">${gcalControls(id)}</div></div>`;
   return `
-    <div class="card mb-4" id="planner">
-      <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days')}</span>${T(U.title)}</h3>
-      <p class="muted text-[14.5px] mt-1">${T(U.sub)}</p>
-      <div class="flex flex-wrap items-center gap-2 mt-3"><span class="text-[14px] font-medium">${T(U.intake)}</span>
-        <div class="seg">${U.months.map(([k, l]) => `<button class="${m === k ? 'on' : ''}" aria-pressed="${m === k}" data-act="plan-m" data-v="${k}">${T(l)}</button>`).join('')}</div>
-        <div class="seg">${years.map(k => `<button class="${y === k ? 'on' : ''}" aria-pressed="${y === k}" data-act="plan-y" data-v="${k}">${k}</button>`).join('')}</div>
-      </div>
-      ${monthsAway < 6 ? `<div class="text-[13.5px] mt-3 flex gap-2" style="background:var(--red-soft);color:var(--red);border-radius:10px;padding:8px 12px"><span style="margin-top:2px">${ic('octagon-alert','icon-sm')}</span><span>${T(U.tight)}</span></div>` : ''}
-      ${lateN ? `<div class="text-[13.5px] mt-3 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px"><span style="color:var(--amber);margin-top:2px">${ic('triangle-alert','icon-sm')}</span><span>${T(U.lateNote)(lateN)}</span></div>` : ''}
+    <details class="card fcard mb-8" id="plan-cal" data-field="planCal" ${S.open && S.open.planCal ? 'open' : ''}>
+      <summary class="flex items-start gap-3">
+        <span style="color:var(--blue);margin-top:2px">${ic('calendar-days')}</span>
+        <span class="flex-1 min-w-0"><span class="block text-[18px] font-semibold">${T(U.moreT)}</span><span class="block muted text-[14px] mt-0.5">${T(U.moreSub)}</span></span>
+        <span class="chev" style="margin-top:2px">${ic('chevron-right')}</span>
+      </summary>
       <div class="grid md:grid-cols-2 gap-x-8 mt-3">
         <div><div class="eyebrow mt-2 mb-1">${T(U.upT)}</div>${up.map(it => row(it.id, T(it.t), dates[it.id].date, T(it.d), dates[it.id].late ? `<span class="badge b-amber mt-1">${T(U.late)}</span>` : '')).join('')}</div>
         <div><div class="eyebrow mt-2 mb-1">${T(U.keyT)}</div>${ms.map(x => row(x.id, T(x.t), x.date, T(x.d))).join('')}</div>
       </div>
       <div class="flex flex-wrap gap-2 mt-4">
         <button class="btn btn-primary" data-act="plan-ics">${ic('download','icon-sm')}${T(U.ics)}</button>
-        ${Object.keys(p.dates || {}).length ? `<button class="btn btn-ghost" data-act="plan-reset">${ic('rotate-ccw','icon-sm')}${T(U.reset)}</button>` : ''}
       </div>
       <details class="mt-3" data-field="planHow" ${S.open && S.open.planHow ? 'open' : ''}><summary class="text-[14px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(U.howT)}</summary>
         <ol class="howlist">${U.how.map(x => `<li>${T(x)}</li>`).join('')}</ol>
         <a class="text-[13.5px] inline-flex items-center gap-1" style="color:var(--blue)" href="https://support.google.com/calendar/answer/37118" target="_blank" rel="noopener noreferrer">${ic('external-link','icon-sm')}${T(U.helpL)}</a>
       </details>
       <p class="faint text-[13px] mt-3 flex gap-2"><span style="margin-top:2px">${ic('lock','icon-sm')}</span><span>${T(U.privacy)}</span></p>
-    </div>`;
+      ${calendarCard()}
+    </details>`;
 }
 /* Month calendar of the plan: steps coloured by checklist phase, key dates in green. Tap a step for details,
    tap a day (on a phone, days show dots) to list what is planned that day. */
@@ -3533,7 +3744,8 @@ function reloadGcalFrame(){ const f = document.getElementById('gcal-frame'); if 
 function calEvents(){
   const st = planStore(), ev = [];
   Object.keys(st.added).forEach(id => { const it = planItem(id); if (!it) return; const a = st.added[id];
-    ev.push(Object.assign({}, it, {key:'a:' + id, date:a.date, done:it.kind === 'step' && !!S.check[id], moved:a.date !== it.date})); });
+    const done = it.kind === 'step' && !!S.check[id];
+    ev.push(Object.assign({}, it, {key:'a:' + id, date:a.date, done, moved:!done && a.date !== it.date})); });
   return ev.sort((a, b) => a.date < b.date ? -1 : 1);
 }
 const calColor = ph => `var(--s${Math.min(6, ph + 1)})`;
@@ -3550,7 +3762,7 @@ function googleCalView(){
           <button class="btn btn-primary" style="padding:6px 16px;font-size:14px" data-act="gcal-save">${ic('calendar-check','icon-sm')}${T(U.gcSave)}</button>
           ${g.editing ? `<button class="btn btn-ghost" style="padding:6px 16px;font-size:14px" data-act="gcal-cancel">${T(U.gcCancel)}</button><button class="linkbtn text-[13.5px]" data-act="gcal-forget">${T(U.gcForget)}</button>` : ''}
         </div>
-        <details class="mt-3" data-field="gcHow" ${S.open && S.open.gcHow === false ? '' : 'open'}><summary class="text-[14px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(U.gcHowT)}</summary>
+        <details class="mt-3" data-field="gcHow" ${S.open && S.open.gcHow ? 'open' : ''}><summary class="text-[14px] font-medium cursor-pointer" style="color:var(--blue)">${ic('info','icon-sm')} ${T(U.gcHowT)}</summary>
           <ol class="howlist gc-steps">${U.gcHow.map(x => `<li>${T(x)}</li>`).join('')}</ol>
           <div class="text-[13.5px] font-medium mt-3">${T(U.gcTipsT)}</div>
           <ul class="clean mt-1">${U.gcTips.map(x => `<li style="font-size:13.5px;color:var(--ink2)"><span style="color:var(--ink3)">${ic('chevron-right','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
@@ -3585,7 +3797,7 @@ function appCalView(){
   const firstTodo = CHECK.items.find(it => !S.check[it.id]);
   const btn = 'padding:6px 14px;font-size:14px';
   const detail = !sel ? '' : `
-      <div class="mt-3 p-3" id="cal-detail" style="border-radius:12px;background:var(--bg);border-left:4px solid ${calColor(sel.ph)}">
+      <div class="mt-3 p-3" id="cal-detail" style="border-radius:12px;background:var(--bg);border:1.5px solid ${calColor(sel.ph)}">
         <div class="flex items-start gap-2"><div class="min-w-0"><div class="eyebrow">${sel.kind === 'step' ? T(U.step) + ' ' + sel.n + ' · ' + T(CHECK.phases[sel.ph].t) : T(U.keyMs)} · ${fdateD(sel.date)}</div>
           <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}${sel.done ? ` <span class="badge b-green">${T(U.done)}</span>` : ''}</div></div>
           <button class="tb-btn ml-auto" style="width:30px;height:30px" data-act="cal-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
@@ -3631,9 +3843,9 @@ function appCalView(){
 function calendarCard(){
   const U = PLAN_UI, view = (S.gcal && S.gcal.view === 'app') ? 'app' : 'google';
   return `
-    <div class="card mb-4" id="calendar">
+    <div class="mt-5 pt-4" id="calendar" style="border-top:1px solid var(--line)">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-range')}</span>${T(U.calT)}</h3>
+        <h3 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-range')}</span>${T(U.calT)}</h3>
         <div class="seg" role="tablist" aria-label="${esc(T(U.calT))}">${[['google', U.viewG], ['app', U.viewA]].map(([k, l]) => `<button role="tab" class="${view === k ? 'on' : ''}" aria-selected="${view === k}" data-act="gcal-view" data-v="${k}">${T(l)}</button>`).join('')}</div>
       </div>
       ${view === 'google' ? googleCalView() : appCalView()}
@@ -3642,13 +3854,13 @@ function calendarCard(){
 function viewPrep(){
   const C = CHECK, c = checkStats(), nx = c.next, idx = nx ? C.items.indexOf(nx) : -1, pd = planDates(), U = PLAN_UI;
   const nextCard = nx ? `
-    <div class="card mb-8 next-card">
+    <div class="card mb-4 next-card">
       <div class="eyebrow flex items-center gap-1" style="color:var(--blue)">${ic('circle-arrow-right','icon-sm')}${T(C.next)} · <span class="num">${idx+1} / ${c.total}</span> · ${T(C.phases[nx.ph].m)}</div>
       <h2 class="text-[22px] font-semibold mt-1">${T(nx.t)}</h2>
       <p class="text-[15px] mt-2">${T(nx.d)}</p>
       <p class="muted text-[14.5px] mt-2"><strong>${T(C.why)}:</strong> ${T(nx.why)}</p>
       ${ckLinks(nx.id)}
-      ${nx.live === 'proc' && LIVE.pt ? `<p class="mt-2"><span class="badge b-green">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(LIVE.pt.study)}</span></p>` : ''}
+      ${nx.live === 'proc' && LIVE.pt ? `<p class="mt-2"><span class="badge b-green">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(ptText(LIVE.pt.study))}</span></p>` : ''}
       <div class="flex flex-wrap gap-2 mt-4">
         
         <button class="btn btn-primary" data-act="ckdone" data-v="${nx.id}">${ic('check','icon-sm')}${T(C.markDone)}</button>
@@ -3657,11 +3869,11 @@ function viewPrep(){
         
         ${nx.anchor ? `<button class="btn btn-ghost" data-act="jump" data-v="${nx.anchor}">${T(C.see)}${ic('arrow-down','icon-sm')}</button>` : ''}
       </div>
-    </div>` : `<div class="card mb-8 flex gap-3 items-start"><span style="color:var(--green)">${ic('party-popper')}</span><p class="text-[15px]">${T(C.allDone)}</p></div>`;
+    </div>` : `<div class="card mb-4 flex gap-3 items-start"><span style="color:var(--green)">${ic('party-popper')}</span><p class="text-[15px]">${T(C.allDone)}</p></div>`;
   const list = C.phases.map((ph, pi) => {
     const its = C.items.map((it, i) => ({it, i})).filter(x => x.it.ph === pi);
     return `<div class="mb-6" id="ckph-${pi}">
-      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2"><h3 class="text-[18px] font-semibold"><span class="num muted">${pi+1}.</span> ${T(ph.t)}</h3><span class="badge b-blue">${ic('clock','icon-sm')}${T(ph.m)}</span></div>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2"><h2 class="text-[18px] font-semibold"><span class="num muted">${pi+1}.</span> ${T(ph.t)}</h2><span class="badge b-blue">${ic('clock','icon-sm')}${T(ph.m)}</span></div>
       <div class="card" style="padding:4px 18px">${its.map(({it, i}) => `
         
         <label class="check ${S.check[it.id]?'done':''} ${nx===it?'is-next':''}" id="ck-${it.id}">
@@ -3674,16 +3886,16 @@ function viewPrep(){
         
             <span class="block muted text-[14px] mt-0.5">${T(it.d)}</span>
         
-            ${it.live === 'proc' && LIVE.pt ? `<span class="badge b-green mt-1">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(LIVE.pt.study)}</span>` : ''}
+            ${it.live === 'proc' && LIVE.pt ? `<span class="badge b-green mt-1">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(ptText(LIVE.pt.study))}</span>` : ''}
         
             <span class="flex items-start gap-1.5 faint text-[13.5px] mt-1"><span style="margin-top:3px">${ic('lightbulb','icon-sm')}</span><span>${T(it.why)}</span></span>
             ${ckLinks(it.id)}
-            <span class="flex flex-wrap items-center gap-2 mt-2">
+            ${S.check[it.id] ? (planStore().added[it.id] ? `<span class="flex flex-wrap items-center gap-2 mt-2">${gcalControls(it.id)}</span>` : '') : `<span class="flex flex-wrap items-center gap-2 mt-2">
               <span class="faint text-[13px] inline-flex items-center gap-1">${ic('calendar','icon-sm')}<span>${T(U.planned)}</span></span>
               <input type="date" class="numin" style="width:150px" data-plan="${it.id}" value="${pd[it.id].date}" aria-label="${esc(T(U.planned) + ': ' + T(it.t))}">
               ${pd[it.id].late ? `<span class="badge b-amber">${T(U.late)}</span>` : ''}${pd[it.id].custom ? `<span class="badge b-blue">${T(U.mine)}</span>` : ''}
               ${gcalControls(it.id)}
-            </span></span>
+            </span>`}</span>
         
         </label>`).join('')}</div>
     </div>`;
@@ -3693,13 +3905,9 @@ function viewPrep(){
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(C.title)}</h1>
       <p class="muted mt-3 text-[17px]">${T(C.lead)}</p>
     </section>
-    <div class="card mb-4">
-      <div class="flex justify-between items-baseline mb-2"><span class="font-medium">${T(C.progress)}</span><span class="num font-semibold">${c.done} / ${c.total} ${T(C.done)}</span></div>
-      <div class="bar"><i style="width:${c.pct}%;background:var(--green)"></i></div>
-    </div>
-    ${plannerCard()}
-    ${calendarCard()}
+    ${progressCard()}
     ${nextCard}
+    ${plannerCard()}
     <section class="mb-10">${list}</section>
     <section id="tests" class="mb-10">${viewTests()}</section>
     <section class="card mb-10">
@@ -3937,25 +4145,28 @@ function simCalc(o){
   });
   const cnt = k => plan.filter(p => p === k).length;
   const show = tu1 + proof + travel;
-  return {s, ty, n, lv, exp, wage, tips, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), tuY, fees, tu1, tu2, proof, pY, travel, setup, incS, incC, incB, incG, plan, N, years:N / 12, months,
+  /* prep and visa costs: All Costs sections 1 and 2 (your own amounts where typed, otherwise the high end of each range) */
+  const prepR = prepCost(), prep = prepR[1];
+  return {s, ty, n, lv, exp, wage, tips, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), tuY, fees, tu1, tu2, proof, pY, travel, setup, prep, prepR, incS, incC, incB, incG, plan, N, years:N / 12, months,
     gS, gC, gB, gG, fac:{tuition:f('tuition'), rent:f('rent'), cpi:f('cpi'), health:f('health'), wage:f('wage'), proof:proofF},
     end:bal, low, runOut, runOutY1: runOut && runOut <= 12 ? runOut : 0, extra:Math.max(0, -low.v),
     mS:cnt('S'), mC:cnt('C'), mB:cnt('B'), mG:cnt('G'), netS:incS - exp, netC:incC - exp, netB:incB - exp, netG:incG - exp,
-    show, total:show + setup,
+    show, total:prep + show + setup,
     breakEvenHrs:exp / (pt * SIMC.weeks * 0.93), cover:Math.round(incS / exp * 100),
     tuTotal:tu1 + (N > 12 ? tu2 : 0)};
 }
 
 function viewBudget(){
   const M = SIM_UI, s = S.sim, ty = SIMC.types[s.type], priv = s.type === 'private', c0 = simCalc();
-  const segB = (act, cur, items) => `<div class="seg">${items.map(([v, l]) => `<button class="${String(cur)===String(v)?'on':''}" data-act="${act}" data-v="${v}">${T(l)}</button>`).join('')}</div>`;
+  const segB = (act, cur, items, label) => `<div class="seg" role="group" aria-label="${esc(label || '')}">${items.map(([v, l]) => `<button class="${String(cur)===String(v)?'on':''}" aria-pressed="${String(cur)===String(v)}" data-act="${act}" data-v="${v}">${T(l)}</button>`).join('')}</div>`;
   /* min and max are today's prices; the slider itself runs in start-year amounts on a whole-step grid, like the results */
   const slider = (key, label, min, max, step, note, def) => {
-    const F = simFac(key, c0), lo = Math.floor(min * F / step) * step, hi = Math.ceil(max * F / step) * step;
+    const q = v => +v.toFixed(4);   /* no 40.800000000000004 in the markup */
+    const F = simFac(key, c0), lo = q(Math.floor(min * F / step) * step), hi = q(Math.ceil(max * F / step) * step);
     return `
     <div>
       <div class="flex justify-between items-baseline gap-3"><label for="sim-${key}" class="font-medium text-[15px]">${label}</label><span id="lab-${key}" class="num font-semibold text-[15px]"></span></div>
-      <input type="range" id="sim-${key}" data-sim="${key}" min="${lo}" max="${hi}" step="${step}" value="${val(s[key], def) * F}">
+      <input type="range" id="sim-${key}" data-sim="${key}" min="${lo}" max="${hi}" step="${step}" value="${q(val(s[key], def) * F)}">
       ${note ? `<div class="faint text-[13px] mt-1">${note}</div>` : ''}
     </div>`; };
   const field = (label, body, note) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? `<div class="faint text-[13px] mt-2">${note}</div>` : ''}</div>`;
@@ -3971,21 +4182,22 @@ function viewBudget(){
     <div id="sim-mini" class="sim-mini" aria-live="polite"></div>
     <div class="grid lg:grid-cols-5 gap-4 items-start lg:items-stretch">
       <div class="card lg:col-span-2 sim-side"><div class="grid gap-6 sim-ctl" id="sim-ctl">
-        ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l])), T(ty.desc))}
+        <h2 class="sr-only">${T(A11Y.settings)}</h2>
+        ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l]), T(M.type)), T(ty.desc))}
         ${field(T(M.intakeQ), yearSeg() + farBox(), T(M.intakeNote))}
-        ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]]))}
+        ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]], T(M.lenQ)))}
         ${field(T(M.coopQ), priv ? `<div class="text-[14px] flex gap-2" style="background:var(--blue-soft);border-radius:10px;padding:8px 12px">${ic('lock','icon-sm')}<span>${T(M.coopFixed)}</span></div>`
-                                 : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]]))}
+                                 : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]], T(M.coopQ)))}
         ${slider('tuition', T(M.tuition), Math.min(ty.min, Math.floor(s.tuition)), Math.max(ty.max, Math.ceil(s.tuition)), 50, T(ty.tuNote))}
         ${slider('fees', T(M.feesL), 0, Math.max(4000, Math.ceil(val(s.fees, ty.fees))), 10, T(M.feesNote), ty.fees)}
-        ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l])), T(SIMC.living[s.living].note))}
+        ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l]), T(M.living)), T(SIMC.living[s.living].note))}
         ${slider('hours', T(M.hours), 0, 24, 1, T(M.hoursNote))}
         ${slider('wage', T(M.wage), 15, 25, 0.05, T(M.wageNote))}
         ${slider('tips', T(M.tipsL), 0, 15, 0.05, T(M.tipsNote), 0)}
         ${hasFT ? slider('coopHours', T(M.coopHours), 10, 40, 1, T(priv ? M.ftNotePriv : M.ftNote), ty.coopH) : ''}
         ${hasC ? slider('coopWage', T(M.coopWage), 0, 40, 0.05, T(ty.cwNote), ty.coopWage) : ''}
         ${hasC ? slider('side', T(M.sideL), 0, 24, 1, T(M.sideNote), 0) : ''}
-        ${hasG ? field(T(M.pgwpQ), segB('sim-pgwp', s.pgwp === false ? 'no' : 'yes', [['yes', M.pgwpYes], ['no', M.pgwpNo]]), T(s.type === 'public' ? M.pgwpNotePub : M.pgwpNoteMa)) : ''}
+        ${hasG ? field(T(M.pgwpQ), segB('sim-pgwp', s.pgwp === false ? 'no' : 'yes', [['yes', M.pgwpYes], ['no', M.pgwpNo]], T(M.pgwpQ)), T(s.type === 'public' ? M.pgwpNotePub : M.pgwpNoteMa)) : ''}
         <div>
           <div class="flex justify-between items-center gap-3"><label for="sim-rate" class="font-medium text-[15px]">${T(M.rate)}</label><input class="numin num" type="number" id="sim-rate" data-sim="rate" min="15" max="40" step="0.01" value="${s.rate}"></div>
           <div id="fx-status" class="faint text-[13px] mt-2" aria-live="polite"></div>
@@ -4092,11 +4304,7 @@ function chartSplit(c){
    own typical tuition, fees, Co-op hours and Co-op wage and keep everything else you set. */
 function compareTypes(cur){
   const M = SIM_UI, s = S.sim;
-  const rows = Object.keys(SIMC.types).map(k => {
-    if (k === s.type) return {k, c:cur, mine:true};
-    const ty = SIMC.types[k];
-    return {k, mine:false, c:simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop})};
-  });
+  const rows = Object.keys(SIMC.types).map(k => k === s.type ? {k, c:cur, mine:true} : {k, mine:false, c:typeCalc(k)});
   const td = (r, html, cls) => `<td style="text-align:right" class="${r.mine ? 'cur-col ' : ''}${cls || ''}">${html}</td>`;
   const tr = (label, f, cls) => `<tr style="cursor:default" class="${cls || ''}"><td style="white-space:normal;min-width:200px">${label}</td>${rows.map(f).join('')}</tr>`;
   /* parts of the money at the end, straight from each month of the plan: start + pay − living costs − year-2 tuition = end */
@@ -4106,13 +4314,13 @@ function compareTypes(cur){
   const c0 = rows[0].c;
   return `
   <div class="card">
-    <h3 class="text-[17px] font-semibold">${T(M.cmpT)}</h3>
+    <h2 class="text-[17px] font-semibold">${T(M.cmpT)}</h2>
     <p class="muted text-[14px] mt-1 mb-3">${T(M.cmpSub)}</p>
     <div class="hscroll"><table class="ctbl" style="min-width:600px"><thead><tr><th></th>${rows.map(r => `<th style="text-align:right;white-space:normal" class="${r.mine ? 'cur-col' : ''}">${T(SIMC.types[r.k].l)}${r.mine ? ' ●' : ''}<div class="faint" style="font-weight:400">${T(r.mine ? M.cMine : M.cTyp)}</div>${r.mine ? '' : `<button class="linkbtn" style="font-size:12.5px" data-act="sim-type" data-v="${r.k}">${T(M.cTry)}</button>`}</th>`).join('')}</tr></thead><tbody>
       ${tr(T(M.cTuY), r => td(r, mny(r.c.tuY, {stack:true})))}
       ${tr(T(M.cFeesY), r => td(r, mny(r.c.fees, {stack:true})))}
       ${tr(lab(`<strong>${T(M.cShow)}</strong>`, T(M.cShowEq)(mny(c0.proof, cu1), mny(c0.travel, cu1)), true), r => td(r, `<strong>${mny(r.c.show, {stack:true})}</strong>`))}
-      ${tr(lab(`<strong>${T(M.cTotal)}</strong>`, T(M.cTotalEq)(mny(c0.setup, cu1)), true), r => td(r, `<strong>${mny(r.c.total, {stack:true})}</strong>`))}
+      ${tr(lab(`<strong>${T(M.cTotal)}</strong>`, T(M.cTotalEq)(mny(c0.prep, cu1), mny(c0.setup, cu1)), true), r => td(r, `<strong>${mny(r.c.total, {stack:true})}</strong>`))}
       ${tr(T(M.cMonths), r => td(r, `${r.c.mS} / ${r.c.mC} / ${r.c.mB + r.c.mG}`))}
       ${tr(T(M.cCoopHW), r => td(r, r.c.mC ? `${r.c.ftH} ${T(M.wkU)}<span class="msub">× ${mny(r.c.cw, {dec:true, cur:curOf() === 'thb' ? 'thb' : 'cad'})}${T(M.hr)}</span>` : '-'))}
       ${tr(T(M.cNetS), r => td(r, mny(r.c.netS, {sign:true, stack:true}), r.c.netS < 0 ? 'neg' : 'pos'))}
@@ -4153,8 +4361,8 @@ function analysis(c){
   if (c.n > 0) pts.push(T(M.a7)(s.intake, c.n));
   return `
   <div class="card verdict v-${level}">
-    <div class="flex items-center gap-2"><span class="vicon">${ic(V.icon)}</span><div><div class="eyebrow">${T(M.vT)}</div><div class="text-[19px] font-semibold">${T(V.l)}</div></div></div>
-    <p class="text-[15px] mt-2">${T(V.d)}</p>
+    <div class="flex items-center gap-3"><span class="vicon">${ic(V.icon)}</span><div><h2 class="eyebrow">${T(M.vT)}</h2><div class="text-[19px] font-semibold">${T(V.l)}</div></div></div>
+    <p class="text-[15px] mt-2">${T(V.dCap && c.breakEvenHrs > 24 ? V.dCap : V.d)}</p>
     <ol class="analysis mt-3">${pts.map(p => `<li>${p}</li>`).join('')}</ol>
   </div>`;
 }
@@ -4231,6 +4439,10 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { au
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'gcal-id-in') { e.preventDefault(); const b = document.querySelector('[data-act="gcal-save"]'); if (b) b.click(); } });
 setInterval(autoRefresh, 30 * 60 * 1000);
 const fdate = d => { const t = new Date(d); return isNaN(t) ? d : t.toLocaleDateString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {day:'numeric', month:'short', year:'numeric'}); };
+/* Provincial Nominee rounds look frightening (700+) without knowing a nomination already adds 600 points. */
+const pnpNote = name => /provincial nominee/i.test(String(name || '')) ? `<span class="block faint text-[12.5px]">${T({en:'Includes the 600 points a provincial nomination adds', th:'รวม 600 คะแนนจากการเสนอชื่อของมณฑลแล้ว'})}</span>` : '';
+/* IRCC's processing time arrives in English ("6 weeks"); say it in Thai when the page is in Thai */
+const ptText = s => S.lang !== 'th' ? String(s || '') : String(s || '').replace(/(\d+)\s*weeks?/gi, '$1 สัปดาห์').replace(/(\d+)\s*days?/gi, '$1 วัน').replace(/(\d+)\s*months?/gi, '$1 เดือน');
 function liveCard(){
   const U = LIVE_UI, e = LIVE.ee && LIVE.ee[0], p = LIVE.pt;
   const msg = liveState === 'fail' && !e ? T(U.fail) : T(U.loading);
@@ -4239,9 +4451,9 @@ function liveCard(){
     <h2 class="text-[18px] font-semibold flex items-center gap-2"><span class="dot" aria-hidden="true"></span>${T(U.title)}</h2>
     <p class="muted text-[13.5px] mb-1">${T(U.sub)}</p>
     ${row('banknote', T(U.fx), `1 CAD = ${Number(S.sim.rate).toFixed(2)} THB`, S.fx.date ? fdate(S.fx.date) + ' · ' + S.fx.src : T(FX_UI.loading), '')}
-    ${p ? row('timer', T(U.proc), p.study, T(U.asOf) + ' ' + p.upd, 'proc') : row('timer', T(U.proc), '...', msg, 'proc')}
+    ${p ? row('timer', T(U.proc), esc(ptText(p.study)), T(U.asOf) + ' ' + esc(fdate(p.upd)), 'proc') : row('timer', T(U.proc), '...', msg, 'proc')}
     ${row('wallet', T(U.funds), `CAD ${fmt(fundsAmt())} <span class="muted text-[14px] font-medium">(${thb(fundsAmt() * (S.sim.rate || 24))})</span>`, (LIVE.funds ? '' : msg + ' · ') + T(U.fundsSub)(fdate(fundsEff() + 'T00:00:00')), 'funds')}
-    ${e ? row('trophy', T(U.draw), `CRS ${e.crs} · ${fmt(+String(e.size).replace(/,/g,''))} ${T(U.inv)}`, fdate(e.d) + ' · ' + esc(e.name), 'draws') : row('trophy', T(U.draw), '...', msg, 'draws')}
+    ${e ? row('trophy', T(U.draw), `CRS ${e.crs} · ${fmt(+String(e.size).replace(/,/g,''))} ${T(U.inv)}`, fdate(e.d) + ' · ' + esc(e.name) + pnpNote(e.name), 'draws') : row('trophy', T(U.draw), '...', msg, 'draws')}
     <div class="flex flex-wrap items-center gap-2 mt-2">
       <button class="btn btn-ghost" style="font-size:14px" data-act="tab" data-v="roadmap" data-anchor="draws">${T(U.more)}${ic('arrow-right','icon-sm')}</button>
       <button class="btn btn-ghost" style="font-size:14px" data-act="refresh">${ic('refresh-cw','icon-sm')}${T(liveState === 'loading' ? SIM_UI.refreshing : SIM_UI.refresh)}</button>
@@ -4252,7 +4464,7 @@ function drawsTable(){
   const U = LIVE_UI, list = LIVE.ee || [];
   if (!list.length) return `<p class="muted text-[14.5px]">${liveState === 'fail' ? T(U.fail) : T(U.loading)} [[draws]]</p>`;
   return `<div class="hscroll"><table class="ctbl"><thead><tr><th>${T(U.date)}</th><th>${T(U.prog)}</th><th style="text-align:right">${T(U.inv)}</th><th style="text-align:right">${T(U.crs)}</th></tr></thead>
-    <tbody>${list.slice(0, 8).map(r => `<tr style="cursor:default"><td>${fdate(r.d)}</td><td style="white-space:normal;min-width:180px">${esc(r.name)}</td><td style="text-align:right">${esc(r.size)}</td><td style="text-align:right"><strong>${esc(r.crs)}</strong></td></tr>`).join('')}</tbody></table></div>`;
+    <tbody>${list.slice(0, 8).map(r => `<tr style="cursor:default"><td>${fdate(r.d)}</td><td style="white-space:normal;min-width:180px">${esc(r.name)}${pnpNote(r.name)}</td><td style="text-align:right">${esc(r.size)}</td><td style="text-align:right"><strong>${esc(r.crs)}</strong></td></tr>`).join('')}</tbody></table></div>`;
 }
 /* ---------- live CAD to THB rate, refreshed once per day ---------- */
 let fxState = 'idle';
@@ -4294,11 +4506,12 @@ let LIST_EDIT = false, COST_EDIT = false;
 /* The money list shared by the Budget and All Costs pages: same lines, labels and numbers from simCalc().
    Amounts typed on either page write the same simulator fields, so the two pages always agree. */
 function cashList(c){
-  const M = SIM_UI, s = c.s, unit = curOf() === 'thb' ? 'thb' : 'cad';
-  const line = (k, label, amount, badge) => {
+  const M = SIM_UI, s = c.s, unit = curOf() === 'thb' ? 'thb' : 'cad', r = s.rate || 24;
+  /* part = one line of the money to show (indented above its subtotal) */
+  const line = (k, label, amount, badge, part) => {
     const m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5;
-    if (!LIST_EDIT) return `<div class="row"><span class="muted min-w-0">${label}${custom ? ` <span class="badge b-blue">${T(M.mine)}</span>` : (badge || '')}</span><span class="num">${mny(amount, {stack:true})}</span></div>`;
-    return amtRow(k, label, c, unit);
+    if (!LIST_EDIT) return `<div class="row${part ? ' lpart' : ''}"><span class="muted min-w-0">${label}${custom ? ` <span class="badge b-blue">${T(M.mine)}</span>` : (badge || '')}</span><span class="num">${mny(amount, {stack:true})}</span></div>`;
+    return amtRow(k, label, c, unit, part);
   };
   const liveBadge = s.proofAuto !== false && LIVE.funds ? ` <span class="badge b-green">${ic('radio','icon-sm')}${T(M.liveB)}</span>` : '';
   return `
@@ -4306,18 +4519,19 @@ function cashList(c){
         ${LIST_EDIT ? `<p class="text-[13.5px] muted" style="max-width:52ch">${T(M.editHint)}</p>` : '<span></span>'}
         <button class="btn btn-ghost" style="padding:4px 10px;font-size:14px" data-act="listedit" aria-pressed="${LIST_EDIT}">${ic(LIST_EDIT ? 'check' : 'pencil','icon-sm')}${T(LIST_EDIT ? M.editDone : M.editL)}</button>
       </div>
-      ${line('tuition', T(M.lTuY), c.tuY)}
-      ${line('fees', T(M.lFeesY), c.fees)}
-      ${line('proof', T(M.lProof), c.proof, liveBadge)}
-      ${line('travel', T(M.lTravel), c.travel)}
-      <div class="row font-semibold"><span>${T(M.lShow)}</span><span class="num">${mny(c.show, {stack:true})}</span></div>
-      ${line('setup', T(M.lSetup), c.setup)}
-      <div class="row font-semibold"><span>${T(M.lReady)}</span><span class="num">${mny(c.total, {stack:true})}</span></div>`;
+      <div class="row font-semibold"><span class="min-w-0"><span class="lname"><i class="sw s1"></i>${T(MONEY.prep)}</span><span class="block faint text-[12.5px] font-normal">${c.prepR[1] - c.prepR[0] > 1 ? T(MONEY.prepR)(thb(c.prepR[0] * r), thb(c.prepR[1] * r)) + ' ' : ''}<button class="linkbtn" data-act="tab" data-v="costs" data-anchor="cost-items">${T(MONEY.editPrep)}</button></span></span><span class="num">${mny(c.prep, {stack:true})}</span></div>
+      ${line('tuition', T(M.lTuY), c.tuY, '', true)}
+      ${line('fees', T(M.lFeesY), c.fees, '', true)}
+      ${line('proof', T(M.lProof), c.proof, liveBadge, true)}
+      ${line('travel', T(M.lTravel), c.travel, '', true)}
+      <div class="row font-semibold"><span class="lname"><i class="sw s2"></i>${T(M.lShow)}</span><span class="num">${mny(c.show, {stack:true})}</span></div>
+      ${line('setup', `<span class="lname"><i class="sw s3"></i><b class="font-semibold" style="color:var(--ink)">${T(MONEY.setup)}</b></span> ${T(MONEY.setupD)}`, c.setup)}
+      <div class="row font-semibold lgoal"><span>${T(M.lReady)}</span><span class="num">${mny(c.total, {stack:true})}</span></div>`;
 }
-function amtRow(k, label, c, unit){
+function amtRow(k, label, c, unit, part){
   const M = SIM_UI, m = amtMeta(k, c), custom = Math.abs(m.v - m.def) > 0.5, r = S.sim.rate || 24;
   const now = m.v * m.fac, shown = Math.round(now * (unit === 'thb' ? r : 1));
-  return `<div class="row erow"><div class="min-w-0"><label for="amt-${k}">${label}</label><div class="faint text-[12.5px]">${T(M.defIs)} ${mny(m.def * m.fac)}${custom ? ` · <button class="linkbtn" data-act="amtdef" data-v="${k}">${T(M.useDef)}</button>` : ''}</div></div>
+  return `<div class="row erow${part ? ' lpart' : ''}"><div class="min-w-0"><label for="amt-${k}">${label}</label><div class="faint text-[12.5px]">${T(M.defIs)} ${mny(m.def * m.fac)}${custom ? ` · <button class="linkbtn" data-act="amtdef" data-v="${k}">${T(M.useDef)}</button>` : ''}</div></div>
     <span class="amt-col"><span class="amt-in"><span class="faint text-[12px]">${unit.toUpperCase()}</span><input class="numin num" id="amt-${k}" type="number" inputmode="decimal" min="0" step="any" data-amt="${k}" data-unit="${unit}" value="${shown}"></span>${curOf() === 'both' ? `<span class="msub">≈ ${thb(now * r)}</span>` : ''}</span></div>`;
 }
 function proofStatusHtml(){
@@ -4449,7 +4663,7 @@ function renderSimOut(){
     if (el === document.activeElement) return;
     const k = el.dataset.sim, raw = S.sim[k]; if (raw == null || raw === '' || isNaN(raw)) return;
     const v = raw * simFac(k, c), st = +el.step || 1;
-    if (el.type === 'range') { if (v > +el.max) el.max = Math.ceil(v / st) * st; if (v < +el.min) el.min = Math.floor(v / st) * st; }
+    if (el.type === 'range') { if (v > +el.max) el.max = +(Math.ceil(v / st) * st).toFixed(4); if (v < +el.min) el.min = +(Math.floor(v / st) * st).toFixed(4); }
     if (Math.abs(+el.value - v) > (el.type === 'range' ? st / 2 : 0.004)) el.value = el.type === 'range' ? v : (k === 'proof' ? Math.round(v) : Math.round(v * 100) / 100);
   });
   document.querySelectorAll('input[type=range]').forEach(r => r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'));
@@ -4462,6 +4676,8 @@ function renderSimOut(){
   set('lab-wage', 'CAD ' + c.wage.toFixed(2) + T(M.hr));
   set('lab-tips', 'CAD ' + c.tips.toFixed(2) + T(M.hr));
   set('lab-coopWage', 'CAD ' + c.cw.toFixed(2) + T(M.hr));
+  /* screen readers read the same text as the label beside each slider, not the raw number */
+  document.querySelectorAll('input[type=range][data-sim]').forEach(el => { const l = document.getElementById('lab-' + el.dataset.sim); if (l && l.textContent) el.setAttribute('aria-valuetext', l.textContent); });
   const cu = curOf(), r = s.rate || 24;
   /* one currency for short lines: THB when the user picked THB, otherwise CAD */
   const one = (v, o = {}) => mny(v, Object.assign({cur:cu === 'thb' ? 'thb' : 'cad'}, o));
@@ -4476,14 +4692,16 @@ function renderSimOut(){
   out.innerHTML = cites(`
     <div class="card">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="eyebrow">${T(M.lTotal)}</div>
+        <h2 class="eyebrow">${T(M.lTotal)}</h2>
         <div class="flex items-center gap-2"><span class="faint text-[13px]">${T(M.curL)}</span><div class="seg" role="group" aria-label="${esc(T(M.curL))}">${[['thb', M.curTHB], ['cad', M.curCAD], ['both', M.curBoth]].map(([v, l]) => `<button class="${cu === v ? 'on' : ''}" aria-pressed="${cu === v}" data-act="sim-cur" data-v="${v}">${T(l)}</button>`).join('')}</div></div>
       </div>
       <div class="flex flex-wrap items-baseline gap-x-4 mt-1">
         <div class="hero num">${cu === 'cad' ? cad(c.total) : thb(c.total*r)}</div>
         ${cu === 'both' ? `<div class="text-[18px] font-semibold muted num">${cad(c.total)}</div>` : ''}
       </div>
-      <div class="faint text-[13.5px] mb-3">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
+      <p class="gbasis">${ic('sliders-horizontal','icon-sm')}<span>${T(MONEY.basisL)}: ${goalBasis(c, true)}</span><button class="linkbtn" data-act="jump" data-v="sim-ctl">${T(MONEY.change)}</button></p>
+      <div class="faint text-[13.5px] mt-1">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
+      <div class="mb-3">${ladderBar(c)}</div>
       <div id="cash-list" data-flash="1">${cashList(c)}</div>
       ${c.extra > 0 ? `<div class="row font-semibold neg"><span>${T(M.lExtra)}</span><span class="num">${mny(c.extra, {stack:true})}</span></div>` : ''}
       <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(M.sameNote)}</span></p>
@@ -4509,7 +4727,13 @@ function renderSimOut(){
     sp.textContent = short && w * short.length / Math.max(1, txt.length) <= room ? short : '';
   });
   linkTerms(out);
+  /* screen readers hear the new savings goal shortly after a setting changes (not on arrival at the page) */
+  const gTxt = cu === 'cad' ? cad(c.total) : thb(c.total * r), app = document.getElementById('app');
+  const act = document.activeElement;   /* body: a control was just redrawn after a click */
+  if (LAST_GOAL != null && gTxt !== LAST_GOAL && (app.contains(act) || act === document.body)) announce(T(A11Y.goal)(gTxt), 900);
+  LAST_GOAL = gTxt;
 }
+let LAST_GOAL = null;
 function bindTips(root){
   let tip = document.getElementById('viz-tip');
   if (!tip) { tip = document.createElement('div'); tip.id = 'viz-tip'; tip.setAttribute('role','tooltip'); document.body.appendChild(tip); }
@@ -4556,6 +4780,10 @@ function cityDetail(){
       ${stat(T(C.wage), 'CAD ' + p.wage.toFixed(2) + `<span class="text-[14px] font-medium muted">${T(C.hr)}</span>`, thb(p.wage*r) + T(C.hr) + (p.next ? ' · ' + T(p.next) : ''), 'minw')}
       ${stat(T(C.hours), Math.round(rentHours(c)) + ' ' + T(C.hrs), T(C.hoursNote), '')}
       ${stat(T(C.jan), (c.jan > 0 ? '+' : '') + c.jan.toFixed(1) + ' °C', T(C.janNote), 'climate')}
+    </div>
+    <div class="text-[13.5px] mt-3 flex flex-wrap items-center gap-x-2 gap-y-1" style="background:var(--gray-soft);border-radius:10px;padding:8px 12px">
+      <span class="flex gap-2 min-w-0" style="flex:1 1 240px"><span style="color:var(--ink3);margin-top:2px">${ic('info','icon-sm')}</span><span>${T(C.budgetNote)(houseText(simCalc()))}</span></span>
+      <button class="linkbtn text-[13.5px] whitespace-nowrap" data-act="tab" data-v="budget" data-anchor="sim-why">${T(C.toBudget)}</button>
     </div>
     <div class="flex flex-col gap-4 mt-5">
       <div><div class="eyebrow">${T(C.health)}</div><p class="text-[15px] mt-1">${T(p.health)} [[${'h_'+c.p}]]</p></div>
@@ -4664,7 +4892,8 @@ function selectCity(id, fly){
 const VIEWS = {start:viewStart, ready:viewReady, fields:viewFields, cities:viewCities, roadmap:viewRoad, costs:viewCosts, budget:viewBudget, prep:viewPrep};
 function updateChip(){
   const c = document.getElementById('fx-chip');
-  if (c) c.innerHTML = '<span class="tb-full">1 CAD =&nbsp;</span>' + Number(S.sim.rate).toFixed(2) + ' THB';
+  /* narrow screens drop "1 CAD =" but keep the unit as THB/CAD, so the number still says what it is */
+  if (c) c.innerHTML = '<span class="tb-full">1 CAD =&nbsp;</span><span>' + Number(S.sim.rate).toFixed(2) + '&nbsp;THB<span class="chip-unit">/CAD</span></span>';
 }
 /* Lucide plus one drawn in the same line style: a closed book with a magnifying glass over its lower corner (glossary). */
 let ICONSET = null;
@@ -4864,6 +5093,8 @@ function openGloss(focusId){
   if (focusId) { GL_CAT = 'all'; GL_Q = ''; }
   d.innerHTML = glossShell(); renderGlossList(); icons();
   if (!d.open) { try { d.showModal(); } catch (e) { d.setAttribute('open', ''); } }
+  /* with a mouse or keyboard, start in the search box; on a touch screen leave the keyboard closed */
+  if (!focusId && matchMedia('(pointer: fine)').matches) { const q = document.getElementById('gloss-q'); if (q) q.focus(); }
   if (focusId) {
     const el = document.getElementById(focusId);
     if (el) { el.scrollIntoView({block:'center'}); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1800); }
@@ -4874,7 +5105,37 @@ let TERM_Y = 0;   /* close the popover only after a real scroll, not a leftover 
 window.addEventListener('scroll', () => { if (TERM_BTN && Math.abs(scrollY - TERM_Y) > 40) hideTerm(); }, {passive:true});
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && TERM_BTN) hideTerm(); });
 
+/* Keyboard and screen-reader support shared by every page (26 Nov 2026). */
+const A11Y = {
+  nav:{en:'Pages', th:'หน้าต่าง ๆ'}, lang:{en:'Language', th:'ภาษา'},
+  skipMain:{en:'Skip to content', th:'ข้ามไปที่เนื้อหา'}, skipNav:{en:'Go to the page menu', th:'ไปที่เมนูหน้า'},
+  fx:{en:'Exchange rate, CAD to THB: open All Costs', th:'อัตราแลกเปลี่ยน CAD เป็นบาท: เปิดหน้าค่าใช้จ่าย'},
+  ckDone:{en:(d, n) => `${d} of ${n} steps done`, th:(d, n) => `ทำแล้ว ${d} จาก ${n} ข้อ`},
+  goal:{en:g => `Total savings goal ${g}`, th:g => `เป้าเงินเก็บทั้งหมด ${g}`},
+  settings:{en:'Your settings', th:'ค่าที่ตั้ง'}
+};
+/* Say a short update to screen readers without moving focus. */
+let SR_T = null;
+function announce(text, delay = 0){
+  clearTimeout(SR_T);
+  SR_T = setTimeout(() => { const el = document.getElementById('sr-live'); if (!el) return; el.textContent = ''; setTimeout(() => { el.textContent = text; }, 40); }, delay);
+}
+/* Every segmented control is a labelled group of toggle buttons: role=group, and aria-pressed from the "on" class. */
+function segA11y(root){
+  (root || document).querySelectorAll('.seg').forEach(g => {
+    if (g.getAttribute('role') === 'tablist') return;
+    if (!g.getAttribute('role')) g.setAttribute('role', 'group');
+    g.querySelectorAll(':scope > button').forEach(b => b.setAttribute('aria-pressed', b.classList.contains('on')));
+  });
+}
+/* After a page switch, put focus on the page title so screen readers announce the new page. */
+function focusTitle(){
+  const h = document.querySelector('#app h1'); if (!h) return;
+  h.setAttribute('tabindex', '-1'); h.focus({preventScroll:true});
+}
 function render(keepScroll){
+  if (MAP) { try { MAP.stop(); } catch (e) {} }
+  if (S.tab !== 'budget') LAST_GOAL = null;   /* a map still flying when the page redraws threw "_leaflet_pos" */
   if (!VIEWS[S.tab]) S.tab = 'ready';
   document.documentElement.lang = S.lang;
   document.title = S.lang === 'th' ? 'คู่มือ Work & Study สู่ PR แคนาดา 2027 ถึง 2033' : 'Canada Work & Study to PR Guide 2027 to 2033';
@@ -4893,7 +5154,13 @@ function render(keepScroll){
   const gb = document.getElementById('gloss-btn');
   gb.innerHTML = ic('book-search'); gb.setAttribute('aria-label', T(GLOSS_UI.btn)); gb.title = T(GLOSS_UI.btn);
   hideTerm();
-  document.getElementById('btabs').innerHTML = UI.tabs.map(t => `<button class="${S.tab===t.id?'on':''}" role="tab" aria-selected="${S.tab===t.id}" aria-label="${T(t.l)}" data-act="tab" data-v="${t.id}">${ic(t.icon)}<span>${T(t.s)}</span></button>`).join('');
+  /* the dock is page navigation (26 Nov 2026): aria-current marks the open page; labels follow the language */
+  const nav = document.getElementById('btabs'); nav.setAttribute('aria-label', T(A11Y.nav));
+  nav.innerHTML = UI.tabs.map(t => `<button class="${S.tab===t.id?'on':''}" ${S.tab===t.id ? 'aria-current="page"' : ''} aria-label="${T(t.l)}" data-act="tab" data-v="${t.id}">${ic(t.icon)}<span>${T(t.s)}</span></button>`).join('');
+  document.getElementById('skip-main').textContent = T(A11Y.skipMain);
+  document.getElementById('skip-nav').textContent = T(A11Y.skipNav);
+  document.getElementById('lang-seg').setAttribute('aria-label', T(A11Y.lang));
+  const fx = document.getElementById('fx-chip'); fx.setAttribute('aria-label', T(A11Y.fx)); fx.title = T(A11Y.fx);
   document.getElementById('disclaimer').textContent = T(UI.disclaimer);
   document.getElementById('links').innerHTML = `
     <h2 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('refresh-cw')}</span>${T(LINKS.title)}</h2>
@@ -4906,6 +5173,7 @@ function render(keepScroll){
   renderSimOut(); updateChip(); updateRefs();
   initMap();
   icons();
+  segA11y(app);
   linkTerms(app, '#sim-out');
   const gd = document.getElementById('gloss-dlg');
   if (gd && gd.open) { gd.innerHTML = glossShell(); renderGlossList(); icons(); }
@@ -4932,7 +5200,7 @@ window.addEventListener('resize', () => { SIDE.off = null; SIDE.y = window.scrol
 /* After a button switches tabs, land on the section it names instead of the top of the page.
    Checked again once late layout (icons, glossary links, embeds) has settled. */
 function goAnchor(id){
-  const jump = () => { const t = document.getElementById(id); if (t) t.scrollIntoView({block:'start', behavior:'instant'}); return t; };
+  const jump = () => { const t = document.getElementById(id); if (t) { if (t.tagName === 'DETAILS' && !t.open) t.open = true; t.scrollIntoView({block:'start', behavior:'instant'}); } return t; };
   const t = jump(); if (!t) return;
   setTimeout(() => { if (Math.abs(t.getBoundingClientRect().top - 80) > 12) jump(); }, 300);
   if (t.matches('label.check')) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); }
@@ -4957,10 +5225,22 @@ document.addEventListener('click', e => {
   const act = b.dataset.act, v = b.dataset.v;
   if (act === 'lang') { S.lang = v; render(true); }
   else if (act === 'theme') { S.theme = S.theme === 'dark' ? 'light' : 'dark'; render(true); }
-  else if (act === 'tab') { S.tab = v; LIST_EDIT = COST_EDIT = false; render(false); if (b.dataset.anchor) goAnchor(b.dataset.anchor); }
-  else if (act === 'quiz') { S.quiz[b.dataset.q] = +b.dataset.o; render(true); }
-  else if (act === 'quizreset') { S.quiz = {}; render(true); }
-  else if (act === 'goroad') { S.scenario = v; S.tab = 'roadmap'; render(false); }
+  else if (act === 'tab') { S.tab = v; LIST_EDIT = COST_EDIT = false; render(false); if (b.dataset.anchor) goAnchor(b.dataset.anchor); else focusTitle(); }
+  else if (act === 'quiz') {
+    const was = quizScore().done, q = b.dataset.q, o = b.dataset.o;
+    S.quiz[q] = +o; render(true);
+    /* the answer that completes the quiz takes you to the result; any other keeps focus on the option just chosen */
+    const head = !was && quizScore().done && document.getElementById('quiz-res-h');
+    if (head) { goAnchor('quiz-result'); head.focus({preventScroll:true}); }
+    else { const nb = document.querySelector(`[data-act="quiz"][data-q="${q}"][data-o="${o}"]`); if (nb) nb.focus({preventScroll:true}); }
+  }
+  else if (act === 'quizreset') { if (Object.keys(S.quiz || {}).length && !confirm(T({en:'Clear all 10 answers and start the self-assessment again?', th:'ล้างคำตอบทั้ง 10 ข้อ และเริ่มแบบประเมินใหม่ใช่ไหม'}))) return; S.quiz = {}; render(true); }
+  else if (act === 'quiztype') {
+    /* open the Budget on the recommended type; a type already chosen keeps your own amounts */
+    if (S.sim.type !== v && SIMC.types[v]) { const ty = SIMC.types[v]; S.sim.type = v; S.sim.tuition = ty.def; S.sim.coopWage = ty.coopWage; S.sim.coopHours = ty.coopH; S.sim.fees = ty.fees; if (v === 'private') S.sim.hasCoop = true; }
+    S.tab = 'budget'; LIST_EDIT = COST_EDIT = false; render(false); focusTitle();
+  }
+  else if (act === 'goroad') { S.scenario = v; S.tab = 'roadmap'; render(false); focusTitle(); }
   else if (act === 'filter') { S.filter = v; render(true); }
   else if (act === 'prog-opt') { S.progOpt = v; render(true); }
   else if (act === 'thai') { showThai(+v); }
@@ -4972,10 +5252,16 @@ document.addEventListener('click', e => {
   else if (act === 'sim-years') { S.sim.years = +v; render(true); }
   else if (act === 'sim-pgwp') { S.sim.pgwp = v === 'yes'; render(true); }
   else if (act === 'sim-coop') { S.sim.hasCoop = v === 'yes'; render(true); }
-  else if (act === 'ckdone') { S.check[v] = true; render(true); }
+  else if (act === 'ckdone') {
+    S.check[v] = true; render(true);
+    /* keep going from the keyboard: focus the next "Done" button, or the ticked step when everything is done */
+    const c = checkStats(), nb = document.querySelector('[data-act="ckdone"]') || document.querySelector(`input[data-check="${v}"]`);
+    if (nb) nb.focus({preventScroll:true});
+    announce(T(A11Y.ckDone)(c.done, c.total));
+  }
   else if (act === 'jump') { const t = document.getElementById(v); if (t) { t.scrollIntoView({behavior:'smooth', block:'start'}); if (t.dataset.flash) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1800); } } }
   else if (act === 'sim-living') { S.sim.living = v; S.sim.rentC = S.sim.foodC = S.sim.otherC = null; render(true); }
-  else if (act === 'simreset') { S.sim = Object.assign({}, DEFAULTS.sim); LIST_EDIT = false; if (S.fx.rate) S.sim.rate = +S.fx.rate.toFixed(2); applyFunds(); render(true); }
+  else if (act === 'simreset') { if (!confirm(T({en:'Reset the simulator to its starting values? Every amount, hour and setting you changed on the Budget page will be cleared.', th:'รีเซ็ตเครื่องจำลองกลับเป็นค่าเริ่มต้นใช่ไหม ยอดเงิน ชั่วโมงทำงาน และค่าที่คุณเปลี่ยนในหน้างบจะถูกล้างทั้งหมด'}))) return; S.sim = Object.assign({}, DEFAULTS.sim); LIST_EDIT = false; if (S.fx.rate) S.sim.rate = +S.fx.rate.toFixed(2); applyFunds(); render(true); }
   else if (act === 'fxlive') { S.sim.rateAuto = true; applyFx(); }
   else if (act === 'proofauto') { S.sim.proofAuto = true; S.sim.proof = fundsAmt(); render(true); }
   else if (act === 'sim-cur') { S.sim.cur = v; renderSimOut(); icons(); save(); }
@@ -4998,6 +5284,7 @@ document.addEventListener('click', e => {
   else if (act === 'plan-m' || act === 'plan-y') {   /* a new intake: dates typed for the old one no longer fit */
     S.plan = S.plan || {}; if (act === 'plan-m') S.plan.m = +v; else S.plan.y = +v;
     if (!S.plan.y) S.plan.y = planIntake().getFullYear();
+    if (!S.plan.m) S.plan.m = planIntake().getMonth() + 1;
     S.plan.dates = {}; render(true);
   }
   else if (act === 'plan-reset') { S.plan.dates = {}; render(true); }
@@ -5041,10 +5328,18 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('input', e => {
   const k = e.target.dataset.conv; if (!k) return;
-  const v = parseFloat(e.target.value) || 0, r = S.sim.rate || 24;
+  let v = parseFloat(e.target.value) || 0; const r = S.sim.rate || 24;
+  if (v < 0) { v = 0; e.target.value = 0; }   /* money cannot be negative here */
   if (k === 'cad') document.getElementById('conv-thb').value = Math.round(v * r);
   else document.getElementById('conv-cad').value = Math.round(v / r * 100) / 100;
+  convOut();
 });
+/* The converter's result written out with thousands separators, since number boxes cannot show them. */
+function convOut(){
+  const el = document.getElementById('conv-out'), a = document.getElementById('conv-cad'), b = document.getElementById('conv-thb'); if (!el || !a || !b) return;
+  const c = parseFloat(a.value) || 0, t = parseFloat(b.value) || 0;
+  el.textContent = `CAD ${c.toLocaleString('en-US', {maximumFractionDigits:2})} = THB ${Math.round(t).toLocaleString('en-US')}`;
+}
 document.addEventListener('toggle', e => {
   const d = e.target; if (!d.dataset || !d.dataset.field) return;
   S.open = S.open || {}; S.open[d.dataset.field] = d.open; save();
@@ -5053,6 +5348,26 @@ document.addEventListener('change', e => {
   if (e.target.dataset.step) { S.steps[e.target.dataset.step] = e.target.checked; render(true); return; }
   const id = e.target.dataset.check; if (!id) return;
   S.check[id] = e.target.checked; render(true);
+  /* the list is redrawn: put focus back on the same checkbox and say the new progress */
+  const box = document.querySelector(`input[data-check="${id}"]`); if (box) box.focus({preventScroll:true});
+  const c = checkStats(); announce(T(A11Y.ckDone)(c.done, c.total));
+});
+/* Any other button that redraws the page: if focus fell back to the page body, return it to the same control. */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.closest('#btabs')) return;
+  const q = (k, v) => v == null ? '' : `[${k}="${String(v).replace(/"/g, '\\"')}"]`;
+  const sel = '[data-act="' + b.dataset.act + '"]' + q('data-v', b.dataset.v) + q('data-q', b.dataset.q) + q('data-o', b.dataset.o);
+  setTimeout(() => {
+    const a = document.activeElement; if (a && a !== document.body && document.contains(a)) return;
+    const n = document.querySelector(sel); if (n && n.getClientRects().length) n.focus({preventScroll:true});
+  }, 0);
+});
+/* Skip links: the menu link lands on the open page's dock button. */
+document.addEventListener('click', e => {
+  const s = e.target.closest('.skip-link'); if (!s) return;
+  e.preventDefault();
+  const t = s.id === 'skip-nav' ? document.querySelector('#btabs button.on') : document.getElementById('app');
+  if (t) t.focus();
 });
 
 applyFunds();
