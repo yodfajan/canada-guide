@@ -64,7 +64,7 @@
     --shadow-ctl:0 .5px 1px rgba(0,0,0,.45),inset 0 .5px 0 rgba(255,255,255,.16);
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth;scrollbar-color:rgba(128,128,128,.5) transparent}
+  html{scroll-behavior:smooth;scrollbar-color:rgba(128,128,128,.5) transparent;scroll-padding-bottom:110px}   /* room for the floating dock */
   body{margin:0;background:var(--window);color:var(--ink);font-size:15px;line-height:1.6;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Sukhumvit Set","Noto Sans Thai",sans-serif;
     -webkit-font-smoothing:antialiased;
@@ -73,6 +73,9 @@
   h1,h2,h3,h4{margin:0;letter-spacing:-0.012em;line-height:1.3;text-wrap:balance}
   html[lang="th"] h1,html[lang="th"] h2,html[lang="th"] h3,html[lang="th"] h4{letter-spacing:0;line-height:1.45}
   p{margin:0}
+  /* reading text: no lone word on the last line, and lines no longer than about 75 characters */
+  p,li,dd{text-wrap:pretty}
+  #app p{max-width:75ch}
   a{color:var(--blue);text-underline-offset:3px}
   /* the wallpaper the glass refracts; fixed so content slides over it */
   body::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--wall),var(--window)}
@@ -147,7 +150,7 @@
   sup.cite a:hover{background:var(--blue-soft)}
   sup.cite a::before{content:'['}sup.cite a::after{content:']'}
   .reflist{counter-reset:none;list-style:none;margin:0;padding:0}
-  .reflist li{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px;scroll-margin-top:80px;scroll-margin-bottom:110px;border-radius:8px;transition:background .6s}
+  .reflist li{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;scroll-margin-top:80px;scroll-margin-bottom:110px;border-radius:8px;transition:background .6s}
   .reflist li.flash{background:var(--blue-soft)}
   .reflist .rn{color:var(--blue);font-weight:600;min-width:2.2em;font-variant-numeric:tabular-nums}
   .reflist a{color:var(--blue)}
@@ -272,7 +275,7 @@
   .bnav svg{width:22px;height:22px}
   @media (max-width:400px){.bnav svg{width:21px;height:21px}}
   /* ---------- Budget charts (dataviz reference palette, validated on the card surfaces) ---------- */
-  :root{--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--grid:rgba(0,0,0,.08);--axis:rgba(0,0,0,.22);--crit:#d03b3b;--warn:#b26b00;--good:#1D7A33}
+  :root{--s1:#2672d0;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--grid:rgba(0,0,0,.08);--axis:rgba(0,0,0,.22);--crit:#d03b3b;--warn:#b26b00;--good:#1D7A33}
   :root[data-theme="dark"]{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#0ca30c;--grid:rgba(255,255,255,.08);--axis:rgba(255,255,255,.22);--crit:#ff6f66;--warn:#ffa826;--good:#32d74b}
   .hero{font-size:44px;font-weight:700;letter-spacing:-0.02em;line-height:1.1}
   @media (max-width:640px){.hero{font-size:34px}}
@@ -304,6 +307,8 @@
   .tline>div{border-radius:4px;min-width:4px;display:flex;align-items:center;padding-left:6px;font-size:12.5px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap;cursor:default}
   .tline .ph-S,.sw.ph-S{background:var(--s1)} .tline .ph-C,.sw.ph-C{background:var(--s3)} .tline .ph-B,.sw.ph-B{background:var(--s4)}
   .tline .ph-B,.tline .ph-C,.tline .ph-G{color:#0b0b0b}
+  /* the dark-theme blue and green are lighter, so their labels switch to dark text (5.4:1 and 5.8:1; white would be 3.6:1 and 3.4:1) */
+  :root[data-theme="dark"] .tline .ph-S,:root[data-theme="dark"] .segbar>.s1,:root[data-theme="dark"] .segbar>.s6{color:#0b0b0b}
   .tline .ph-G,.sw.ph-G{background:var(--s5)}
   .tline>div.hov{filter:brightness(1.08)}
   .viz .band-C{fill:var(--s3);opacity:.12} .viz .band-B{fill:var(--s4);opacity:.14} .viz .band-G{fill:var(--s5);opacity:.12}
@@ -326,7 +331,7 @@
   /* money ladder: prep (s1), money to show (s2), setup reserve (s3); a thin strip plus swatched labels, no text inside the colours */
   .lbar{display:flex;gap:2px;height:10px;margin:10px 0 4px}
   .lbar>div{border-radius:3px;min-width:6px}
-  .lbar>.s1{background:var(--s1)} .lbar>.s2{background:var(--s2)} .lbar>.s3{background:var(--s3)}
+  .lbar>.s1{background:var(--s1)} .lbar>.s2{background:var(--s2)} .lbar>.s3{background:var(--s3)} .lbar>.s4{background:var(--s4)}
   .lname{display:inline-flex;align-items:center;gap:8px}
   .gbasis{margin-top:6px;font-size:13px;line-height:1.5;color:var(--ink2)}
   .gbasis svg{color:var(--ink3);display:inline-block;vertical-align:-2px;margin-right:6px}
@@ -336,7 +341,7 @@
   .row.lpart>:first-child{padding-left:18px}
   .row>.num{white-space:nowrap;text-align:right}
   /* quiz verdict: lead size, the answers behind it, and what still blocks the path (status colour on the icon only) */
-  .qlead{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:14.5px;border-radius:10px;padding:8px 12px}
+  .qlead{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:15px;border-radius:10px;padding:8px 12px}
   .qlead svg,.qneed svg,.qnone svg{flex:none;margin-top:3px}
   .qlead-close{background:var(--amber-soft)} .qlead-some,.qlead-clear{background:var(--gray-soft)}
   .qsec{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
@@ -386,7 +391,7 @@
   .linkbtn{all:unset;cursor:pointer;color:var(--blue);font-weight:500}
   .linkbtn:hover{text-decoration:underline}
   .linkbtn:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
-  .mline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding:8px 0;border-top:1px solid var(--line);font-size:14.5px}
+  .mline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
   .mline:first-child{border-top:0}
   .mline .f{color:var(--ink2);font-variant-numeric:tabular-nums}
   .why h4{font-size:15px;font-weight:600;margin:14px 0 4px}
@@ -454,7 +459,7 @@
   @media (max-width:640px){dialog#gloss-dlg{width:100vw;height:100dvh;border-radius:0;margin:0}}
   .autoline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;color:var(--ink2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
   .ctbl th.cur-col,.ctbl td.cur-col{background:var(--blue-soft)}
-  .ctbl{width:100%;border-collapse:collapse;font-size:14.5px;min-width:640px}
+  .ctbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
   .ctbl th{text-align:left;font-size:12px;font-weight:600;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
   .ctbl td{padding:9px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
   .ctbl tr.on td{background:var(--blue-soft)}
@@ -465,8 +470,8 @@
   /* program links: school name, program name, arrow. In tables the school opens its international page and the program its official page. */
   .plist li + li{border-top:.5px solid var(--line)}
   .plist a{display:grid;grid-template-columns:minmax(88px,30%) 1fr auto;gap:2px 12px;align-items:baseline;padding:9px 0;color:var(--ink);text-decoration:none}
-  .pl-s{font-weight:600;font-size:14.5px}
-  .pl-p{color:var(--blue);font-size:14.5px;min-width:0}
+  .pl-s{font-weight:600;font-size:15px}
+  .pl-p{color:var(--blue);font-size:15px;min-width:0}
   .pl-n{display:block;color:var(--ink3);font-size:12.5px;margin-top:1px}
   .pl-ic{color:var(--blue);display:inline-flex;align-self:center}
   .plist a:hover .pl-p,.plist a:focus-visible .pl-p{text-decoration:underline}
@@ -503,9 +508,49 @@
   @media (min-width:640px){.trow .cost-edit{grid-column:span 2}}
   .hscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;min-width:0}
   #sim-out,#sim-out>*,.grid>.card{min-width:0}
-  .sim-mini{position:sticky;top:calc(60px + env(safe-area-inset-top));z-index:20;display:flex;justify-content:space-between;gap:12px;
+  /* phones: tables that needed sideways scrolling become stacked rows (roles in the markup keep them a table for screen readers) */
+  @media (max-width:640px){
+    .ctbl.prog-tbl,.ctbl.cmp-tbl{min-width:0!important}
+    .prog-tbl,.prog-tbl>tbody,.prog-tbl tr,.prog-tbl td{display:block}
+    .prog-tbl>thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+    .prog-tbl tr{padding:12px 0;border-bottom:1px solid var(--line)}
+    .prog-tbl td{border:0;padding:3px 0;white-space:normal;min-width:0!important;text-align:left!important}
+    .prog-tbl td[data-l]{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+    .prog-tbl td[data-l]::before{content:attr(data-l);flex:none;font-size:12.5px;font-weight:600;color:var(--ink3)}
+    .prog-tbl td[data-l]>div{text-align:right}
+    .prog-tbl tbody tr:hover td{background:none}
+    .cmp-tbl,.cmp-tbl>thead,.cmp-tbl>tbody{display:block}
+    .cmp-tbl tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:6px;border-bottom:1px solid var(--line)}
+    .cmp-tbl th,.cmp-tbl td{display:block;border:0;padding:6px 4px;white-space:normal!important;min-width:0!important;font-size:13.5px}
+    .cmp-tbl>thead th:first-child{display:none}
+    .cmp-tbl>tbody td:first-child{grid-column:1 / -1;padding:10px 4px 0}
+    .cmp-tbl tr.calc td:first-child{padding-left:14px}
+    .cmp-tbl tr.calc-end,.cmp-tbl tr.calc-after,.cmp-tbl tr.calc-sub{border-top:1.5px solid var(--line2)}
+    .cmp-tbl tr.calc-end td,.cmp-tbl tr.calc-after td,.cmp-tbl tr.calc-sub td{border-top:0}
+  }
+  /* phones: the mini summary floats under the toolbar only once the goal card has scrolled away (it repeated the goal right above it) */
+  .sim-mini{position:fixed;left:12px;right:12px;top:calc(64px + env(safe-area-inset-top));z-index:20;display:flex;justify-content:space-between;gap:12px;
     background:var(--toolbar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
-    border:1px solid var(--line2);border-radius:10px;padding:8px 14px;margin-bottom:12px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+    border:1px solid var(--line2);border-radius:10px;padding:8px 14px;box-shadow:0 6px 20px rgba(0,0,0,.12);
+    opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .2s cubic-bezier(.2,.8,.2,1),transform .2s cubic-bezier(.2,.8,.2,1)}
+  .sim-mini.on{opacity:1;transform:none;pointer-events:auto}
+  @media (prefers-reduced-motion:reduce){.sim-mini{transition:none}}
+  /* Budget: phones read goal and verdict, then the controls, then the charts; wide screens keep controls on the left */
+  .sim-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);grid-template-areas:"out" "ctl" "more";align-items:start}
+  .sim-grid>#sim-out{grid-area:out} .sim-grid>.sim-side{grid-area:ctl} .sim-grid>#sim-more{grid-area:more}
+  #sim-more,#sim-more>*{min-width:0}
+  @media (min-width:1024px){.sim-grid{grid-template-columns:minmax(0,2fr) minmax(0,3fr);grid-template-areas:"ctl out" "ctl more";align-items:stretch}}
+  /* compact pop-up menu (AppKit pop-up button) for long single choices such as the start year */
+  .sel-wrap{position:relative;display:inline-flex;align-items:center;max-width:100%}
+  .sel{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-weight:600;color:var(--ink);min-height:36px;padding:6px 36px 6px 14px;max-width:100%;
+    border-radius:999px;border:1px solid var(--glass-border);background:var(--glass-strong);box-shadow:0 3px 10px rgba(30,40,70,.12),var(--specular);cursor:pointer}
+  .sel-wrap>svg{position:absolute;right:12px;pointer-events:none;color:var(--ink3)}
+  .sel:focus-visible{outline:3px solid var(--ring);outline-offset:1px}
+  @media (pointer:coarse),(max-width:1023px){.sel{min-height:44px;font-size:16px}}
+  details.sim-adv>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
+  details.sim-adv>summary::-webkit-details-marker{display:none}
+  details.sim-adv .chev{transition:transform .2s;color:var(--ink3)} details.sim-adv[open] .chev{transform:rotate(90deg)}
+  #quiz{scroll-margin-top:80px} #quiz:focus{outline:none}
   .sim-mini b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
   .sim-mini small{display:block;font-size:12px;color:var(--ink2)}
   #fx-chip{border:0;cursor:pointer;font-family:inherit;white-space:nowrap}
@@ -606,7 +651,8 @@ try {
   const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
   if (saved) S = Object.assign(S, saved, { sim:Object.assign({}, DEFAULTS.sim, saved.sim || {}) });
 } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+let SYNC_IN = false;   /* true while applying a change made in another open tab: do not write it straight back */
+const save = () => { if (SYNC_IN) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 if (S.sim.proof === 22895) S.sim.proof = 23448;
 /* Older saves: a proof amount the user typed (not an IRCC figure) stays manual */
 try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o && o.sim && o.sim.proofAuto === undefined && o.sim.proof && ![22895, 23448].includes(o.sim.proof)) S.sim.proofAuto = false; } catch (e) {}
@@ -821,9 +867,10 @@ const OPTIONS = [
    ]}
 ];
 
-/* The money ladder (25 Nov 2026): three amounts with fixed names, used the same way on every page.
+/* The money ladder (25 Nov 2026): amounts with fixed names, used the same way on every page.
    prep = Costs sections 1 and 2 (paid in Thailand before you apply), show = money to show IRCC,
-   setup = setup reserve. The savings goal is all three added together. */
+   setup = setup reserve, extra = money needed during the program (26 Nov 2026; only when the plan runs short,
+   e.g. second-year tuition). The savings goal is all of them added together. */
 const MONEY = {
   prep:{en:'Prep and visa costs', th:'ค่าเตรียมตัวและยื่นวีซ่า'},
   show:{en:'Money to show', th:'เงินที่ต้องแสดง'},
@@ -837,15 +884,81 @@ const MONEY = {
   perMo:{en:'/month', th:'/เดือน'},
   setup:{en:'Setup reserve', th:'เงินสำรองตั้งตัว'},
   goal:{en:'Total savings goal', th:'เป้าเงินเก็บทั้งหมด'},
-  goalN:{en:'The one number to save toward: the three amounts below added together.', th:'ตัวเลขเดียวที่ควรเก็บให้ถึง คือเงิน 3 ก้อนด้านล่างรวมกัน'},
+  goalN:{en:'The one number to save toward: the amounts below added together.', th:'ตัวเลขเดียวที่ควรเก็บให้ถึง คือเงินทุกก้อนด้านล่างรวมกัน'},
+  extra:{en:'Extra money during the program', th:'เงินเพิ่มระหว่างหลักสูตร'},
+  extraN:{en:(m, two) => `What your expected pay does not cover${two ? ', mostly second-year tuition due at the start of month 13' : ''}. Have it ready by month ${m}. IRCC may also ask how you will pay for the rest of the program.`, th:(m, two) => `ส่วนที่รายได้ที่คาดว่าจะได้ยังไม่พอ${two ? ' ส่วนใหญ่คือค่าเล่าเรียนปีที่ 2 ที่ต้องจ่ายต้นเดือนที่ 13' : ''} ต้องมีพร้อมภายในเดือนที่ ${m} และ IRCC อาจถามว่าจะจ่ายค่าเรียนส่วนที่เหลือของหลักสูตรอย่างไร`},
   prepN:{en:'Tests, documents, school application and visa fees (sections 1 and 2 on the All Costs page). Paid in Thailand before you apply, on top of the money to show.', th:'ค่าสอบ เอกสาร ค่าสมัครเรียน และค่าวีซ่า (หมวด 1 ถึง 2 ในหน้าค่าใช้จ่าย) จ่ายที่ไทยก่อนยื่นวีซ่า แยกจากเงินที่ต้องแสดง'},
   prepR:{en:(a, b) => `Estimate ${a} to ${b}; the goal uses the high end.`, th:(a, b) => `ช่วงประมาณ ${a} ถึง ${b} เป้าใช้ยอดสูงไว้ก่อน`},
   showN:{en:a => `Must be in your bank when you apply: first-year tuition and fees, the IRCC living-cost amount${a ? ` (CAD ${a}, read live from IRCC)` : ''}, and travel. Once you arrive it pays your flight, rent and food.`, th:a => `ต้องมีในบัญชีตอนยื่นวีซ่า: ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC${a ? ` (CAD ${a} อ่านจากเว็บ IRCC อัตโนมัติ)` : ''} และค่าเดินทาง เมื่อไปถึงแล้วเงินก้อนนี้ใช้จ่ายค่าตั๋ว ค่าเช่า และค่าอาหาร`},
   setupN:{en:'Rent deposit and first purchases. IRCC does not ask for it, but you will need it.', th:'เงินประกันห้องและของใช้ช่วงแรก IRCC ไม่ได้ขอ แต่ควรมีไว้'},
   setupD:{en:'(rent deposit, first purchases)', th:'(เงินประกันห้อง ของใช้ช่วงแรก)'},
-  eq:{en:(p, s) => `= prep and visa costs ${p} + money to show + setup reserve ${s}`, th:(p, s) => `= ค่าเตรียมตัวและยื่นวีซ่า ${p} + เงินที่ต้องแสดง + เงินสำรองตั้งตัว ${s}`},
+  eq:{en:(p, s) => `= prep and visa costs ${p} + money to show + setup reserve ${s} + extra money during the program (if any)`, th:(p, s) => `= ค่าเตรียมตัวและยื่นวีซ่า ${p} + เงินที่ต้องแสดง + เงินสำรองตั้งตัว ${s} + เงินเพิ่มระหว่างหลักสูตร (ถ้ามี)`},
   editPrep:{en:'Enter your real prep costs', th:'ใส่ค่าเตรียมตัวจริง'}
 };
+/* The housing hint under the Budget's housing choice, in start-year amounts like every other figure on the page
+   (it used to quote today's prices, CAD 1,150, beside the start-year 1,179). */
+const LIVING_NOTE = {
+  shared:{en:(v, y) => `Default for a ${y} start: rent CAD ${v.r}, food ${v.f}, transit, phone and personal ${v.o}, health insurance ${v.h} a month. Based on 2026 prices (a room in shared housing in Toronto averages CAD 1,146 to 1,220), raised to your start year. [[uoft]]`,
+    th:(v, y) => `ค่าเริ่มต้นของการเริ่มเรียนปี ${y}: ค่าเช่า CAD ${v.r} ค่าอาหาร ${v.f} ค่าเดินทาง โทรศัพท์ และของใช้ส่วนตัว ${v.o} ประกันสุขภาพ ${v.h} ต่อเดือน คิดจากราคาปี 2026 (ห้องในบ้านแชร์ในโตรอนโตเฉลี่ย CAD 1,146 ถึง 1,220) ปรับเป็นราคาของปีที่เริ่มเรียนแล้ว [[uoft]]`},
+  studio:{en:(v, y) => `Default for a ${y} start: rent CAD ${v.r}, food ${v.f}, other costs including internet ${v.o}, health insurance ${v.h} a month. Based on what a new tenant paid for a vacant studio (CMHC, October 2025: Vancouver 1,988, Toronto 1,689), raised to your start year. [[cmhc]]`,
+    th:(v, y) => `ค่าเริ่มต้นของการเริ่มเรียนปี ${y}: ค่าเช่า CAD ${v.r} ค่าอาหาร ${v.f} ค่าใช้จ่ายอื่นรวมอินเทอร์เน็ต ${v.o} ประกันสุขภาพ ${v.h} ต่อเดือน คิดจากราคาที่ผู้เช่าใหม่จ่ายสำหรับห้องสตูดิโอว่าง (CMHC ตุลาคม 2025: แวนคูเวอร์ 1,988 โตรอนโต 1,689) ปรับเป็นราคาของปีที่เริ่มเรียนแล้ว [[cmhc]]`}
+};
+function livingNote(c){
+  const s = c.s, L = SIMC.living[s.living] || SIMC.living.shared, F = c.fac;
+  const v = {r:fmt(L.rent * F.rent), f:fmt(L.food * F.cpi), o:fmt(L.other * F.cpi), h:fmt(SIMC.health * F.health)};
+  return T(LIVING_NOTE[s.living === 'studio' ? 'studio' : 'shared'])(v, s.intake || SIMC.base + 1);
+}
+/* When the city picked on the Map page is not Toronto and no rent was typed, say so beside the goal, with a way to type rent. */
+function cityRentNote(c){
+  const s = c.s; if (!S.city || S.city === 'tor' || (s.rentC != null && s.rentC !== '' && !isNaN(s.rentC))) return '';
+  const city = typeof cityOf === 'function' ? T(cityOf(S.city).n) : '';
+  return `<span class="block mt-0.5">${T({en:n => `The city picked on the Map page is ${n}, but this rent is not from that city.`, th:n => `เมืองที่เลือกในหน้าแผนที่คือ${n} แต่ค่าเช่านี้ไม่ได้มาจากเมืองนั้น`})(city)}<button class="linkbtn" style="margin-left:8px" data-act="tab" data-v="budget" data-anchor="sim-why">${T({en:'Type the rent you expect', th:'ใส่ค่าเช่าที่คาดว่าจะจ่าย'})}</button></span>`;
+}
+/* The Budget's folded "fine-tune" settings (26 Nov 2026): tips, Co-op wage, side job, PGWP wait, exchange rate, IRCC amount. */
+const ADV = {
+  t:{en:'Fine-tune', th:'ปรับละเอียด'},
+  sub:{en:'Tips, Co-op wage, a side job, working while waiting for a PGWP, the exchange rate and the IRCC amount. The defaults suit most plans.', th:'ทิป ค่าจ้าง Co-op งานเสริม การทำงานระหว่างรอ PGWP อัตราแลกเปลี่ยน และยอดของ IRCC ค่าเริ่มต้นใช้ได้กับแผนส่วนใหญ่'},
+  n:{en:n => `${n} changed`, th:n => `ปรับไว้ ${n} ค่า`}
+};
+/* Money the user already has (THB, optional, kept on this device in S.have): how far the savings goal is (26 Nov 2026). */
+const HAVE = {
+  l:{en:'Money you have now (optional)', th:'เงินที่มีตอนนี้ (ไม่บังคับ)'},
+  ph:{en:'e.g. 500000', th:'เช่น 500000'},
+  short:{en:(x, p) => `Short by ${x} (${p}% of the goal saved)`, th:(x, p) => `ยังขาดอีก ${x} (มีแล้ว ${p}% ของเป้า)`},
+  ok:{en:x => `Goal reached, with ${x} to spare`, th:x => `ถึงเป้าแล้ว เหลือเผื่ออีก ${x}`},
+  note:{en:'Saved on this device only. It does not change the goal.', th:'เก็บไว้ในเครื่องนี้เท่านั้น ไม่ได้เปลี่ยนเป้า'}
+};
+function haveInfo(c){
+  const h = +S.have; if (!(h > 0)) return null;
+  const g = c.total * (S.sim.rate || 24), d = g - h;
+  return {pct:Math.min(100, Math.floor(h / g * 100)), text:d > 0 ? T(HAVE.short)(thb(d), Math.floor(h / g * 100)) : T(HAVE.ok)(thb(-d)), ok:d <= 0};
+}
+function haveBlock(c){
+  const hi = haveInfo(c);
+  return `<div class="have mt-3">
+      <label for="have-in" class="text-[14px] font-medium">${T(HAVE.l)}</label>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+        <span class="amt-in"><span class="faint text-[12px]">THB</span><input id="have-in" class="numin num" type="number" inputmode="numeric" min="0" step="1000" data-have value="${+S.have > 0 ? Math.round(S.have) : ''}" placeholder="${esc(T(HAVE.ph))}" aria-describedby="have-out"></span>
+        <span id="have-out" class="text-[14px] font-semibold ${hi && hi.ok ? 'pos' : ''}" aria-live="polite">${hi ? hi.text : ''}</span>
+      </div>
+      <div class="bar mt-2" id="have-bar" style="display:${hi ? '' : 'none'}"><i style="width:${hi ? hi.pct : 0}%;background:var(--s3)"></i></div>
+      <p class="faint text-[12.5px] mt-1">${T(HAVE.note)}</p>
+    </div>`;
+}
+/* Typed amounts far outside anything real (an extra zero, a wrong currency) get a gentle note, never a block. */
+const ODD_UI = {
+  t:{en:'Check these amounts, they look unusual:', th:'ตรวจยอดเหล่านี้ ดูผิดปกติ:'},
+  usual:{en:(lo, hi, mo) => `usually CAD ${lo} to ${hi}${mo ? ' a month' : ' a year'}`, th:(lo, hi, mo) => `ปกติ CAD ${lo} ถึง ${hi}${mo ? ' ต่อเดือน' : ' ต่อปี'}`},
+  fix:{en:'An extra zero or an amount in THB typed into a CAD box are the usual causes.', th:'สาเหตุที่พบบ่อยคือพิมพ์เลขศูนย์เกิน หรือพิมพ์ยอดเงินบาทลงช่อง CAD'}
+};
+function oddAmounts(c){
+  const M = SIM_UI;
+  const checks = [[M.lTuY, c.tuY, 3000, 80000], [M.lFeesY, c.fees, 0, 15000], [M.lProof, c.proof, 10000, 80000], [M.lTravel, c.travel, 300, 15000], [MONEY.setup, c.setup, 0, 30000],
+    [M.rent, c.lv.rent, 300, 6000, 1], [M.food, c.lv.food, 100, 2500, 1], [M.other, c.lv.other, 0, 3000, 1], [M.health, c.lv.health, 0, 600, 1]];
+  const bad = checks.filter(([, v, lo, hi]) => v < lo || v > hi).map(([l, v, lo, hi, mo]) => `${T(l)} CAD ${fmt(v)} (${T(ODD_UI.usual)(fmt(lo), fmt(hi), mo)})`);
+  if (!bad.length) return '';
+  return `<div class="text-[13.5px] mt-3 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px" role="note"><span style="color:var(--amber);margin-top:2px">${ic('triangle-alert','icon-sm')}</span><span>${T(ODD_UI.t)} ${bad.join(S.lang === 'th' ? ' ' : '; ')}${S.lang === 'th' ? ' ' : '. '}${T(ODD_UI.fix)}</span></div>`;
+}
 /* Housing behind the rent in a simulation, e.g. "shared room at Toronto rent CAD 1,179/month". */
 function houseText(c){
   const s = c.s, k = s.rentC != null && s.rentC !== '' && !isNaN(s.rentC) ? 'own' : (s.living === 'studio' ? 'studio' : 'shared');
@@ -859,10 +972,10 @@ function goalBasis(c, full){
 }
 /* One program type worked out the same way everywhere (Budget compare table, quiz hint): the selected type is
    exactly your simulation; the others swap in their own typical tuition, fees, Co-op hours and Co-op wage. */
-function typeCalc(k){
-  const s = S.sim; if (k === s.type) return simCalc();
+function typeCalc(k, o){
+  const s = S.sim; if (k === s.type) return simCalc(o);
   const ty = SIMC.types[k];
-  return simCalc({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop});
+  return simCalc(Object.assign({type:k, tuition:ty.def, fees:ty.fees, coopWage:ty.coopWage, coopHours:ty.coopH, hasCoop:k === 'private' ? true : s.hasCoop}, o || {}));
 }
 /* Quiz amounts in THB at today's rate, rounded to 10,000 (tuition defaults in the risk question). */
 const qTHB = cad => fmt(Math.round(cad * (S.sim.rate || 24) / 10000) * 10000);
@@ -884,7 +997,7 @@ const QUIZ = [
    ]},
   {id:'english', icon:'languages', cat:{en:'English', th:'ภาษาอังกฤษ'},
    q:{en:'Where is your English today?', th:'ระดับภาษาอังกฤษของคุณตอนนี้'},
-   hint:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall. Private Co-op colleges often accept their own placement test.', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 ส่วนวิทยาลัย Co-op เอกชนมักใช้ข้อสอบวัดระดับของสถาบันเองแทนได้'},
+   hint:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall. Private Co-op colleges often accept their own placement test. Later, the PGWP and PR need a second, different test (IELTS General Training, CELPIP or PTE Core).', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 ส่วนวิทยาลัย Co-op เอกชนมักใช้ข้อสอบวัดระดับของสถาบันเองแทนได้ ภายหลัง PGWP และ PR ต้องใช้ข้อสอบอีกแบบ (IELTS General Training, CELPIP หรือ PTE Core)'},
    o:[
      {a:3,b:0,c:0,l:{en:'Below IELTS 6.0, or never tested', th:'ต่ำกว่า IELTS 6.0 หรือยังไม่เคยสอบ'}},
      {a:1,b:2,c:1,l:{en:'Around 6.0. I can reach 6.5 with a few months of prep.', th:'ประมาณ 6.0 เตรียมตัวอีกไม่กี่เดือนน่าจะถึง 6.5'}},
@@ -952,17 +1065,17 @@ const QUIZ_UI = {
   progress:{en:'answered', th:'ข้อที่ตอบแล้ว'},
   reset:{en:'Start over', th:'เริ่มใหม่'},
   pending:{en:'Answer every question to see your recommendation.', th:'ตอบให้ครบทุกข้อเพื่อดูคำแนะนำ'},
-  recA:{t:{en:'Start with Option A: Private Co-op', th:'เริ่มด้วยทางเลือก A: Co-op เอกชน'},
+  recA:{t:{en:'Option A fits you best: start with a private Co-op', th:'ทางเลือก A เหมาะกับคุณที่สุด: เริ่มด้วย Co-op เอกชน'},
         
         d:{en:'A low-cost trial year. Treat it as a test only: it does not lead to a PGWP. Use the year to raise your IELTS to 6.5 and apply early to a public program, and budget for a second study permit application if you decide to stay.',
 
            th:'ปีทดลองแบบต้นทุนต่ำ ให้มองว่าเป็นการทดลองเท่านั้น เพราะไม่นำไปสู่ PGWP ใช้ปีนี้ดัน IELTS ให้ถึง 6.5 และสมัครหลักสูตรสถาบันรัฐแต่เนิ่น ๆ พร้อมเผื่องบสำหรับการขอ Study Permit รอบสองถ้าตัดสินใจอยู่ต่อ'}},
-  recB:{t:{en:'Go straight to Option B: Public Co-op Diploma', th:'ไปทางเลือก B เลย: Diploma พร้อม Co-op ที่สถาบันรัฐ'},
+  recB:{t:{en:'Option B fits you best: a public Co-op diploma', th:'ทางเลือก B เหมาะกับคุณที่สุด: Diploma พร้อม Co-op ที่สถาบันรัฐ'},
         
         d:{en:'The direct route. You still get to test daily life in Canada, but every month also counts toward a PGWP and PR. Choose a 2-year program in an eligible STEM or Healthcare CIP code for the full 3-year permit.',
 
            th:'เส้นทางตรง คุณยังได้ทดลองใช้ชีวิตในแคนาดาเหมือนกัน แต่ทุกเดือนนับต่อยอดสู่ PGWP และ PR ด้วย ควรเลือกหลักสูตร 2 ปีในรหัส CIP สาย STEM หรือ Healthcare เพื่อให้ได้ใบอนุญาตเต็ม 3 ปี'}},
-  recC:{t:{en:'Go for Option C: a university master\'s degree', th:'เลือกทางเลือก C: ปริญญาโทของมหาวิทยาลัย'},
+  recC:{t:{en:'Option C fits you best: a university master\'s degree', th:'ทางเลือก C เหมาะกับคุณที่สุด: ปริญญาโทของมหาวิทยาลัย'},
         
         d:{en:'A master\'s gives a PGWP of up to 3 years in any field and the strongest credential for PR. Prefer a program with a paid Co-op term if you want Canadian work experience before graduating, and compare the master\'s list below.',
         
@@ -992,9 +1105,10 @@ Object.assign(QUIZ_UI, {
   blockL:{en:'Blocks this path', th:'ขวางทางนี้'}, checkL:{en:'Check', th:'ต้องเช็ค'},
   alt:{en:n => `If you cannot clear the blocking items in time, ${n} does not have them.`, th:n => `ถ้าแก้ข้อที่ขวางไม่ทัน ${n} ไม่ติดข้อเหล่านี้`},
   useBudget:{en:'Use this type in the Budget', th:'ใช้ประเภทนี้ในหน้างบ'},
+  useBudgetY:{en:'Use this plan (2 years) in the Budget', th:'ใช้แผนนี้ (หลักสูตร 2 ปี) ในหน้างบ'},
   need:{
-    budShort:{en:(g, band, x) => `The total savings goal for this path is ${g}, above the budget you chose (${band}). You need about ${x} more.`, th:(g, band, x) => `เป้าเงินเก็บทั้งหมดของทางนี้คือ ${g} มากกว่างบที่คุณเลือก (${band}) ต้องหาเพิ่มประมาณ ${x}`},
-    budIn:{en:(g, band) => `The total savings goal for this path is ${g}, inside the range you chose (${band}). Make sure you reach at least that amount.`, th:(g, band) => `เป้าเงินเก็บทั้งหมดของทางนี้คือ ${g} อยู่ในช่วงที่คุณเลือก (${band}) ต้องมีให้ถึงยอดนี้`},
+    budShort:{en:(g, band, x, y) => `The total savings goal for this path (${y}) is ${g}, above the budget you chose (${band}). You need about ${x} more.`, th:(g, band, x, y) => `เป้าเงินเก็บทั้งหมดของทางนี้ (${y}) คือ ${g} มากกว่างบที่คุณเลือก (${band}) ต้องหาเพิ่มประมาณ ${x}`},
+    budIn:{en:(g, band, y) => `The total savings goal for this path (${y}) is ${g}, inside the range you chose (${band}). Make sure you reach at least that amount.`, th:(g, band, y) => `เป้าเงินเก็บทั้งหมดของทางนี้ (${y}) คือ ${g} อยู่ในช่วงที่คุณเลือก (${band}) ต้องมีให้ถึงยอดนี้`},
     en0:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall. You answered below 6.0 or not tested yet, so you need 6.5 before you apply.', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 คุณตอบว่าต่ำกว่า 6.0 หรือยังไม่เคยสอบ จึงต้องได้ 6.5 ก่อนสมัคร'},
     en1:{en:'Raise IELTS Academic from about 6.0 to 6.5 before you apply.', th:'ต้องดัน IELTS Academic จากประมาณ 6.0 ให้ถึง 6.5 ก่อนสมัคร'},
     noDegC:{en:'A master\'s needs a finished bachelor\'s degree first.', th:'ปริญญาโทต้องจบปริญญาตรีก่อน'},
@@ -1007,16 +1121,18 @@ Object.assign(QUIZ_UI, {
     spouseC:{en:'Choose a master\'s of 16 months or longer so your spouse can apply for a work permit.', th:'เลือกปริญญาโทที่ยาว 16 เดือนขึ้นไป คู่สมรสจึงจะขอใบอนุญาตทำงานได้'}
   }
 });
-/* quiz option to Budget program type */
-const QTYPE = {a:'private', b:'public', c:'masters'};
+/* quiz option to Budget program type, and the program length an option is advised with (B: 2 years for the full PGWP) */
+const QTYPE = {a:'private', b:'public', c:'masters'}, QYEARS = {b:2};
 /* What in the answers blocks (lv 'block') or needs checking (lv 'check') on path k. Budget uses the live savings goal. */
 function quizNeeds(k){
   const A = S.quiz, N = QUIZ_UI.need, out = [], add = (lv, t) => out.push({lv, t});
   const r = S.sim.rate || 24, bandMax = [900000, 1300000, Infinity], bandMin = [0, 900000, 1300000];
   if (A.budget != null) {
-    const g = typeCalc(QTYPE[k]).total * r, band = T(QUIZ.find(q => q.id === 'budget').o[A.budget].l);
-    if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget])));
-    else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band));
+    /* option B is advised as a 2-year program, so its goal is worked out for 2 years */
+    const yrs = QYEARS[k] || S.sim.years || 1, g = typeCalc(QTYPE[k], QYEARS[k] ? {years:QYEARS[k]} : null).total * r;
+    const band = T(QUIZ.find(q => q.id === 'budget').o[A.budget].l), y = T(MONEY.yrs)(yrs);
+    if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget]), y));
+    else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band, y));
   }
   if (k !== 'a') { if (A.english === 0) add('block', T(N.en0)); else if (A.english === 1) add('check', T(N.en1)); }
   if (k === 'c') { if (A.edu === 0) add('block', T(N.noDegC)); else if (A.edu === 1) add('block', T(N.gpaLowC)); else if (A.edu === 2) add('check', T(N.gpaMidC)); }
@@ -1558,7 +1674,6 @@ const SIM_UI = {
   projNote:{en:y => `Amounts are estimated for a ${y} start.`, th:y => `ตัวเลขเป็นค่าประมาณสำหรับการเริ่มเรียนปี ${y}`},
   lTuition:{en:'Tuition', th:'ค่าเล่าเรียน'}, lProof:{en:'IRCC living-cost minimum', th:'ค่าครองชีพขั้นต่ำของ IRCC'},
   lSetup:{en:'Setup reserve: flight, rent deposit, first purchases', th:'เงินสำรองตั้งตัว: ตั๋ว เงินประกันห้อง ของใช้ช่วงแรก'},
-  lExtra:{en:'Extra money needed during the program', th:'เงินที่ต้องหาเพิ่มระหว่างหลักสูตร'},
   study:{en:'Study term', th:'เทอมเรียน'}, coop:{en:'Co-op term', th:'เทอม Co-op'}, brk:{en:'Break or after graduation', th:'ปิดเทอมหรือหลังเรียนจบ'},
   ftBoth:{en:'Co-op and breaks', th:'Co-op และปิดเทอม'},
   tlT:{en:'Your program, month by month', th:'หลักสูตรของคุณ เดือนต่อเดือน'},
@@ -1632,10 +1747,10 @@ Object.assign(SIM_UI, {
   lShow:MONEY.show,
   lSetup:{en:'Setup reserve: rent deposit, first purchases', th:'เงินสำรองตั้งตัว: เงินประกันห้อง ของใช้ช่วงแรก'},
   lReady:MONEY.goal,
-  sameNote:{en:'The All Costs page shows the same three amounts and the same savings goal. Prep and visa costs come from sections 1 and 2 on that page, where you can type what you really paid.', th:'หน้าค่าใช้จ่ายแสดงเงิน 3 ก้อนและเป้าเงินเก็บชุดเดียวกันนี้ ค่าเตรียมตัวและยื่นวีซ่ามาจากหมวด 1 ถึง 2 ในหน้านั้น และใส่ยอดที่จ่ายจริงได้'},
+  sameNote:{en:'The All Costs page shows the same amounts and the same savings goal. Prep and visa costs come from sections 1 and 2 on that page, where you can type what you really paid.', th:'หน้าค่าใช้จ่ายแสดงเงินแต่ละก้อนและเป้าเงินเก็บชุดเดียวกันนี้ ค่าเตรียมตัวและยื่นวีซ่ามาจากหมวด 1 ถึง 2 ในหน้านั้น และใส่ยอดที่จ่ายจริงได้'},
   lTravelSetup:{en:'Travel and setup', th:'ค่าเดินทางและตั้งตัว'},
   health:{en:'Health insurance', th:'ประกันสุขภาพ'},
-  showNote:{en:'The one number to save toward: prep and visa costs, the money to show IRCC, and a setup reserve, added together. The list below shows each part. [[funds]]', th:'ตัวเลขเดียวที่ควรเก็บให้ถึง คือค่าเตรียมตัวและยื่นวีซ่า เงินที่ต้องแสดงต่อ IRCC และเงินสำรองตั้งตัว รวมกัน รายการด้านล่างแสดงแต่ละส่วน [[funds]]'},
+  showNote:{en:'The one number to save toward: prep and visa costs, the money to show IRCC, a setup reserve, and any extra money the plan runs short of during the program, added together. The list below shows each part. [[funds]]', th:'ตัวเลขเดียวที่ควรเก็บให้ถึง คือค่าเตรียมตัวและยื่นวีซ่า เงินที่ต้องแสดงต่อ IRCC เงินสำรองตั้งตัว และเงินเพิ่มระหว่างหลักสูตรถ้าแผนขาดเงิน รวมกัน รายการด้านล่างแสดงแต่ละส่วน [[funds]]'},
   brk:{en:'Scheduled break', th:'ปิดเทอมตามตาราง'}, brkS:{en:'Break', th:'ปิดเทอม'},
   grad:{en:'After graduation (while waiting for a PGWP)', th:'หลังเรียนจบ (ระหว่างรอผล PGWP)'}, gradS:{en:'After graduation', th:'หลังเรียนจบ'},
   pgwpQ:{en:'After graduation, will you apply for a PGWP before your study permit expires?', th:'หลังเรียนจบ จะยื่นขอ PGWP ก่อน Study Permit หมดอายุไหม'},
@@ -1996,8 +2111,8 @@ const GLOSS = [
    th:'เงินที่ควรเตรียมไว้ใช้ช่วงแรกที่ไปถึง เช่น เงินประกันห้อง ของใช้ในบ้าน และเสื้อกันหนาว แอปตั้งไว้ CAD 2,000 แก้เองได้ในหน้างบ',
    en:'Money for your first weeks: a rent deposit, household items and winter clothes. The app uses CAD 2,000; you can change it in the simulator.'},
   {k:MONEY.goal, c:'money', m:['เป้าเงินเก็บทั้งหมด','Total savings goal','total savings goal'],
-   th:'ตัวเลขเดียวที่ควรเก็บเงินให้ถึง คือเงิน 3 ก้อนรวมกัน: ค่าเตรียมตัวและยื่นวีซ่า เงินที่ต้องแสดง และเงินสำรองตั้งตัว หน้างบและหน้าค่าใช้จ่ายแสดงยอดเดียวกัน',
-   en:'The one number to save toward: three amounts added together, prep and visa costs, the money to show, and the setup reserve. The Budget and All Costs pages show the same figure.'},
+   th:'ตัวเลขเดียวที่ควรเก็บเงินให้ถึง คือค่าเตรียมตัวและยื่นวีซ่า เงินที่ต้องแสดง เงินสำรองตั้งตัว และเงินเพิ่มระหว่างหลักสูตรถ้าแผนขาดเงิน (เช่น ค่าเล่าเรียนปีที่ 2) รวมกัน หน้างบและหน้าค่าใช้จ่ายแสดงยอดเดียวกัน',
+   en:'The one number to save toward: prep and visa costs, the money to show, the setup reserve, and any extra money the plan runs short of during the program (such as second-year tuition), added together. The Budget and All Costs pages show the same figure.'},
   {k:MONEY.prep, c:'money', m:['ค่าเตรียมตัวและยื่นวีซ่า','Prep and visa costs','prep and visa costs'],
    th:'ค่าสอบภาษา เอกสาร ค่าสมัครเรียน ค่า Study Permit ค่า Biometrics และค่าตรวจสุขภาพ ที่จ่ายที่ไทยก่อนยื่นวีซ่า (หมวด 1 ถึง 2 ในหน้าค่าใช้จ่าย) เป็นเงินแยกจากเงินที่ต้องแสดง',
    en:'Language test, documents, school application, study permit, biometrics and medical exam, paid in Thailand before you apply (sections 1 and 2 on the All Costs page). Separate from the money to show.'},
@@ -2077,6 +2192,7 @@ const GLOSS_UI = {
   searchL:{en:'Search terms', th:'ค้นหาคำศัพท์'},
   found:{en:n => `${n} found, best match first. Part of a word, letters in order, a small typo, or * and ? all work.`, th:n => `พบ ${n} คำ เรียงจากที่ตรงที่สุด พิมพ์บางส่วนของคำ ตัวอักษรเรียงกัน สะกดผิดเล็กน้อย หรือใช้ * และ ? ก็ได้`},
   all:{en:'All', th:'ทั้งหมด'}, none:{en:'No term matches. Try another word.', th:'ไม่พบคำที่ค้นหา ลองคำอื่น'},
+  clear:{en:'Clear search', th:'ล้างคำค้นหา'}, allCats:{en:n => `Search all groups (${n} found)`, th:n => `ค้นในทุกหมวด (พบ ${n} คำ)`},
   open:{en:'All terms', th:'คำศัพท์ทั้งหมด'}, close:{en:'Close', th:'ปิด'},
   official:{en:'Official page', th:'หน้าเว็บทางการ'},
   seeAll:{en:n => `See all ${n} terms`, th:n => `ดูคำศัพท์ทั้งหมด ${n} คำ`},
@@ -2204,7 +2320,7 @@ SIM_UI.gloss = [
 ];
 
 const READY_UI = {
-  h1:{en:'Test the waters in Canada, then decide how far to go.', th:'ลองใช้ชีวิตที่แคนาดาก่อน แล้วค่อยตัดสินใจว่าจะไปไกลแค่ไหน'},
+  h1:{en:'Test the waters in Canada, then decide how far to go.', th:'ลองใช้ชีวิตที่แคนาดาก่อน แล้วค่อย<span class="whitespace-nowrap">ตัดสินใจ</span>ว่าจะไปไกลแค่ไหน'},
   lead:{en:'An interactive guide for Thai professionals: compare private Co-op, public college Co-op and a master\'s degree, pick a field that still leads to PR, and check the budget before you commit.', th:'คู่มือแบบอินเทอร์แอกทีฟสำหรับคนทำงานชาวไทย: เปรียบเทียบ Co-op เอกชน Co-op วิทยาลัยรัฐ และปริญญาโท เลือกสาขาที่ยังต่อยอดสู่ PR ได้ และตรวจงบประมาณก่อนตัดสินใจ'},
   cmp:{en:'Three ways to study and work in Canada', th:'สามเส้นทางเรียนและทำงานในแคนาดา'},
   cmpSub:{en:'They look similar in brochures. For immigration they are very different.', th:'ในโบรชัวร์ดูคล้ายกัน แต่ในแง่การย้ายถิ่นฐานต่างกันมาก'},
@@ -2218,7 +2334,7 @@ const START = {
   openCk:{en:'Open the Checklist', th:'เปิดเช็กลิสต์'},
   seeCk:{en:n => `See in the Checklist: ${n}`, th:n => `ดูในเช็กลิสต์: ${n}`},
   itemN:{en:(a, b) => b > a ? `items ${a} to ${b}` : `item ${a}`, th:(a, b) => b > a ? `ข้อ ${a} ถึง ${b}` : `ข้อ ${a}`},
-  planCk:{en:'Set your intake in the Checklist planner', th:'ตั้งรอบเปิดเรียนในตัววางแผนของเช็กลิสต์'},
+  planCk:{en:'Set your intake in the Checklist planner', th:'ตั้งรอบเปิดเรียนในตัววางแผนของ<span class="whitespace-nowrap">เช็กลิสต์</span>'},
   ckDone:{en:'Done in the Checklist', th:'ทำแล้วในเช็กลิสต์'},
   ckPart:{en:(d, n) => `${d} of ${n} done in the Checklist`, th:(d, n) => `ทำแล้ว ${d} จาก ${n} ข้อในเช็กลิสต์`},
   /* which Checklist items each step covers; steps 10 to 12 happen in Canada and keep their official link here */
@@ -2253,7 +2369,9 @@ const START = {
         
         {en:'Private Co-op colleges often accept their own online placement test instead.', th:'วิทยาลัย Co-op เอกชนมักใช้ข้อสอบวัดระดับออนไลน์ของสถาบันเองแทนได้'},
         
-        {en:'Allow 2 to 3 months of preparation and time for one retake.', th:'เผื่อเวลาเตรียมตัว 2 ถึง 3 เดือน และเผื่อสอบซ้ำ 1 ครั้ง'}],
+        {en:'Allow 2 to 3 months of preparation and time for one retake.', th:'เผื่อเวลาเตรียมตัว 2 ถึง 3 เดือน และเผื่อสอบซ้ำ 1 ครั้ง'},
+
+        {en:'This score is for getting into school. The PGWP and PR later need a different test (IELTS General Training, CELPIP or PTE Core), so plan and budget for a second test.', th:'คะแนนนี้ใช้สมัครเรียน ส่วน PGWP และ PR ภายหลังต้องใช้ข้อสอบอีกแบบ (IELTS General Training, CELPIP หรือ PTE Core) จึงควรวางแผนและเผื่อเงินสอบครั้งที่ 2'}],
      c:() => T({en:'See current prices in the English test list', th:'ดูราคาปัจจุบันในรายการสอบภาษาอังกฤษ'}), go:{tab:'prep', anchor:'tests', l:{en:'Test prices and booking', th:'ราคาและลิงก์จองสอบ'}}},
     {id:'s4', icon:'graduation-cap', m:{en:'10 to 12 months', th:'10 ถึง 12 เดือน'}, t:{en:'Choose the school and program', th:'เลือกสถาบันและหลักสูตร'},
      d:[{en:'Shortlist 3 to 5 programs from the Fields tab.', th:'คัดหลักสูตร 3 ถึง 5 แห่งจากแท็บสาขาเรียน'},
@@ -2902,7 +3020,7 @@ const COSTS = {
   item:{en:'Item', th:'รายการ'}, off:{en:'Official fee', th:'ค่าธรรมเนียมทางการ'}, est:{en:'Estimate', th:'ค่าประมาณ'}, free:{en:'Free by rule', th:'ไม่มีค่าใช้จ่ายตามกฎ'},
   sub:{en:'Subtotal', th:'รวมย่อย'}, verify:{en:'Verify', th:'ตรวจสอบ'},
   ownIncl:{en:'Uses the amounts you typed where you have them.', th:'ใช้ยอดที่คุณใส่เองในรายการที่ใส่ไว้'},
-  sameNote:{en:'The same three amounts and savings goal as the Budget page; the money to show and the setup reserve follow your simulator settings.', th:'เงิน 3 ก้อนและเป้าเงินเก็บชุดเดียวกับหน้างบ เงินที่ต้องแสดงและเงินสำรองตั้งตัวเปลี่ยนตามค่าที่ตั้งในเครื่องจำลอง'},
+  sameNote:{en:'The same amounts and savings goal as the Budget page; everything except prep and visa costs follows your simulator settings.', th:'เงินแต่ละก้อนและเป้าเงินเก็บชุดเดียวกับหน้างบ ทุกก้อนยกเว้นค่าเตรียมตัวและยื่นวีซ่าเปลี่ยนตามค่าที่ตั้งในเครื่องจำลอง'},
   secPrep:{en:'Counted in prep and visa costs', th:'นับอยู่ในค่าเตรียมตัวและยื่นวีซ่า'},
   secPaid:{en:'Paid from the money to show and the setup reserve, so not counted again', th:'จ่ายจากเงินที่ต้องแสดงและเงินสำรองตั้งตัว จึงไม่นับซ้ำ'},
   secLater:{en:'Later costs, not part of the savings goal', th:'ค่าใช้จ่ายภายหลัง ไม่รวมในเป้าเงินเก็บ'},
@@ -3019,11 +3137,11 @@ function viewStart(){
 
         <div class="flex flex-wrap items-center gap-2"><span class="badge b-blue">${ic('clock','icon-sm')}${T(s.m)}${i<9?' '+T(A.before):''}</span>${st && st.d ? `<span class="badge ${st.all ? 'b-green' : 'b-gray'}">${ic(st.all ? 'circle-check' : 'circle-dashed','icon-sm')}${st.all ? T(A.ckDone) : T(A.ckPart)(st.d, st.n)}</span>` : ''}</div>
         
-        <h2 class="text-[18px] font-semibold mt-3 flex items-start gap-2"><span style="color:var(--blue);margin-top:4px">${ic(s.icon)}</span><span>${T(s.t)}</span></h2>
+        <h2 class="text-[17px] font-semibold mt-3 flex items-start gap-2"><span style="color:var(--blue);margin-top:4px">${ic(s.icon)}</span><span>${T(s.t)}</span></h2>
         
         <ul class="clean mt-2">${s.d.map(x => `<li><span style="color:var(--ink3)">${ic('chevron-right','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
         
-        <div class="mt-3 text-[14.5px] flex gap-2" style="background:var(--bg);border-radius:8px;padding:8px 12px"><span style="color:var(--green)">${ic('banknote','icon-sm')}</span><span><strong>${T(A.cost)}:</strong> <span class="num">${T(s.c)}</span></span></div>
+        <div class="mt-3 text-[15px] flex gap-2" style="background:var(--bg);border-radius:8px;padding:8px 12px"><span style="color:var(--green)">${ic('banknote','icon-sm')}</span><span><strong>${T(A.cost)}:</strong> <span class="num">${T(s.c)}</span></span></div>
         
         <div class="flex flex-wrap gap-2 mt-3">
         
@@ -3059,9 +3177,9 @@ function viewStart(){
       <div class="card">${liveCard()}</div>
       <div class="card">
         
-        <h2 class="text-[18px] font-semibold mb-1">${T(A.glossT)}</h2>
+        <h2 class="text-[17px] font-semibold mb-1">${T(A.glossT)}</h2>
 
-        ${['DLI','LOA','PAL','Study Permit','Co-op','PGWP','SIN','PR'].map(k => GLOSS.find(e => e.k === k)).filter(Boolean).map(e => `<div class="py-2" style="border-top:1px solid var(--line)"><div class="font-semibold text-[14.5px]">${esc(gk(e))}${e.f ? ` <span class="faint font-normal text-[12.5px]">${esc(e.f)}</span>` : ''}</div><div class="muted text-[14px]">${esc(gtxt(e))}</div></div>`).join('')}
+        ${['DLI','LOA','PAL','Study Permit','Co-op','PGWP','SIN','PR'].map(k => GLOSS.find(e => e.k === k)).filter(Boolean).map(e => `<div class="py-2" style="border-top:1px solid var(--line)"><div class="font-semibold text-[15px]">${esc(gk(e))}${e.f ? ` <span class="faint font-normal text-[12.5px]">${esc(e.f)}</span>` : ''}</div><div class="muted text-[14px]">${esc(gtxt(e))}</div></div>`).join('')}
         <button class="btn btn-ghost mt-2" style="font-size:14px" data-act="gloss-open">${ic('book-search','icon-sm')}${T(GLOSS_UI.seeAll)(GLOSS.length)}</button>
       </div>
       </div>
@@ -3086,7 +3204,7 @@ function prepCost(){
 }
 /* The money ladder as a thin proportion strip: prep, money to show, setup reserve, always in that order and colour. */
 function ladderBar(c){
-  const parts = [[MONEY.prep, c.prep, 's1'], [MONEY.show, c.show, 's2'], [MONEY.setup, c.setup, 's3']], tot = c.total || 1;
+  const parts = [[MONEY.prep, c.prep, 's1'], [MONEY.show, c.show, 's2'], [MONEY.setup, c.setup, 's3']].concat(c.extra > 0 ? [[MONEY.extra, c.extra, 's4']] : []), tot = c.total || 1;
   return `<div class="lbar" role="img" aria-label="${esc(parts.map(p => T(p[0]) + ' ' + Math.round(p[1] / tot * 100) + '%').join(', '))}">${parts.map(p => `<div class="${p[2]}" style="flex:${Math.max(p[1], 0)}"></div>`).join('')}</div>`;
 }
 function costCell(it){
@@ -3187,20 +3305,22 @@ function viewCosts(){
           <div class="text-[28px] font-bold num">${thb(c.total * r)}</div>
           <div class="muted num">${cad(c.total)}</div>
         </div>
-        <p class="gbasis">${ic('sliders-horizontal','icon-sm')}<span>${T(MONEY.basisL)}: ${goalBasis(c, true)}</span><button class="linkbtn" data-act="tab" data-v="budget">${T(MONEY.change)}</button></p>
+        <p class="gbasis">${ic('sliders-horizontal','icon-sm')}<span>${T(MONEY.basisL)}: ${goalBasis(c, true)}</span><button class="linkbtn" data-act="tab" data-v="budget">${T(MONEY.change)}</button>${cityRentNote(c)}</p>
+        ${(hi => hi ? `<p class="text-[14px] font-semibold mt-1 ${hi.ok ? 'pos' : ''}">${hi.text}</p>` : '')(haveInfo(c))}
         <p class="faint text-[13px] mt-1">${T(MONEY.goalN)}</p>
         ${ladderBar(c)}
         <div class="mt-2">
           ${lrow('s1', MONEY.prep, prepNote, c.prep)}
           ${lrow('s2', MONEY.show, showNote, c.show)}
           ${lrow('s3', MONEY.setup, T(MONEY.setupN), c.setup)}
+          ${c.extra > 0 ? lrow('s4', MONEY.extra, T(MONEY.extraN)(c.runOut || c.low.m, c.N > 12), c.extra) : ''}
         </div>
         <p class="faint text-[13px] mt-3 flex gap-2"><span style="margin-top:2px">${ic('link','icon-sm')}</span><span>${T(C.sameNote)}</span></p>
         <button class="btn btn-ghost mt-1" style="padding:4px 8px;font-size:14px" data-act="tab" data-v="budget">${T(C.open)}${ic('arrow-right','icon-sm')}</button>
       </div>
     </div>
     <div class="flex flex-wrap items-end justify-between gap-3 mt-8" id="cost-items">
-      <div style="max-width:64ch"><h2 class="text-[22px] font-semibold">${T(C.itemsT)}</h2><p class="muted text-[14.5px] mt-1">${T(COST_EDIT ? C.editHint : C.itemsSub)}</p></div>
+      <div style="max-width:64ch"><h2 class="text-[24px] font-semibold">${T(C.itemsT)}</h2><p class="muted text-[15px] mt-1">${T(COST_EDIT ? C.editHint : C.itemsSub)}</p></div>
       <div class="flex flex-wrap gap-2">
         ${anyOwn ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:14px" data-act="costreset">${ic('rotate-ccw','icon-sm')}${T(C.resetOwn)}</button>` : ''}
         <button class="btn ${COST_EDIT ? 'btn-primary' : 'btn-ghost'}" style="padding:4px 12px;font-size:14px" data-act="costedit" aria-pressed="${COST_EDIT}">${ic(COST_EDIT ? 'check' : 'pencil','icon-sm')}${T(COST_EDIT ? M.editDone : M.editL)}</button>
@@ -3225,7 +3345,7 @@ function viewReady(){
         
         <div class="min-w-0">
         
-          <h3 class="text-[19px] font-semibold">${T(o.t)}</h3>
+          <h3 class="text-[17px] font-semibold">${T(o.t)}</h3>
         
           <div class="flex flex-wrap items-center gap-2 mt-2">
         
@@ -3254,16 +3374,33 @@ function viewReady(){
   return `
     <section class="mb-10 sm:mb-14" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(R.h1)}</h1>
-      <p class="muted text-[17px] sm:text-[19px] mt-4" style="max-width:62ch">${T(R.lead)}</p>
+      <p class="muted text-[17px] mt-4" style="max-width:62ch">${T(R.lead)}</p>
     </section>
+    ${quizEntry()}
     <section class="grid md:grid-cols-3 gap-4 mb-12">${phases}</section>
     <section class="mb-12">
-      <h2 class="text-[26px] font-semibold">${T(R.cmp)}</h2>
+      <h2 class="text-[24px] font-semibold">${T(R.cmp)}</h2>
       <p class="muted mt-1 mb-5">${T(R.cmpSub)}</p>
       <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">${opts}</div>
       <div class="card mt-4" id="masters">${viewPrograms()}</div>
     </section>
-    <section id="quiz">${viewQuiz()}</section>`;
+    <section id="quiz" tabindex="-1">${viewQuiz()}</section>`;
+}
+/* Ready opens with the way in to the quiz (it sat about 6,000px down on a phone), or the result once it is done. */
+const QENTRY = {
+  t:{en:'Not sure which option fits you? Take the 10-question self-assessment', th:'ยังไม่แน่ใจว่าทางไหนเหมาะ? ทำแบบประเมิน 10 ข้อ'},
+  d:{en:'It takes a few minutes and gives a recommendation with the reasons, what still blocks it, and the savings goal for that option.', th:'ใช้เวลาไม่กี่นาที ได้คำแนะนำพร้อมเหตุผล ข้อที่ยังขวาง และเป้าเงินเก็บของทางนั้น'},
+  go:{en:'Start the self-assessment', th:'เริ่มทำแบบประเมิน'},
+  part:{en:(n, t) => `You have answered ${n} of ${t}.`, th:(n, t) => `ตอบไปแล้ว ${n} จาก ${t} ข้อ`}, cont:{en:'Continue', th:'ทำต่อ'},
+  done:{en:'Your result', th:'ผลของคุณ'}, see:{en:'See the result', th:'ดูผล'}
+};
+function quizEntry(){
+  const Q = QENTRY, r = quizScore(), NM = {a:QUIZ_UI.nA, b:QUIZ_UI.nB, c:QUIZ_UI.nC};
+  const body = r.done ? `<div class="flex-1 min-w-0"><div class="muted text-[14px]">${T(Q.done)}</div><h2 class="text-[17px] font-semibold">${T(NM[r.rank[0]])}</h2></div>
+      <button class="btn btn-primary" data-act="jump" data-v="quiz-result">${T(Q.see)}${ic('arrow-down','icon-sm')}</button>`
+    : `<div class="flex-1 min-w-0" style="flex-basis:260px"><h2 class="text-[17px] font-semibold">${T(Q.t)}</h2><p class="muted text-[15px] mt-1">${r.n ? T(Q.part)(r.n, QUIZ.length) + ' ' : ''}${T(Q.d)}</p></div>
+      <button class="btn btn-primary" data-act="jump" data-v="quiz">${T(r.n ? Q.cont : Q.go)}${ic('arrow-down','icon-sm')}</button>`;
+  return `<section class="card mb-10 flex flex-wrap items-center gap-4"><span class="tile" style="background:var(--blue-soft);color:var(--blue)">${ic('list-checks')}</span>${body}</section>`;
 }
 
 function quizScore(){
@@ -3299,14 +3436,14 @@ function viewQuiz(){
     const strip = s => String(s).replace(/\s*\[\[[^\]]+\]\]/g, '').replace(/ (บาท|THB)\b/g, ' $1');
     side = `<div class="hidden lg:block">
         <div class="text-[13.5px] muted">${T(Q.doneS)}</div>
-        <div class="font-semibold text-[15.5px] mt-0.5">${T(NM[k1])}</div>
+        <div class="font-semibold text-[15px] mt-0.5">${T(NM[k1])}</div>
         <button class="btn btn-ghost mt-3" style="padding:4px 12px;font-size:14px" data-act="jump" data-v="quiz-result">${T(Q.seeRes)}${ic('arrow-down','icon-sm')}</button>
       </div>`;
     /* fit bars: one neutral colour, the leader in the first data colour and labelled, so colour is not the only cue */
     const bars = ['a', 'b', 'c'].map(k => { const lead = k === k1; return `<div class="flex flex-col justify-between"><div class="flex justify-between items-baseline gap-2 text-[14px] mb-1"><span class="${lead ? 'font-semibold' : ''}">${T(NM[k])}${lead ? ` <span class="badge b-blue">${T(Q.bestB)}</span>` : ''}</span><span class="num font-semibold">${r.pct[k]}%</span></div><div class="bar"><i class="${lead ? 'fit-lead' : 'fit-n'}" style="width:${r.pct[k]}%"></i></div></div>`; }).join('');
     res = `
     <section class="card mt-4" id="quiz-result" aria-labelledby="quiz-res-h">
-      <h3 id="quiz-res-h" tabindex="-1" class="text-[22px] font-semibold">${blocks ? T(Q.fitsIf)(T(NM[k1])) : T(rec.t)}</h3>
+      <h3 id="quiz-res-h" tabindex="-1" class="text-[20px] font-semibold">${blocks ? T(Q.fitsIf)(T(NM[k1])) : T(rec.t)}</h3>
       <p class="qlead qlead-${lvl}" style="max-width:72ch">${ic(lvl === 'clear' ? 'circle-check' : 'scale','icon-sm')}<span>${T(Q.lead[lvl])(T(NM[k2]), gap, r.pct[k1], r.pct[k2])}</span></p>
       <p class="muted mt-3 text-[15px]" style="max-width:72ch">${T(rec.d)}</p>
       <div class="grid md:grid-cols-2 gap-x-8">
@@ -3317,16 +3454,16 @@ function viewQuiz(){
         </div>
       </div>
       <div class="qsec"><h4>${T(Q.fitT)}</h4><div class="grid sm:grid-cols-3 gap-x-6 gap-y-3">${bars}</div></div>
-      ${r.city ? `<p class="mt-5 text-[14.5px] flex gap-2"><span style="color:var(--blue)">${ic('map-pin','icon-sm')}</span><span>${T(Q.city[r.city])}</span></p>` : ''}
+      ${r.city ? `<p class="mt-5 text-[15px] flex gap-2"><span style="color:var(--blue)">${ic('map-pin','icon-sm')}</span><span>${T(Q.city[r.city])}</span></p>` : ''}
       <div class="flex flex-wrap gap-2 mt-5">
         <button class="btn btn-primary" data-act="goroad" data-v="${sc}">${T(Q.go)}${ic('arrow-right','icon-sm')}</button>
-        <button class="btn btn-ghost" data-act="quiztype" data-v="${QTYPE[k1]}">${ic('calculator','icon-sm')}${T(Q.useBudget)}</button>
+        <button class="btn btn-ghost" data-act="quiztype" data-v="${QTYPE[k1]}" ${QYEARS[k1] ? `data-years="${QYEARS[k1]}"` : ''}>${ic('calculator','icon-sm')}${T(QYEARS[k1] ? Q.useBudgetY : Q.useBudget)}</button>
       </div>
     </section>`;
   }
   return `
     <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
-      <div><h2 class="text-[26px] font-semibold">${T(Q.title)}</h2><p class="muted mt-1">${T(Q.sub)}</p></div>
+      <div><h2 class="text-[24px] font-semibold">${T(Q.title)}</h2><p class="muted mt-1">${T(Q.sub)}</p></div>
       <button class="btn btn-ghost" data-act="quizreset">${ic('rotate-ccw','icon-sm')}${T(Q.reset)}</button>
     </div>
     <div class="grid lg:grid-cols-3 gap-4 items-start">
@@ -3348,13 +3485,17 @@ function fieldProgs(f){
 }
 function viewFields(){
   const F = FIELD_UI;
-  if (!FILTERS.some(x => x.id === S.filter)) S.filter = 'all';
-  const match = f => S.filter==='all' || f.g===S.filter || (S.filter==='pgwp' && f.pg==='yes') || (S.filter==='cat' && f.cat) || (S.filter==='warn' && (f.warn || f.pg==='no'));
+  /* two filters (26 Nov 2026): the group, and a status ("show only"); a status saved in the old single filter moves over */
+  if (['pgwp','cat','warn'].includes(S.filter)) { S.fstat = S.filter; S.filter = 'all'; }
+  if (S.filter !== 'all' && !GROUPS.some(g => g.id === S.filter)) S.filter = 'all';
+  if (S.fstat && !['pgwp','cat','warn'].includes(S.fstat)) S.fstat = null;
+  const stat = f => !S.fstat || (S.fstat==='pgwp' && f.pg==='yes') || (S.fstat==='cat' && f.cat) || (S.fstat==='warn' && (f.warn || f.pg==='no'));
+  const match = f => (S.filter==='all' || f.g===S.filter) && stat(f);
   const list = FIELDS.filter(match);
   const card = f => {
     const pg = PG[f.pg], tint = f.warn ? 'red' : 'blue';
     const nocs = f.noc.length ? f.noc.map(c => `<a class="noc" href="${nocUrl(c)}" target="_blank" rel="noopener noreferrer"><b>${c}</b><span>${T(NOCT[c])}</span><i>TEER ${c[1]}</i></a>`).join('')
-      : `<p class="text-[14.5px] muted">${T(F.nocNone)} [[noc]]</p>`;
+      : `<p class="text-[15px] muted">${T(F.nocNone)} [[noc]]</p>`;
     return `
     <details class="card fcard" ${S.open && S.open[f.id] ? 'open' : ''} data-field="${f.id}">
       <summary class="flex items-start gap-3">
@@ -3363,7 +3504,7 @@ function viewFields(){
         
         <div class="flex-1 min-w-0">
         
-          <h3 class="text-[17.5px] font-semibold">${T(f.t)}</h3>
+          <h3 class="text-[17px] font-semibold">${T(f.t)}</h3>
         
           <div class="flex flex-wrap gap-2 mt-2">
         
@@ -3379,7 +3520,7 @@ function viewFields(){
       </summary>
       <div class="flex flex-col gap-4 mt-4">
         
-        ${f.alert?`<div class="text-[14.5px] flex gap-2" style="background:var(--red-soft);color:var(--red);border-radius:8px;padding:10px 12px">${ic('octagon-alert','icon-sm')}<span>${T(f.alert)}</span></div>`:''}
+        ${f.alert?`<div class="text-[15px] flex gap-2" style="background:var(--red-soft);color:var(--red);border-radius:8px;padding:10px 12px">${ic('octagon-alert','icon-sm')}<span>${T(f.alert)}</span></div>`:''}
         
         <div><div class="eyebrow">${T(F.why)}</div><p class="text-[15px] mt-1">${T(f.why)}</p></div>
         
@@ -3411,7 +3552,13 @@ function viewFields(){
       <p class="muted mt-3 text-[17px]"><span class="num">${FIELDS.length}</span> ${T(F.sub)}</p>
       <p class="faint text-[13.5px] mt-2 flex gap-2">${ic('badge-check','icon-sm')}<span>${T(F.checked)}</span></p>
     </section>
-    <div class="seg mb-3" role="group" aria-label="${esc(T({en:'Filter fields', th:'กรองสาขา'}))}">${FILTERS.map(x => `<button class="${S.filter===x.id?'on':''}" data-act="filter" data-v="${x.id}">${T(x.l)}</button>`).join('')}</div>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3">
+      <label class="flex items-center gap-2 text-[14px] font-medium">${T({en:'Group', th:'หมวด'})}
+        <span class="sel-wrap"><select class="sel" data-sel="field-g">${FILTERS.filter(x => !['pgwp','cat','warn'].includes(x.id)).map(x => `<option value="${x.id}" ${S.filter === x.id ? 'selected' : ''}>${T(x.l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
+      <label class="flex items-center gap-2 text-[14px] font-medium">${T({en:'Show only', th:'แสดงเฉพาะ'})}
+        <span class="sel-wrap"><select class="sel" data-sel="field-s"><option value="none" ${!S.fstat ? 'selected' : ''}>${T({en:'Everything', th:'ทั้งหมด'})}</option>${FILTERS.filter(x => ['pgwp','cat','warn'].includes(x.id)).map(x => `<option value="${x.id}" ${S.fstat === x.id ? 'selected' : ''}>${T(x.l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
+      <span class="faint text-[13.5px] num" aria-live="polite">${T({en:n => `${n} fields`, th:n => `${n} สาขา`})(list.length)}</span>
+    </div>
     <p class="text-[14px] muted mb-2 flex gap-2">${ic('graduation-cap','icon-sm')}<span>${T(F.degree)}</span></p>
     <div class="mb-8">${body || `<p class="muted mt-6">${T(F.none)}</p>`}</div>
     <div class="card">
@@ -3422,8 +3569,9 @@ function viewFields(){
 
 /* Start year picker shared by the Budget and Roadmap pages, and a caution when the start year is far away. */
 function yearSeg(){
+  /* a pop-up menu: seven year buttons wrapped into two rows on every screen (26 Nov 2026) */
   const Y = S.sim.intake || 2027;
-  return `<div class="seg" role="group" aria-label="${esc(T(SIM_UI.intakeQ))}">${SIMC.intakes.map(y => `<button class="${Y === y ? 'on' : ''}" aria-pressed="${Y === y}" data-act="sim-intake" data-v="${y}">${y}</button>`).join('')}</div>`;
+  return `<span class="sel-wrap"><select class="sel num" data-sel="sim-intake" aria-label="${esc(T(SIM_UI.intakeQ))}">${SIMC.intakes.map(y => `<option value="${y}" ${Y === y ? 'selected' : ''}>${y}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span>`;
 }
 function farBox(){
   const Y = S.sim.intake || 2027, n = Y - SIMC.base;
@@ -3442,7 +3590,7 @@ function viewRoad(){
         
         <span class="badge ${s.goal?'b-green':(s.risk?'b-amber':'b-gray')}">${T(s.y)}</span>
         
-        <h2 class="text-[18px] font-semibold mt-3">${T(s.t)}</h2>
+        <h2 class="text-[17px] font-semibold mt-3">${T(s.t)}</h2>
         
         <p class="muted text-[15px] mt-2">${T(s.d)}</p>
       </div>
@@ -3471,7 +3619,7 @@ function viewRoad(){
     </div>
     <section class="card mt-8" id="draws">
       <h2 class="text-[20px] font-semibold flex items-center gap-2"><span class="dot" aria-hidden="true"></span>${T(LIVE_UI.drawsT)}</h2>
-      <p class="muted text-[14.5px] mt-1 mb-3">${T(LIVE_UI.drawsSub)} [[draws]] [[eecat]]</p>
+      <p class="muted text-[15px] mt-1 mb-3">${T(LIVE_UI.drawsSub)} [[draws]] [[eecat]]</p>
       ${drawsTable()}
     </section>`;
 }
@@ -3628,7 +3776,7 @@ function progressCard(){
       <div class="mt-4 pt-4" style="border-top:1px solid var(--line)">
         <div class="flex flex-wrap items-center gap-2"><span class="text-[14px] font-medium">${T(U.intake)}</span>
           <div class="seg" role="group" aria-label="${esc(T({en:'Intake month', th:'เดือนที่เปิดเรียน'}))}">${U.months.map(([k, l]) => { const on = chosen && m === k; return `<button class="${on ? 'on' : ''}" aria-pressed="${on}" data-act="plan-m" data-v="${k}">${T(l)}</button>`; }).join('')}</div>
-          <div class="seg" role="group" aria-label="${esc(T({en:'Intake year', th:'ปีที่เปิดเรียน'}))}">${years.map(k => { const on = chosen && y === k; return `<button class="${on ? 'on' : ''}" aria-pressed="${on}" data-act="plan-y" data-v="${k}">${k}</button>`; }).join('')}</div>
+          <span class="sel-wrap"><select class="sel num" data-sel="plan-y" aria-label="${esc(T({en:'Intake year', th:'ปีที่เปิดเรียน'}))}">${chosen ? '' : `<option value="" selected disabled>${T({en:'Choose a year', th:'เลือกปี'})}</option>`}${years.map(k => `<option value="${k}" ${chosen && y === k ? 'selected' : ''}>${k}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span>
         </div>
         <p class="muted text-[13.5px] mt-2">${T(U.intakeSub)}</p>
         ${!chosen ? note('var(--blue-soft)', 'var(--blue)', 'calendar-search', T(U.notChosen)(mName, y))
@@ -3645,7 +3793,7 @@ function plannerCard(){
   const up = CHECK.items.filter(it => !S.check[it.id]).sort((a, b) => dates[a.id].date < dates[b.id].date ? -1 : 1).slice(0, 3);
   const row = (id, title, date, details, extra) => `<div class="py-2" style="border-top:1px solid var(--line)">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="min-w-0" style="flex:1 1 200px"><div class="text-[14.5px] font-medium">${esc(plainT(title))}</div>${extra || ''}</div>
+        <div class="min-w-0" style="flex:1 1 200px"><div class="text-[15px] font-medium">${esc(plainT(title))}</div>${extra || ''}</div>
         <input type="date" class="numin" style="width:150px" data-plan="${id}" value="${date}" aria-label="${esc(T(U.planned))}">
       </div>
       <div class="mt-2">${gcalControls(id)}</div></div>`;
@@ -3653,7 +3801,7 @@ function plannerCard(){
     <details class="card fcard mb-8" id="plan-cal" data-field="planCal" ${S.open && S.open.planCal ? 'open' : ''}>
       <summary class="flex items-start gap-3">
         <span style="color:var(--blue);margin-top:2px">${ic('calendar-days')}</span>
-        <span class="flex-1 min-w-0"><span class="block text-[18px] font-semibold">${T(U.moreT)}</span><span class="block muted text-[14px] mt-0.5">${T(U.moreSub)}</span></span>
+        <span class="flex-1 min-w-0"><span class="block text-[17px] font-semibold">${T(U.moreT)}</span><span class="block muted text-[14px] mt-0.5">${T(U.moreSub)}</span></span>
         <span class="chev" style="margin-top:2px">${ic('chevron-right')}</span>
       </summary>
       <div class="grid md:grid-cols-2 gap-x-8 mt-3">
@@ -3753,7 +3901,7 @@ function googleCalView(){
   const U = PLAN_UI, g = S.gcal || {}, url = gcalEmbedUrl(), btn = 'padding:4px 10px;font-size:13.5px';
   if (!url || g.editing) return `
       <div class="mt-3 p-4" style="border-radius:12px;background:var(--bg)">
-        <div class="font-semibold text-[15.5px] flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days','icon-sm')}</span>${T(U.gcSetT)}</div>
+        <div class="font-semibold text-[15px] flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-days','icon-sm')}</span>${T(U.gcSetT)}</div>
         <p class="muted text-[14px] mt-1">${T(U.gcSetSub)}</p>
         <label for="gcal-id-in" class="block text-[13.5px] font-medium mt-3">${T(U.gcLabel)}</label>
         <input id="gcal-id-in" class="gl-search" style="margin-top:6px" type="text" autocomplete="off" spellcheck="false" inputmode="email" placeholder="${esc(T(U.gcPh))}" value="${esc(g.id || '')}">
@@ -3801,7 +3949,7 @@ function appCalView(){
         <div class="flex items-start gap-2"><div class="min-w-0"><div class="eyebrow">${sel.kind === 'step' ? T(U.step) + ' ' + sel.n + ' · ' + T(CHECK.phases[sel.ph].t) : T(U.keyMs)} · ${fdateD(sel.date)}</div>
           <div class="text-[16px] font-semibold mt-0.5">${esc(sel.title)}${sel.done ? ` <span class="badge b-green">${T(U.done)}</span>` : ''}</div></div>
           <button class="tb-btn ml-auto" style="width:30px;height:30px" data-act="cal-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
-        <p class="text-[14.5px] mt-2">${sel.d}</p>
+        <p class="text-[15px] mt-2">${sel.d}</p>
         ${sel.why ? `<p class="muted text-[14px] mt-1"><strong>${T(CHECK.why)}:</strong> ${sel.why}</p>` : ''}
         <div class="mt-3">${gcalControls(sel.id)}</div>
         <div class="flex flex-wrap gap-2 mt-3">
@@ -3834,7 +3982,7 @@ function appCalView(){
         <div class="eyebrow mb-1">${day ? T(U.dayT)(fdateD(day)) : T(U.monthT)(first.toLocaleDateString(loc, {month:'long'}))}</div>
         ${list.length ? list.map(e => `<div class="cal-row" style="--c:${calColor(e.ph)}"><span class="cal-bar"></span>
             <div class="min-w-0" style="flex:1"><div class="faint text-[12.5px] num">${fdateD(e.date)}${e.kind === 'step' ? ' · ' + T(U.step) + ' ' + e.n : ''}</div>
-              <button class="linkbtn text-[14.5px] ${e.done ? 'line-through' : ''}" style="color:var(--ink);text-align:left" data-act="cal-ev" data-v="${e.key}">${esc(e.title)}</button>
+              <button class="linkbtn text-[15px] ${e.done ? 'line-through' : ''}" style="color:var(--ink);text-align:left" data-act="cal-ev" data-v="${e.key}">${esc(e.title)}</button>
               ${e.done ? ` <span class="badge b-green">${T(U.done)}</span>` : ''}${e.moved ? ` <span class="badge b-amber">${T(U.gMoved)}</span>` : ''}</div>
           </div>`).join('') : `<p class="muted text-[14px] py-2">${T(U.none)}</p>`}
       </div>` : ''}`;
@@ -3856,9 +4004,9 @@ function viewPrep(){
   const nextCard = nx ? `
     <div class="card mb-4 next-card">
       <div class="eyebrow flex items-center gap-1" style="color:var(--blue)">${ic('circle-arrow-right','icon-sm')}${T(C.next)} · <span class="num">${idx+1} / ${c.total}</span> · ${T(C.phases[nx.ph].m)}</div>
-      <h2 class="text-[22px] font-semibold mt-1">${T(nx.t)}</h2>
+      <h2 class="text-[20px] font-semibold mt-1">${T(nx.t)}</h2>
       <p class="text-[15px] mt-2">${T(nx.d)}</p>
-      <p class="muted text-[14.5px] mt-2"><strong>${T(C.why)}:</strong> ${T(nx.why)}</p>
+      <p class="muted text-[15px] mt-2"><strong>${T(C.why)}:</strong> ${T(nx.why)}</p>
       ${ckLinks(nx.id)}
       ${nx.live === 'proc' && LIVE.pt ? `<p class="mt-2"><span class="badge b-green">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(ptText(LIVE.pt.study))}</span></p>` : ''}
       <div class="flex flex-wrap gap-2 mt-4">
@@ -3873,7 +4021,7 @@ function viewPrep(){
   const list = C.phases.map((ph, pi) => {
     const its = C.items.map((it, i) => ({it, i})).filter(x => x.it.ph === pi);
     return `<div class="mb-6" id="ckph-${pi}">
-      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2"><h2 class="text-[18px] font-semibold"><span class="num muted">${pi+1}.</span> ${T(ph.t)}</h2><span class="badge b-blue">${ic('clock','icon-sm')}${T(ph.m)}</span></div>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2"><h2 class="text-[17px] font-semibold"><span class="num muted">${pi+1}.</span> ${T(ph.t)}</h2><span class="badge b-blue">${ic('clock','icon-sm')}${T(ph.m)}</span></div>
       <div class="card" style="padding:4px 18px">${its.map(({it, i}) => `
         
         <label class="check ${S.check[it.id]?'done':''} ${nx===it?'is-next':''}" id="ck-${it.id}">
@@ -3882,7 +4030,7 @@ function viewPrep(){
         
           <span class="ckn num" aria-hidden="true">${i+1}</span>
         
-          <span class="min-w-0"><span class="ct font-medium text-[15.5px]">${T(it.t)}</span>${nx===it?` <span class="badge b-blue">${T(C.next)}</span>`:''}
+          <span class="min-w-0"><span class="ct font-medium text-[15px]">${T(it.t)}</span>${nx===it?` <span class="badge b-blue">${T(C.next)}</span>`:''}
         
             <span class="block muted text-[14px] mt-0.5">${T(it.d)}</span>
         
@@ -3911,15 +4059,15 @@ function viewPrep(){
     <section class="mb-10">${list}</section>
     <section id="tests" class="mb-10">${viewTests()}</section>
     <section class="card mb-10">
-      <h3 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('languages')}</span>${T(IELTSQ.title)}</h3>
+      <h3 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('languages')}</span>${T(IELTSQ.title)}</h3>
       <p class="muted text-[15px] mt-1 mb-2">${T(IELTSQ.lead)}</p>
       <div class="grid md:grid-cols-2 gap-x-8">${IELTSQ.rows.map(r => `
         
         <div class="py-3" style="border-top:1px solid var(--line)">
         
-          <div class="flex flex-wrap items-center gap-2"><span class="font-semibold text-[15.5px]">${T(r.t)}</span><span class="badge ${r.c}">${T(r.s)}</span></div>
+          <div class="flex flex-wrap items-center gap-2"><span class="font-semibold text-[15px]">${T(r.t)}</span><span class="badge ${r.c}">${T(r.s)}</span></div>
         
-          <p class="muted text-[14.5px] mt-1">${T(r.d)}</p>
+          <p class="muted text-[15px] mt-1">${T(r.d)}</p>
         
         </div>`).join('')}</div>
       <p class="faint text-[13.5px] flex gap-2 mt-2">${ic('info','icon-sm')}<span>${T(IELTSQ.tip)}</span></p>
@@ -3967,22 +4115,23 @@ function viewTests(){
 function progTable(rows){
   const U = MASTER_UI, P = PROG_UI;
   const ext = `<span class="pl-ic" aria-hidden="true">${ic('arrow-up-right','icon-sm')}</span>`;
-  return `<div class="hscroll"><table class="ctbl prog-tbl"><thead><tr><th>${T(P.school)}</th><th>${T(U.prog)}</th><th>${T(U.len)}</th><th>Co-op</th><th style="text-align:right">${T(U.fee)}</th></tr></thead>
-    <tbody>${rows.map(m => `<tr style="cursor:default">
-      <td><a class="tlink" href="${m.home || m.url}" target="_blank" rel="noopener noreferrer"><strong>${esc(m.u)}</strong>${ext}</a><div class="faint text-[12.5px]">${esc(m.city)}</div></td>
-      <td style="white-space:normal;min-width:220px"><a class="tlink" href="${m.url}" target="_blank" rel="noopener noreferrer">${esc(m.p)}${ext}</a>${m.note ? `<div class="faint text-[12.5px] mt-0.5">${T(m.note)}</div>` : ''}</td>
-      <td>${T(m.len)}</td>
-      <td>${m.coop ? `<span class="badge b-green">${T(m.coopL || U.yes)}</span>` : `<span class="badge b-gray">${T(U.no)}</span>`}</td>
-      <td style="text-align:right">${m.fee ? (m.est ? '≈ ' : '') + 'CAD ' + fmt(m.fee) + `<div class="faint text-[12.5px]">${m.feeNote ? T(m.feeNote) : thb(m.fee * S.sim.rate)}</div>` : (m.feeNote ? T(m.feeNote) : `<span class="faint">${T(U.noFee)}</span>`)}</td></tr>`).join('')}</tbody></table></div>`;
+  /* data-l names each value when a phone stacks the row; the roles keep it a table once CSS changes its display */
+  return `<div class="hscroll"><table class="ctbl prog-tbl" role="table"><thead role="rowgroup"><tr role="row"><th role="columnheader">${T(P.school)}</th><th role="columnheader">${T(U.prog)}</th><th role="columnheader">${T(U.len)}</th><th role="columnheader">Co-op</th><th role="columnheader" style="text-align:right">${T(U.fee)}</th></tr></thead>
+    <tbody role="rowgroup">${rows.map(m => `<tr role="row" style="cursor:default">
+      <td role="cell"><a class="tlink" href="${m.home || m.url}" target="_blank" rel="noopener noreferrer"><strong>${esc(m.u)}</strong>${ext}</a><div class="faint text-[12.5px]">${esc(m.city)}</div></td>
+      <td role="cell" style="white-space:normal;min-width:220px"><a class="tlink" href="${m.url}" target="_blank" rel="noopener noreferrer">${esc(m.p)}${ext}</a>${m.note ? `<div class="faint text-[12.5px] mt-0.5">${T(m.note)}</div>` : ''}</td>
+      <td role="cell" data-l="${esc(T(U.len))}"><div>${T(m.len)}</div></td>
+      <td role="cell" data-l="Co-op"><div>${m.coop ? `<span class="badge b-green">${T(m.coopL || U.yes)}</span>` : `<span class="badge b-gray">${T(U.no)}</span>`}</div></td>
+      <td role="cell" data-l="${esc(T(U.fee))}" style="text-align:right"><div>${m.fee ? (m.est ? '≈ ' : '') + 'CAD ' + fmt(m.fee) + `<div class="faint text-[12.5px]">${m.feeNote ? T(m.feeNote) : thb(m.fee * S.sim.rate)}</div>` : (m.feeNote ? T(m.feeNote) : `<span class="faint">${T(U.noFee)}</span>`)}</div></td></tr>`).join('')}</tbody></table></div>`;
 }
 function viewPrograms(){
   const P = PROG_UI, k = PROGS[S.progOpt] ? S.progOpt : 'A', o = P.opts[k], d = PROGS[k];
   return `
     <h3 class="text-[20px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('list-checks')}</span>${T(P.title)}</h3>
-    <p class="muted text-[14.5px] mt-1 mb-3">${T(P.sub)}</p>
+    <p class="muted text-[15px] mt-1 mb-3">${T(P.sub)}</p>
     <div class="seg mb-4" role="group" aria-label="${esc(T(P.title))}">${['A','B','C'].map(x => `<button class="${k === x ? 'on' : ''}" data-act="prog-opt" data-v="${x}" aria-pressed="${k === x}">${T(P.opts[x].seg)}</button>`).join('')}</div>
     <h4 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:${o.color}">${ic(o.icon,'icon-sm')}</span>${T(o.t)}</h4>
-    <p class="muted text-[14.5px] mt-1 mb-3">${T(o.sub)}</p>
+    <p class="muted text-[15px] mt-1 mb-3">${T(o.sub)}</p>
     ${o.warn ? `<p class="text-[14px] flex gap-2 mb-3" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px">${ic('triangle-alert','icon-sm')}<span>${T(o.warn)}</span></p>` : ''}
     <ul class="clean mb-4">${d.rules.map(x => `<li><span style="color:${o.color}">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
     ${progTable(d.rows)}
@@ -4009,7 +4158,7 @@ function agentListCard(){
       <div class="mt-3">${rows.map(a => `
         <div class="py-3" style="border-top:1px solid var(--line)">
           <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <a href="${a.u}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-semibold text-[15.5px] hover:underline" style="color:var(--blue)">${esc(a.n)}${ic('external-link','icon-sm')}</a>
+            <a href="${a.u}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-semibold text-[15px] hover:underline" style="color:var(--blue)">${esc(a.n)}${ic('external-link','icon-sm')}</a>
             ${a.city ? `<span class="faint text-[13px]">${esc(T(a.city))}</span>` : ''}
           </div>
           ${a.free ? `<div class="text-[13.5px] mt-1 flex items-start gap-1.5" style="color:var(--green)"><span style="margin-top:3px">${ic('circle-check','icon-sm')}</span><span>${T(a.free)}</span></div>` : ''}
@@ -4147,11 +4296,14 @@ function simCalc(o){
   const show = tu1 + proof + travel;
   /* prep and visa costs: All Costs sections 1 and 2 (your own amounts where typed, otherwise the high end of each range) */
   const prepR = prepCost(), prep = prepR[1];
+  /* extra money during the program: the deepest the month-by-month balance goes below zero, after expected pay
+     (second-year tuition in month 13, or months where pay does not cover living costs). Part of the savings goal (26 Nov 2026). */
+  const extra = Math.max(0, -low.v);
   return {s, ty, n, lv, exp, wage, tips, cw, ftH, side, netC20:netC20 - (lv.rent + lv.food + lv.other + lv.health), tuY, fees, tu1, tu2, proof, pY, travel, setup, prep, prepR, incS, incC, incB, incG, plan, N, years:N / 12, months,
     gS, gC, gB, gG, fac:{tuition:f('tuition'), rent:f('rent'), cpi:f('cpi'), health:f('health'), wage:f('wage'), proof:proofF},
-    end:bal, low, runOut, runOutY1: runOut && runOut <= 12 ? runOut : 0, extra:Math.max(0, -low.v),
+    end:bal, low, runOut, runOutY1: runOut && runOut <= 12 ? runOut : 0, extra,
     mS:cnt('S'), mC:cnt('C'), mB:cnt('B'), mG:cnt('G'), netS:incS - exp, netC:incC - exp, netB:incB - exp, netG:incG - exp,
-    show, total:prep + show + setup,
+    show, total:prep + show + setup + extra,
     breakEvenHrs:exp / (pt * SIMC.weeks * 0.93), cover:Math.round(incS / exp * 100),
     tuTotal:tu1 + (N > 12 ? tu2 : 0)};
 }
@@ -4171,17 +4323,16 @@ function viewBudget(){
     </div>`; };
   const field = (label, body, note) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? `<div class="faint text-[13px] mt-2">${note}</div>` : ''}</div>`;
   const plan = planOf(s), hasFT = plan.some(p => p !== 'S'), hasC = plan.includes('C'), hasG = plan.includes('G');
+  /* how many of the folded settings differ from their defaults, so a closed "fine-tune" section never hides a change */
+  const advN = [val(s.tips, 0) > 0, hasC && val(s.coopWage, ty.coopWage) !== ty.coopWage, hasC && val(s.side, 0) > 0, hasG && s.pgwp === false, s.rateAuto === false, s.proofAuto === false].filter(Boolean).length;
   return `
     <section class="mb-6" style="max-width:820px">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <h1 class="text-[30px] sm:text-[38px] font-bold">${T(M.title)}</h1>
-        <button class="btn btn-ghost" data-act="simreset">${ic('rotate-ccw','icon-sm')}${T(M.reset)}</button>
-      </div>
+      <h1 class="text-[30px] sm:text-[38px] font-bold">${T(M.title)}</h1>
       <p class="muted mt-3 text-[17px]">${T(M.sub)}</p>
     </section>
-    <div id="sim-mini" class="sim-mini" aria-live="polite"></div>
-    <div class="grid lg:grid-cols-5 gap-4 items-start lg:items-stretch">
-      <div class="card lg:col-span-2 sim-side"><div class="grid gap-6 sim-ctl" id="sim-ctl">
+    <div id="sim-mini" class="sim-mini"></div>
+    <div class="sim-grid">
+      <div class="card sim-side"><div class="grid gap-6 sim-ctl" id="sim-ctl">
         <h2 class="sr-only">${T(A11Y.settings)}</h2>
         ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l]), T(M.type)), T(ty.desc))}
         ${field(T(M.intakeQ), yearSeg() + farBox(), T(M.intakeNote))}
@@ -4190,11 +4341,15 @@ function viewBudget(){
                                  : segB('sim-coop', s.hasCoop !== false ? 'yes' : 'no', [['yes', M.coopYes], ['no', M.coopNo]], T(M.coopQ)))}
         ${slider('tuition', T(M.tuition), Math.min(ty.min, Math.floor(s.tuition)), Math.max(ty.max, Math.ceil(s.tuition)), 50, T(ty.tuNote))}
         ${slider('fees', T(M.feesL), 0, Math.max(4000, Math.ceil(val(s.fees, ty.fees))), 10, T(M.feesNote), ty.fees)}
-        ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l]), T(M.living)), T(SIMC.living[s.living].note))}
+        ${field(T(M.living), segB('sim-living', s.living, Object.keys(SIMC.living).map(k => [k, SIMC.living[k].l]), T(M.living)), livingNote(c0))}
         ${slider('hours', T(M.hours), 0, 24, 1, T(M.hoursNote))}
         ${slider('wage', T(M.wage), 15, 25, 0.05, T(M.wageNote))}
-        ${slider('tips', T(M.tipsL), 0, 15, 0.05, T(M.tipsNote), 0)}
         ${hasFT ? slider('coopHours', T(M.coopHours), 10, 40, 1, T(priv ? M.ftNotePriv : M.ftNote), ty.coopH) : ''}
+        <details class="sim-adv" data-field="simAdv" ${S.open && S.open.simAdv ? 'open' : ''}>
+          <summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T(ADV.t)}${advN ? ` <span class="badge b-blue">${T(ADV.n)(advN)}</span>` : ''}</span></summary>
+          <p class="faint text-[13px] mt-1">${T(ADV.sub)}</p>
+          <div class="grid gap-6 mt-4">
+        ${slider('tips', T(M.tipsL), 0, 15, 0.05, T(M.tipsNote), 0)}
         ${hasC ? slider('coopWage', T(M.coopWage), 0, 40, 0.05, T(ty.cwNote), ty.coopWage) : ''}
         ${hasC ? slider('side', T(M.sideL), 0, 24, 1, T(M.sideNote), 0) : ''}
         ${hasG ? field(T(M.pgwpQ), segB('sim-pgwp', s.pgwp === false ? 'no' : 'yes', [['yes', M.pgwpYes], ['no', M.pgwpNo]], T(M.pgwpQ)), T(s.type === 'public' ? M.pgwpNotePub : M.pgwpNoteMa)) : ''}
@@ -4206,12 +4361,16 @@ function viewBudget(){
           <div class="flex justify-between items-center gap-3"><label for="sim-proof" class="font-medium text-[15px]">${T(M.proof)}</label><input class="numin num" type="number" id="sim-proof" data-sim="proof" min="10000" max="70000" step="1" value="${Math.round(val(s.proof, fundsAmt()) * simFac('proof', c0))}"></div>
           <div class="faint text-[13px] mt-1" id="proof-status">${proofStatusHtml()}</div>
         </div>
+          </div>
+        </details>
+        <div><button class="btn btn-ghost" data-act="simreset">${ic('rotate-ccw','icon-sm')}${T(M.reset)}</button></div>
       </div></div>
-      <div class="lg:col-span-3 grid gap-4 content-start" id="sim-out"></div>
+      <div class="grid gap-4 content-start" id="sim-out"></div>
+      <div class="grid gap-4 content-start" id="sim-more"></div>
     </div>
     <details class="card mt-4">
       <summary class="font-semibold text-[17px] cursor-pointer">${ic('book-search','icon-sm')} ${T(M.glossT)}</summary>
-      <dl class="mt-3 grid sm:grid-cols-2 gap-x-8">${M.gloss.map(g => `<div class="py-3" style="border-top:1px solid var(--line)"><dt class="font-semibold text-[15px]">${T(g.k)}</dt><dd class="muted text-[14.5px] mt-1">${T(g.v)}</dd></div>`).join('')}</dl>
+      <dl class="mt-3 grid sm:grid-cols-2 gap-x-8">${M.gloss.map(g => `<div class="py-3" style="border-top:1px solid var(--line)"><dt class="font-semibold text-[15px]">${T(g.k)}</dt><dd class="muted text-[15px] mt-1">${T(g.v)}</dd></div>`).join('')}</dl>
       <button class="btn btn-ghost mt-2" style="font-size:14px" data-act="gloss-open">${ic('book-search','icon-sm')}${T(GLOSS_UI.seeAll)(GLOSS.length)}</button>
     </details>
     <p class="faint text-[13px] mt-4" style="max-width:90ch">${T(M.assume)}</p>`;
@@ -4305,8 +4464,8 @@ function chartSplit(c){
 function compareTypes(cur){
   const M = SIM_UI, s = S.sim;
   const rows = Object.keys(SIMC.types).map(k => k === s.type ? {k, c:cur, mine:true} : {k, mine:false, c:typeCalc(k)});
-  const td = (r, html, cls) => `<td style="text-align:right" class="${r.mine ? 'cur-col ' : ''}${cls || ''}">${html}</td>`;
-  const tr = (label, f, cls) => `<tr style="cursor:default" class="${cls || ''}"><td style="white-space:normal;min-width:200px">${label}</td>${rows.map(f).join('')}</tr>`;
+  const td = (r, html, cls) => `<td role="cell" style="text-align:right" class="${r.mine ? 'cur-col ' : ''}${cls || ''}">${html}</td>`;
+  const tr = (label, f, cls) => `<tr role="row" style="cursor:default" class="${cls || ''}"><td role="rowheader" style="white-space:normal;min-width:200px">${label}</td>${rows.map(f).join('')}</tr>`;
   /* parts of the money at the end, straight from each month of the plan: start + pay − living costs − year-2 tuition = end */
   rows.forEach(r => { const ms = r.c.months; r.inc = ms.reduce((a, m) => a + m.inc, 0); r.paid = ms.reduce((a, m) => a + m.paid, 0); r.spend = r.c.exp * r.c.N; });
   const cu1 = {cur:curOf() === 'thb' ? 'thb' : 'cad'}, endOpen = !!(S.open && S.open.endWhy);
@@ -4316,7 +4475,7 @@ function compareTypes(cur){
   <div class="card">
     <h2 class="text-[17px] font-semibold">${T(M.cmpT)}</h2>
     <p class="muted text-[14px] mt-1 mb-3">${T(M.cmpSub)}</p>
-    <div class="hscroll"><table class="ctbl" style="min-width:600px"><thead><tr><th></th>${rows.map(r => `<th style="text-align:right;white-space:normal" class="${r.mine ? 'cur-col' : ''}">${T(SIMC.types[r.k].l)}${r.mine ? ' ●' : ''}<div class="faint" style="font-weight:400">${T(r.mine ? M.cMine : M.cTyp)}</div>${r.mine ? '' : `<button class="linkbtn" style="font-size:12.5px" data-act="sim-type" data-v="${r.k}">${T(M.cTry)}</button>`}</th>`).join('')}</tr></thead><tbody>
+    <div class="hscroll"><table class="ctbl cmp-tbl" role="table" style="min-width:600px"><thead role="rowgroup"><tr role="row"><th role="columnheader"></th>${rows.map(r => `<th role="columnheader" style="text-align:right;white-space:normal" class="${r.mine ? 'cur-col' : ''}">${T(SIMC.types[r.k].l)}${r.mine ? ' ●' : ''}<div class="faint" style="font-weight:400">${T(r.mine ? M.cMine : M.cTyp)}</div>${r.mine ? '' : `<button class="linkbtn" style="font-size:12.5px" data-act="sim-type" data-v="${r.k}">${T(M.cTry)}</button>`}</th>`).join('')}</tr></thead><tbody role="rowgroup">
       ${tr(T(M.cTuY), r => td(r, mny(r.c.tuY, {stack:true})))}
       ${tr(T(M.cFeesY), r => td(r, mny(r.c.fees, {stack:true})))}
       ${tr(lab(`<strong>${T(M.cShow)}</strong>`, T(M.cShowEq)(mny(c0.proof, cu1), mny(c0.travel, cu1)), true), r => td(r, `<strong>${mny(r.c.show, {stack:true})}</strong>`))}
@@ -4361,7 +4520,7 @@ function analysis(c){
   if (c.n > 0) pts.push(T(M.a7)(s.intake, c.n));
   return `
   <div class="card verdict v-${level}">
-    <div class="flex items-center gap-3"><span class="vicon">${ic(V.icon)}</span><div><h2 class="eyebrow">${T(M.vT)}</h2><div class="text-[19px] font-semibold">${T(V.l)}</div></div></div>
+    <div class="flex items-center gap-3"><span class="vicon">${ic(V.icon)}</span><div><h2 class="eyebrow">${T(M.vT)}</h2><div class="text-[20px] font-semibold">${T(V.l)}</div></div></div>
     <p class="text-[15px] mt-2">${T(V.dCap && c.breakEvenHrs > 24 ? V.dCap : V.d)}</p>
     <ol class="analysis mt-3">${pts.map(p => `<li>${p}</li>`).join('')}</ol>
   </div>`;
@@ -4448,7 +4607,7 @@ function liveCard(){
   const msg = liveState === 'fail' && !e ? T(U.fail) : T(U.loading);
   const row = (icon, label, val, sub, src) => `<div class="py-3" style="border-top:1px solid var(--line)"><div class="eyebrow flex items-center gap-1">${ic(icon,'icon-sm')}${label}</div><div class="font-semibold text-[17px] mt-0.5">${val}</div><div class="faint text-[13px]">${sub}${src ? ` [[${src}]]` : ''}</div></div>`;
   return `
-    <h2 class="text-[18px] font-semibold flex items-center gap-2"><span class="dot" aria-hidden="true"></span>${T(U.title)}</h2>
+    <h2 class="text-[17px] font-semibold flex items-center gap-2"><span class="dot" aria-hidden="true"></span>${T(U.title)}</h2>
     <p class="muted text-[13.5px] mb-1">${T(U.sub)}</p>
     ${row('banknote', T(U.fx), `1 CAD = ${Number(S.sim.rate).toFixed(2)} THB`, S.fx.date ? fdate(S.fx.date) + ' · ' + S.fx.src : T(FX_UI.loading), '')}
     ${p ? row('timer', T(U.proc), esc(ptText(p.study)), T(U.asOf) + ' ' + esc(fdate(p.upd)), 'proc') : row('timer', T(U.proc), '...', msg, 'proc')}
@@ -4462,7 +4621,7 @@ function liveCard(){
 }
 function drawsTable(){
   const U = LIVE_UI, list = LIVE.ee || [];
-  if (!list.length) return `<p class="muted text-[14.5px]">${liveState === 'fail' ? T(U.fail) : T(U.loading)} [[draws]]</p>`;
+  if (!list.length) return `<p class="muted text-[15px]">${liveState === 'fail' ? T(U.fail) : T(U.loading)} [[draws]]</p>`;
   return `<div class="hscroll"><table class="ctbl"><thead><tr><th>${T(U.date)}</th><th>${T(U.prog)}</th><th style="text-align:right">${T(U.inv)}</th><th style="text-align:right">${T(U.crs)}</th></tr></thead>
     <tbody>${list.slice(0, 8).map(r => `<tr style="cursor:default"><td>${fdate(r.d)}</td><td style="white-space:normal;min-width:180px">${esc(r.name)}${pnpNote(r.name)}</td><td style="text-align:right">${esc(r.size)}</td><td style="text-align:right"><strong>${esc(r.crs)}</strong></td></tr>`).join('')}</tbody></table></div>`;
 }
@@ -4526,6 +4685,7 @@ function cashList(c){
       ${line('travel', T(M.lTravel), c.travel, '', true)}
       <div class="row font-semibold"><span class="lname"><i class="sw s2"></i>${T(M.lShow)}</span><span class="num">${mny(c.show, {stack:true})}</span></div>
       ${line('setup', `<span class="lname"><i class="sw s3"></i><b class="font-semibold" style="color:var(--ink)">${T(MONEY.setup)}</b></span> ${T(MONEY.setupD)}`, c.setup)}
+      ${c.extra > 0 ? `<div class="row font-semibold"><span class="min-w-0"><span class="lname"><i class="sw s4"></i>${T(MONEY.extra)}</span><span class="block faint text-[12.5px] font-normal">${T(MONEY.extraN)(c.runOut || c.low.m, c.N > 12)}</span></span><span class="num">${mny(c.extra, {stack:true})}</span></div>` : ''}
       <div class="row font-semibold lgoal"><span>${T(M.lReady)}</span><span class="num">${mny(c.total, {stack:true})}</span></div>`;
 }
 function amtRow(k, label, c, unit, part){
@@ -4567,7 +4727,7 @@ function whyPanel(c, one, unit){
   if (c.mB) inc.push([T(M.brkS), `${c.ftH} ${T(M.wkU)} × ${ptRate} × ${wk} ${T(M.weeksU)}` + res(c.gB, c.incB)]);
   if (c.mG) inc.push([T(M.gradS), s.pgwp === false ? `${T(M.noPay)}` + res(0, 0) : `${c.ftH} ${T(M.wkU)} × ${ptRate} × ${wk} ${T(M.weeksU)}` + res(c.gG, c.incG)]);
   /* type hours and wages right here (start-year amounts, the same numbers as the sliders and the formulas above) */
-  const box = (k, label, v, step, u) => `<label class="inbox"><span class="text-[13px] muted">${label}</span><span class="flex items-center gap-1"><input class="numin num" type="number" inputmode="decimal" min="0" step="${step}" data-simc="${k}" value="${v}">${u ? `<span class="faint text-[12px]">${u}</span>` : ''}</span></label>`;
+  const box = (k, label, v, step, u) => `<label class="inbox"><span class="text-[13px] muted">${label}</span><span class="flex items-center gap-1"><input class="numin num" type="number" inputmode="decimal" min="0" step="${step}" data-simc="${k}" value="${v}">${u ? `<span class="faint text-[12px] whitespace-nowrap">${u}</span>` : ''}</span></label>`;
   const ty = c.ty, cadHr = 'CAD' + T(M.hr), r2 = v => Math.round(v * 100) / 100;
   const boxes = [box('hours', T(M.inHours), s.hours, 1, T(M.wkU)), box('wage', T(M.inWage), r2(c.wage), 0.05, cadHr), box('tips', T(M.inTips), r2(c.tips), 0.05, cadHr)];
   if (c.plan.some(p => p !== 'S')) boxes.push(box('coopHours', T(M.inCoopH), c.ftH, 1, T(M.wkU)));
@@ -4690,7 +4850,7 @@ function renderSimOut(){
       ${cu === 'both' ? `<div class="s">${mny(net, {sign:true, cur:'thb'})} ${T(M.mo)}</div>` : ''}</div>`;
   const unit = cu === 'thb' ? 'thb' : 'cad';
   out.innerHTML = cites(`
-    <div class="card">
+    <div class="card" id="sim-hero">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="eyebrow">${T(M.lTotal)}</h2>
         <div class="flex items-center gap-2"><span class="faint text-[13px]">${T(M.curL)}</span><div class="seg" role="group" aria-label="${esc(T(M.curL))}">${[['thb', M.curTHB], ['cad', M.curCAD], ['both', M.curBoth]].map(([v, l]) => `<button class="${cu === v ? 'on' : ''}" aria-pressed="${cu === v}" data-act="sim-cur" data-v="${v}">${T(l)}</button>`).join('')}</div></div>
@@ -4699,34 +4859,41 @@ function renderSimOut(){
         <div class="hero num">${cu === 'cad' ? cad(c.total) : thb(c.total*r)}</div>
         ${cu === 'both' ? `<div class="text-[18px] font-semibold muted num">${cad(c.total)}</div>` : ''}
       </div>
-      <p class="gbasis">${ic('sliders-horizontal','icon-sm')}<span>${T(MONEY.basisL)}: ${goalBasis(c, true)}</span><button class="linkbtn" data-act="jump" data-v="sim-ctl">${T(MONEY.change)}</button></p>
+      <p class="gbasis">${ic('sliders-horizontal','icon-sm')}<span>${T(MONEY.basisL)}: ${goalBasis(c, true)}</span><button class="linkbtn" data-act="jump" data-v="sim-ctl">${T(MONEY.change)}</button>${cityRentNote(c)}</p>
       <div class="faint text-[13.5px] mt-1">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
       <div class="mb-3">${ladderBar(c)}</div>
-      <div id="cash-list" data-flash="1">${cashList(c)}</div>
-      ${c.extra > 0 ? `<div class="row font-semibold neg"><span>${T(M.lExtra)}</span><span class="num">${mny(c.extra, {stack:true})}</span></div>` : ''}
+      ${haveBlock(c)}
+      ${oddAmounts(c)}
+      <div id="cash-list" class="mt-3" data-flash="1">${cashList(c)}</div>
       <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(M.sameNote)}</span></p>
       <div class="autoline" id="auto-line">${autoLineHtml()}</div>
-      <div class="mt-4">${timeline(c)}</div>
+    </div>
+    ${analysis(c)}`).html;
+  /* the month-by-month detail, charts and the type comparison sit after the controls on phones (see .sim-grid) */
+  const more = document.getElementById('sim-more');
+  if (more) more.innerHTML = cites(`
+    <div class="card">
+      ${timeline(c)}
       <div class="grid gap-3 mt-4 ${[c.mS, c.mC, c.mB, c.mG].filter(Boolean).length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}">${term(T(M.study), c.mS, c.netS, c.incS)}${c.mC ? term(T(M.coop), c.mC, c.netC, c.incC) : ''}${c.mB ? term(T(M.brkS), c.mB, c.netB, c.incB) : ''}${c.mG ? term(T(M.gradS), c.mG, c.netG, c.incG) : ''}</div>
       ${whyPanel(c, one, unit)}
       <p class="faint text-[13px] mt-3 flex gap-2">${ic('info','icon-sm')}<span>${T(M.whySame)}</span></p>
     </div>
-    ${analysis(c)}
     <div class="card">${chartBalance(c)}</div>
     ${compareTypes(c)}
     <div class="card">${chartTerms(c)}</div>
     <div class="card">${chartSplit(c)}</div>`).html;
   updateRefs();
-  bindTips(out);
+  bindTips(out); if (more) bindTips(more);
+  heroWatch();
   /* Timeline labels: never clip. Fall back to the month count, then to nothing (legend and tooltip carry it). */
   /* Read every size first, then write, so the page is laid out once instead of once per segment. */
-  const segs = [...out.querySelectorAll('.tline>div')].map(d => { const sp = d.querySelector('span'); return sp ? {sp, w:sp.offsetWidth, room:d.clientWidth - 8} : null; }).filter(Boolean);
+  const segs = [...(more || out).querySelectorAll('.tline>div')].map(d => { const sp = d.querySelector('span'); return sp ? {sp, w:sp.offsetWidth, room:d.clientWidth - 8} : null; }).filter(Boolean);
   segs.forEach(({sp, w, room}) => {
     if (w <= room) return;
     const txt = sp.textContent, short = txt.replace(/\D+/g, '').trim();
     sp.textContent = short && w * short.length / Math.max(1, txt.length) <= room ? short : '';
   });
-  linkTerms(out);
+  linkTerms(out); if (more) linkTerms(more);
   /* screen readers hear the new savings goal shortly after a setting changes (not on arrival at the page) */
   const gTxt = cu === 'cad' ? cad(c.total) : thb(c.total * r), app = document.getElementById('app');
   const act = document.activeElement;   /* body: a control was just redrawn after a click */
@@ -4734,6 +4901,15 @@ function renderSimOut(){
   LAST_GOAL = gTxt;
 }
 let LAST_GOAL = null;
+/* Phones: show the floating mini summary only while the goal card is off screen. */
+let HERO_IO = null;
+function heroWatch(){
+  const hero = document.getElementById('sim-hero'), mini = document.getElementById('sim-mini');
+  if (HERO_IO) { HERO_IO.disconnect(); HERO_IO = null; }
+  if (!hero || !mini || !('IntersectionObserver' in window)) { if (mini) mini.classList.add('on'); return; }
+  HERO_IO = new IntersectionObserver(es => es.forEach(en => mini.classList.toggle('on', !en.isIntersecting)), {rootMargin:'-80px 0px 0px 0px'});
+  HERO_IO.observe(hero);
+}
 function bindTips(root){
   let tip = document.getElementById('viz-tip');
   if (!tip) { tip = document.createElement('div'); tip.id = 'viz-tip'; tip.setAttribute('role','tooltip'); document.body.appendChild(tip); }
@@ -4774,7 +4950,7 @@ function cityDetail(){
       </div>
     </div>
     <a class="btn btn-ghost mb-4" style="font-size:14px" href="${gmap(c.n.en.split(' and ')[0] + ', ' + PROV[c.p].n.en + ', Canada')}" target="_blank" rel="noopener noreferrer">${ic('map','icon-sm')}${T(CITY_UI.gmap)}</a>
-    ${c.p==='QC' ? `<div class="text-[14.5px] flex gap-2 mb-4" style="background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:10px 12px">${ic('triangle-alert','icon-sm')}<span>${T(C.qc)} [[caq]]</span></div>` : ''}
+    ${c.p==='QC' ? `<div class="text-[15px] flex gap-2 mb-4" style="background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:10px 12px">${ic('triangle-alert','icon-sm')}<span>${T(C.qc)} [[caq]]</span></div>` : ''}
     <div class="grid grid-cols-2 gap-3">
       ${stat(T(C.rent), cad(c.rent) + `<span class="text-[14px] font-medium muted">${T(C.mo)}</span>`, thb(c.rent*r) + ' · ' + T(c.rentNote || C.rentNote), 'cmhc')}
       ${stat(T(C.wage), 'CAD ' + p.wage.toFixed(2) + `<span class="text-[14px] font-medium muted">${T(C.hr)}</span>`, thb(p.wage*r) + T(C.hr) + (p.next ? ' · ' + T(p.next) : ''), 'minw')}
@@ -4826,27 +5002,28 @@ function viewCities(){
         
         </div>
         
-        <div class="seg" role="group" aria-label="${esc(T(C.pick))}">${CITIES.map(c => `<button class="${S.city===c.id?'on':''}" data-act="city" data-v="${c.id}" data-fly="1">${T(c.n)}</button>`).join('')}</div>
+        <label class="flex flex-wrap items-center gap-2 text-[14px] font-medium">${T({en:'City', th:'เมือง'})}
+          <span class="sel-wrap"><select class="sel" data-sel="city" aria-label="${esc(T(C.pick))}">${CITIES.map(c => `<option value="${c.id}" ${S.city === c.id ? 'selected' : ''}>${T(c.n)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
       </div>
       <div class="card lg:col-span-2 lg:sticky" style="top:72px" id="city-detail">${cityDetail()}</div>
     </div>
     <div class="card mb-6">
       <h2 class="text-[20px] font-semibold">${T(C.cmpT)}</h2>
-      <p class="muted text-[14.5px] mt-1 mb-3">${T(C.cmpSub)} [[cmhc]] [[minw]] [[climate]]</p>
+      <p class="muted text-[15px] mt-1 mb-3">${T(C.cmpSub)} [[cmhc]] [[minw]] [[climate]]</p>
       <div class="hscroll" id="city-table">${cityTable()}</div>
     </div>
     <div class="grid md:grid-cols-2 gap-4 mb-6">
       <div class="card">
         
-        <h2 class="text-[20px] font-semibold flex items-center gap-2">${ic('lightbulb')}${T(C.howT)}</h2>
+        <h2 class="text-[17px] font-semibold flex items-center gap-2">${ic('lightbulb')}${T(C.howT)}</h2>
         
         <ul class="clean mt-2">${C.how.map(x => `<li><span style="color:var(--blue)">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
       </div>
       <div class="card">
         
-        <h2 class="text-[20px] font-semibold flex items-center gap-2">${THAI_SVG} ${T(C.thaiT)}</h2>
+        <h2 class="text-[17px] font-semibold flex items-center gap-2">${THAI_SVG} ${T(C.thaiT)}</h2>
         
-        <p class="muted text-[14.5px] mt-1">${T(C.thaiSub)}</p>
+        <p class="muted text-[15px] mt-1">${T(C.thaiSub)}</p>
         
         ${THAI.map(t => `<div class="py-3" style="border-top:1px solid var(--line);margin-top:10px"><div class="font-semibold">${T(t.n)}</div><div class="muted text-[14px]">${T(t.d)} [[${t.src}]]</div><div class="flex flex-wrap gap-2 mt-2"><button class="btn btn-primary" style="font-size:14px" data-act="thai" data-v="${THAI.indexOf(t)}">${ic('map-pin','icon-sm')}${T(C.onMap)}</button><a class="btn btn-ghost" style="font-size:14px" href="${gmap(t.q)}" target="_blank" rel="noopener noreferrer">${ic('map','icon-sm')}${T(C.gmap)}</a></div></div>`).join('')}
       </div>
@@ -4879,12 +5056,12 @@ function selectCity(id, fly){
   const d = document.getElementById('city-detail'); if (!d) { render(true); return; }
   d.innerHTML = cites(cityDetail()).html;
   document.getElementById('city-table').innerHTML = cites(cityTable()).html;
-  document.querySelectorAll('[data-act="city"].seg button, .seg [data-act="city"]').forEach(b => { b.className = b.dataset.v === id ? 'on' : ''; });
+  document.querySelectorAll('select[data-sel="city"]').forEach(x => { x.value = id; });
   Object.entries(MARKERS).forEach(([k, m]) => { const e = m.getElement(); if (e) e.firstChild.classList.toggle('on', k === id);
     const t = m.getTooltip() && m.getTooltip().getElement(); if (t) t.classList.toggle('sel', k === id); });
   const c = cityOf(id);
   if (MAP && fly) MAP.flyTo([c.lat, c.lng], Math.max(MAP.getZoom(), 4),{duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.8});
-  if (fly && innerWidth < 1024) d.scrollIntoView({behavior:'smooth', block:'start'});
+  if (fly === true && innerWidth < 1024) d.scrollIntoView({behavior:'smooth', block:'start'});
   updateRefs(); icons();
 }
 
@@ -4893,7 +5070,11 @@ const VIEWS = {start:viewStart, ready:viewReady, fields:viewFields, cities:viewC
 function updateChip(){
   const c = document.getElementById('fx-chip');
   /* narrow screens drop "1 CAD =" but keep the unit as THB/CAD, so the number still says what it is */
-  if (c) c.innerHTML = '<span class="tb-full">1 CAD =&nbsp;</span><span>' + Number(S.sim.rate).toFixed(2) + '&nbsp;THB<span class="chip-unit">/CAD</span></span>';
+  if (c) {
+    const rt = Number(S.sim.rate).toFixed(2);
+    c.innerHTML = '<span class="tb-full">1 CAD =&nbsp;</span><span>' + rt + '&nbsp;THB<span class="chip-unit">/CAD</span></span>';
+    c.setAttribute('aria-label', T(A11Y.fx)(rt)); c.title = T(A11Y.fx)(rt);   /* the spoken name carries the rate itself */
+  }
 }
 /* Lucide plus one drawn in the same line style: a closed book with a magnifying glass over its lower corner (glossary). */
 let ICONSET = null;
@@ -4918,7 +5099,7 @@ function cites(html, used = PAGE_USED){
   html = html.replace(/\s?\[\[([a-z0-9_]+)\]\]/gi, (m, k) => {
     const s = SRC[k]; if (!s) return '';
     let n = used.indexOf(k); if (n < 0) { used.push(k); n = used.length - 1; }
-    return `<sup class="cite"><a href="#ref-${n+1}" data-cite="${n+1}" title="${esc(T(s.l))}">${n+1}</a></sup>`;
+    return `<sup class="cite"><a href="#ref-${n+1}" data-cite="${n+1}" title="${esc(T(s.l))}" aria-label="${esc(T({en:'Source', th:'แหล่งอ้างอิง'}) + ' ' + (n+1) + ': ' + T(s.l))}">${n+1}</a></sup>`;
   });
   return {html, used};
 }
@@ -4926,7 +5107,7 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').r
 function refsHtml(used){
   if (!used.length) return '';
   return `
-    <h2 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('library')}</span>${T(REF_UI.title)}</h2>
+    <h2 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('library')}</span>${T(REF_UI.title)}</h2>
     <p class="muted text-[14px] mt-1 mb-2">${T(REF_UI.sub)}</p>
     <ol class="reflist">${used.map((k,i) => { const s = SRC[k], host = new URL(s.u).hostname.replace(/^www\./,'');
       return `<li id="ref-${i+1}"><span class="rn">[${i+1}]</span><span><a href="${s.u}" target="_blank" rel="noopener noreferrer">${T(s.l)}</a><span class="faint">. ${T(s.o)}, ${host}</span> <span style="color:var(--blue)">${ic('external-link','icon-sm')}</span></span></li>`; }).join('')}</ol>`;
@@ -4976,7 +5157,26 @@ function linkTerms(root, skipIn){
     if (last < txt.length) df.append(txt.slice(last));
     n.replaceWith(df);
   });
+  termTabOnce();
 }
+/* Only the first link of each glossary term on a page sits in the Tab order; repeats stay clickable (26 Nov 2026). */
+function termTabOnce(){
+  const app = document.getElementById('app'); if (!app) return;
+  const seen = new Set();
+  app.querySelectorAll('.term').forEach(b => { if (seen.has(b.dataset.term)) b.tabIndex = -1; else { seen.add(b.dataset.term); b.removeAttribute('tabindex'); } });
+}
+/* Keyboard focus never hides under the floating dock or the toolbar: nudge the page so the focused control shows. */
+document.addEventListener('focusin', e => {
+  const t = e.target;
+  if (!(t instanceof Element) || t.closest('#btabs, .toolbar, dialog, .skip-link') || !t.matches(':focus-visible')) return;
+  requestAnimationFrame(() => {
+    const r = t.getBoundingClientRect(), nav = document.getElementById('btabs'), tb = document.querySelector('.toolbar');
+    if (!r.height || !nav || !tb) return;
+    const low = nav.getBoundingClientRect().top - 12, high = tb.getBoundingClientRect().bottom + 12;
+    if (r.bottom > low) window.scrollBy({top:r.bottom - low, behavior:'instant'});
+    else if (r.top < high) window.scrollBy({top:r.top - high, behavior:'instant'});
+  });
+});
 function hideTerm(){ const p = document.getElementById('term-pop'); if (p) p.classList.remove('on'); if (TERM_BTN) TERM_BTN.setAttribute('aria-expanded', 'false'); TERM_BTN = null; }
 function showTerm(btn){
   const e = GLOSS.find(x => gid(x) === btn.dataset.term); if (!e) return;
@@ -4989,7 +5189,7 @@ function showTerm(btn){
   pop.innerHTML = `
     <div class="flex items-start gap-2"><div class="min-w-0"><div class="font-semibold text-[16px]">${esc(gk(e))}</div>${e.f ? `<div class="faint text-[13px]">${esc(e.f)}</div>` : ''}</div>
       <button class="tb-btn ml-auto" style="width:30px;height:30px;margin:-4px -6px 0 0" data-act="term-close" aria-label="${esc(T(U.close))}">${ic('x','icon-sm')}</button></div>
-    <p class="text-[14.5px] mt-2">${esc(gtxt(e))}</p>
+    <p class="text-[15px] mt-2">${esc(gtxt(e))}</p>
     <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[13.5px]">
       ${e.s && SRC[e.s] ? `<a href="${SRC[e.s].u}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1">${ic('external-link','icon-sm')}${T(U.official)}</a>` : ''}
       <button class="linkbtn inline-flex items-center gap-1" data-act="gloss-open" data-v="${gid(e)}">${ic('book-search','icon-sm')}${T(U.open)}</button></div>`;
@@ -5084,7 +5284,10 @@ function renderGlossList(){
       return items.length ? `<section><h3 class="grp" style="margin-top:18px">${T(l)}</h3>${items.map(item).join('')}</section>` : '';
     }).join('');
   }
-  box.innerHTML = html || `<p class="muted text-center" style="margin-top:32px">${T(GLOSS_UI.none)}</p>`;
+  /* nothing found: offer the way out (the other groups when they have matches, or a clear search) */
+  if (!html) { const elsewhere = GL_CAT !== 'all' ? GLOSS.filter(e => gScore(e, words) > 0).length : 0;
+    html = `<div class="text-center" style="margin-top:32px"><p class="muted mx-auto">${T(GLOSS_UI.none)}</p><div class="flex flex-wrap justify-center gap-2 mt-3">${elsewhere ? `<button class="btn btn-primary" data-act="gloss-cat" data-v="all">${T(GLOSS_UI.allCats)(elsewhere)}</button>` : ''}<button class="btn btn-ghost" data-act="gloss-clear">${ic('x','icon-sm')}${T(GLOSS_UI.clear)}</button></div></div>`; }
+  box.innerHTML = html;
   icons();
 }
 function openGloss(focusId){
@@ -5109,7 +5312,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && TERM_BTN) 
 const A11Y = {
   nav:{en:'Pages', th:'หน้าต่าง ๆ'}, lang:{en:'Language', th:'ภาษา'},
   skipMain:{en:'Skip to content', th:'ข้ามไปที่เนื้อหา'}, skipNav:{en:'Go to the page menu', th:'ไปที่เมนูหน้า'},
-  fx:{en:'Exchange rate, CAD to THB: open All Costs', th:'อัตราแลกเปลี่ยน CAD เป็นบาท: เปิดหน้าค่าใช้จ่าย'},
+  fx:{en:r => `Exchange rate 1 CAD = ${r} THB: open All Costs`, th:r => `อัตราแลกเปลี่ยน 1 CAD = ${r} บาท: เปิดหน้าค่าใช้จ่าย`},
   ckDone:{en:(d, n) => `${d} of ${n} steps done`, th:(d, n) => `ทำแล้ว ${d} จาก ${n} ข้อ`},
   goal:{en:g => `Total savings goal ${g}`, th:g => `เป้าเงินเก็บทั้งหมด ${g}`},
   settings:{en:'Your settings', th:'ค่าที่ตั้ง'}
@@ -5156,14 +5359,14 @@ function render(keepScroll){
   hideTerm();
   /* the dock is page navigation (26 Nov 2026): aria-current marks the open page; labels follow the language */
   const nav = document.getElementById('btabs'); nav.setAttribute('aria-label', T(A11Y.nav));
-  nav.innerHTML = UI.tabs.map(t => `<button class="${S.tab===t.id?'on':''}" ${S.tab===t.id ? 'aria-current="page"' : ''} aria-label="${T(t.l)}" data-act="tab" data-v="${t.id}">${ic(t.icon)}<span>${T(t.s)}</span></button>`).join('');
+  /* the spoken name starts with the visible label (WCAG label in name), then the full page name */
+  nav.innerHTML = UI.tabs.map(t => { const sh = T(t.s), lg = T(t.l); return `<button class="${S.tab===t.id?'on':''}" ${S.tab===t.id ? 'aria-current="page"' : ''} aria-label="${esc(sh === lg ? sh : sh + ': ' + lg)}" data-act="tab" data-v="${t.id}">${ic(t.icon)}<span>${sh}</span></button>`; }).join('');
   document.getElementById('skip-main').textContent = T(A11Y.skipMain);
   document.getElementById('skip-nav').textContent = T(A11Y.skipNav);
   document.getElementById('lang-seg').setAttribute('aria-label', T(A11Y.lang));
-  const fx = document.getElementById('fx-chip'); fx.setAttribute('aria-label', T(A11Y.fx)); fx.title = T(A11Y.fx);
   document.getElementById('disclaimer').textContent = T(UI.disclaimer);
   document.getElementById('links').innerHTML = `
-    <h2 class="text-[18px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('refresh-cw')}</span>${T(LINKS.title)}</h2>
+    <h2 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('refresh-cw')}</span>${T(LINKS.title)}</h2>
     <p class="muted text-[14px] mt-1 mb-3">${T(LINKS.sub)}</p>
     <div class="grid sm:grid-cols-2 gap-x-8">${LINKS.items.map(x => `<a href="${x.u}" target="_blank" rel="noopener noreferrer" class="tap flex items-start gap-2 py-3 text-[15px] hover:underline" style="color:var(--blue);border-top:1px solid var(--line);align-items:flex-start">${ic('external-link','icon-sm')}<span style="margin-top:-3px">${T(x.l)}</span></a>`).join('')}</div>`;
   const y = window.scrollY;
@@ -5174,7 +5377,7 @@ function render(keepScroll){
   initMap();
   icons();
   segA11y(app);
-  linkTerms(app, '#sim-out');
+  linkTerms(app, '#sim-out, #sim-more');
   const gd = document.getElementById('gloss-dlg');
   if (gd && gd.open) { gd.innerHTML = glossShell(); renderGlossList(); icons(); }
   window.scrollTo({top: keepScroll ? y : 0, behavior:'instant'});   /* new page content: jump, do not animate */
@@ -5238,6 +5441,7 @@ document.addEventListener('click', e => {
   else if (act === 'quiztype') {
     /* open the Budget on the recommended type; a type already chosen keeps your own amounts */
     if (S.sim.type !== v && SIMC.types[v]) { const ty = SIMC.types[v]; S.sim.type = v; S.sim.tuition = ty.def; S.sim.coopWage = ty.coopWage; S.sim.coopHours = ty.coopH; S.sim.fees = ty.fees; if (v === 'private') S.sim.hasCoop = true; }
+    if (b.dataset.years) S.sim.years = +b.dataset.years;   /* the length the result advises (B: 2 years) */
     S.tab = 'budget'; LIST_EDIT = COST_EDIT = false; render(false); focusTitle();
   }
   else if (act === 'goroad') { S.scenario = v; S.tab = 'roadmap'; render(false); focusTitle(); }
@@ -5259,7 +5463,9 @@ document.addEventListener('click', e => {
     if (nb) nb.focus({preventScroll:true});
     announce(T(A11Y.ckDone)(c.done, c.total));
   }
-  else if (act === 'jump') { const t = document.getElementById(v); if (t) { t.scrollIntoView({behavior:'smooth', block:'start'}); if (t.dataset.flash) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1800); } } }
+  else if (act === 'jump') { const t = document.getElementById(v); if (t) { t.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'}); if (t.dataset.flash) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1800); }
+    /* keyboard users land where they jumped: the target itself if it can take focus, else its first heading */
+    const f = t.hasAttribute('tabindex') ? t : t.querySelector('h2[tabindex], h3[tabindex]'); if (f) f.focus({preventScroll:true}); } }
   else if (act === 'sim-living') { S.sim.living = v; S.sim.rentC = S.sim.foodC = S.sim.otherC = null; render(true); }
   else if (act === 'simreset') { if (!confirm(T({en:'Reset the simulator to its starting values? Every amount, hour and setting you changed on the Budget page will be cleared.', th:'รีเซ็ตเครื่องจำลองกลับเป็นค่าเริ่มต้นใช่ไหม ยอดเงิน ชั่วโมงทำงาน และค่าที่คุณเปลี่ยนในหน้างบจะถูกล้างทั้งหมด'}))) return; S.sim = Object.assign({}, DEFAULTS.sim); LIST_EDIT = false; if (S.fx.rate) S.sim.rate = +S.fx.rate.toFixed(2); applyFunds(); render(true); }
   else if (act === 'fxlive') { S.sim.rateAuto = true; applyFx(); }
@@ -5278,6 +5484,7 @@ document.addEventListener('click', e => {
   else if (act === 'refresh') { loadFx(true); loadLive(true); }
   else if (act === 'gloss-open') { openGloss(v); }
   else if (act === 'gloss-close') { const d = document.getElementById('gloss-dlg'); if (d && d.open) d.close(); }
+  else if (act === 'gloss-clear') { GL_Q = ''; const q = document.querySelector('[data-gloss-q]'); renderGlossList(); if (q) { q.value = ''; q.focus(); } }
   else if (act === 'gloss-cat') { GL_CAT = v; document.querySelectorAll('.gl-cats button').forEach(x => { x.classList.toggle('on', x.dataset.v === v); x.setAttribute('aria-pressed', x.dataset.v === v); }); renderGlossList(); const gl = document.getElementById('gloss-list'); if (gl) gl.scrollTop = 0; }
   else if (act === 'term-close') { hideTerm(); }
   else if (act === 'agent-city') { S.agentCity = v; render(true); }
@@ -5329,10 +5536,42 @@ document.addEventListener('input', e => {
 document.addEventListener('input', e => {
   const k = e.target.dataset.conv; if (!k) return;
   let v = parseFloat(e.target.value) || 0; const r = S.sim.rate || 24;
-  if (v < 0) { v = 0; e.target.value = 0; }   /* money cannot be negative here */
+  const neg = v < 0; if (neg) { v = 0; e.target.value = 0; }   /* money cannot be negative here */
   if (k === 'cad') document.getElementById('conv-thb').value = Math.round(v * r);
   else document.getElementById('conv-cad').value = Math.round(v / r * 100) / 100;
   convOut();
+  if (neg) { const o = document.getElementById('conv-out'); if (o) o.textContent = T({en:'Amounts below 0 are not allowed, so this became 0.', th:'ใส่ยอดติดลบไม่ได้ จึงเปลี่ยนเป็น 0'}); }
+});
+/* Two open tabs: when the other tab saves, take its state and redraw, instead of overwriting it on the next save. */
+window.addEventListener('storage', e => {
+  if (e.key !== KEY || !e.newValue) return;
+  let o; try { o = JSON.parse(e.newValue); } catch (err) { return; }
+  S = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), o, {sim:Object.assign({}, DEFAULTS.sim, o.sim || {})});
+  const a = document.activeElement; if (a && a.matches && a.matches('input, textarea, select')) return;   /* do not yank a box being typed in */
+  SYNC_IN = true; try { render(true); } finally { SYNC_IN = false; }
+});
+/* Pop-up menus (start year, Checklist intake year, Fields filters): apply, redraw, keep focus on the same menu. */
+document.addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.sel; if (!k) return;
+  const v = e.target.value;
+  /* the city menu redraws only the city panels and moves the map, never the page, so arrow keys can step through cities */
+  if (k === 'city') { if (cityOf(v)) selectCity(v, 'map'); return; }
+  if (k === 'sim-intake') S.sim.intake = +v;
+  else if (k === 'plan-y') { S.plan = S.plan || {}; S.plan.y = +v; if (!S.plan.m) S.plan.m = planIntake().getMonth() + 1; S.plan.dates = {}; }
+  else if (k === 'field-g') S.filter = v;
+  else if (k === 'field-s') S.fstat = v === 'none' ? null : v;
+  else return;
+  render(true);
+  const n = document.querySelector(`[data-sel="${k}"]`); if (n) n.focus({preventScroll:true});
+});
+/* Money you have now: update the line and bar as you type, without redrawing the page (focus stays in the box). */
+document.addEventListener('input', e => {
+  if (!e.target.matches || !e.target.matches('[data-have]')) return;
+  let v = parseFloat(e.target.value); if (!isFinite(v) || v < 0) v = 0;
+  S.have = v || null; saveSoon();
+  const hi = haveInfo(simCalc()), out = document.getElementById('have-out'), bar = document.getElementById('have-bar');
+  if (out) { out.textContent = hi ? hi.text : ''; out.classList.toggle('pos', !!(hi && hi.ok)); }
+  if (bar) { bar.style.display = hi ? '' : 'none'; const i = bar.querySelector('i'); if (i) i.style.width = (hi ? hi.pct : 0) + '%'; }
 });
 /* The converter's result written out with thousands separators, since number boxes cannot show them. */
 function convOut(){
