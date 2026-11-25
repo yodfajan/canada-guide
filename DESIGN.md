@@ -204,7 +204,7 @@ A cool, misty neutral world with a single system-blue accent, soft tinted wallpa
 **Character:** native macOS type: neutral, legible, and quietly confident, so the content feels like an Apple app rather than a website. Inter and Noto Sans Thai (400 to 700) load from Google Fonts for systems without SF Pro or Sukhumvit Set.
 
 ### Hierarchy
-- **Hero** (700, 44px, 34px on phones, line height 1.1, tracking -0.02em): the one big money figure, such as "cash to have ready".
+- **Hero** (700, 44px, 34px on phones, line height 1.1, tracking -0.02em): the one big money figure, such as the total savings goal.
 - **Display** (700, 30px on phones to 38px from 640px, line height 1.3): page titles, one per tab. The Start page title runs larger, 28px to 42px.
 - **Headline** (600, 20 to 24px, line height 1.3): section headings inside a page (agents, tests, master's examples).
 - **Title** (600, 17 to 18px): card headings and checklist phase headings.
@@ -223,7 +223,7 @@ A single centred column (max width 1040px) inside the window, with 16px side pad
 
 The toolbar is a 56px sticky strip whose background blurs and fades out with a mask as content scrolls under it. Navigation is a floating tab dock: a full-width rounded bar 10px from the bottom on phones and tablets, and a centred dock (max width 1010px, 16px from the bottom) on computers, where icons and labels sit side by side. The body keeps 88px of bottom padding so the dock never covers content.
 
-Breakpoints: 400px (smaller dock labels), 640px (tables gain column headers, calendar shows chips instead of dots), 768px (multi-column grids), 1024px (centred dock, scroll-following simulator controls, mini summary bar hidden). Under 1024px or on coarse pointers, every control grows to a 44px touch target and text inputs use 16px text to avoid zoom on focus.
+Breakpoints: 400px (smaller dock icons; dock labels stay 11px and each dock cell is at least as wide as its label), 640px (tables gain column headers, calendar shows chips instead of dots), 768px (multi-column grids), 1024px (centred dock, scroll-following simulator controls, mini summary bar hidden). Under 1024px or on coarse pointers, every control grows to a 44px touch target and text inputs use 16px text to avoid zoom on focus.
 
 ## Elevation & Depth
 
@@ -250,7 +250,7 @@ Soft, continuous macOS geometry. Controls are pills (999px): buttons, segmented 
 Tactile glass pills that press in slightly.
 - **Shape:** full pill (999px), 32px tall (44px on touch).
 - **Glass (default):** Glass Dense background, Glass Edge 1px rim, Ink text, raised-control shadow; 14px medium text, 4px 16px padding, 6px gap to an optional 14px icon.
-- **Primary:** System Blue fill with a top-to-middle white sheen gradient, white text, accent lift shadow. One primary per card at most.
+- **Primary:** System Blue fill that shades slightly darker toward the bottom (never lighter than the blue behind the white text, so it stays at 4.8:1), the 1px white top rim, white text, accent lift shadow. One primary per card at most.
 - **Press:** scales to 0.97 and dims slightly (180ms, `cubic-bezier(.2,.8,.2,1)`).
 - **Focus:** 3px outline in the focus ring blue (`rgba(0,122,255,.5)`), 1px offset.
 - **Link button:** unstyled text in Link Blue, medium weight, underline on hover, for inline actions such as "Use default".
@@ -270,7 +270,7 @@ The main choice control (language, currency, program type, intake, filters).
 - **Background:** Card Veil with a Glass Edge rim.
 - **Shadow Strategy:** resting card (see Elevation & Depth).
 - **Internal Padding:** 20px; tables use 0 padding with 10px 14px rows.
-- **Variants:** the "do this next" card adds a 1.5px System Blue border; verdict cards carry a 4px left bar in green, amber or red; stat tiles sit inside cards on Inset Wash (12px radius).
+- **Variants:** the "do this next" card adds a 1.5px System Blue border; verdict cards lead with a 38px icon tile (11px radius) tinted green, amber or red, with no coloured side bar; chart labels on the green, orange, amber and pink series use near-black text; stat tiles sit inside cards on Inset Wash (12px radius).
 
 ### Inputs / Fields
 - **Number field:** borderless, 10px radius, right-aligned 14px text, white (dark: 7% white) with a 1px inset control border; grows to 44px and 16px text on touch.
@@ -281,7 +281,9 @@ The main choice control (language, currency, program type, intake, filters).
 
 ### Navigation
 - **Toolbar:** app icon tile (blue gradient, 7px corners), page title, the live exchange-rate chip, round 34px glass buttons (glossary, theme), and the TH / EN segmented control.
-- **Tab dock:** eight tabs with 22px icons and 11px labels on phones; on computers a centred dock with 18px icons beside 13.5px labels. The active tab becomes a Glass Dense pill with Link Blue semibold text; others are Ink Secondary.
+- **Tab dock:** eight tabs with 22px icons and 11px labels on phones; on computers a centred dock with 18px icons beside 13.5px labels. The active tab becomes a Glass Dense pill with Link Blue semibold text (near-white text with a blue icon in dark mode); others are Ink Secondary. It is page navigation, not a tab list: a labelled nav whose open page carries aria-current="page".
+- **Skip links:** two glass pills ("Skip to content", "Go to the page menu") hidden above the toolbar until focused, then shown at the top left with the focus ring.
+- **Touch hit areas:** the 34px toolbar buttons, the TH / EN segments and the rate chip keep their look but take a 44px hit area on touch screens and below 1024px.
 
 ### Plan calendar (signature component)
 The Calendar card switches between two views with a segmented control. "My Google Calendar" shows the user's real Google Calendar as an embedded frame (12px radius, white, hairline inset ring, 640px tall, 540px on phones) under a row of glass buttons (Refresh, Open in Google Calendar) and a Change calendar link; before a Calendar ID is saved it shows an inset setup panel (Inset Wash, 12px radius) with a search-style field, a primary Show calendar button and a how-to disclosure. "Added from this page" is a month grid: 7 columns, 10px cells on Inset Wash, day numbers in 24px circles (today filled System Blue), events as 5px chips with a 3px left bar and a 16% wash of their series colour, done items struck through. Under 640px the chips turn into 7px coloured dots and tapping a day lists its items below. When nothing is added yet, the grid stays clear under a Blue Wash hint; once items exist, a legend names the six colours.
@@ -291,6 +293,9 @@ An item not yet added shows a glass "Add to Google Calendar" button; once added 
 
 ### Charts
 Line, bar and stacked bar charts drawn as inline SVG: 1px grid lines in a faint ink, 12px tabular axis labels in Ink Tertiary, a 2px series line with a 10% area fill, glass tooltips (10px radius, blur 20px), legends with 10px rounded swatches, and every chart offering a "show as a table" fallback.
+
+### Money ladder
+The one way the app names money before the trip, on the All Costs and Budget pages, the Start page and the quiz hint. Three amounts, always in this order and colour: prep and visa costs (series 1), money to show (series 2), setup reserve (series 3), adding up to the total savings goal. A 10px proportion strip (2px gaps, 3px radius, 6px minimum segment) sits under the goal figure with no text inside the colours; each amount is labelled beside a 10px swatch. On the Budget list the money-to-show parts are indented 18px above their subtotal. Amounts keep to one line (no wrap inside a figure).
 
 ### Glossary term and popover
 Known terms in body text get a 1.5px dotted Link Blue underline; tapping opens a 16px-radius glass popover (max 360px wide) with the term, full name, plain explanation, an official link and a link to the full glossary sheet (22px radius, full screen on phones).
