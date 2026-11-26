@@ -32,10 +32,10 @@
     --ctl:#FFFFFF; --field:#FFFFFF; --knob:#FFFFFF; --seg-on:#FFFFFF;
     --ctl-border:rgba(0,0,0,.22); --track:rgba(120,120,128,.26); --sel:rgba(0,0,0,.09); --hover:rgba(0,0,0,.045);
     --accent:#0070E0; --blue:#0064D9; --blue-soft:rgba(0,122,255,.12);
-    --green:#1D7A33; --green-soft:rgba(52,199,89,.18);
-    --amber:#9A4D00; --amber-soft:rgba(255,149,0,.16);
+    --green:#17672A; --green-soft:rgba(52,199,89,.18);   /* one step darker: 12px text on the soft washes reaches 4.5:1 (was about 4.46) */
+    --amber:#8A4400; --amber-soft:rgba(255,149,0,.16);
     --red:#C4281C; --red-soft:rgba(255,59,48,.12);
-    --gray-soft:rgba(120,120,128,.14); --ring:rgba(0,122,255,.5);
+    --gray-soft:rgba(120,120,128,.14); --ring:#007AFF;   /* solid, so the focus ring keeps 3:1 or more on white (4.0:1) and the window gray (3.6:1) */
     --shadow-ctl:0 .5px 1px rgba(0,0,0,.18),0 0 0 .5px rgba(0,0,0,.16);
   }
   :root[data-theme="dark"]{
@@ -60,7 +60,7 @@
     --green:#32D74B; --green-soft:rgba(48,209,88,.2);
     --amber:#FFA826; --amber-soft:rgba(255,159,10,.2);
     --red:#FF6F66; --red-soft:rgba(255,69,58,.2);
-    --gray-soft:rgba(255,255,255,.1); --ring:rgba(10,132,255,.6);
+    --gray-soft:rgba(255,255,255,.1); --ring:#0A84FF;
     --shadow-ctl:0 .5px 1px rgba(0,0,0,.45),inset 0 .5px 0 rgba(255,255,255,.16);
   }
   *{box-sizing:border-box}
@@ -76,6 +76,7 @@
   /* reading text: no lone word on the last line, and lines no longer than about 75 characters */
   p,li,dd{text-wrap:pretty}
   #app p{max-width:75ch}
+  #app p.faint{max-width:62ch}   /* small print: 13px text needs a shorter line to stay near 75 characters */
   a{color:var(--blue);text-underline-offset:3px}
   /* the wallpaper the glass refracts; fixed so content slides over it */
   body::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--wall),var(--window)}
@@ -121,6 +122,9 @@
   }
   .tb-sec{color:var(--ink2);font-weight:600;margin-left:12px}
   .tb-btn{width:34px;height:34px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer;padding:0}
+  /* the glossary is core help for beginners: on wider screens its button carries a word, not only the book icon */
+  .gl-word{display:none}
+  @media (min-width:1024px){#gloss-btn{width:auto;border-radius:999px;padding:0 12px 0 10px;gap:6px}.gl-word{display:inline;font-size:13.5px;font-weight:500}}
   .appicon{width:28px;height:28px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;
     background:linear-gradient(#3F9BFF,#0068D6);box-shadow:0 1px 2px rgba(0,0,0,.25),inset 0 .5px 0 rgba(255,255,255,.35)}
   .sb-head{font-size:11.5px;font-weight:600;color:var(--ink3);padding:4px 8px 4px}
@@ -142,7 +146,7 @@
   .b-amber{background:var(--amber-soft);color:var(--amber)}
   .b-red{background:var(--red-soft);color:var(--red)}
   .b-blue{background:var(--blue-soft);color:var(--blue)}
-  :root:not([data-theme="dark"]) .b-blue{color:#0058C2}   /* light mode: Link Blue on its own tint measured 4.49:1 at 12px */
+  :root:not([data-theme="dark"]) .b-blue{color:#0058C2}   /* light mode: 5.7:1 on its tint (Link Blue there measured only 4.49:1 at 12px) */
   .b-gray{background:var(--gray-soft);color:var(--ink2)}
   /* Citations */
   sup.cite{font-size:.68em;line-height:0;vertical-align:super;margin-left:1px;white-space:nowrap}
@@ -159,6 +163,12 @@
   .noc{display:inline-flex;align-items:baseline;gap:6px;padding:5px 10px;border-radius:10px;background:var(--gray-soft);color:var(--ink);font-size:13.5px;line-height:1.35;text-decoration:none}
   .noc:hover{background:var(--blue-soft)}
   .noc b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:600}
+  :root:not([data-theme="dark"]) .noc b,:root:not([data-theme="dark"]) .ctbl td.cur-col .pos{color:#0058C2}   /* 4.45:1 on the gray wash before */
+  :root:not([data-theme="dark"]) .ctbl td.cur-col .pos{color:var(--green)}
+  :root:not([data-theme="dark"]) .ctbl td.cur-col.neg,:root:not([data-theme="dark"]) .ctbl td.cur-col .neg{color:#B42318}
+  /* touch: every fold, segment, chip and lone link button reaches 44px */
+  @media (pointer:coarse){details>summary{min-height:44px;display:flex;align-items:center}.seg button{min-height:44px}.noc{min-height:44px;align-items:center}.cpick{display:inline-flex;align-items:center;min-height:44px}.ctbl th .linkbtn,.ctbl td .linkbtn{min-height:44px;display:inline-flex;align-items:center}}
+  details>summary{min-height:32px}
   .noc i{font-style:normal;color:var(--ink3);font-size:12px}
   /* Field cards */
   details.fcard>summary{list-style:none;cursor:pointer}
@@ -209,7 +219,9 @@
   .opt:active{background:var(--sel)}
 
   /* ---------- checkbox ---------- */
-  .check{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+  /* a checklist row: only the box and the title tick it, so reading the description, picking a date or opening a link never does */
+  .check{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+  .check label.ct{cursor:pointer}
   .check:first-child{border-top:0}
   .check input{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:4px;flex:none;margin:4px 0 0;cursor:pointer;position:relative;
     background:var(--ctl);box-shadow:inset 0 0 0 1px var(--ctl-border),inset 0 1px 1.5px rgba(0,0,0,.08)}
@@ -228,7 +240,7 @@
     box-shadow:0 .5px 2px rgba(0,0,0,.35),0 0 0 .5px rgba(0,0,0,.2)}
   .numin{border:0;border-radius:10px;min-height:30px;padding:2px 8px;width:96px;font:inherit;font-size:14px;text-align:right;color:var(--ink);
     background:var(--field);box-shadow:inset 0 0 0 1px var(--ctl-border),inset 0 1px 1.5px rgba(0,0,0,.06)}
-  button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--ring);outline-offset:1px}
+  button:focus-visible,input:focus-visible,a:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--ring);outline-offset:1px}
   .numin:focus-visible{outline-offset:0}
 
   /* ---------- NSTableView (costs) ---------- */
@@ -289,7 +301,8 @@
   .viz .band{fill:var(--s1);opacity:.07}
   .viz .s1-line{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
   .viz .s1-area{fill:var(--s1);opacity:.1}
-  .viz .s1-dot{fill:var(--s1);stroke:var(--card-solid,#fff);stroke-width:2}
+  .viz .s1-dot{fill:var(--s1);stroke:var(--window);stroke-width:2}
+  :root[data-theme="dark"] .tl-dot{color:#fff}   /* light blue numbers on dark glass were about 4.0:1 */
   .viz .crit{stroke:var(--crit);stroke-width:1.5}
   .viz .hit{fill:transparent;cursor:crosshair}
   .viz .hit.hov{fill:var(--s1);opacity:.08}
@@ -327,7 +340,7 @@
   .check.done .ckn{background:var(--green-soft);color:var(--green)}
   .check.is-next .ckn{background:var(--accent);color:#fff}
   .tprice{font-size:20px;font-weight:700;line-height:1.2}
-  section[id],div[id="masters"],div[id="planner"],div[id^="ckph-"],div[id="cost-items"],div[id="sim-ctl"],details[id="sim-why"],label.check[id]{scroll-margin-top:80px}
+  section[id],div[id="masters"],div[id="planner"],div[id^="ckph-"],div[id="cost-items"],div[id="sim-ctl"],details[id="sim-why"],.check[id]{scroll-margin-top:80px}
   /* money ladder: prep (s1), money to show (s2), setup reserve (s3); a thin strip plus swatched labels, no text inside the colours */
   .lbar{display:flex;gap:2px;height:10px;margin:10px 0 4px}
   .lbar>div{border-radius:3px;min-width:6px}
@@ -363,7 +376,7 @@
   #cmap{height:440px;border-radius:16px;overflow:hidden;z-index:0;background:var(--gray-soft)}
   @media (max-width:767px){#cmap{height:340px}}
   .leaflet-container{font-family:inherit}
-  .leaflet-control-attribution{font-size:10px}
+  .leaflet-control-attribution{font-size:11px}
   .cpin{width:18px;height:18px;border-radius:50%;background:var(--pc,var(--blue));border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);transition:transform .15s;position:relative}
   .cpin.on{transform:scale(1.5);box-shadow:0 0 0 4px color-mix(in srgb,var(--pc) 35%,transparent),0 3px 10px rgba(0,0,0,.4)}
   .cpin.on::after{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--pc);animation:pulse 1.8s ease-out infinite}
@@ -379,6 +392,8 @@
   .clabel::before{display:none}
   .lowz .clabel:not(.sel){display:none}
   .clabel.sel{background:var(--accent);color:#fff;border-color:transparent}
+  .leaflet-tooltip.clabel.sel{opacity:1!important}   /* Leaflet's 0.9 tooltip opacity dropped white on blue to about 4.0:1 */
+  .check .linkbtn[data-act="g-add"]{min-height:32px} @media (pointer:coarse){.check .linkbtn[data-act="g-add"]{min-height:44px}}
   .stat{background:var(--bg);border-radius:12px;padding:12px 14px}
   .stat .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.25}
   .stat .s{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
@@ -433,6 +448,7 @@
   .gc-steps b{font-weight:600}
   /* glossary: tappable terms, popover and full sheet */
   .term{all:unset;cursor:pointer;color:inherit;text-decoration:underline dotted;text-decoration-color:var(--blue);text-decoration-thickness:1.5px;text-underline-offset:3px;border-radius:3px}
+  .term.rep{text-decoration:none}
   @media (hover:hover){.term:hover{background:var(--blue-soft)}}
   .term:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
   #term-pop{position:fixed;z-index:120;display:none;padding:14px 16px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--glass-border);
@@ -448,12 +464,15 @@
   .gl-search-wrap{position:relative;margin-top:12px}
   .gl-search-wrap .gl-search{margin-top:0;padding-left:36px}
   .gl-search-ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink3);display:flex;pointer-events:none}
-  .gl-cats{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:4px;scrollbar-width:none}
+  /* glossary groups: wrap onto two rows on wider screens; on phones one scrolling row whose right edge fades until its end */
+  .gl-cats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-bottom:4px}
+  @media (max-width:639px){.gl-cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
+    .gl-cats.at-end{-webkit-mask-image:none;mask-image:none}}
   .gl-cats::-webkit-scrollbar{display:none}
   .gl-cats button{flex:none;border:0;border-radius:999px;padding:5px 12px;font:inherit;font-size:13.5px;background:var(--gray-soft);color:var(--ink);cursor:pointer;min-height:34px}
   .gl-cats button.on{background:var(--blue-soft);color:var(--blue);font-weight:600}
   .gl-item{padding:10px 8px;margin:0 -8px;border-top:1px solid var(--line);border-radius:10px;transition:background .3s}
-  .gl-item.flash,label.check.flash{background:var(--blue-soft);border-radius:10px}
+  .gl-item.flash,.check.flash{background:var(--blue-soft);border-radius:10px}
   .gl-item a{color:var(--blue)}
   .gl-item mark{background:rgba(255,204,0,.42);color:inherit;border-radius:3px;padding:0 1px}
   @media (max-width:640px){dialog#gloss-dlg{width:100vw;height:100dvh;border-radius:0;margin:0}}
@@ -466,6 +485,8 @@
   .ctbl tbody tr{cursor:pointer}
   .ctbl tbody tr:hover td{background:var(--hover)}
   .ctbl th button{all:unset;cursor:pointer}
+  /* every unstyled button keeps the shared focus ring (all:unset used to remove it from the city sort buttons) */
+  .ctbl th button:focus-visible,.linkbtn:focus-visible,.cpick:focus-visible,.term:focus-visible,.cal-dn:focus-visible,.cal-ev:focus-visible{outline:3px solid var(--ring);outline-offset:2px;border-radius:4px}
   .ctbl th button.on{color:var(--blue)}
   /* program links: school name, program name, arrow. In tables the school opens its international page and the program its official page. */
   .plist li + li{border-top:.5px solid var(--line)}
@@ -509,16 +530,10 @@
   .hscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;min-width:0}
   #sim-out,#sim-out>*,.grid>.card{min-width:0}
   /* phones: tables that needed sideways scrolling become stacked rows (roles in the markup keep them a table for screen readers) */
-  @media (max-width:640px){
-    .ctbl.prog-tbl,.ctbl.cmp-tbl{min-width:0!important}
-    .prog-tbl,.prog-tbl>tbody,.prog-tbl tr,.prog-tbl td{display:block}
-    .prog-tbl>thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-    .prog-tbl tr{padding:12px 0;border-bottom:1px solid var(--line)}
-    .prog-tbl td{border:0;padding:3px 0;white-space:normal;min-width:0!important;text-align:left!important}
-    .prog-tbl td[data-l]{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-    .prog-tbl td[data-l]::before{content:attr(data-l);flex:none;font-size:12.5px;font-weight:600;color:var(--ink3)}
-    .prog-tbl td[data-l]>div{text-align:right}
-    .prog-tbl tbody tr:hover td{background:none}
+  /* the Budget type comparison follows its own card's width, not the screen's: on desktop it sits in a narrow column */
+  .cmp-card{container-type:inline-size}
+  @container (max-width:620px){
+    .ctbl.cmp-tbl{min-width:0!important}
     .cmp-tbl,.cmp-tbl>thead,.cmp-tbl>tbody{display:block}
     .cmp-tbl tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:6px;border-bottom:1px solid var(--line)}
     .cmp-tbl th,.cmp-tbl td{display:block;border:0;padding:6px 4px;white-space:normal!important;min-width:0!important;font-size:13.5px}
@@ -527,7 +542,37 @@
     .cmp-tbl tr.calc td:first-child{padding-left:14px}
     .cmp-tbl tr.calc-end,.cmp-tbl tr.calc-after,.cmp-tbl tr.calc-sub{border-top:1.5px solid var(--line2)}
     .cmp-tbl tr.calc-end td,.cmp-tbl tr.calc-after td,.cmp-tbl tr.calc-sub td{border-top:0}
+    .cmp-tbl td.cur-col,.cmp-tbl th.cur-col{padding-left:8px;padding-right:8px;border-radius:6px}
   }
+  @media (max-width:640px){
+    .ctbl.prog-tbl{min-width:0!important}
+    .prog-tbl,.prog-tbl>tbody,.prog-tbl tr,.prog-tbl td{display:block}
+    .prog-tbl>thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+    .prog-tbl tr{padding:12px 0;border-bottom:1px solid var(--line)}
+    .prog-tbl td{border:0;padding:3px 0;white-space:normal;min-width:0!important;text-align:left!important}
+    .prog-tbl td[data-l]{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+    .prog-tbl td[data-l]::before{content:attr(data-l);flex:none;font-size:12.5px;font-weight:600;color:var(--ink3)}
+    .prog-tbl td[data-l]>div{text-align:right}
+    .prog-tbl tbody tr:hover td{background:none}
+    .ctbl.city-tbl{min-width:0!important}
+    .city-tbl,.city-tbl>thead,.city-tbl>tbody{display:block}
+    .city-tbl>thead tr{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+    .city-tbl>thead tr::before{content:attr(data-sortl);font-size:12.5px;font-weight:600;color:var(--ink3);margin-right:2px}
+    .city-tbl>thead th{display:block;border:0;padding:0}
+    .city-tbl>thead th:first-child{display:none}
+    .city-tbl>thead th button{display:inline-flex;align-items:center;min-height:32px;padding:4px 12px;border-radius:999px;background:var(--gray-soft);color:var(--ink);font-size:13px}
+    .city-tbl>thead th button.on{background:var(--blue-soft);color:var(--blue)}
+    .city-tbl tbody tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px;padding:10px 4px;border-bottom:1px solid var(--line)}
+    .city-tbl td{display:flex;align-items:baseline;justify-content:space-between;gap:8px;border:0;padding:2px 0;white-space:normal}
+    .city-tbl td:first-child{grid-column:1 / -1;justify-content:flex-start}
+    .city-tbl td[data-l]::before{content:attr(data-l);font-size:12.5px;font-weight:600;color:var(--ink3)}
+  }
+  .seg-s{display:none}
+  @media (max-width:520px){.seg-l{display:none}.seg-s{display:inline}}
+  /* the Budget's control column is narrow at every width, so its type control always uses the short names */
+  .sim-side .seg-l{display:none} .sim-side .seg-s{display:inline}
+  .cpick{all:unset;cursor:pointer;color:var(--ink)} .cpick:hover strong{text-decoration:underline}
+  .cpick:focus-visible{outline:3px solid var(--ring);outline-offset:2px;border-radius:4px}
   /* phones: the mini summary floats under the toolbar only once the goal card has scrolled away (it repeated the goal right above it) */
   .sim-mini{position:fixed;left:12px;right:12px;top:calc(64px + env(safe-area-inset-top));z-index:20;display:flex;justify-content:space-between;gap:12px;
     background:var(--toolbar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
@@ -540,16 +585,38 @@
   .sim-grid>#sim-out{grid-area:out} .sim-grid>.sim-side{grid-area:ctl} .sim-grid>#sim-more{grid-area:more}
   #sim-more,#sim-more>*{min-width:0}
   @media (min-width:1024px){.sim-grid{grid-template-columns:minmax(0,2fr) minmax(0,3fr);grid-template-areas:"ctl out" "ctl more";align-items:stretch}}
-  /* compact pop-up menu (AppKit pop-up button) for long single choices such as the start year */
+  /* compact pop-up menu (AppKit pop-up button) for long single choices such as the start year.
+     Scoped to select: "sel" is also the selected state of map labels and calendar days, which must not take this look. */
   .sel-wrap{position:relative;display:inline-flex;align-items:center;max-width:100%}
-  .sel{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-weight:600;color:var(--ink);min-height:36px;padding:6px 36px 6px 14px;max-width:100%;
+  select.sel{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;font-weight:600;color:var(--ink);min-height:36px;padding:6px 36px 6px 14px;max-width:100%;
     border-radius:999px;border:1px solid var(--glass-border);background:var(--glass-strong);box-shadow:0 3px 10px rgba(30,40,70,.12),var(--specular);cursor:pointer}
   .sel-wrap>svg{position:absolute;right:12px;pointer-events:none;color:var(--ink3)}
-  .sel:focus-visible{outline:3px solid var(--ring);outline-offset:1px}
-  @media (pointer:coarse),(max-width:1023px){.sel{min-height:44px;font-size:16px}}
-  details.sim-adv>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
-  details.sim-adv>summary::-webkit-details-marker{display:none}
-  details.sim-adv .chev{transition:transform .2s;color:var(--ink3)} details.sim-adv[open] .chev{transform:rotate(90deg)}
+  select.sel:focus-visible{outline:3px solid var(--ring);outline-offset:1px}
+  @media (pointer:coarse),(max-width:1023px){select.sel{min-height:44px;font-size:16px}}
+  details.sim-adv>summary,details.cashd>summary,details.vwhy>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
+  details.cashd>summary,details.vwhy>summary{color:var(--blue);min-height:32px}
+  details.sim-adv>summary::-webkit-details-marker,details.cashd>summary::-webkit-details-marker,details.vwhy>summary::-webkit-details-marker{display:none}
+  details.sim-adv .chev,details.cashd .chev,details.vwhy .chev{display:inline-flex;transition:transform .2s;color:var(--ink3)}
+  details.sim-adv[open]>summary .chev,details.cashd[open]>summary .chev,details.vwhy[open]>summary .chev{transform:rotate(90deg)}
+  details.cashd{border-top:1px solid var(--line);padding-top:8px}
+  /* reference sections at the end of the Checklist (test prices, agents): a section heading that opens */
+  details.refsec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:24px;font-weight:600;line-height:1.3;padding:8px 0;border-top:1px solid var(--line)}
+  details.refsec>summary::-webkit-details-marker{display:none}
+  details.refsec .chev{display:inline-flex;transition:transform .2s;color:var(--ink3)} details.refsec[open]>summary .chev{transform:rotate(90deg)}
+  details.cnote{margin-top:4px}
+  details.cnote>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--ink3);min-height:32px}
+  @media (pointer:coarse){details.cnote>summary,details.sim-adv>summary,details.cashd>summary,details.vwhy>summary{min-height:44px}}
+  details.cnote>summary::-webkit-details-marker{display:none}
+  details.cnote>summary:hover,details.cnote[open]>summary{color:var(--blue)}
+  /* Budget goal card: the verdict in one line, and the names of the strip's parts */
+  .vline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:10px;font-size:15px}
+  .vline .vicon-sm{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:var(--green-soft);color:var(--good)}
+  .vline.v-warn .vicon-sm,.vline.v-need .vicon-sm{background:var(--amber-soft);color:var(--warn)}
+  .vline.v-crit .vicon-sm{background:var(--red-soft);color:var(--crit)}
+  .vline .linkbtn{display:inline-flex;align-items:center;gap:4px}
+  .llegend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--ink2);margin-bottom:8px}
+  .llegend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .llegend b{color:var(--ink);font-weight:600}
   #quiz{scroll-margin-top:80px} #quiz:focus{outline:none}
   .sim-mini b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
   .sim-mini small{display:block;font-size:12px;color:var(--ink2)}
@@ -641,7 +708,7 @@
 /* ============================== STATE ============================== */
 const KEY = 'canadaGuide.v1';
 const DEFAULTS = {
-  lang:'th', theme:'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', progOpt:'A', open:{}, scenario:'safe', plan:{y:null, m:9, dates:{}}, costs:{},
+  lang:'th', theme:(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light', tab:'start', quiz:{}, check:{}, steps:{}, filter:'all', progOpt:'A', open:{}, scenario:'safe', plan:{y:null, m:9, dates:{}}, costs:{},
   sim:{ type:'public', tuition:20000, living:'shared', hours:20, wage:18.25, rate:24, rateAuto:true, proof:23448, hasCoop:true, years:1, intake:2027, coopWage:21, coopHours:37, fees:2000, pgwp:true, side:0,
         cur:'both', proofAuto:true, travel:2500, setup:2000, rentC:null, foodC:null, otherC:null, healthC:null, tips:0 },
   fx:{ rate:null, date:null, day:null, src:'' }
@@ -784,7 +851,7 @@ const UI = {
     {id:'roadmap', icon:'map', l:{en:'Bridge Roadmap', th:'แผนเส้นทางสู่ PR'}, s:{en:'Roadmap', th:'เส้นทาง'}},
     {id:'costs', icon:'receipt', l:{en:'All Costs', th:'ค่าใช้จ่ายทั้งหมด'}, s:{en:'Costs', th:'ค่าใช้จ่าย'}},
     {id:'budget', icon:'calculator', l:{en:'Budget Simulator', th:'จำลองงบประมาณ'}, s:{en:'Budget', th:'งบ'}},
-    {id:'prep', icon:'list-checks', l:{en:'Preparation Checklist', th:'เช็กลิสต์การเตรียมตัว'}, s:{en:'Checklist', th:'เช็กลิสต์'}}
+    {id:'prep', icon:'list-checks', l:{en:'Preparation Checklist', th:'เช็กลิสต์การเตรียมตัว'}, s:{en:'To-do', th:'เช็กลิสต์'}}   /* short EN label: "Checklist" touched "Budget" at 390px */
   ],
   disclaimer:{
     en:'This guide is for planning only and is not legal or immigration advice. Study permit, PGWP, and Express Entry rules change often. Always confirm tuition, admission requirements, PGWP field-of-study eligibility (CIP codes), and proof-of-funds amounts on the official IRCC website and each school\'s site before you pay any deposit. Figures are estimates in Canadian dollars.',
@@ -889,7 +956,8 @@ const MONEY = {
   extraN:{en:(m, two) => `What your expected pay does not cover${two ? ', mostly second-year tuition due at the start of month 13' : ''}. Have it ready by month ${m}. IRCC may also ask how you will pay for the rest of the program.`, th:(m, two) => `ส่วนที่รายได้ที่คาดว่าจะได้ยังไม่พอ${two ? ' ส่วนใหญ่คือค่าเล่าเรียนปีที่ 2 ที่ต้องจ่ายต้นเดือนที่ 13' : ''} ต้องมีพร้อมภายในเดือนที่ ${m} และ IRCC อาจถามว่าจะจ่ายค่าเรียนส่วนที่เหลือของหลักสูตรอย่างไร`},
   prepN:{en:'Tests, documents, school application and visa fees (sections 1 and 2 on the All Costs page). Paid in Thailand before you apply, on top of the money to show.', th:'ค่าสอบ เอกสาร ค่าสมัครเรียน และค่าวีซ่า (หมวด 1 ถึง 2 ในหน้าค่าใช้จ่าย) จ่ายที่ไทยก่อนยื่นวีซ่า แยกจากเงินที่ต้องแสดง'},
   prepR:{en:(a, b) => `Estimate ${a} to ${b}; the goal uses the high end.`, th:(a, b) => `ช่วงประมาณ ${a} ถึง ${b} เป้าใช้ยอดสูงไว้ก่อน`},
-  showN:{en:a => `Must be in your bank when you apply: first-year tuition and fees, the IRCC living-cost amount${a ? ` (CAD ${a}, read live from IRCC)` : ''}, and travel. Once you arrive it pays your flight, rent and food.`, th:a => `ต้องมีในบัญชีตอนยื่นวีซ่า: ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC${a ? ` (CAD ${a} อ่านจากเว็บ IRCC อัตโนมัติ)` : ''} และค่าเดินทาง เมื่อไปถึงแล้วเงินก้อนนี้ใช้จ่ายค่าตั๋ว ค่าเช่า และค่าอาหาร`},
+  /* a: today's IRCC amount read live; p and y: the projected amount actually used for a later start year */
+  showN:{en:(a, p, y) => `Must be in your bank when you apply: first-year tuition and fees, the IRCC living-cost amount${a ? (p ? ` (CAD ${a} today on the IRCC page; this plan uses about CAD ${p}, projected for ${y} at about 2.4% a year)` : ` (CAD ${a}, read live from IRCC)`) : ''}, and travel. Once you arrive it pays your flight, rent and food.`, th:(a, p, y) => `ต้องมีในบัญชีตอนยื่นวีซ่า: ค่าเล่าเรียนและค่าธรรมเนียมปีแรก ยอดค่าครองชีพของ IRCC${a ? (p ? ` (วันนี้ CAD ${a} ตามเว็บ IRCC แผนนี้ใช้ประมาณ CAD ${p} ซึ่งคาดการณ์สำหรับปี ${y} โดยปรับเพิ่มราว 2.4% ต่อปี)` : ` (CAD ${a} อ่านจากเว็บ IRCC อัตโนมัติ)`) : ''} และค่าเดินทาง เมื่อไปถึงแล้วเงินก้อนนี้ใช้จ่ายค่าตั๋ว ค่าเช่า และค่าอาหาร`},
   setupN:{en:'Rent deposit and first purchases. IRCC does not ask for it, but you will need it.', th:'เงินประกันห้องและของใช้ช่วงแรก IRCC ไม่ได้ขอ แต่ควรมีไว้'},
   setupD:{en:'(rent deposit, first purchases)', th:'(เงินประกันห้อง ของใช้ช่วงแรก)'},
   eq:{en:(p, s) => `= prep and visa costs ${p} + money to show + setup reserve ${s} + extra money during the program (if any)`, th:(p, s) => `= ค่าเตรียมตัวและยื่นวีซ่า ${p} + เงินที่ต้องแสดง + เงินสำรองตั้งตัว ${s} + เงินเพิ่มระหว่างหลักสูตร (ถ้ามี)`},
@@ -910,9 +978,16 @@ function livingNote(c){
 }
 /* When the city picked on the Map page is not Toronto and no rent was typed, say so beside the goal, with a way to type rent. */
 function cityRentNote(c){
-  const s = c.s; if (!S.city || S.city === 'tor' || (s.rentC != null && s.rentC !== '' && !isNaN(s.rentC))) return '';
+  /* only a city the user picked (not the Map page's default) asks for a rent change */
+  const s = c.s; if (!S.city || !S.cityPicked || S.city === 'tor' || (s.rentC != null && s.rentC !== '' && !isNaN(s.rentC))) return '';
   const city = typeof cityOf === 'function' ? T(cityOf(S.city).n) : '';
-  return `<span class="block mt-0.5">${T({en:n => `The city picked on the Map page is ${n}, but this rent is not from that city.`, th:n => `เมืองที่เลือกในหน้าแผนที่คือ${n} แต่ค่าเช่านี้ไม่ได้มาจากเมืองนั้น`})(city)}<button class="linkbtn" style="margin-left:8px" data-act="tab" data-v="budget" data-anchor="sim-why">${T({en:'Type the rent you expect', th:'ใส่ค่าเช่าที่คาดว่าจะจ่าย'})}</button></span>`;
+  return `<span class="block mt-0.5">${T({en:n => `The city picked on the Map page is ${n}, but this rent is not from that city.`, th:n => `เมืองที่เลือกในหน้าแผนที่คือ${n} แต่ค่าเช่านี้ไม่ได้มาจากเมืองนั้น`})(city)}<button class="linkbtn" style="margin-left:8px" data-act="cityrent">${T({en:n => `Use ${n} rent`, th:n => `ใช้ค่าเช่า${n}`})(city)}</button><button class="linkbtn" style="margin-left:8px" data-act="tab" data-v="budget" data-anchor="sim-why">${T({en:'Type your own', th:'ใส่เอง'})}</button></span>`;
+}
+/* the rent for the housing type you chose, moved from Toronto to the city picked on the Map by the two cities' 1-bedroom rents */
+function cityRentFor(id){
+  const city = typeof cityOf === 'function' && cityOf(id), tor = typeof cityOf === 'function' && cityOf('tor'); if (!city || !tor) return null;
+  const L0 = SIMC.living[S.sim.living] || SIMC.living.shared;
+  return Math.round(L0.rent * city.rent / tor.rent);
 }
 /* The Budget's folded "fine-tune" settings (26 Nov 2026): tips, Co-op wage, side job, PGWP wait, exchange rate, IRCC amount. */
 const ADV = {
@@ -928,20 +1003,41 @@ const HAVE = {
   ok:{en:x => `Goal reached, with ${x} to spare`, th:x => `ถึงเป้าแล้ว เหลือเผื่ออีก ${x}`},
   note:{en:'Saved on this device only. It does not change the goal.', th:'เก็บไว้ในเครื่องนี้เท่านั้น ไม่ได้เปลี่ยนเป้า'}
 };
+/* Months left to save: the money must be in the bank when the study permit is applied for, about 4 months before the intake. */
+function monthsToApply(){
+  const t = typeof planIntake === 'function' ? planIntake() : new Date((S.sim.intake || 2027), 8, 1), now = new Date();
+  /* the money must already sit still in one account about 4 months before the visa application (itself about 4 months before the intake) */
+  return Math.max(1, (t.getFullYear() - now.getFullYear()) * 12 + t.getMonth() - now.getMonth() - 8);
+}
+/* "save about THB X a month for N months": a shortfall turned into a plan */
+const savePlan = d => { const n = monthsToApply(); return T({en:(x, n, w) => `Save about ${x} a month for ${n} months. Then leave the money untouched in one account for about 4 months before the visa application (about 8 months before the ${w} start), so the bank statement shows no large new deposits.`, th:(x, n, w) => `เก็บเพิ่มเดือนละประมาณ ${x} อีก ${n} เดือน แล้วพักเงินไว้ในบัญชีเดียวโดยไม่แตะราว 4 เดือนก่อนยื่นวีซ่า (ราว 8 เดือนก่อนเริ่มเรียน ${w}) เพื่อให้รายการเดินบัญชีไม่มียอดฝากก้อนใหญ่ช่วงท้าย`})(thb(Math.ceil(d / n / 100) * 100), n, intakeText()); };
+/* A monthly saving above this is out of reach for most salaried savers: offer the first later start that brings it under. */
+const SAVE_CAP = 30000;
+function altStart(h){
+  const r = S.sim.rate || 24, now = new Date();
+  for (const y of SIMC.intakes.filter(y => y > S.sim.intake)) {
+    const d = simCalc({intake:y}).total * r - h, n = Math.max(1, (y - now.getFullYear()) * 12 + 8 - now.getMonth() - 8);
+    if (d <= 0 || d / n <= SAVE_CAP) return {y, n, m:Math.max(0, Math.ceil(d / n / 100) * 100)};
+  }
+  return null;
+}
+const altLine = a => a ? `${T({en:(y, m, n) => `Or start in ${y}: about ${m} a month for ${n} months.`, th:(y, m, n) => `หรือเริ่มเรียนปี ${y}: เก็บเดือนละประมาณ ${m} อีก ${n} เดือน`})(a.y, thb(a.m), a.n)} <button class="linkbtn" data-act="sim-intake" data-v="${a.y}">${T({en:y => `Use ${y}`, th:y => `ใช้ปี ${y}`})(a.y)}</button>` : '';
 function haveInfo(c){
   const h = +S.have; if (!(h > 0)) return null;
-  const g = c.total * (S.sim.rate || 24), d = g - h;
-  return {pct:Math.min(100, Math.floor(h / g * 100)), text:d > 0 ? T(HAVE.short)(thb(d), Math.floor(h / g * 100)) : T(HAVE.ok)(thb(-d)), ok:d <= 0};
+  const g = c.total * (S.sim.rate || 24), d = g - h, tooMuch = d > 0 && d / monthsToApply() > SAVE_CAP;
+  return {pct:Math.min(100, Math.floor(h / g * 100)), text:d > 0 ? T(HAVE.short)(thb(d), Math.floor(h / g * 100)) : T(HAVE.ok)(thb(-d)), ok:d <= 0, plan:d > 0 ? savePlan(d) : '', alt:tooMuch ? altLine(altStart(h)) : ''};
 }
 function haveBlock(c){
   const hi = haveInfo(c);
   return `<div class="have mt-3">
       <label for="have-in" class="text-[14px] font-medium">${T(HAVE.l)}</label>
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-        <span class="amt-in"><span class="faint text-[12px]">THB</span><input id="have-in" class="numin num" type="number" inputmode="numeric" min="0" step="1000" data-have value="${+S.have > 0 ? Math.round(S.have) : ''}" placeholder="${esc(T(HAVE.ph))}" aria-describedby="have-out"></span>
+        <span class="amt-in"><span class="faint text-[12px]">THB</span><input id="have-in" class="numin num" style="width:150px" type="number" inputmode="numeric" min="0" step="1000" data-have value="${+S.have > 0 ? Math.round(S.have) : ''}" placeholder="${esc(T(HAVE.ph))}" aria-describedby="have-out"></span>
         <span id="have-out" class="text-[14px] font-semibold ${hi && hi.ok ? 'pos' : ''}" aria-live="polite">${hi ? hi.text : ''}</span>
       </div>
       <div class="bar mt-2" id="have-bar" style="display:${hi ? '' : 'none'}"><i style="width:${hi ? hi.pct : 0}%;background:var(--s3)"></i></div>
+      <p class="text-[14px] mt-1 flex gap-2" id="have-plan" style="display:${hi && hi.plan ? '' : 'none'}">${ic('piggy-bank','icon-sm')}<span>${hi && hi.plan ? hi.plan : ''}</span></p>
+      <p class="text-[14px] mt-1" id="have-alt" style="display:${hi && hi.alt ? '' : 'none'}">${hi && hi.alt ? hi.alt : ''}</p>
       <p class="faint text-[12.5px] mt-1">${T(HAVE.note)}</p>
     </div>`;
 }
@@ -961,12 +1057,17 @@ function oddAmounts(c){
 }
 /* Housing behind the rent in a simulation, e.g. "shared room at Toronto rent CAD 1,179/month". */
 function houseText(c){
-  const s = c.s, k = s.rentC != null && s.rentC !== '' && !isNaN(s.rentC) ? 'own' : (s.living === 'studio' ? 'studio' : 'shared');
-  return T(MONEY.house[k]) + ' CAD ' + fmt(c.lv.rent) + T(MONEY.perMo);
+  const s = c.s, own = s.rentC != null && s.rentC !== '' && !isNaN(s.rentC), k = own ? 'own' : (s.living === 'studio' ? 'studio' : 'shared');
+  /* a rent set with "Use <city> rent" names that city instead of reading as typed by hand */
+  const fromCity = own && S.city && S.city !== 'tor' && typeof cityRentFor === 'function' && +s.rentC === cityRentFor(S.city);
+  const label = fromCity ? T({en:(st, n) => `${st ? 'own studio' : 'shared room'} at ${n} rent`, th:(st, n) => `${st ? 'สตูดิโอ' : 'ห้องแชร์'} ค่าเช่าแบบ${n}`})(s.living === 'studio', T(cityOf(S.city).n)) : T(MONEY.house[k]);
+  return label + ' CAD ' + fmt(c.lv.rent) + T(MONEY.perMo);
 }
 /* "Public college · start 2027 · 1-year program" (+ housing when full): the assumptions behind a savings goal. */
 function goalBasis(c, full){
-  const s = c.s, parts = [T(SIMC.types[s.type].l), T(MONEY.startY)(s.intake || SIMC.base + 1), T(MONEY.yrs)(s.years || 1)];
+  /* the Checklist's intake month shows here too when it is set, so every goal names the same start */
+  const s = c.s, yr = s.intake || SIMC.base + 1, when = typeof intakeText === 'function' && yr === S.sim.intake ? intakeText() : String(yr);
+  const parts = [T(SIMC.types[s.type].l), T(MONEY.startY)(when), T(MONEY.yrs)(s.years || 1)];
   if (full) parts.push(houseText(c));
   return parts.join(' · ');
 }
@@ -989,7 +1090,9 @@ const QUIZ = [
    ]},
   {id:'budget', icon:'wallet', cat:{en:'Budget', th:'งบประมาณ'},
    q:{en:'How much can you (or your sponsor) show and commit for year one, tuition plus living?', th:'คุณ (หรือสปอนเซอร์) แสดงเงินและพร้อมใช้ในปีแรกได้เท่าไร รวมค่าเรียนและค่าครองชีพ'},
-   hint:() => { const sh = k => thb(typeCalc(k).total * (S.sim.rate || 24)), c = simCalc(), b = [T(MONEY.startY)(S.sim.intake), T(MONEY.yrs)(S.sim.years || 1), houseText(c)].join(' · '); return {en:`For comparison, the total savings goal on the Budget page (it includes the money to show) is ${sh('private')} for a private Co-op, ${sh('public')} for a public college and ${sh('masters')} for a master's (${b}).`, th:`เทียบ: เป้าเงินเก็บทั้งหมดในหน้างบ (รวมเงินที่ต้องแสดงแล้ว) คือ ${sh('private')} สำหรับ Co-op เอกชน ${sh('public')} สำหรับวิทยาลัยรัฐ และ ${sh('masters')} สำหรับปริญญาโท (${b})`}; },
+   /* the same goals, for the same program lengths, that the verdict will measure against (option B is advised as 2 years) */
+   hint:() => { const r = S.sim.rate || 24, sh = q => { const y = qYearsOf(q); return `${thb(typeCalc(QTYPE[q], y ? {years:y} : null).total * r)} (${T(MONEY.yrs)(y || S.sim.years || 1)})`; }, c = simCalc(), b = [T(MONEY.startY)(intakeText()), houseText(c)].join(' · '), h = +S.have > 0 ? thb(+S.have) : '';
+     return {en:`For comparison, the total savings goal on the Budget page (it includes the money to show) is ${sh('a')} for a private Co-op, ${sh('b')} for a public college and ${sh('c')} for a master's (${b}).` + (h ? ` You entered ${h} as money you have now, so the result counts from that.` : ''), th:`เทียบ: เป้าเงินเก็บทั้งหมดในหน้างบ (รวมเงินที่ต้องแสดงแล้ว) คือ ${sh('a')} สำหรับ Co-op เอกชน ${sh('b')} สำหรับวิทยาลัยรัฐ และ ${sh('c')} สำหรับปริญญาโท (${b})` + (h ? ` คุณกรอกเงินที่มีตอนนี้ไว้ ${h} ผลจะคิดจากยอดนั้น` : '')}; },
    o:[
      {a:3,b:0,c:0,l:{en:'Under THB 900,000', th:'ต่ำกว่า 900,000 บาท'}},
      {a:1,b:2,c:1,l:{en:'THB 900,000 to 1,300,000', th:'900,000 ถึง 1,300,000 บาท'}},
@@ -1035,7 +1138,7 @@ const QUIZ = [
    ]},
   {id:'edu', icon:'school', cat:{en:'Education', th:'การศึกษา'},
    q:{en:'What is your highest education, and your grade average (GPA)?', th:'วุฒิการศึกษาสูงสุด และเกรดเฉลี่ย (GPA) ของคุณ'},
-   hint:{en:'Low grades do not close the door. Private Co-op colleges rarely look at grades, and most public college post-graduate programs mainly ask for a finished bachelor\'s degree (some set a minimum, so check the program page). Master\'s programs usually ask for about a B (3.0), and some also weigh work experience.', th:'เกรดน้อยก็ไปได้ วิทยาลัย Co-op เอกชนแทบไม่ดูเกรด หลักสูตร Post-Graduate ของวิทยาลัยรัฐส่วนใหญ่ขอหลัก ๆ แค่จบปริญญาตรี (บางแห่งกำหนดเกรดขั้นต่ำ ควรเช็คในหน้าหลักสูตร) ส่วนปริญญาโทมักขอเกรดประมาณ B (3.0) และบางแห่งพิจารณาประสบการณ์ทำงานประกอบด้วย'},
+   hint:{en:'Low grades do not close the door. Private Co-op colleges rarely look at grades, and most public college post-graduate programs mainly ask for a finished bachelor\'s degree (some set a minimum, so check the program page). Master\'s programs usually ask for about a B (3.0), and some also weigh work experience.', th:'เกรดน้อยก็ไปได้ วิทยาลัย Co-op เอกชนแทบไม่ดูเกรด หลักสูตร Post-Graduate ของวิทยาลัยรัฐส่วนใหญ่ขอหลัก ๆ แค่จบปริญญาตรี (บางแห่งกำหนดเกรดขั้นต่ำ ควรเช็กในหน้าหลักสูตร) ส่วนปริญญาโทมักขอเกรดประมาณ B (3.0) และบางแห่งพิจารณาประสบการณ์ทำงานประกอบด้วย'},
    o:[
      {a:2,b:2,c:0,l:{en:'No bachelor\'s degree yet (high school, vocational certificate or diploma)', th:'ยังไม่มีปริญญาตรี (ม.6 ปวช. หรือ ปวส.)'}},
      {a:2,b:3,c:0,l:{en:'Bachelor\'s degree, GPA under 2.50', th:'ปริญญาตรี เกรดเฉลี่ยต่ำกว่า 2.50'}},
@@ -1072,9 +1175,9 @@ const QUIZ_UI = {
            th:'ปีทดลองแบบต้นทุนต่ำ ให้มองว่าเป็นการทดลองเท่านั้น เพราะไม่นำไปสู่ PGWP ใช้ปีนี้ดัน IELTS ให้ถึง 6.5 และสมัครหลักสูตรสถาบันรัฐแต่เนิ่น ๆ พร้อมเผื่องบสำหรับการขอ Study Permit รอบสองถ้าตัดสินใจอยู่ต่อ'}},
   recB:{t:{en:'Option B fits you best: a public Co-op diploma', th:'ทางเลือก B เหมาะกับคุณที่สุด: Diploma พร้อม Co-op ที่สถาบันรัฐ'},
         
-        d:{en:'The direct route. You still get to test daily life in Canada, but every month also counts toward a PGWP and PR. Choose a 2-year program in an eligible STEM or Healthcare CIP code for the full 3-year permit.',
+        d:{en:'The direct route. You still get to test daily life in Canada, but every month also counts toward a PGWP and PR. Choose a program of 2 years or longer for the full 3-year permit, and check that its CIP code is on the PGWP list.',
 
-           th:'เส้นทางตรง คุณยังได้ทดลองใช้ชีวิตในแคนาดาเหมือนกัน แต่ทุกเดือนนับต่อยอดสู่ PGWP และ PR ด้วย ควรเลือกหลักสูตร 2 ปีในรหัส CIP สาย STEM หรือ Healthcare เพื่อให้ได้ใบอนุญาตเต็ม 3 ปี'}},
+           th:'เส้นทางตรง คุณยังได้ทดลองใช้ชีวิตในแคนาดาเหมือนกัน แต่ทุกเดือนนับต่อยอดสู่ PGWP และ PR ด้วย ควรเลือกหลักสูตรที่ยาว 2 ปีขึ้นไปเพื่อให้ได้ใบอนุญาตเต็ม 3 ปี และตรวจว่ารหัส CIP อยู่ในรายการ PGWP'}},
   recC:{t:{en:'Option C fits you best: a university master\'s degree', th:'ทางเลือก C เหมาะกับคุณที่สุด: ปริญญาโทของมหาวิทยาลัย'},
         
         d:{en:'A master\'s gives a PGWP of up to 3 years in any field and the strongest credential for PR. Prefer a program with a paid Co-op term if you want Canadian work experience before graduating, and compare the master\'s list below.',
@@ -1092,23 +1195,26 @@ const QUIZ_UI = {
    blocks the recommended path. The facts come from the quiz's own hints and the live savings goal on the Budget page. */
 Object.assign(QUIZ_UI, {
   lead:{
-    clear:{en:(n, g, p1, p2) => `Clear lead: ${g} points ahead of ${n} (${p1}% vs ${p2}%).`, th:(n, g, p1, p2) => `ผลชัดเจน: นำ${n} ${g} จุด (${p1}% กับ ${p2}%)`},
-    some:{en:(n, g, p1, p2) => `Moderate lead: ${g} points ahead of ${n} (${p1}% vs ${p2}%). Read that option's card too.`, th:(n, g, p1, p2) => `นำไม่มาก: นำ${n} ${g} จุด (${p1}% กับ ${p2}%) ควรอ่านการ์ดของทางนั้นประกอบด้วย`},
-    close:{en:(n, g, p1, p2) => `Close call: only ${g} points ahead of ${n} (${p1}% vs ${p2}%). Compare both cards above before deciding.`, th:(n, g, p1, p2) => `สูสีมาก: นำ${n} แค่ ${g} จุด (${p1}% กับ ${p2}%) ควรเปรียบเทียบทั้งสองการ์ดด้านบนก่อนตัดสินใจ`}
+    /* one unit only: the two fit percentages (the gap in "points" read as a second scale) */
+    clear:{en:(n, g, p1, p2) => `Clear lead: ${p1}% fit, against ${p2}% for ${n}.`, th:(n, g, p1, p2) => `ผลชัดเจน: เหมาะ ${p1}% ส่วน${n} ${p2}%`},
+    some:{en:(n, g, p1, p2) => `Moderate lead: ${p1}% fit, against ${p2}% for ${n}. Read that option's card too.`, th:(n, g, p1, p2) => `นำไม่มาก: เหมาะ ${p1}% ส่วน${n} ${p2}% ควรอ่านการ์ดของทางนั้นประกอบด้วย`},
+    close:{en:(n, g, p1, p2) => `Close call: ${p1}% fit, against ${p2}% for ${n}. Compare both cards above before deciding.`, th:(n, g, p1, p2) => `สูสีมาก: เหมาะ ${p1}% ส่วน${n} ${p2}% ควรเปรียบเทียบทั้งสองการ์ดด้านบนก่อนตัดสินใจ`}
   },
-  fitsIf:{en:n => `${n} fits best, once the blocking items are cleared`, th:n => `${n} เหมาะที่สุด ถ้าแก้ข้อที่ขวางได้`},
+  fitsIf:{en:n => `${n} fits best, once the blocking items are cleared`, th:n => `${n} เหมาะที่สุด เมื่อจัดการเรื่องที่ขวางอยู่ได้`},
   doneS:{en:'Your best fit', th:'ทางที่เหมาะกับคุณที่สุด'}, seeRes:{en:'See the result', th:'ดูผลแบบประเมิน'},
   fitT:{en:'Fit for each option', th:'ความเหมาะกับแต่ละทางเลือก'}, bestB:{en:'Best fit', th:'เหมาะที่สุด'},
   whyT:{en:'Because you answered', th:'เพราะคุณตอบว่า'},
   needT:{en:'Before this path works', th:'ก่อนจะไปทางนี้ได้'},
   needNone:{en:'Nothing in your answers blocks this path.', th:'จากคำตอบของคุณ ไม่มีข้อไหนขวางทางนี้'},
-  blockL:{en:'Blocks this path', th:'ขวางทางนี้'}, checkL:{en:'Check', th:'ต้องเช็ค'},
-  alt:{en:n => `If you cannot clear the blocking items in time, ${n} does not have them.`, th:n => `ถ้าแก้ข้อที่ขวางไม่ทัน ${n} ไม่ติดข้อเหล่านี้`},
+  blockL:{en:'Blocks this path', th:'ขวางทางนี้'}, checkL:{en:'Check', th:'ต้องเช็ก'},
+  alt:{en:n => `If you cannot clear the blocking items in time, ${n} does not have them.`, th:n => `ถ้าจัดการเรื่องที่ขวางไม่ทัน ${n} ไม่ติดเรื่องเหล่านี้`},
   useBudget:{en:'Use this type in the Budget', th:'ใช้ประเภทนี้ในหน้างบ'},
   useBudgetY:{en:'Use this plan (2 years) in the Budget', th:'ใช้แผนนี้ (หลักสูตร 2 ปี) ในหน้างบ'},
   need:{
-    budShort:{en:(g, band, x, y) => `The total savings goal for this path (${y}) is ${g}, above the budget you chose (${band}). You need about ${x} more.`, th:(g, band, x, y) => `เป้าเงินเก็บทั้งหมดของทางนี้ (${y}) คือ ${g} มากกว่างบที่คุณเลือก (${band}) ต้องหาเพิ่มประมาณ ${x}`},
-    budIn:{en:(g, band, y) => `The total savings goal for this path (${y}) is ${g}, inside the range you chose (${band}). Make sure you reach at least that amount.`, th:(g, band, y) => `เป้าเงินเก็บทั้งหมดของทางนี้ (${y}) คือ ${g} อยู่ในช่วงที่คุณเลือก (${band}) ต้องมีให้ถึงยอดนี้`},
+    /* lo and hi: the shortfall at the top and at the bottom of the chosen band (hi is empty for the lowest band) */
+    budShort:{en:(g, band, lo, hi, y) => `The total savings goal for this path (${y}) is ${g}, above the budget you chose (${band}). You need ${hi ? `about ${lo} to ${hi}` : `at least ${lo}`} more, depending on where in that range you are. Enter the money you have now on the Budget page for one exact figure.`, th:(g, band, lo, hi, y) => `เป้าเงินเก็บทั้งหมดของทางนี้ (${y}) คือ ${g} มากกว่างบที่คุณเลือก (${band}) ต้องหาเพิ่ม${hi ? `ประมาณ ${lo} ถึง ${hi}` : `อย่างน้อย ${lo}`} ขึ้นกับว่าคุณมีเท่าไรในช่วงนั้น กรอกเงินที่มีตอนนี้ในหน้างบเพื่อดูตัวเลขเดียว`},
+    budIn:{en:(g, band, x, y) => `The total savings goal for this path (${y}) is ${g}, inside the range you chose (${band}). If you have less than ${g}, you could be up to ${x} short.`, th:(g, band, x, y) => `เป้าเงินเก็บทั้งหมดของทางนี้ (${y}) คือ ${g} อยู่ในช่วงที่คุณเลือก (${band}) ถ้ามีน้อยกว่ายอดนี้ อาจขาดได้ถึง ${x}`},
+    haveShort:{en:(g, h, x, y) => `The total savings goal for this path (${y}) is ${g}. You have ${h} (entered on the Budget page), so you need about ${x} more.`, th:(g, h, x, y) => `เป้าเงินเก็บทั้งหมดของทางนี้ (${y}) คือ ${g} คุณมีแล้ว ${h} (ตามที่กรอกในหน้างบ) จึงต้องหาเพิ่มประมาณ ${x}`},
     en0:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall. You answered below 6.0 or not tested yet, so you need 6.5 before you apply.', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 คุณตอบว่าต่ำกว่า 6.0 หรือยังไม่เคยสอบ จึงต้องได้ 6.5 ก่อนสมัคร'},
     en1:{en:'Raise IELTS Academic from about 6.0 to 6.5 before you apply.', th:'ต้องดัน IELTS Academic จากประมาณ 6.0 ให้ถึง 6.5 ก่อนสมัคร'},
     noDegC:{en:'A master\'s needs a finished bachelor\'s degree first.', th:'ปริญญาโทต้องจบปริญญาตรีก่อน'},
@@ -1123,16 +1229,21 @@ Object.assign(QUIZ_UI, {
 });
 /* quiz option to Budget program type, and the program length an option is advised with (B: 2 years for the full PGWP) */
 const QTYPE = {a:'private', b:'public', c:'masters'}, QYEARS = {b:2};
+/* the program length a path is priced at: B is advised as 2 years; C too when a spouse wants to work (16 months or more) */
+const qYearsOf = k => QYEARS[k] || (k === 'c' && S.quiz && S.quiz.family === 1 ? 2 : undefined);
 /* What in the answers blocks (lv 'block') or needs checking (lv 'check') on path k. Budget uses the live savings goal. */
 function quizNeeds(k){
-  const A = S.quiz, N = QUIZ_UI.need, out = [], add = (lv, t) => out.push({lv, t});
+  const A = S.quiz, N = QUIZ_UI.need, out = [], add = (lv, t, kind) => out.push({lv, t, kind});
   const r = S.sim.rate || 24, bandMax = [900000, 1300000, Infinity], bandMin = [0, 900000, 1300000];
   if (A.budget != null) {
     /* option B is advised as a 2-year program, so its goal is worked out for 2 years */
-    const yrs = QYEARS[k] || S.sim.years || 1, g = typeCalc(QTYPE[k], QYEARS[k] ? {years:QYEARS[k]} : null).total * r;
-    const band = T(QUIZ.find(q => q.id === 'budget').o[A.budget].l), y = T(MONEY.yrs)(yrs);
-    if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget]), y));
-    else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band, y));
+    const yrs = qYearsOf(k) || S.sim.years || 1, g = typeCalc(QTYPE[k], qYearsOf(k) ? {years:qYearsOf(k)} : null).total * r;
+    /* the verdict names the start it was worked out for, so a change of year on the Budget explains a changed gap */
+    const band = T(QUIZ.find(q => q.id === 'budget').o[A.budget].l), y = T(MONEY.yrs)(yrs) + ', ' + T(MONEY.startY)(intakeText()), have = +S.have > 0 ? +S.have : 0;
+    /* the money the user typed on the Budget page beats the band: one exact shortfall instead of a guess */
+    if (have) { if (g > have) add('block', T(N.haveShort)(thb(g), thb(have), thb(g - have), y) + ' ' + savePlan(g - have), 'money'); }
+    else if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget]), bandMin[A.budget] ? thb(g - bandMin[A.budget]) : '', y), 'money');
+    else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band, thb(g - bandMin[A.budget]), y));
   }
   if (k !== 'a') { if (A.english === 0) add('block', T(N.en0)); else if (A.english === 1) add('check', T(N.en1)); }
   if (k === 'c') { if (A.edu === 0) add('block', T(N.noDegC)); else if (A.edu === 1) add('block', T(N.gpaLowC)); else if (A.edu === 2) add('check', T(N.gpaMidC)); }
@@ -1140,6 +1251,21 @@ function quizNeeds(k){
   if (k === 'a') { if (A.goal === 2) add('check', T(N.prA)); if (A.time === 2) add('check', T(N.timeA)); }
   if (A.family === 1) add(k === 'c' ? 'check' : 'block', T(k === 'c' ? N.spouseC : N.spouseAB));
   return out.sort((x, y) => (x.lv === 'block' ? 0 : 1) - (y.lv === 'block' ? 0 : 1));
+}
+/* When the money chosen (or typed on the Budget) is below every option's goal, say so first: fit ranks paths, money decides them. */
+function quizAfford(k1){
+  const A = S.quiz; if (A.budget == null) return '';
+  const r = S.sim.rate || 24, usesHave = +S.have > 0, cap = usesHave ? +S.have : [900000, 1300000, Infinity][A.budget];
+  const gs = ['a','b','c'].map(k => ({k, g:typeCalc(QTYPE[k], qYearsOf(k) ? {years:qYearsOf(k)} : null).total * r}));
+  if (gs.some(x => x.g <= cap)) return '';
+  const near = gs.sort((x, y) => x.g - y.g)[0], NM = {a:QUIZ_UI.nA, b:QUIZ_UI.nB, c:QUIZ_UI.nC};
+  /* one gap figure per card: when the closest path is the recommended one, its own blocker below carries the number */
+  const txt = near.k === k1
+    ? T({en:'With the money you chose, no option fits yet; the gap for this path is below. The fit percentages rank the paths on everything except money.', th:'ด้วยเงินที่เลือก ยังไม่มีทางไหนพอ เงินที่ขาดของทางนี้อยู่ด้านล่าง เปอร์เซ็นต์ความเหมาะจัดอันดับจากทุกเรื่องยกเว้นเงิน'})
+    : T({en:(n, x) => `With the money you chose, no option fits yet. The closest in money is ${n}, short by at least ${x}. The fit percentages rank the paths on everything except money.`, th:(n, x) => `ด้วยเงินที่เลือก ยังไม่มีทางไหนพอ ทางที่ใช้เงินใกล้ที่สุดคือ${n} ขาดอย่างน้อย ${x} เปอร์เซ็นต์ความเหมาะจัดอันดับจากทุกเรื่องยกเว้นเงิน`})(T(NM[near.k]), thb(near.g - cap));
+  /* name the money being judged: the amount typed on the Budget replaces the quiz's band answer */
+  const src = usesHave ? T({en:x => `Judged against the ${x} you typed as money you have now on the Budget page, not your answer to question 2. `, th:x => `คิดจากเงินที่มีตอนนี้ ${x} ที่คุณกรอกในหน้างบ ไม่ใช่คำตอบข้อ 2 `})(thb(+S.have)) : '';
+  return `<p class="qlead qlead-close" style="max-width:72ch">${ic('wallet','icon-sm')}<span>${src}${txt}</span></p>`;
 }
 /* Up to three answers that favoured path k most over the other two. */
 function quizWhy(k){
@@ -1540,8 +1666,9 @@ const CHECK = {
     {id:'passport', ph:0, t:{en:'Check your passport', th:'ตรวจสอบพาสปอร์ต'},
      d:{en:'It should stay valid for your whole program. Renew now if it expires within about 2 years.', th:'ควรมีอายุครอบคลุมตลอดหลักสูตร ถ้าจะหมดอายุภายในประมาณ 2 ปี ให้ต่ออายุตอนนี้'},
      why:{en:'Every later form asks for your passport number. Changing passports mid-process creates extra work.', th:'ทุกแบบฟอร์มหลังจากนี้ต้องใช้เลขพาสปอร์ต ถ้าเปลี่ยนเล่มกลางทางจะยุ่งยาก'}},
-    {id:'season', ph:0, t:{en:'Put the money in one account and leave it', th:'รวมเงินไว้บัญชีเดียวและปล่อยให้นิ่ง'},
-     d:{en:`The money to show: ${MONEY.showDef.en}. Keep it for 4 to 6 months; avoid large deposits you cannot explain. [[funds]]`, th:`เงินที่ต้องแสดง: ${MONEY.showDef.th} คงเงินไว้ 4 ถึง 6 เดือน หลีกเลี่ยงยอดฝากก้อนใหญ่ที่อธิบายที่มาไม่ได้ [[funds]]`},
+    {id:'season', ph:0, t:{en:'Open one account for the money and keep saving into it', th:'เปิดบัญชีเดียวสำหรับเงินก้อนนี้ และเก็บเข้าบัญชีนี้เรื่อย ๆ'},
+     /* same timing as the Budget's saving plan: save into this one account, then stop adding about 8 months before the intake */
+     d:{en:`The money to show: ${MONEY.showDef.en}. Add to this one account every month (regular salary transfers are easy to explain). About 8 months before the intake, 4 months before you apply, stop adding and leave it untouched. Avoid large deposits you cannot explain. [[funds]]`, th:`เงินที่ต้องแสดง: ${MONEY.showDef.th} โอนเข้าบัญชีนี้ทุกเดือน (เงินเดือนที่โอนสม่ำเสมออธิบายที่มาได้ง่าย) ราว 8 เดือนก่อนเริ่มเรียน หรือ 4 เดือนก่อนยื่นวีซ่า ให้หยุดฝากเพิ่มและปล่อยให้นิ่ง หลีกเลี่ยงยอดฝากก้อนใหญ่ที่อธิบายที่มาไม่ได้ [[funds]]`},
      why:{en:'Officers read your account history, not just today\'s balance. Time is the only way to build that history.', th:'เจ้าหน้าที่ดูประวัติบัญชี ไม่ใช่แค่ยอดวันนี้ และประวัตินี้สร้างได้ด้วยเวลาเท่านั้น'}, go:'budget'},
     {id:'ielts-prep', ph:0, t:{en:'English test: start preparing', th:'สอบภาษาอังกฤษ: เริ่มเตรียมตัว'},
      d:{en:'Check which test your schools accept: usually IELTS Academic, 6.5 overall with no band under 6.0 for public colleges; universities often ask more. Try the free practice material from IDP or British Council to see how far you are from that score, then study the weak skills.', th:'ตรวจว่าสถาบันที่สนใจรับข้อสอบแบบไหน โดยทั่วไปคือ IELTS Academic รวม 6.5 ไม่มีทักษะใดต่ำกว่า 6.0 สำหรับวิทยาลัยรัฐ มหาวิทยาลัยมักขอสูงกว่า ลองทำแบบฝึกฟรีจาก IDP หรือ British Council เพื่อดูว่ายังห่างจากคะแนนเป้าหมายแค่ไหน แล้วฝึกทักษะที่ยังอ่อน'},
@@ -1648,11 +1775,12 @@ const SIM_UI = {
   type:{en:'Program type', th:'ประเภทหลักสูตร'},
   intakeQ:{en:'Start year', th:'ปีที่เริ่มเรียน'},
   roadYears:{en:'The years in this roadmap count from the start year you pick (the same setting as the Budget page).', th:'ปีในแผนนี้นับจากปีที่เริ่มเรียนที่เลือก (ใช้ค่าเดียวกับหน้างบ)'},
-  farNote:{en:(y, n) => `A ${y} start is ${n} years away. The amounts are rough projections from today's prices, and IRCC rules, school programs and fees are likely to change before then. Check again each year.`, th:(y, n) => `เริ่มเรียนปี ${y} คือล่วงหน้า ${n} ปี ตัวเลขเงินเป็นการคาดการณ์คร่าว ๆ จากราคาปัจจุบัน และกฎของ IRCC หลักสูตร และค่าเรียนมีแนวโน้มเปลี่ยนก่อนถึงตอนนั้น ควรกลับมาเช็คทุกปี`},
+  farNote:{en:(y, n) => `A ${y} start is ${n} years away. The amounts are rough projections from today's prices, and IRCC rules, school programs and fees are likely to change before then. Check again each year.`, th:(y, n) => `เริ่มเรียนปี ${y} คือล่วงหน้า ${n} ปี ตัวเลขเงินเป็นการคาดการณ์คร่าว ๆ จากราคาปัจจุบัน และกฎของ IRCC หลักสูตร และค่าเรียนมีแนวโน้มเปลี่ยนก่อนถึงตอนนั้น ควรกลับมาเช็กทุกปี`},
   intakeNote:{en:'Assumes a September start. Every money amount on this page is for your start year: the defaults already add estimated yearly increases to today\'s prices, so the sliders, the typed amounts and the results show the same numbers.', th:'สมมติเปิดเรียนเดือนกันยายน ตัวเลขเงินทุกช่องในหน้านี้เป็นยอดของปีที่เริ่มเรียน ค่าเริ่มต้นบวกอัตราเพิ่มรายปีโดยประมาณจากราคาปัจจุบันแล้ว แถบเลื่อน ช่องใส่ยอดเอง และผลลัพธ์จึงแสดงตัวเลขเดียวกัน'},
   lenQ:{en:'Program length', th:'ระยะเวลาหลักสูตร'},
   len1:{en:'1 year', th:'1 ปี'}, len2:{en:'2 years', th:'2 ปี'},
-  len1p:{en:'1 year (6 + 6 months)', th:'1 ปี (เรียน 6 + Co-op 6 เดือน)'}, len2p:{en:'2 years (12 + 12 months)', th:'2 ปี (เรียน 12 + Co-op 12 เดือน)'},
+  /* short labels so the length control never wraps; the study and Co-op split is in the program description */
+  len1p:{en:'1 year', th:'1 ปี'}, len2p:{en:'2 years', th:'2 ปี'},
   coopQ:{en:'Does the program include a paid Co-op term?', th:'หลักสูตรมีเทอม Co-op แบบได้ค่าจ้างไหม'},
   coopYes:{en:'Yes, with Co-op', th:'มี Co-op'}, coopNo:{en:'No Co-op', th:'ไม่มี Co-op'},
   coopFixed:{en:'Work & Study programs always include a Co-op term, so this is fixed.', th:'หลักสูตร Work & Study มีเทอม Co-op เสมอ จึงล็อกไว้'},
@@ -2353,7 +2481,7 @@ const START = {
   ],
   steps:[
     {id:'s1', icon:'signpost', m:{en:'12 to 18 months', th:'12 ถึง 18 เดือน'}, t:{en:'Decide which path fits you', th:'ตัดสินใจว่าเส้นทางไหนเหมาะกับคุณ'},
-     d:[{en:'Take the self-assessment quiz to see whether to start with a private Co-op (cheap trial, no PGWP) or a public Co-op diploma (leads to PR).', th:'ทำแบบประเมินเพื่อดูว่าควรเริ่มด้วย Co-op เอกชน (ทดลองราคาถูก ไม่มี PGWP) หรือ Diploma พร้อม Co-op ที่สถาบันรัฐ (ต่อยอดสู่ PR ได้)'},
+     d:[{en:'Take the self-assessment quiz to see whether to start with a private Co-op (cheap trial, no PGWP), a public Co-op diploma (leads to PR) or a university master\'s (a PGWP of up to 3 years in any field).', th:'ทำแบบประเมินเพื่อดูว่าควรเริ่มด้วย Co-op เอกชน (ทดลองราคาถูก ไม่มี PGWP) Diploma พร้อม Co-op ที่สถาบันรัฐ (ต่อยอดสู่ PR ได้) หรือปริญญาโทของมหาวิทยาลัย (PGWP สูงสุด 3 ปีในทุกสาขา)'},
         
         {en:'Pick a target intake: January, May, or September, in any year from 2027 to 2033.', th:'เลือกรอบเปิดเรียนเป้าหมาย: มกราคม พฤษภาคม หรือกันยายน ของปีใดก็ได้ตั้งแต่ 2027 ถึง 2033'}],
      c:{en:'Free', th:'ไม่มีค่าใช้จ่าย'}, go:{tab:'ready', anchor:'quiz', l:{en:'Take the quiz', th:'ทำแบบประเมิน'}}},
@@ -2984,7 +3112,7 @@ const CITY_UI = {
   airport:{en:'Airport', th:'สนามบิน'},
   gmap:{en:'Open in Google Maps', th:'เปิดใน Google Maps'},
   onMap:{en:'Show on map', th:'ดูบนแผนที่'},
-  zoomTip:{en:'Scroll or pinch to zoom, drag to move.', th:'เลื่อนลูกกลิ้งเมาส์หรือใช้สองนิ้วเพื่อซูม ลากเพื่อเลื่อนแผนที่'},
+  zoomTip:{en:'Click the map, then scroll to zoom and drag to move. On a phone, use two fingers.', th:'คลิกที่แผนที่ก่อน แล้วเลื่อนลูกกลิ้งเพื่อซูม ลากเพื่อเลื่อน บนมือถือใช้สองนิ้ว'},
   rent:{en:'Average rent, 1-bedroom', th:'ค่าเช่าเฉลี่ย ห้อง 1 ห้องนอน'}, rentNote:{en:'CMHC average', th:'ค่าเฉลี่ยของ CMHC'},
   budgetNote:{en:h => `These figures are for comparing cities. The Budget page does not change with the city you pick here: it uses the housing chosen there (now ${h}). If you plan to study here, type the rent you expect on the Budget page.`, th:h => `ตัวเลขในหน้านี้ใช้เทียบเมือง หน้างบไม่ได้เปลี่ยนตามเมืองที่เลือกตรงนี้ แต่ใช้ที่พักที่เลือกในหน้างบ (ตอนนี้ ${h}) ถ้าจะเรียนเมืองนี้ ให้พิมพ์ค่าเช่าที่คาดว่าจะจ่ายในหน้างบ`},
   toBudget:{en:'Type rent on the Budget page', th:'ใส่ค่าเช่าในหน้างบ'},
@@ -3161,10 +3289,11 @@ function viewStart(){
     </section>
     <div class="grid lg:grid-cols-3 gap-6 items-start">
       <div class="lg:col-span-2">
-        
+        ${startHere()}
         <div class="card mb-6">
-        
-          <div class="flex justify-between text-[14px] mb-2"><span class="muted">${T(A.progress)}</span><span class="num font-semibold">${cs.done} / ${cs.total}</span></div>
+
+          <div class="flex justify-between text-[14px] mb-2"><span class="muted">${T(A.progress)}</span><span class="num font-semibold">${cs.done} / ${cs.total} ${T({en:'items', th:'ข้อ'})}</span></div>
+          <p class="faint text-[13px] mb-2">${T({en:(s, n) => `The ${s} steps on this page are split into ${n} smaller items in the Checklist.`, th:(s, n) => `${s} ขั้นตอนในหน้านี้ แบ่งเป็น ${n} ข้อย่อยในเช็กลิสต์`})(A.steps.length, cs.total)}</p>
 
           <div class="bar"><i style="width:${cs.pct}%;background:var(--green)"></i></div>
 
@@ -3174,14 +3303,14 @@ function viewStart(){
         <div class="tl">${steps}</div>
       </div>
       <div class="grid gap-6">
-      <div class="card">${liveCard()}</div>
       <div class="card">
-        
+
         <h2 class="text-[17px] font-semibold mb-1">${T(A.glossT)}</h2>
 
         ${['DLI','LOA','PAL','Study Permit','Co-op','PGWP','SIN','PR'].map(k => GLOSS.find(e => e.k === k)).filter(Boolean).map(e => `<div class="py-2" style="border-top:1px solid var(--line)"><div class="font-semibold text-[15px]">${esc(gk(e))}${e.f ? ` <span class="faint font-normal text-[12.5px]">${esc(e.f)}</span>` : ''}</div><div class="muted text-[14px]">${esc(gtxt(e))}</div></div>`).join('')}
         <button class="btn btn-ghost mt-2" style="font-size:14px" data-act="gloss-open">${ic('book-search','icon-sm')}${T(GLOSS_UI.seeAll)(GLOSS.length)}</button>
       </div>
+      <div class="card">${liveCard()}</div>
       </div>
     </div>`;
 }
@@ -3207,6 +3336,11 @@ function ladderBar(c){
   const parts = [[MONEY.prep, c.prep, 's1'], [MONEY.show, c.show, 's2'], [MONEY.setup, c.setup, 's3']].concat(c.extra > 0 ? [[MONEY.extra, c.extra, 's4']] : []), tot = c.total || 1;
   return `<div class="lbar" role="img" aria-label="${esc(parts.map(p => T(p[0]) + ' ' + Math.round(p[1] / tot * 100) + '%').join(', '))}">${parts.map(p => `<div class="${p[2]}" style="flex:${Math.max(p[1], 0)}"></div>`).join('')}</div>`;
 }
+/* a typed cost far above its estimate (over 3 times the high end) gets the same gentle note as the Budget amounts */
+function costOdd(it){
+  const o = costOwn(it), hi = it.cad ? it.cad[1] : it.thb[1]; if (o == null || !(hi > 0) || o <= hi * 3) return '';
+  return T({en:n => `About ${n} times the estimate. Check for an extra zero, or THB typed into a CAD box.`, th:n => `สูงกว่าค่าประมาณราว ${n} เท่า ตรวจว่าพิมพ์เลขศูนย์เกิน หรือใส่ยอดบาทในช่อง CAD หรือไม่`})(Math.round(o / hi));
+}
 function costCell(it){
   const C = COSTS, k = costKey(it), unit = it.cad ? 'cad' : 'thb', o = costOwn(it), r = S.sim.rate || 24;
   const est = it.cad ? money(it.cad[0], it.cad[1], 'cad') : money(it.thb[0], it.thb[1], 'thb');
@@ -3214,6 +3348,7 @@ function costCell(it){
   return `<div class="amt cost-edit">
       <span class="amt-in"><span class="faint text-[12px]">${unit.toUpperCase()}</span><input class="numin num" type="number" inputmode="decimal" min="0" step="any" data-cost="${k}" data-unit="${unit}" value="${o == null ? '' : o}" placeholder="${esc(T(C.ownPh))}" aria-label="${esc(T(it.t))}"></span>
       <span class="msub">${other ? other + ' · ' : ''}${T(C.estIs)} ${unit === 'cad' ? 'CAD ' + est.cad : 'THB ' + est.thb}${o != null ? ` · <button class="linkbtn" data-act="costdef" data-v="${k}">${T(C.useEst)}</button>` : ''}</span>
+      ${costOdd(it) ? `<span class="msub" style="color:var(--warn)">${costOdd(it)}</span>` : ''}
     </div>`;
 }
 function viewCosts(){
@@ -3282,7 +3417,8 @@ function viewCosts(){
   const c = simCalc(), prepOwn = C.secs.some(s => s.prep && s.items.some(it => costOwn(it) != null));
   const lrow = (sw, name, note, v) => `<div class="lrow"><div class="min-w-0"><div class="lname font-medium text-[15px]"><i class="sw ${sw}"></i>${T(name)}</div><p class="faint text-[13px] mt-0.5">${note}</p></div><div class="amtv">${thb(v * r)}<span class="msub">${cad(v)}</span></div></div>`;
   const prepNote = T(MONEY.prepN) + (c.prepR[1] - c.prepR[0] > 1 ? ' ' + T(MONEY.prepR)(thb(c.prepR[0] * r), thb(c.prepR[1] * r)) : '') + (prepOwn ? ' ' + T(C.ownIncl) : '');
-  const showNote = T(MONEY.showN)(c.s.proofAuto !== false && LIVE.funds ? fmt(fundsAmt()) : '');
+  const live = c.s.proofAuto !== false && LIVE.funds, proj = live && Math.abs(c.proof - fundsAmt()) > 1;
+  const showNote = T(MONEY.showN)(live ? fmt(fundsAmt()) : '', proj ? fmt(c.proof) : '', c.s.intake);
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(C.h1)}</h1>
@@ -3327,14 +3463,16 @@ function viewCosts(){
       </div>
     </div>
     <div class="grid gap-6 mt-4">${secs}</div>
-    <p class="faint text-[13px] mt-4 flex gap-2" style="max-width:90ch">${ic('info','icon-sm')}<span>${T(C.note)}</span></p>`;
+    <p class="faint text-[13px] mt-4 flex gap-2" style="max-width:62ch">${ic('info','icon-sm')}<span>${T(C.note)}</span></p>`;
 }
 
 function viewReady(){
   const R = READY_UI;
+  /* phase labels are a sequence, not a status: one neutral blue, so phase 2 does not read as a warning */
+  const qr = quizScore(), best = qr.done ? qr.rank[0].toUpperCase() : '';
   const phases = PHASES.map(p => `
     <div class="card">
-      <span class="badge ${p.c}">${ic(p.icon,'icon-sm')}${T(p.t)}</span>
+      <span class="badge b-blue">${ic(p.icon,'icon-sm')}${T(p.t)}</span>
       <p class="mt-3 muted text-[15px]">${T(p.d)}</p>
     </div>`).join('');
   const opts = OPTIONS.map(o => `
@@ -3346,7 +3484,8 @@ function viewReady(){
         <div class="min-w-0">
         
           <h3 class="text-[17px] font-semibold">${T(o.t)}</h3>
-        
+          ${best === o.key ? `<span class="badge b-blue mt-1">${ic('circle-check','icon-sm')}${T({en:'Best fit in your self-assessment', th:'เหมาะกับคุณที่สุดจากแบบประเมิน'})}</span>` : ''}
+
           <div class="flex flex-wrap items-center gap-2 mt-2">
         
             <span class="badge b-gray">${T(o.sub)}</span>
@@ -3394,14 +3533,19 @@ const QENTRY = {
   part:{en:(n, t) => `You have answered ${n} of ${t}.`, th:(n, t) => `ตอบไปแล้ว ${n} จาก ${t} ข้อ`}, cont:{en:'Continue', th:'ทำต่อ'},
   done:{en:'Your result', th:'ผลของคุณ'}, see:{en:'See the result', th:'ดูผล'}
 };
-function quizEntry(){
+/* The quiz entry card: on top of Ready (jumps down the page) and first on Start (opens Ready at the quiz). */
+function quizEntry(fromStart){
   const Q = QENTRY, r = quizScore(), NM = {a:QUIZ_UI.nA, b:QUIZ_UI.nB, c:QUIZ_UI.nC};
-  const body = r.done ? `<div class="flex-1 min-w-0"><div class="muted text-[14px]">${T(Q.done)}</div><h2 class="text-[17px] font-semibold">${T(NM[r.rank[0]])}</h2></div>
-      <button class="btn btn-primary" data-act="jump" data-v="quiz-result">${T(Q.see)}${ic('arrow-down','icon-sm')}</button>`
+  const go = id => fromStart ? `data-act="tab" data-v="ready" data-anchor="${id}"` : `data-act="jump" data-v="${id}"`, arrow = ic(fromStart ? 'arrow-right' : 'arrow-down', 'icon-sm');
+  /* the result keeps its condition: a path with blocking items fits "once they are cleared" */
+  const blocked = r.done && quizNeeds(r.rank[0]).some(x => x.lv === 'block');
+  const body = r.done ? `<div class="flex-1 min-w-0"><div class="muted text-[14px]">${T(Q.done)}</div><h2 class="text-[17px] font-semibold">${T(NM[r.rank[0]]).replace(/Co-op/g, 'Co‑op')}</h2>${blocked ? `<p class="text-[14px] mt-0.5" style="color:var(--warn)">${T({en:'Fits once the blocking items are cleared', th:'เหมาะเมื่อจัดการเรื่องที่ขวางอยู่ได้'})}</p>` : ''}</div>
+      <button class="btn btn-primary" ${go('quiz-result')}>${T(Q.see)}${arrow}</button>`
     : `<div class="flex-1 min-w-0" style="flex-basis:260px"><h2 class="text-[17px] font-semibold">${T(Q.t)}</h2><p class="muted text-[15px] mt-1">${r.n ? T(Q.part)(r.n, QUIZ.length) + ' ' : ''}${T(Q.d)}</p></div>
-      <button class="btn btn-primary" data-act="jump" data-v="quiz">${T(r.n ? Q.cont : Q.go)}${ic('arrow-down','icon-sm')}</button>`;
-  return `<section class="card mb-10 flex flex-wrap items-center gap-4"><span class="tile" style="background:var(--blue-soft);color:var(--blue)">${ic('list-checks')}</span>${body}</section>`;
+      <button class="btn btn-primary" ${go('quiz')}>${T(r.n ? Q.cont : Q.go)}${arrow}</button>`;
+  return `<section class="card ${fromStart ? 'mb-6' : 'mb-10'} flex flex-wrap items-center gap-4"><span class="tile" style="background:var(--blue-soft);color:var(--blue)">${ic('list-checks')}</span>${body}</section>`;
 }
+const startHere = () => quizEntry(true);
 
 function quizScore(){
   const sc = {a:0,b:0,c:0}, mx = {a:0,b:0,c:0}; let city = null, n = 0;
@@ -3421,7 +3565,7 @@ function viewQuiz(){
       <div class="flex items-center gap-2 mb-2"><span class="badge b-gray">${ic(q.icon,'icon-sm')}${T(q.cat)}</span><span class="faint text-[13px] num">${qi+1} / ${QUIZ.length}</span></div>
       <h3 id="qq-${q.id}" class="text-[17px] font-semibold ${q.hint ? 'mb-1' : 'mb-3'}">${T(q.q)}</h3>
       ${q.hint ? `<p class="muted text-[13.5px] mb-3 flex gap-1.5"><span style="color:var(--blue);margin-top:2px">${ic('info','icon-sm')}</span><span>${T(q.hint)}</span></p>` : ''}
-      <div class="grid gap-2" role="group" aria-labelledby="qq-${q.id}">${q.o.map((o,oi) => `<button class="opt ${S.quiz[q.id]===oi?'on':''}" data-act="quiz" data-q="${q.id}" data-o="${oi}" aria-pressed="${S.quiz[q.id]===oi}">${T(o.l)}</button>`).join('')}</div>
+      <div class="grid gap-2" role="radiogroup" aria-labelledby="qq-${q.id}">${q.o.map((o,oi) => `<button class="opt ${S.quiz[q.id]===oi?'on':''}" role="radio" data-act="quiz" data-q="${q.id}" data-o="${oi}" aria-checked="${S.quiz[q.id]===oi}" tabindex="${(S.quiz[q.id] == null ? oi === 0 : S.quiz[q.id] === oi) ? 0 : -1}">${T(o.l)}</button>`).join('')}</div>
     </div>`).join('');
   /* The verdict gets the full width under the questions (26 Nov 2026); the sticky side card keeps progress and a link to it. */
   let side, res = '';
@@ -3440,10 +3584,13 @@ function viewQuiz(){
         <button class="btn btn-ghost mt-3" style="padding:4px 12px;font-size:14px" data-act="jump" data-v="quiz-result">${T(Q.seeRes)}${ic('arrow-down','icon-sm')}</button>
       </div>`;
     /* fit bars: one neutral colour, the leader in the first data colour and labelled, so colour is not the only cue */
-    const bars = ['a', 'b', 'c'].map(k => { const lead = k === k1; return `<div class="flex flex-col justify-between"><div class="flex justify-between items-baseline gap-2 text-[14px] mb-1"><span class="${lead ? 'font-semibold' : ''}">${T(NM[k])}${lead ? ` <span class="badge b-blue">${T(Q.bestB)}</span>` : ''}</span><span class="num font-semibold">${r.pct[k]}%</span></div><div class="bar"><i class="${lead ? 'fit-lead' : 'fit-n'}" style="width:${r.pct[k]}%"></i></div></div>`; }).join('');
+    /* fit and money are separate: when no path is affordable, each bar says so beside its fit */
+    const noMoney = !!quizAfford(k1);
+    const bars = ['a', 'b', 'c'].map(k => { const lead = k === k1; return `<div class="flex flex-col justify-between"><div class="flex justify-between items-baseline gap-2 text-[14px] mb-1"><span class="${lead ? 'font-semibold' : ''}">${T(NM[k])}${lead ? ` <span class="badge b-blue">${T(Q.bestB)}</span>` : ''}</span><span class="num font-semibold">${T({en:'fit', th:'เหมาะ'})} ${r.pct[k]}%${noMoney ? ` <span class="font-normal" style="color:var(--warn)">· ${T({en:'money short', th:'เงินยังไม่พอ'})}</span>` : ''}</span></div><div class="bar"><i class="${lead ? 'fit-lead' : 'fit-n'}" style="width:${r.pct[k]}%"></i></div></div>`; }).join('');
     res = `
     <section class="card mt-4" id="quiz-result" aria-labelledby="quiz-res-h">
       <h3 id="quiz-res-h" tabindex="-1" class="text-[20px] font-semibold">${blocks ? T(Q.fitsIf)(T(NM[k1])) : T(rec.t)}</h3>
+      ${quizAfford(k1)}
       <p class="qlead qlead-${lvl}" style="max-width:72ch">${ic(lvl === 'clear' ? 'circle-check' : 'scale','icon-sm')}<span>${T(Q.lead[lvl])(T(NM[k2]), gap, r.pct[k1], r.pct[k2])}</span></p>
       <p class="muted mt-3 text-[15px]" style="max-width:72ch">${T(rec.d)}</p>
       <div class="grid md:grid-cols-2 gap-x-8">
@@ -3454,11 +3601,9 @@ function viewQuiz(){
         </div>
       </div>
       <div class="qsec"><h4>${T(Q.fitT)}</h4><div class="grid sm:grid-cols-3 gap-x-6 gap-y-3">${bars}</div></div>
-      ${r.city ? `<p class="mt-5 text-[15px] flex gap-2"><span style="color:var(--blue)">${ic('map-pin','icon-sm')}</span><span>${T(Q.city[r.city])}</span></p>` : ''}
-      <div class="flex flex-wrap gap-2 mt-5">
-        <button class="btn btn-primary" data-act="goroad" data-v="${sc}">${T(Q.go)}${ic('arrow-right','icon-sm')}</button>
-        <button class="btn btn-ghost" data-act="quiztype" data-v="${QTYPE[k1]}" ${QYEARS[k1] ? `data-years="${QYEARS[k1]}"` : ''}>${ic('calculator','icon-sm')}${T(QYEARS[k1] ? Q.useBudgetY : Q.useBudget)}</button>
-      </div>
+      ${r.city ? `<p class="mt-5 text-[15px] flex gap-2"><span style="color:var(--blue)">${ic('map-pin','icon-sm')}</span><span>${T(Q.city[r.city])}${r.city === 'bc' && needs.some(x => x.kind === 'money') ? ' ' + T({en:'With a tight budget, compare rents on the Map page first: a 1-bedroom in Winnipeg or Edmonton costs about CAD 500 a month less than in Vancouver.', th:'ถ้างบตึง ให้เทียบค่าเช่าในหน้าแผนที่ก่อน ห้อง 1 ห้องนอนในวินนิเพกหรือเอดมันตันถูกกว่าแวนคูเวอร์ราว CAD 500 ต่อเดือน'}) : ''}</span></p>` : ''}
+      ${(() => {   /* when money is what blocks the path, the Budget (where the gap becomes a monthly plan) is the main next step */ const money = needs.some(x => x.kind === 'money'), bud = `<button class="btn ${money ? 'btn-primary' : 'btn-ghost'}" data-act="quiztype" data-v="${QTYPE[k1]}" ${qYearsOf(k1) ? `data-years="${qYearsOf(k1)}"` : ''}>${ic('calculator','icon-sm')}${T(qYearsOf(k1) ? Q.useBudgetY : Q.useBudget)}</button>`, road = `<button class="btn ${money ? 'btn-ghost' : 'btn-primary'}" data-act="goroad" data-v="${sc}">${T(Q.go)}${ic('arrow-right','icon-sm')}</button>`;
+        return `<div class="flex flex-wrap gap-2 mt-5">${money ? bud + road : road + bud}</div>`; })()}
     </section>`;
   }
   return `
@@ -3560,7 +3705,9 @@ function viewFields(){
       <span class="faint text-[13.5px] num" aria-live="polite">${T({en:n => `${n} fields`, th:n => `${n} สาขา`})(list.length)}</span>
     </div>
     <p class="text-[14px] muted mb-2 flex gap-2">${ic('graduation-cap','icon-sm')}<span>${T(F.degree)}</span></p>
-    <div class="mb-8">${body || `<p class="muted mt-6">${T(F.none)}</p>`}</div>
+    <div class="mb-8">${body || (() => { const fl = id => { const x = FILTERS.find(f => f.id === id); return x ? T(x.l) : ''; };
+      /* a dead end names the two filters that clash and offers the way out */
+      return `<div class="card mt-4"><p class="muted">${T(F.none)}: ${esc(fl(S.filter))} + ${esc(fl(S.fstat))}</p><div class="flex flex-wrap gap-2 mt-3">${S.filter !== 'all' ? `<button class="btn btn-primary" data-act="filter" data-v="all">${T({en:'Search every group', th:'ดูทุกหมวด'})}</button>` : ''}<button class="btn btn-ghost" data-act="fields-clear">${ic('x','icon-sm')}${T({en:'Clear both filters', th:'ล้างตัวกรองทั้งสอง'})}</button></div></div>`; })()}</div>
     <div class="card">
       <h2 class="text-[20px] font-semibold mb-2">${T(F.rules)}</h2>
       <ul class="clean">${F.rulesList.map(x => `<li><span style="color:var(--blue)">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
@@ -3600,7 +3747,7 @@ function viewRoad(){
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(R.title)}</h1>
       <p class="muted mt-3 text-[17px]">${T(R.sub)}</p>
     </section>
-    <div class="seg mb-4" role="group" aria-label="${esc(T({en:'Scenario', th:'สถานการณ์'}))}">${Object.keys(R.sc).map(k => `<button class="${S.scenario===k?'on':''}" aria-pressed="${S.scenario===k}" data-act="scenario" data-v="${k}">${T(R.sc[k].l)}</button>`).join('')}</div>
+    <div class="seg mb-4" role="group" aria-label="${esc(T({en:'Scenario', th:'สถานการณ์'}))}">${Object.keys(R.sc).map(k => `<button class="${S.scenario===k?'on':''}" aria-pressed="${S.scenario===k}" data-act="scenario" data-v="${k}"><span class="seg-l">${T(R.sc[k].l)}</span><span class="seg-s">${T(R.sc[k].l).replace(/^(Scenario|สถานการณ์)\s*/, '')}</span></button>`).join('')}</div>
     <div class="flex flex-wrap items-center gap-2"><span class="text-[14px] font-medium">${T(SIM_UI.intakeQ)}</span>${yearSeg()}</div>
     <p class="faint text-[13px] mt-1">${T(SIM_UI.roadYears)}</p>
     ${farBox()}
@@ -3614,7 +3761,7 @@ function viewRoad(){
         
         <p class="text-[15px] mt-2">${T(sc.best)}</p>
         
-        <button class="btn btn-primary mt-5" data-act="tab" data-v="costs">${T(tabL('costs'))}${ic('arrow-right','icon-sm')}</button>
+        <button class="btn btn-primary mt-5" data-act="tab" data-v="budget">${T(tabL('budget'))}${ic('arrow-right','icon-sm')}</button>
       </div>
     </div>
     <section class="card mt-8" id="draws">
@@ -3668,6 +3815,15 @@ function planIntake(){ const p = S.plan || {}; return new Date(p.y || S.sim.inta
 /* The user picked an intake on the Checklist (25 Nov 2026). Until then the dates use September of the Budget start
    year, and no step is called late. */
 const planChosen = () => !!(S.plan && S.plan.y && S.plan.m);
+/* One start year for the whole plan: the Budget, Roadmap, Start, quiz and the Checklist intake move together. */
+function setIntakeYear(y){
+  if (!y) return;
+  if (SIMC.intakes.includes(y)) S.sim.intake = y;
+  if (planChosen() && S.plan.y !== y) { S.plan.y = y; S.plan.dates = {}; }
+}
+/* "September 2028" when the Checklist intake is set, otherwise the start year alone */
+const intakeText = () => { const y = S.sim.intake; if (!planChosen() || S.plan.y !== y) return String(y);
+  return new Date(y, S.plan.m - 1, 1).toLocaleDateString(S.lang === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', {month:'long', year:'numeric'}); };
 /* Recommended date for every checklist step: spread across its phase window; steps already overdue start from today.
    Done steps never fall into the past and take no slot, so ticking one does not send its date backwards. */
 function planDates(){
@@ -3724,8 +3880,11 @@ function gcalControls(id){
   const U = PLAN_UI, st = planStore(), it = planItem(id); if (!it) return '';
   const a = st.added[id], doneStep = it.kind === 'step' && !!S.check[id];
   const main = a
-    ? `<span class="badge b-green">${ic('circle-check','icon-sm')}${T(U.gAdded)}</span>${a.date !== it.date && !doneStep ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : ''}<button class="linkbtn text-[13.5px]" data-act="g-del" data-v="${id}">${T(U.gDel)}</button>`
-    : `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="g-add" data-v="${id}">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</button>`;
+    ? `<span class="badge b-green">${ic('send','icon-sm')}${T(U.gAdded)}</span>${a.date !== it.date && !doneStep ? `<span class="badge b-amber">${T(U.gMoved)}</span>` : `<button class="linkbtn text-[13.5px]" data-act="g-open" data-v="${id}">${T(U.gOpen)}</button>`}<button class="linkbtn text-[13.5px]" data-act="g-del" data-v="${id}">${T(U.gDel)}</button>`
+    /* a full button only for milestones and the next three open steps; later steps get a quieter link so 17 rows do not repeat one loud button */
+    : (it.kind === 'step' && !CHECK.items.filter(x => !S.check[x.id]).slice(0, 3).some(x => x.id === id)
+      ? `<button class="linkbtn text-[13.5px] inline-flex items-center gap-1" data-act="g-add" data-v="${id}" aria-label="${esc(T(U.gcal) + ': ' + plainT(it.title))}">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</button>`
+      : `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="g-add" data-v="${id}" aria-label="${esc(T(U.gcal) + ': ' + plainT(it.title))}">${ic('calendar-plus','icon-sm')}${T(U.gcal)}</button>`);
   return `<span class="gc-ctl inline-flex flex-wrap items-center gap-2">${main}</span>`;
 }
 /* All-day events in one .ics file; lines folded at 75 bytes as the format requires. */
@@ -3835,10 +3994,12 @@ Object.assign(PLAN_UI, {
   calSub:{en:'Shows only what you have added to Google Calendar from this page. Tap an item for details, or a day to see what is on it.', th:'แสดงเฉพาะรายการที่คุณเพิ่มลง Google Calendar จากหน้านี้ แตะรายการเพื่อดูรายละเอียด หรือแตะวันที่เพื่อดูว่าวันนั้นมีอะไรบ้าง'},
   calEmpty:{en:'Nothing added yet. Tap "Add to Google Calendar" on any step in the planner or checklist and it will appear here.', th:'ยังไม่มีรายการ กด "เพิ่มลง Google Calendar" ที่ข้อไหนก็ได้ในแผนหรือเช็กลิสต์ รายการจะขึ้นที่นี่'},
   nextItem:{en:'Next item', th:'รายการถัดไป'},
-  gAdded:{en:'Added to Google', th:'เพิ่มใน Google แล้ว'}, gDel:{en:'Remove', th:'ลบ'},
+  /* this page only opens Google's pre-filled event; whether it was saved there is up to the user, so the badge says "sent" */
+  gAdded:{en:'Sent to Google', th:'ส่งไป Google แล้ว'}, gDel:{en:'Remove', th:'ลบ'},
+  gOpen:{en:'Not saved there? Open again', th:'ยังไม่ได้บันทึก? เปิดอีกครั้ง'},
   gMoved:{en:'Date changed: remove, then add again', th:'วันที่เปลี่ยนแล้ว: ลบแล้วเพิ่มใหม่'},
   gDelQ:{en:t => `Remove "${t}" from your added items?\n\nThis page cannot delete events inside Google Calendar. After you confirm, Google Calendar opens a search for this event so you can delete it there too.`, th:t => `ลบ "${t}" ออกจากรายการที่เพิ่มแล้ว?\n\nหน้านี้ลบกิจกรรมใน Google Calendar ให้ไม่ได้ เมื่อกดตกลง จะเปิด Google Calendar ค้นหากิจกรรมนี้ให้ เพื่อลบในนั้นด้วย`},
-  privacy:{en:'Nothing is sent anywhere by this page. "Add to Google Calendar" opens Google Calendar in your own account with the event filled in; tap Save there. The page remembers what you added on this device; if you did not save it in Google, tap Remove and add it again.', th:'หน้านี้ไม่ได้ส่งข้อมูลไปที่ไหน ปุ่ม "เพิ่มลง Google Calendar" จะเปิดปฏิทินในบัญชี Google ของคุณเองพร้อมกรอกรายละเอียดให้ แล้วกด "บันทึก" ในนั้น หน้านี้จำไว้ในเครื่องว่าเพิ่มอะไรไปแล้ว ถ้าใน Google ไม่ได้กดบันทึก ให้กด "ลบ" แล้วเพิ่มใหม่'},
+  privacy:{en:'Nothing is sent anywhere by this page. "Add to Google Calendar" opens Google Calendar in your own account with the event filled in; tap Save there. The page remembers on this device what you sent; if you did not save it in Google, tap "Not saved there? Open again".', th:'หน้านี้ไม่ได้ส่งข้อมูลไปที่ไหน ปุ่ม "เพิ่มลง Google Calendar" จะเปิดปฏิทินในบัญชี Google ของคุณเองพร้อมกรอกรายละเอียดให้ แล้วกด "บันทึก" ในนั้น หน้านี้จำไว้ในเครื่องว่าส่งอะไรไปแล้ว ถ้าใน Google ยังไม่ได้กดบันทึก ให้กด "ยังไม่ได้บันทึก? เปิดอีกครั้ง"'},
   calT:{en:'Calendar', th:'ปฏิทิน'},
   viewG:{en:'My Google Calendar', th:'Google Calendar ของฉัน'}, viewA:{en:'Added from this page', th:'รายการที่เพิ่มจากหน้านี้'},
   gcSetT:{en:'Show your Google Calendar on this page', th:'แสดง Google Calendar ของคุณในหน้านี้'},
@@ -3968,10 +4129,10 @@ function appCalView(){
       <p class="muted text-[14px] mt-2">${T(U.calSub)}</p>
       ${ev.length ? `<div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">${CHECK.phases.map((p, i) => `<span class="cal-key" style="--c:${calColor(i)}"><i></i>${i + 1}. ${T(p.t)}</span>`).join('')}<span class="cal-key" style="--c:${calColor(5)}"><i></i>${T(U.keyMs)}</span></div>`
         : `<div class="text-[14px] mt-3 flex flex-wrap items-center gap-2" style="background:var(--blue-soft);border-radius:10px;padding:10px 12px"><span style="color:var(--blue);margin-top:2px">${ic('calendar-plus','icon-sm')}</span><span style="flex:1 1 220px">${T(U.calEmpty)}</span>${firstTodo ? `<button class="btn btn-ghost whitespace-nowrap" style="padding:4px 10px;font-size:13.5px" data-act="cal-go" data-v="${firstTodo.id}">${ic('list-checks','icon-sm')}${T(U.goStep)}</button>` : ''}</div>`}
-      <div class="cal-grid mt-3" role="grid" aria-label="${esc(monthName)}">
-        ${wd.map(w => `<div class="cal-wd" role="columnheader">${w}</div>`).join('')}
+      <div class="cal-grid mt-3" role="group" aria-label="${esc(monthName)}">
+        ${wd.map(w => `<div class="cal-wd" aria-hidden="true">${w}</div>`).join('')}
         ${cells.slice(0, lastRow).map(d => { const s = isoD(d), es = byDay[s] || [];
-          return `<div class="cal-cell ${d.getMonth() !== Mo - 1 ? 'out' : ''} ${s === todayS ? 'today' : ''} ${s === day ? 'sel' : ''}" role="gridcell" data-act="cal-day" data-v="${s}">
+          return `<div class="cal-cell ${d.getMonth() !== Mo - 1 ? 'out' : ''} ${s === todayS ? 'today' : ''} ${s === day ? 'sel' : ''}" data-act="cal-day" data-v="${s}">
             <button class="cal-dn" data-act="cal-day" data-v="${s}" aria-label="${esc(d.toLocaleDateString(loc, {day:'numeric', month:'long', year:'numeric'}))}${es.length ? ', ' + es.length : ''}">${d.getDate()}</button>
             ${es.slice(0, 2).map(chip).join('')}${es.length > 2 ? `<span class="cal-more">${T(U.more)(es.length - 2)}</span>` : ''}
             ${es.length ? `<span class="cal-dots">${es.map(e => `<i class="cal-dot ${e.done ? 'done' : ''}" style="--c:${calColor(e.ph)}"></i>`).join('')}</span>` : ''}
@@ -3994,7 +4155,7 @@ function calendarCard(){
     <div class="mt-5 pt-4" id="calendar" style="border-top:1px solid var(--line)">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h3 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('calendar-range')}</span>${T(U.calT)}</h3>
-        <div class="seg" role="tablist" aria-label="${esc(T(U.calT))}">${[['google', U.viewG], ['app', U.viewA]].map(([k, l]) => `<button role="tab" class="${view === k ? 'on' : ''}" aria-selected="${view === k}" data-act="gcal-view" data-v="${k}">${T(l)}</button>`).join('')}</div>
+        <div class="seg" role="tablist" aria-label="${esc(T(U.calT))}">${[['google', U.viewG, {en:'My Google', th:'Google ของฉัน'}], ['app', U.viewA, {en:'From this page', th:'จากหน้านี้'}]].map(([k, l, sh]) => `<button role="tab" class="${view === k ? 'on' : ''}" aria-selected="${view === k}" data-act="gcal-view" data-v="${k}"><span class="seg-l">${T(l)}</span><span class="seg-s">${T(sh)}</span></button>`).join('')}</div>
       </div>
       ${view === 'google' ? googleCalView() : appCalView()}
     </div>`;
@@ -4024,13 +4185,13 @@ function viewPrep(){
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2"><h2 class="text-[17px] font-semibold"><span class="num muted">${pi+1}.</span> ${T(ph.t)}</h2><span class="badge b-blue">${ic('clock','icon-sm')}${T(ph.m)}</span></div>
       <div class="card" style="padding:4px 18px">${its.map(({it, i}) => `
         
-        <label class="check ${S.check[it.id]?'done':''} ${nx===it?'is-next':''}" id="ck-${it.id}">
-        
-          <input type="checkbox" data-check="${it.id}" ${S.check[it.id]?'checked':''} aria-label="${esc(T(it.t))}">
-        
+        <div class="check ${S.check[it.id]?'done':''} ${nx===it?'is-next':''}" id="ck-${it.id}">
+
+          <input type="checkbox" id="cb-${it.id}" data-check="${it.id}" ${S.check[it.id]?'checked':''}>
+
           <span class="ckn num" aria-hidden="true">${i+1}</span>
-        
-          <span class="min-w-0"><span class="ct font-medium text-[15px]">${T(it.t)}</span>${nx===it?` <span class="badge b-blue">${T(C.next)}</span>`:''}
+
+          <span class="min-w-0"><label for="cb-${it.id}" class="ct font-medium text-[15px]">${T(it.t)}</label>${nx===it?` <span class="badge b-blue">${T(C.next)}</span>`:''}
         
             <span class="block muted text-[14px] mt-0.5">${T(it.d)}</span>
         
@@ -4044,8 +4205,8 @@ function viewPrep(){
               ${pd[it.id].late ? `<span class="badge b-amber">${T(U.late)}</span>` : ''}${pd[it.id].custom ? `<span class="badge b-blue">${T(U.mine)}</span>` : ''}
               ${gcalControls(it.id)}
             </span>`}</span>
-        
-        </label>`).join('')}</div>
+
+        </div>`).join('')}</div>
     </div>`;
   }).join('');
   return `
@@ -4057,7 +4218,7 @@ function viewPrep(){
     ${nextCard}
     ${plannerCard()}
     <section class="mb-10">${list}</section>
-    <section id="tests" class="mb-10">${viewTests()}</section>
+    <details class="refsec mb-6" id="tests" data-field="testsOpen" ${S.open && S.open.testsOpen ? 'open' : ''}><summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T(TEST_UI.title)}</span></summary><div class="mt-3">${viewTests(true)}</div></details>
     <section class="card mb-10">
       <h3 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('languages')}</span>${T(IELTSQ.title)}</h3>
       <p class="muted text-[15px] mt-1 mb-2">${T(IELTSQ.lead)}</p>
@@ -4072,15 +4233,15 @@ function viewPrep(){
         </div>`).join('')}</div>
       <p class="faint text-[13.5px] flex gap-2 mt-2">${ic('info','icon-sm')}<span>${T(IELTSQ.tip)}</span></p>
     </section>
-    <section id="agents" class="mb-6">${viewAgents()}</section>`;
+    <details class="refsec mb-6" id="agents" data-field="agentsOpen" ${S.open && S.open.agentsOpen ? 'open' : ''}><summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T(AGENT_UI.title)}</span></summary><div class="mt-3">${viewAgents(true)}</div></details>`;
 }
 
 /* ============================== ENGLISH TESTS, MASTER'S, AGENTS ============================== */
 const usd = v => S.fx.usd ? thb(v * S.fx.usd) : '';
-function viewTests(){
+function viewTests(folded){
   const U = TEST_UI;
   return `
-    <h2 class="text-[24px] font-semibold">${T(U.title)}</h2>
+    ${folded ? '' : `<h2 class="text-[24px] font-semibold">${T(U.title)}</h2>`}
     <p class="muted mt-1 mb-4" style="max-width:75ch">${T(U.sub)}</p>
     <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">${TESTS.map(t => `
       <div class="card flex flex-col gap-3">
@@ -4108,7 +4269,7 @@ function viewTests(){
         <div class="flex flex-wrap gap-2 mt-auto">${t.links.map((l, i) => `<a class="btn ${i ? 'btn-ghost' : 'btn-primary'}" style="font-size:14px" href="${l.u}" target="_blank" rel="noopener noreferrer">${ic(i ? 'external-link' : 'calendar-check','icon-sm')}${T(l.l)}</a>`).join('')}</div>
       </div>`).join('')}
     </div>
-    <p class="faint text-[13.5px] flex gap-2 mt-3" style="max-width:90ch">${ic('info','icon-sm')}<span>${T(U.priceNote)}</span></p>`;
+    <p class="faint text-[13.5px] flex gap-2 mt-3" style="max-width:62ch">${ic('info','icon-sm')}<span>${T(U.priceNote)}</span></p>`;
 }
 /* Rules and example programs for the three options (A private Co-op, B public college, C master's).
    School names open the school's international page, program names open the official program page. */
@@ -4129,7 +4290,7 @@ function viewPrograms(){
   return `
     <h3 class="text-[20px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('list-checks')}</span>${T(P.title)}</h3>
     <p class="muted text-[15px] mt-1 mb-3">${T(P.sub)}</p>
-    <div class="seg mb-4" role="group" aria-label="${esc(T(P.title))}">${['A','B','C'].map(x => `<button class="${k === x ? 'on' : ''}" data-act="prog-opt" data-v="${x}" aria-pressed="${k === x}">${T(P.opts[x].seg)}</button>`).join('')}</div>
+    <div class="seg mb-4" role="group" aria-label="${esc(T(P.title))}">${['A','B','C'].map(x => `<button class="${k === x ? 'on' : ''}" data-act="prog-opt" data-v="${x}" aria-pressed="${k === x}"><span class="seg-l">${T(P.opts[x].seg)}</span><span class="seg-s">${x}: ${T(TYPE_SHORT[{A:'private', B:'public', C:'masters'}[x]])}</span></button>`).join('')}</div>
     <h4 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:${o.color}">${ic(o.icon,'icon-sm')}</span>${T(o.t)}</h4>
     <p class="muted text-[15px] mt-1 mb-3">${T(o.sub)}</p>
     ${o.warn ? `<p class="text-[14px] flex gap-2 mb-3" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px">${ic('triangle-alert','icon-sm')}<span>${T(o.warn)}</span></p>` : ''}
@@ -4154,7 +4315,7 @@ function agentListCard(){
       <h3 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('messages-square')}</span>${T(U.listT)}</h3>
       <p class="muted text-[14px] mt-1">${T(U.listSub)}</p>
       <div class="text-[13.5px] mt-2 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px"><span style="color:var(--amber)">${ic('triangle-alert','icon-sm')}</span><span>${T(U.listWarn)}</span></div>
-      ${cityKeys.length > 1 ? `<div class="flex flex-wrap items-center gap-2 mt-3"><span class="faint text-[13px]">${T(U.cityL)}</span><div class="seg">${[['all', T(U.cityAll)], ...cityKeys.map(k => [k, cityName(k)])].map(([k, l]) => `<button class="${cur === k ? 'on' : ''}" aria-pressed="${cur === k}" data-act="agent-city" data-v="${esc(k)}">${esc(l)}</button>`).join('')}</div></div>` : ''}
+      ${cityKeys.length > 1 ? `<label class="flex flex-wrap items-center gap-2 mt-3 text-[14px] font-medium">${T(U.cityL)}<span class="sel-wrap"><select class="sel" data-sel="agent-city">${[['all', T(U.cityAll)], ...cityKeys.map(k => [k, cityName(k)])].map(([k, l]) => `<option value="${esc(k)}" ${cur === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span><span class="faint text-[13px] num" aria-live="polite">${T({en:n => `${n} agencies`, th:n => `${n} แห่ง`})(rows.length)}</span></label>` : ''}
       <div class="mt-3">${rows.map(a => `
         <div class="py-3" style="border-top:1px solid var(--line)">
           <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -4179,10 +4340,10 @@ function agentListCard(){
       <p class="faint text-[13px] mt-2">${T(U.listNote)}</p>
     </div>`;
 }
-function viewAgents(){
+function viewAgents(folded){
   const U = AGENT_UI;
   return `
-    <h2 class="text-[24px] font-semibold">${T(U.title)}</h2>
+    ${folded ? '' : `<h2 class="text-[24px] font-semibold">${T(U.title)}</h2>`}
     <p class="muted mt-1 mb-4" style="max-width:75ch">${T(U.sub)}</p>
     <div class="grid md:grid-cols-2 gap-4 items-start">
       <div class="card">
@@ -4247,6 +4408,21 @@ function amtMeta(k, c){
     healthC:{fac:F.health, def:SIMC.health, v:val(s.healthC, SIMC.health)}
   })[k];
 }
+/* Switch the Budget's program type without losing typed quotes: amounts you changed for the type you leave are kept
+   in S.sim.own[type] and come back when you return to it; a type you never edited starts from its typical amounts. */
+/* short program-type names, so the Budget's type control stays on one row on phones */
+const TYPE_SHORT = {private:{en:'Private', th:'เอกชน'}, public:{en:'Public', th:'วิทยาลัยรัฐ'}, masters:{en:'Master\'s', th:'ป.โท'}};
+const OWN_KEYS = [['tuition','def'], ['fees','fees'], ['coopWage','coopWage'], ['coopHours','coopH']];
+function setSimType(v){
+  const s = S.sim, ty = SIMC.types[v], cur = SIMC.types[s.type]; if (!ty || s.type === v) return;
+  s.own = s.own || {};
+  const keep = {}; if (cur) OWN_KEYS.forEach(([k, d]) => { if (s[k] != null && s[k] !== cur[d]) keep[k] = s[k]; });
+  if (Object.keys(keep).length) s.own[s.type] = keep; else delete s.own[s.type];
+  const back = s.own[v] || {};
+  s.type = v; OWN_KEYS.forEach(([k, d]) => { s[k] = back[k] != null ? back[k] : ty[d]; });
+  if (v === 'private') s.hasCoop = true;
+  if (Object.keys(back).length) announce(T({en:'Your own amounts for this type are back.', th:'คืนยอดที่คุณพิมพ์ไว้สำหรับประเภทนี้แล้ว'}));
+}
 function amtDefault(k){
   const ty = SIMC.types[S.sim.type];
   if (k === 'tuition') S.sim.tuition = ty.def;
@@ -4308,6 +4484,11 @@ function simCalc(o){
     tuTotal:tu1 + (N > 12 ? tu2 : 0)};
 }
 
+/* how many folded "fine-tune" settings differ from their defaults (also refreshed while a slider moves) */
+function advCount(){
+  const s = S.sim, ty = SIMC.types[s.type], plan = planOf(s), hasC = plan.includes('C'), hasG = plan.includes('G');
+  return [val(s.tips, 0) > 0, hasC && val(s.coopWage, ty.coopWage) !== ty.coopWage, hasC && val(s.side, 0) > 0, hasG && s.pgwp === false, s.rateAuto === false, s.proofAuto === false].filter(Boolean).length;
+}
 function viewBudget(){
   const M = SIM_UI, s = S.sim, ty = SIMC.types[s.type], priv = s.type === 'private', c0 = simCalc();
   const segB = (act, cur, items, label) => `<div class="seg" role="group" aria-label="${esc(label || '')}">${items.map(([v, l]) => `<button class="${String(cur)===String(v)?'on':''}" aria-pressed="${String(cur)===String(v)}" data-act="${act}" data-v="${v}">${T(l)}</button>`).join('')}</div>`;
@@ -4317,14 +4498,16 @@ function viewBudget(){
     const F = simFac(key, c0), lo = q(Math.floor(min * F / step) * step), hi = q(Math.ceil(max * F / step) * step);
     return `
     <div>
-      <div class="flex justify-between items-baseline gap-3"><label for="sim-${key}" class="font-medium text-[15px]">${label}</label><span id="lab-${key}" class="num font-semibold text-[15px]"></span></div>
+      <div class="flex justify-between items-baseline gap-3"><label for="sim-${key}" class="font-medium text-[15px]">${label}</label><span id="lab-${key}" class="num font-semibold text-[15px] whitespace-nowrap"></span></div>
       <input type="range" id="sim-${key}" data-sim="${key}" min="${lo}" max="${hi}" step="${step}" value="${q(val(s[key], def) * F)}">
-      ${note ? `<div class="faint text-[13px] mt-1">${note}</div>` : ''}
+      ${noteFold(note)}
     </div>`; };
-  const field = (label, body, note) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? `<div class="faint text-[13px] mt-2">${note}</div>` : ''}</div>`;
+  /* every control's explanation folds under "About this" (the program type keeps its description in view) */
+  const noteFold = note => note ? `<details class="cnote"><summary>${ic('info','icon-sm')}<span>${T({en:'About this', th:'ดูคำอธิบาย'})}</span></summary><div class="faint text-[13px] mt-1">${note}</div></details>` : '';
+  const field = (label, body, note, open) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? (open ? `<div class="faint text-[13px] mt-2">${note}</div>` : noteFold(note)) : ''}</div>`;
   const plan = planOf(s), hasFT = plan.some(p => p !== 'S'), hasC = plan.includes('C'), hasG = plan.includes('G');
   /* how many of the folded settings differ from their defaults, so a closed "fine-tune" section never hides a change */
-  const advN = [val(s.tips, 0) > 0, hasC && val(s.coopWage, ty.coopWage) !== ty.coopWage, hasC && val(s.side, 0) > 0, hasG && s.pgwp === false, s.rateAuto === false, s.proofAuto === false].filter(Boolean).length;
+  const advN = advCount();
   return `
     <section class="mb-6" style="max-width:820px">
       <h1 class="text-[30px] sm:text-[38px] font-bold">${T(M.title)}</h1>
@@ -4334,7 +4517,7 @@ function viewBudget(){
     <div class="sim-grid">
       <div class="card sim-side"><div class="grid gap-6 sim-ctl" id="sim-ctl">
         <h2 class="sr-only">${T(A11Y.settings)}</h2>
-        ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, SIMC.types[k].l]), T(M.type)), T(ty.desc))}
+        ${field(T(M.type), segB('sim-type', s.type, Object.keys(SIMC.types).map(k => [k, {en:`<span class="seg-l">${SIMC.types[k].l.en}</span><span class="seg-s">${TYPE_SHORT[k].en}</span>`, th:`<span class="seg-l">${SIMC.types[k].l.th}</span><span class="seg-s">${TYPE_SHORT[k].th}</span>`}]), T(M.type)), T(ty.desc), true)}
         ${field(T(M.intakeQ), yearSeg() + farBox(), T(M.intakeNote))}
         ${field(T(M.lenQ), segB('sim-years', s.years, [[1, priv ? M.len1p : M.len1], [2, priv ? M.len2p : M.len2]], T(M.lenQ)))}
         ${field(T(M.coopQ), priv ? `<div class="text-[14px] flex gap-2" style="background:var(--blue-soft);border-radius:10px;padding:8px 12px">${ic('lock','icon-sm')}<span>${T(M.coopFixed)}</span></div>`
@@ -4346,7 +4529,7 @@ function viewBudget(){
         ${slider('wage', T(M.wage), 15, 25, 0.05, T(M.wageNote))}
         ${hasFT ? slider('coopHours', T(M.coopHours), 10, 40, 1, T(priv ? M.ftNotePriv : M.ftNote), ty.coopH) : ''}
         <details class="sim-adv" data-field="simAdv" ${S.open && S.open.simAdv ? 'open' : ''}>
-          <summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T(ADV.t)}${advN ? ` <span class="badge b-blue">${T(ADV.n)(advN)}</span>` : ''}</span></summary>
+          <summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T(ADV.t)} <span id="adv-n" class="badge b-blue" style="${advN ? '' : 'display:none'}">${T(ADV.n)(advN)}</span></span></summary>
           <p class="faint text-[13px] mt-1">${T(ADV.sub)}</p>
           <div class="grid gap-6 mt-4">
         ${slider('tips', T(M.tipsL), 0, 15, 0.05, T(M.tipsNote), 0)}
@@ -4373,7 +4556,7 @@ function viewBudget(){
       <dl class="mt-3 grid sm:grid-cols-2 gap-x-8">${M.gloss.map(g => `<div class="py-3" style="border-top:1px solid var(--line)"><dt class="font-semibold text-[15px]">${T(g.k)}</dt><dd class="muted text-[15px] mt-1">${T(g.v)}</dd></div>`).join('')}</dl>
       <button class="btn btn-ghost mt-2" style="font-size:14px" data-act="gloss-open">${ic('book-search','icon-sm')}${T(GLOSS_UI.seeAll)(GLOSS.length)}</button>
     </details>
-    <p class="faint text-[13px] mt-4" style="max-width:90ch">${T(M.assume)}</p>`;
+    <p class="faint text-[13px] mt-4" style="max-width:62ch">${T(M.assume)}</p>`;
 }
 
 /* Small SVG charts. Palette: dataviz reference slots, validated on the app card surfaces (light #F8F9FB, dark #1E2025). */
@@ -4420,6 +4603,9 @@ function chartBalance(c){
       ${pts.map(p => `<rect x="${x(p.m)-(W-L-R)/(2*N)}" y="${Tp}" width="${(W-L-R)/N}" height="${H-Tp-B}" class="hit" data-tip="${esc(tip(p))}"></rect>`).join('')}
     </svg>
     <div class="vlegend"><span>${T(M.axisM)}</span><span class="ml-auto font-semibold num">${T(M.endLbl)(c.N)} ${last.bal < 0 ? '-' : ''}CAD ${fmt(Math.abs(last.bal))}</span></div>
+    <details class="mt-2"><summary class="text-[13.5px] muted cursor-pointer">${T(M.table)}</summary>
+      <div class="hscroll" style="margin-top:6px"><table class="ctbl chart-tbl" style="min-width:0"><thead><tr><th scope="col">${T(M.monthN)}</th><th scope="col" style="text-align:right">${T(M.left)} (CAD)</th><th scope="col" style="text-align:right">THB</th></tr></thead><tbody>${pts.map(p => `<tr style="cursor:default"><th scope="row" style="font-weight:500;color:var(--ink)">${p.m}</th><td style="text-align:right" class="${p.bal < 0 ? 'neg' : ''}">${p.bal < 0 ? '-' : ''}${fmt(Math.abs(p.bal))}${p.paid ? `<span class="msub">${T(M.paidY2)} ${fmt(p.paid)}</span>` : ''}</td><td style="text-align:right">${p.bal < 0 ? '-' : ''}${thb(Math.abs(p.bal) * s.rate)}</td></tr>`).join('')}</tbody></table></div>
+    </details>
   </figure>`;
 }
 function chartTerms(c){
@@ -4441,6 +4627,9 @@ function chartTerms(c){
         ${bar(y0, r[1], 's1', T(M.income))}${bar(y0 + 24, r[2], 's2', T(M.exp))}`; }).join('')}
     </svg>
     <div class="vlegend"><span><i class="sw s1"></i>${T(M.income)}</span><span><i class="sw s2"></i>${T(M.exp)}</span><span class="muted">CAD ${T(M.mo)}</span></div>
+    <details class="mt-2"><summary class="text-[13.5px] muted cursor-pointer">${T(M.table)}</summary>
+      <div class="hscroll" style="margin-top:6px"><table class="ctbl chart-tbl" style="min-width:0"><thead><tr><th scope="col"></th><th scope="col" style="text-align:right">${T(M.income)}</th><th scope="col" style="text-align:right">${T(M.exp)}</th><th scope="col" style="text-align:right">+ / −</th></tr></thead><tbody>${rows.map(r => `<tr style="cursor:default"><th scope="row" style="font-weight:500;color:var(--ink)">${esc(r[0])}</th><td style="text-align:right">CAD ${fmt(r[1])}</td><td style="text-align:right">CAD ${fmt(r[2])}</td><td style="text-align:right" class="${r[1] - r[2] < 0 ? 'neg' : 'pos'}">${r[1] - r[2] < 0 ? '-' : '+'}CAD ${fmt(Math.abs(r[1] - r[2]))}</td></tr>`).join('')}</tbody></table></div>
+    </details>
   </figure>`;
 }
 function chartSplit(c){
@@ -4455,7 +4644,7 @@ function chartSplit(c){
     </div>
     <div class="vlegend">${parts.map(p => `<span><i class="sw ${p[2]}"></i>${p[0]}</span>`).join('')}</div>
     <details class="mt-2"><summary class="text-[13.5px] muted cursor-pointer">${T(M.table)}</summary>
-      <table class="ctbl" style="min-width:0;margin-top:6px"><tbody>${parts.map(p => `<tr><td>${p[0]}</td><td style="text-align:right">CAD ${fmt(p[1])}</td><td style="text-align:right">${thb(p[1]*s.rate)}</td><td style="text-align:right">${Math.round(p[1]/tot*100)}%</td></tr>`).join('')}</tbody></table>
+      <div class="hscroll" style="margin-top:6px"><table class="ctbl chart-tbl" style="min-width:0"><tbody>${parts.map(p => `<tr><td>${p[0]}</td><td style="text-align:right">CAD ${fmt(p[1])}</td><td style="text-align:right">${thb(p[1]*s.rate)}</td><td style="text-align:right">${Math.round(p[1]/tot*100)}%</td></tr>`).join('')}</tbody></table></div>
     </details>
   </figure>`;
 }
@@ -4472,7 +4661,7 @@ function compareTypes(cur){
   const lab = (t, sub, link) => `${t}<span class="block faint text-[12.5px]" style="font-weight:400">${sub}</span>${link ? `<button class="linkbtn text-[12.5px] mt-0.5" style="font-weight:500;display:inline-flex;align-items:center;gap:4px" data-act="jump" data-v="cash-list">${ic('arrow-up','icon-sm')}<span>${T(M.cSeeAbove)}</span></button>` : ''}`;
   const c0 = rows[0].c;
   return `
-  <div class="card">
+  <div class="card cmp-card">
     <h2 class="text-[17px] font-semibold">${T(M.cmpT)}</h2>
     <p class="muted text-[14px] mt-1 mb-3">${T(M.cmpSub)}</p>
     <div class="hscroll"><table class="ctbl cmp-tbl" role="table" style="min-width:600px"><thead role="rowgroup"><tr role="row"><th role="columnheader"></th>${rows.map(r => `<th role="columnheader" style="text-align:right;white-space:normal" class="${r.mine ? 'cur-col' : ''}">${T(SIMC.types[r.k].l)}${r.mine ? ' ●' : ''}<div class="faint" style="font-weight:400">${T(r.mine ? M.cMine : M.cTyp)}</div>${r.mine ? '' : `<button class="linkbtn" style="font-size:12.5px" data-act="sim-type" data-v="${r.k}">${T(M.cTry)}</button>`}</th>`).join('')}</tr></thead><tbody role="rowgroup">
@@ -4500,10 +4689,24 @@ function compareTypes(cur){
     <p class="faint text-[13px] mt-2">${T(M.cNote)}</p>
   </div>`;
 }
+const verdictLevel = c => c.runOutY1 ? 'crit' : (c.extra > 0 ? 'need' : (c.end < c.proof ? 'warn' : 'good'));
+/* Budget goal card: the verdict in one line beside the goal, linking down to its reasons (the goal card holds only the goal,
+   its basis, this line, the parts of the goal and the money you have; the itemised list folds away). */
+function verdictLine(c){
+  const level = verdictLevel(c), V = SIM_UI.verdict[level];
+  return `<div class="vline v-${level}"><span class="vicon-sm">${ic(V.icon,'icon-sm')}</span><span class="font-semibold">${T(V.l)}</span><button class="linkbtn" data-act="jump" data-v="sim-verdict">${T({en:'Why', th:'ดูเหตุผล'})}${ic('arrow-down','icon-sm')}</button></div>`;
+}
+/* names and amounts of the goal's parts, in the strip's colours and order */
+function ladderLegend(c, one){
+  const parts = [[MONEY.prep, c.prep, 's1'], [MONEY.show, c.show, 's2'], [MONEY.setup, c.setup, 's3']].concat(c.extra > 0 ? [[MONEY.extra, c.extra, 's4']] : []);
+  /* same currency as the goal above it: THB unless the user picked CAD only */
+  const f = v => curOf() === 'cad' ? cad(v) : thb(v * (S.sim.rate || 24));
+  return `<div class="llegend">${parts.map(p => `<span><i class="sw ${p[2]}"></i>${T(p[0])} <b class="num">${f(p[1])}</b></span>`).join('')}</div>`;
+}
 function analysis(c){
   const M = SIM_UI, s = c.s, r = S.sim.rate;
   const C = v => `<strong class="num">CAD ${fmt(Math.abs(v))}</strong> <span class="muted num">(${thb(Math.abs(v)*r)})</span>`;
-  const level = c.runOutY1 ? 'crit' : (c.extra > 0 ? 'need' : (c.end < c.proof ? 'warn' : 'good'));
+  const level = verdictLevel(c);
   const V = M.verdict[level];
   const pts = [];
   pts.push(T(M.a1)(C(c.show), C(c.tu1), C(c.proof), C(c.travel)));
@@ -4518,11 +4721,25 @@ function analysis(c){
   if (c.N > 12) pts.push(T(M.a6)(C(c.tu2), c.extra > 0 ? C(c.extra) : ''));
   pts.push(c.runOut ? T(M.a5out)(c.runOut, C(c.extra)) : (c.low.m === 0 ? T(M.a5up)(c.N, C(c.proof), C(c.end)) : T(M.a5)(c.N, C(c.proof), C(c.end), c.low.m, C(c.low.v))));
   if (c.n > 0) pts.push(T(M.a7)(s.intake, c.n));
+  /* three numbers lead the verdict; the step-by-step reasons fold away */
+  const stat = (l, v, sub, cls) => `<div class="stat"><div class="eyebrow">${l}</div><div class="v ${cls || ''}">${v}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
+  const be = Math.ceil(c.breakEvenHrs), whyOpen = !!(S.open && S.open.vWhy);
+  const stats = [
+    /* the same baseline as the goal: if the goal includes extra money for year 2, the end balance counts it too */
+    c.extra > 0
+      ? stat(T({en:`Money at the end (month ${c.N}), saving the full goal`, th:`เงินเหลือตอนจบ (เดือนที่ ${c.N}) ถ้าเก็บครบเป้า`}), mny(c.end + c.extra, {sign:true, stack:true}), T({en:`Without the extra ${mny(c.extra)} in the goal: ${mny(c.end, {sign:true})}`, th:`ถ้าไม่มีเงินเพิ่ม ${mny(c.extra)} ที่อยู่ในเป้า: ${mny(c.end, {sign:true})}`}))
+      : stat(T({en:`Money at the end (month ${c.N})`, th:`เงินเหลือตอนจบ (เดือนที่ ${c.N})`}), mny(c.end, {sign:true, stack:true}), T({en:`You start with ${mny(c.proof)} after tuition and travel`, th:`เริ่มต้นมี ${mny(c.proof)} หลังจ่ายค่าเรียนและค่าเดินทาง`}), c.end < 0 ? 'neg' : (c.end < c.proof ? '' : 'pos')),
+    c.runOut ? stat(T({en:'Money runs out', th:'เงินหมด'}), T({en:`Month ${c.runOut}`, th:`เดือนที่ ${c.runOut}`}), T({en:`Need about ${mny(c.extra)} more`, th:`ต้องมีเพิ่มประมาณ ${mny(c.extra)}`}), 'neg')
+      : stat(T({en:'Lowest point', th:'จุดต่ำสุด'}), c.low.m === 0 ? T({en:'At the start', th:'ตอนเริ่ม'}) : mny(c.low.v, {stack:true}), c.low.m === 0 ? T({en:'Your money only grows after that', th:'หลังจากนั้นเงินมีแต่เพิ่ม'}) : T({en:`Month ${c.low.m}`, th:`เดือนที่ ${c.low.m}`})),
+    stat(T({en:'Break-even work hours', th:'ชั่วโมงทำงานที่พอค่าครองชีพ'}), `${be} ${T(M.wkU)}`, be <= 24 ? T({en:`Within the 24-hour limit (you set ${s.hours})`, th:`ไม่เกินขีดจำกัด 24 ชม. (ตั้งไว้ ${s.hours})`}) : T({en:'Over the 24-hour study-term limit', th:'เกินขีดจำกัด 24 ชม. ช่วงเทอมเรียน'}), be <= 24 ? '' : 'neg')
+  ].join('');
   return `
-  <div class="card verdict v-${level}">
-    <div class="flex items-center gap-3"><span class="vicon">${ic(V.icon)}</span><div><h2 class="eyebrow">${T(M.vT)}</h2><div class="text-[20px] font-semibold">${T(V.l)}</div></div></div>
+  <div class="card verdict v-${level}" id="sim-verdict">
+    <div class="flex items-center gap-3"><span class="vicon">${ic(V.icon)}</span><div><h2 class="eyebrow" tabindex="-1">${T(M.vT)}</h2><div class="text-[20px] font-semibold">${T(V.l)}</div></div></div>
     <p class="text-[15px] mt-2">${T(V.dCap && c.breakEvenHrs > 24 ? V.dCap : V.d)}</p>
-    <ol class="analysis mt-3">${pts.map(p => `<li>${p}</li>`).join('')}</ol>
+    <div class="grid gap-3 mt-3 sm:grid-cols-3">${stats}</div>
+    <details class="vwhy mt-3" data-field="vWhy" ${whyOpen ? 'open' : ''}><summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T({en:n => `The reasons, step by step (${n})`, th:n => `ดูเหตุผลทีละข้อ (${n} ข้อ)`})(pts.length)}</span></summary>
+      <ol class="analysis mt-3">${pts.map(p => `<li>${p}</li>`).join('')}</ol></details>
   </div>`;
 }
 
@@ -4672,7 +4889,10 @@ function cashList(c){
     if (!LIST_EDIT) return `<div class="row${part ? ' lpart' : ''}"><span class="muted min-w-0">${label}${custom ? ` <span class="badge b-blue">${T(M.mine)}</span>` : (badge || '')}</span><span class="num">${mny(amount, {stack:true})}</span></div>`;
     return amtRow(k, label, c, unit, part);
   };
-  const liveBadge = s.proofAuto !== false && LIVE.funds ? ` <span class="badge b-green">${ic('radio','icon-sm')}${T(M.liveB)}</span>` : '';
+  /* the live IRCC amount is only "live" for a start this year; a later start uses a projection of it, labelled as such */
+  const liveBadge = s.proofAuto !== false && LIVE.funds ? (Math.abs(c.proof - fundsAmt()) > 1
+    ? ` <span class="badge b-gray">${ic('trending-up','icon-sm')}${T({en:y => `Projected for ${y} from today's IRCC amount`, th:y => `คาดการณ์ปี ${y} จากยอด IRCC วันนี้`})(s.intake)}</span>`
+    : ` <span class="badge b-green">${ic('radio','icon-sm')}${T(M.liveB)}</span>`) : '';
   return `
       <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
         ${LIST_EDIT ? `<p class="text-[13.5px] muted" style="max-width:52ch">${T(M.editHint)}</p>` : '<span></span>'}
@@ -4761,13 +4981,30 @@ function whyPanel(c, one, unit){
 let ptrDown = false, simPending = false;
 document.addEventListener('pointerdown', () => { ptrDown = true; }, true);
 document.addEventListener('pointerup', () => { ptrDown = false; if (simPending) setTimeout(flushSim, 0); }, true);
+/* a selector that finds the same control again after the page is redrawn */
+function focusKey(a){
+  const d = a && a !== document.body && a.dataset; if (!d) return '';
+  if (d.amt) return `[data-amt="${d.amt}"]`; if (d.simc) return `[data-simc="${d.simc}"]`; if (d.cost) return `[data-cost="${d.cost}"]`;
+  if (a.id) return '#' + CSS.escape(a.id);
+  if (d.act) return `[data-act="${d.act}"]` + (d.v != null ? `[data-v="${String(d.v).replace(/"/g, '\\"')}"]` : '');
+  return a.tagName === 'A' && a.getAttribute('href') ? `a[href="${a.getAttribute('href').replace(/"/g, '\\"')}"]` : '';
+}
+let REFOCUS = '', LAST_MONEY = '';   /* LAST_MONEY: the money box just changed, for Tab when its next control is redrawn */
+document.addEventListener('change', e => { const t = e.target; if (t && t.dataset && (t.dataset.cost || t.dataset.amt)) LAST_MONEY = focusKey(t); }, true);   /* set by Enter in a money box: keep focus on that box after the redraw */
 function flushSim(){
   simPending = false;
-  const a = document.activeElement, d = a && a.dataset, sel = d && (d.amt ? `[data-amt="${d.amt}"]` : d.simc ? `[data-simc="${d.simc}"]` : d.cost ? `[data-cost="${d.cost}"]` : '');
+  /* Tab moved focus on to the next control, Enter kept it on the box: find that control again after the redraw */
+  const sel = focusKey(document.activeElement) || REFOCUS; REFOCUS = '';
+  const was = LAST_MONEY; LAST_MONEY = '';
   if (S.tab === 'costs') render(true); else { renderSimOut(); icons(); save(); }   /* All Costs shows the same money list, so redraw that page */
-  if (sel) { const n = document.querySelector(sel); if (n) { n.focus({preventScroll:true}); try { n.select(); } catch (e) {} } }
+  let n = sel ? document.querySelector(sel) : null;
+  /* Tab went to a control the redraw replaced: go on to the next money box after the one just typed in */
+  if (!n && was) { const all = [...document.querySelectorAll('input[data-cost], input[data-amt]')], i = all.findIndex(x => focusKey(x) === was); n = all[i + 1] || all[i] || null; }
+  if (n) { n.focus({preventScroll:true}); if (n.matches('input')) try { n.select(); } catch (e) {} }
 }
 function queueFlush(){ if (ptrDown) simPending = true; else setTimeout(flushSim, 0); }
+/* A money box reached by keyboard or by the app selects its value, so typing replaces it instead of adding digits in front. */
+document.addEventListener('focusin', e => { const t = e.target; if (!ptrDown && t.matches && t.matches('input.numin')) setTimeout(() => { if (document.activeElement === t) try { t.select(); } catch (err) {} }, 0); });
 document.addEventListener('change', e => {
   const pk = e.target.dataset && e.target.dataset.plan;
   if (pk) {   /* a planned date typed by the user; clearing the field goes back to the recommended date */
@@ -4799,7 +5036,9 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('keydown', e => {
   if (!e.target.dataset || !(e.target.dataset.amt || e.target.dataset.simc || e.target.dataset.cost)) return;
-  if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+  if (e.key === 'Enter') { e.preventDefault(); REFOCUS = focusKey(e.target); e.target.blur();
+    /* nothing changed, so no redraw comes to put focus back: return it to the box here */
+    setTimeout(() => { if (!REFOCUS) return; const n = document.querySelector(REFOCUS); REFOCUS = ''; if (n && document.activeElement === document.body) n.focus({preventScroll:true}); }, 30); }
   else if (e.key === 'Escape' && (LIST_EDIT || COST_EDIT)) { LIST_EDIT = COST_EDIT = false; if (S.tab === 'costs') render(true); else { renderSimOut(); icons(); } }
 });
 /* Smooth sliders: draw at most once per frame, save shortly after the last change. */
@@ -4828,6 +5067,7 @@ function renderSimOut(){
   });
   document.querySelectorAll('input[type=range]').forEach(r => r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'));
   const set =(id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  { const an = document.getElementById('adv-n'), n = advCount(); if (an) { an.textContent = T(ADV.n)(n); an.style.display = n ? '' : 'none'; } }
   set('lab-tuition', cad(c.tuY));
   set('lab-hours', s.hours + ' ' + T(M.wk));
   set('lab-coopHours', c.ftH + ' ' + T(M.wk));
@@ -4860,13 +5100,18 @@ function renderSimOut(){
         ${cu === 'both' ? `<div class="text-[18px] font-semibold muted num">${cad(c.total)}</div>` : ''}
       </div>
       <p class="gbasis">${ic('sliders-horizontal','icon-sm')}<span>${T(MONEY.basisL)}: ${goalBasis(c, true)}</span><button class="linkbtn" data-act="jump" data-v="sim-ctl">${T(MONEY.change)}</button>${cityRentNote(c)}</p>
-      <div class="faint text-[13.5px] mt-1">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
-      <div class="mb-3">${ladderBar(c)}</div>
+      ${verdictLine(c)}
+      ${ladderBar(c)}
+      ${ladderLegend(c, one)}
       ${haveBlock(c)}
       ${oddAmounts(c)}
-      <div id="cash-list" class="mt-3" data-flash="1">${cashList(c)}</div>
-      <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(M.sameNote)}</span></p>
-      <div class="autoline" id="auto-line">${autoLineHtml()}</div>
+      <details class="cashd mt-3" data-field="cashOpen" ${(S.open && S.open.cashOpen) || LIST_EDIT ? 'open' : ''}>
+        <summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T({en:'Each amount, one by one (and edit them)', th:'ดูเงินทีละก้อน และแก้ยอด'})}</span></summary>
+        <div class="faint text-[13.5px] mt-2">${T(M.showNote)}${c.n ? ' ' + T(M.projNote)(s.intake) : ''}</div>
+        <div id="cash-list" class="mt-2" data-flash="1">${cashList(c)}</div>
+        <p class="faint text-[13px] mt-2 flex gap-2">${ic('link','icon-sm')}<span>${T(M.sameNote)}</span></p>
+        <div class="autoline" id="auto-line">${autoLineHtml()}</div>
+      </details>
     </div>
     ${analysis(c)}`).html;
   /* the month-by-month detail, charts and the type comparison sit after the controls on phones (see .sim-grid) */
@@ -4952,7 +5197,7 @@ function cityDetail(){
     <a class="btn btn-ghost mb-4" style="font-size:14px" href="${gmap(c.n.en.split(' and ')[0] + ', ' + PROV[c.p].n.en + ', Canada')}" target="_blank" rel="noopener noreferrer">${ic('map','icon-sm')}${T(CITY_UI.gmap)}</a>
     ${c.p==='QC' ? `<div class="text-[15px] flex gap-2 mb-4" style="background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:10px 12px">${ic('triangle-alert','icon-sm')}<span>${T(C.qc)} [[caq]]</span></div>` : ''}
     <div class="grid grid-cols-2 gap-3">
-      ${stat(T(C.rent), cad(c.rent) + `<span class="text-[14px] font-medium muted">${T(C.mo)}</span>`, thb(c.rent*r) + ' · ' + T(c.rentNote || C.rentNote), 'cmhc')}
+      ${stat(T(C.rent), `<span class="whitespace-nowrap">${cad(c.rent)}<span class="text-[14px] font-medium muted">${T(C.mo)}</span></span>`, thb(c.rent*r) + ' · ' + T(c.rentNote || C.rentNote), 'cmhc')}
       ${stat(T(C.wage), 'CAD ' + p.wage.toFixed(2) + `<span class="text-[14px] font-medium muted">${T(C.hr)}</span>`, thb(p.wage*r) + T(C.hr) + (p.next ? ' · ' + T(p.next) : ''), 'minw')}
       ${stat(T(C.hours), Math.round(rentHours(c)) + ' ' + T(C.hrs), T(C.hoursNote), '')}
       ${stat(T(C.jan), (c.jan > 0 ? '+' : '') + c.jan.toFixed(1) + ' °C', T(C.janNote), 'climate')}
@@ -4978,9 +5223,11 @@ function cityTable(){
   const C = CITY_UI, key = S.csort || 'hours';
   const val = {rent:c => c.rent, wage:c => -PROV[c.p].wage, hours:rentHours, jan:c => -c.jan};
   const rows = [...CITIES].sort((a,b) => val[key](a) - val[key](b));
-  const th = (k, l) => `<th>${k ? `<button class="${key===k?'on':''}" data-act="csort" data-v="${k}">${l}${key===k?' ↑':''}</button>` : l}</th>`;
-  return `<table class="ctbl"><thead><tr>${th('', T(C.city))}${th('rent', T(C.rentS))}${th('wage', T(C.wageS))}${th('hours', T(C.hoursS))}${th('jan', T(C.janS))}</tr></thead>
-    <tbody>${rows.map(c => `<tr class="${c.id===S.city?'on':''}" data-act="city" data-v="${c.id}" data-fly="1"><td><strong>${T(c.n)}</strong> <span class="faint">${c.p}</span></td><td>${cad(c.rent)}</td><td>${PROV[c.p].wage.toFixed(2)}</td><td>${Math.round(rentHours(c))}</td><td>${c.jan.toFixed(1)}</td></tr>`).join('')}</tbody></table>`;
+  const th = (k, l) => `<th role="columnheader">${k ? `<button class="${key===k?'on':''}" data-act="csort" data-v="${k}" aria-pressed="${key===k}">${l}${key===k?' ↑':''}</button>` : l}</th>`;
+  /* phones stack each city (see .city-tbl): data-l names each value, the header row becomes the sort buttons, and the
+     city name is a real button so the row can be picked from the keyboard */
+  return `<table class="ctbl city-tbl" role="table"><thead role="rowgroup"><tr role="row" data-sortl="${esc(T({en:'Sort by', th:'เรียงตาม'}))}">${th('', T(C.city))}${th('rent', T(C.rentS))}${th('wage', T(C.wageS))}${th('hours', T(C.hoursS))}${th('jan', T(C.janS))}</tr></thead>
+    <tbody role="rowgroup">${rows.map(c => `<tr role="row" class="${c.id===S.city?'on':''}" data-act="city" data-v="${c.id}" data-fly="1"><td role="rowheader"><button class="cpick" data-act="city" data-v="${c.id}" data-fly="1" aria-pressed="${c.id===S.city}"><strong>${T(c.n)}</strong></button> <span class="faint">${c.p}</span></td><td role="cell" data-l="${esc(plainT(T(C.rentS)))}">${cad(c.rent)}</td><td role="cell" data-l="${esc(plainT(T(C.wageS)))}">${PROV[c.p].wage.toFixed(2)}</td><td role="cell" data-l="${esc(plainT(T(C.hoursS)))}">${Math.round(rentHours(c))}</td><td role="cell" data-l="${esc(plainT(T(C.janS)))}">${c.jan.toFixed(1)}</td></tr>`).join('')}</tbody></table>`;
 }
 function viewCities(){
   const C = CITY_UI; if (!CITIES.some(c => c.id === S.city)) S.city = 'van';
@@ -4991,7 +5238,8 @@ function viewCities(){
     </section>
     <div class="grid lg:grid-cols-5 gap-5 items-start mb-6">
       <div class="lg:col-span-3 flex flex-col gap-3">
-        
+        <label class="flex flex-wrap items-center gap-2 text-[14px] font-medium">${T({en:'City', th:'เมือง'})}
+          <span class="sel-wrap"><select class="sel" data-sel="city" aria-label="${esc(T(C.pick))}">${CITIES.map(c => `<option value="${c.id}" ${S.city === c.id ? 'selected' : ''}>${T(c.n)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
         <div class="card" style="padding:8px"><div id="cmap" role="region" aria-label="${esc(T(C.mapLabel))}"></div></div>
         
         <div class="flex flex-wrap gap-x-4 gap-y-1 text-[13px] muted px-1">
@@ -5001,9 +5249,10 @@ function viewCities(){
           <span class="flex items-center gap-1">${THAI_SVG} ${T(C.lgThai)}</span><span class="flex items-center gap-1 w-full">${ic('mouse','icon-sm')}${T(C.zoomTip)}</span>
         
         </div>
-        
-        <label class="flex flex-wrap items-center gap-2 text-[14px] font-medium">${T({en:'City', th:'เมือง'})}
-          <span class="sel-wrap"><select class="sel" data-sel="city" aria-label="${esc(T(C.pick))}">${CITIES.map(c => `<option value="${c.id}" ${S.city === c.id ? 'selected' : ''}>${T(c.n)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
+        <div class="card">
+          <h2 class="text-[17px] font-semibold flex items-center gap-2">${ic('lightbulb')}${T(C.howT)}</h2>
+          <ul class="clean mt-2">${C.how.map(x => `<li><span style="color:var(--blue)">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
+        </div>
       </div>
       <div class="card lg:col-span-2 lg:sticky" style="top:72px" id="city-detail">${cityDetail()}</div>
     </div>
@@ -5012,28 +5261,25 @@ function viewCities(){
       <p class="muted text-[15px] mt-1 mb-3">${T(C.cmpSub)} [[cmhc]] [[minw]] [[climate]]</p>
       <div class="hscroll" id="city-table">${cityTable()}</div>
     </div>
-    <div class="grid md:grid-cols-2 gap-4 mb-6">
-      <div class="card">
-        
-        <h2 class="text-[17px] font-semibold flex items-center gap-2">${ic('lightbulb')}${T(C.howT)}</h2>
-        
-        <ul class="clean mt-2">${C.how.map(x => `<li><span style="color:var(--blue)">${ic('circle-check','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
-      </div>
+    <div class="mb-6">
       <div class="card">
         
         <h2 class="text-[17px] font-semibold flex items-center gap-2">${THAI_SVG} ${T(C.thaiT)}</h2>
         
         <p class="muted text-[15px] mt-1">${T(C.thaiSub)}</p>
         
-        ${THAI.map(t => `<div class="py-3" style="border-top:1px solid var(--line);margin-top:10px"><div class="font-semibold">${T(t.n)}</div><div class="muted text-[14px]">${T(t.d)} [[${t.src}]]</div><div class="flex flex-wrap gap-2 mt-2"><button class="btn btn-primary" style="font-size:14px" data-act="thai" data-v="${THAI.indexOf(t)}">${ic('map-pin','icon-sm')}${T(C.onMap)}</button><a class="btn btn-ghost" style="font-size:14px" href="${gmap(t.q)}" target="_blank" rel="noopener noreferrer">${ic('map','icon-sm')}${T(C.gmap)}</a></div></div>`).join('')}
+        ${THAI.map(t => `<div class="py-3" style="border-top:1px solid var(--line);margin-top:10px"><div class="font-semibold">${T(t.n)}</div><div class="muted text-[14px]">${T(t.d)} [[${t.src}]]</div><div class="flex flex-wrap gap-2 mt-2"><button class="btn btn-ghost" style="font-size:14px" data-act="thai" data-v="${THAI.indexOf(t)}">${ic('map-pin','icon-sm')}${T(C.onMap)}</button><a class="btn btn-ghost" style="font-size:14px" href="${gmap(t.q)}" target="_blank" rel="noopener noreferrer">${ic('map','icon-sm')}${T(C.gmap)}</a></div></div>`).join('')}
       </div>
     </div>`;
 }
 function initMap(){
-  if (MAP) { try { MAPVIEW = {c:MAP.getCenter(), z:MAP.getZoom()}; MAP.remove(); } catch(e){} MAP = null; MARKERS = {}; THAIM = []; }
+  if (MAP) { try { MAPVIEW = {c:MAP.getCenter(), z:MAP.getZoom()}; MAP.stop(); MAP.off(); MAP.remove(); } catch(e){} MAP = null; MARKERS = {}; THAIM = []; }
   const el = document.getElementById('cmap'); if (!el) return;
   if (!window.L) { el.innerHTML = `<div class="p-6 muted text-[14px]">${T(CITY_UI.noMap)}</div>`; return; }
-  MAP = L.map(el, {zoomSnap:0.5, scrollWheelZoom:true, wheelPxPerZoomLevel:90, attributionControl:true});
+  /* the map never captures a page scroll: the wheel zooms only after the map is clicked or focused, and on touch screens
+     one finger scrolls the page while two fingers zoom and move the map */
+  MAP = L.map(el, {zoomSnap:0.5, scrollWheelZoom:false, wheelPxPerZoomLevel:90, attributionControl:true, dragging:!L.Browser.mobile, tap:!L.Browser.mobile});
+  MAP.on('click focus', () => MAP.scrollWheelZoom.enable()); MAP.on('mouseout blur', () => MAP.scrollWheelZoom.disable());
   const dark = S.theme === 'dark';
   L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/${dark?'Canvas/World_Dark_Gray_Base':'World_Street_Map'}/MapServer/tile/{z}/{y}/{x}`, {maxZoom:16, minZoom:2,
     attribution:'Tiles &copy; Esri, HERE, Garmin, &copy; OpenStreetMap contributors'}).addTo(MAP);
@@ -5043,16 +5289,17 @@ function initMap(){
     m.bindTooltip(T(c.n), {permanent: true, direction:'right', offset:[8,0], className:'clabel' + (c.id===S.city ? ' sel' : '')});
     MARKERS[c.id] = m;
   });
-  THAI.forEach((t, i) => THAIM[i] = L.marker([t.lat, t.lng], {icon:L.divIcon({className:'', html:'<div class="tpin">' + THAI_SVG + '<span>' + esc(T(t.short)) + '</span></div>', iconSize:[0,0], iconAnchor:[0,0]}), title:T(t.n), zIndexOffset:1000})
+  THAI.forEach((t, i) => THAIM[i] = L.marker([t.lat, t.lng], {icon:L.divIcon({className:'', html:'<div class="tpin">' + THAI_SVG + '<span>' + esc(T(t.short)) + '</span></div>', iconSize:[0,0], iconAnchor:[0,0]}), title:T(t.n), zIndexOffset:-1000})   /* under the city pins: the flags used to cover Vancouver and Ottawa */
     .addTo(MAP).bindPopup(`<strong>${esc(T(t.n))}</strong><br>${esc(T(t.d))}<br><a href="${gmap(t.q)}" target="_blank" rel="noopener noreferrer">${esc(T(CITY_UI.gmap))}</a>`));
   const lowz = () => el.classList.toggle('lowz', MAP.getZoom() < 6);
   MAP.on('zoomend', lowz); lowz();
-  const fit = () => MAP.fitBounds(L.latLngBounds(CITIES.map(c => [c.lat, c.lng])), {padding:[24,24], maxZoom:5});
+  const fit = () => MAP.fitBounds(L.latLngBounds(CITIES.map(c => [c.lat, c.lng])), {padding:[24,24], maxZoom:5, animate:false});   /* no zoom animation on the first fit: a redraw during it threw "_leaflet_pos" */
   if (MAPVIEW) MAP.setView(MAPVIEW.c, MAPVIEW.z); else MAP.setView([52, -96], 3);
-  requestAnimationFrame(() => setTimeout(() => { if (!MAP) return; MAP.invalidateSize(); if (!MAPVIEW) fit(); }, 30));
+  /* the first fit runs only on the same, still-attached map (a redraw in between used to throw "_leaflet_pos") */
+  const me = MAP; requestAnimationFrame(() => setTimeout(() => { if (!MAP || MAP !== me || !document.body.contains(el)) return; try { MAP.invalidateSize(); if (!MAPVIEW) fit(); } catch (e) {} }, 30));
 }
 function selectCity(id, fly){
-  S.city = id; save();
+  S.city = id; S.cityPicked = true; save();
   const d = document.getElementById('city-detail'); if (!d) { render(true); return; }
   d.innerHTML = cites(cityDetail()).html;
   document.getElementById('city-table').innerHTML = cites(cityTable()).html;
@@ -5061,12 +5308,13 @@ function selectCity(id, fly){
     const t = m.getTooltip() && m.getTooltip().getElement(); if (t) t.classList.toggle('sel', k === id); });
   const c = cityOf(id);
   if (MAP && fly) MAP.flyTo([c.lat, c.lng], Math.max(MAP.getZoom(), 4),{duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.8});
-  if (fly === true && innerWidth < 1024) d.scrollIntoView({behavior:'smooth', block:'start'});
+  if (fly === true && innerWidth < 1024) d.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
   updateRefs(); icons();
 }
 
 /* ============================== RENDER ============================== */
 const VIEWS = {start:viewStart, ready:viewReady, fields:viewFields, cities:viewCities, roadmap:viewRoad, costs:viewCosts, budget:viewBudget, prep:viewPrep};
+const isView = h => Object.prototype.hasOwnProperty.call(VIEWS, h);
 function updateChip(){
   const c = document.getElementById('fx-chip');
   /* narrow screens drop "1 CAD =" but keep the unit as THB/CAD, so the number still says what it is */
@@ -5099,7 +5347,8 @@ function cites(html, used = PAGE_USED){
   html = html.replace(/\s?\[\[([a-z0-9_]+)\]\]/gi, (m, k) => {
     const s = SRC[k]; if (!s) return '';
     let n = used.indexOf(k); if (n < 0) { used.push(k); n = used.length - 1; }
-    return `<sup class="cite"><a href="#ref-${n+1}" data-cite="${n+1}" title="${esc(T(s.l))}" aria-label="${esc(T({en:'Source', th:'แหล่งอ้างอิง'}) + ' ' + (n+1) + ': ' + T(s.l))}">${n+1}</a></sup>`;
+    /* out of the Tab order: one stop per figure made long pages tiring (Costs had 66); the numbered list at the end of each page holds every source as a link */
+    return `<sup class="cite"><a href="#ref-${n+1}" data-cite="${n+1}" tabindex="-1" title="${esc(T(s.l))}" aria-label="${esc(T({en:'Source', th:'แหล่งอ้างอิง'}) + ' ' + (n+1) + ': ' + T(s.l))}">${n+1}</a></sup>`;
   });
   return {html, used};
 }
@@ -5163,7 +5412,8 @@ function linkTerms(root, skipIn){
 function termTabOnce(){
   const app = document.getElementById('app'); if (!app) return;
   const seen = new Set();
-  app.querySelectorAll('.term').forEach(b => { if (seen.has(b.dataset.term)) b.tabIndex = -1; else { seen.add(b.dataset.term); b.removeAttribute('tabindex'); } });
+  /* a term is underlined and tabbable only the first time on a page; repeats still open their popover on tap, without the dotted line */
+  app.querySelectorAll('.term').forEach(b => { const rep = seen.has(b.dataset.term); b.classList.toggle('rep', rep); if (rep) b.tabIndex = -1; else { seen.add(b.dataset.term); b.removeAttribute('tabindex'); } });
 }
 /* Keyboard focus never hides under the floating dock or the toolbar: nudge the page so the focused control shows. */
 document.addEventListener('focusin', e => {
@@ -5177,7 +5427,13 @@ document.addEventListener('focusin', e => {
     else if (r.top < high) window.scrollBy({top:r.top - high, behavior:'instant'});
   });
 });
-function hideTerm(){ const p = document.getElementById('term-pop'); if (p) p.classList.remove('on'); if (TERM_BTN) TERM_BTN.setAttribute('aria-expanded', 'false'); TERM_BTN = null; }
+function hideTerm(){ const p = document.getElementById('term-pop'), back = p && p.contains(document.activeElement) ? TERM_BTN : null;
+  if (p) p.classList.remove('on'); if (TERM_BTN) TERM_BTN.setAttribute('aria-expanded', 'false'); TERM_BTN = null;
+  if (back && document.contains(back)) back.focus({preventScroll:true}); }   /* focus returns to the term it came from */
+/* keyboard: Escape or Tab past the last link closes the term popover and returns to the term */
+document.addEventListener('keydown', e => { const p = document.getElementById('term-pop'); if (!p || !p.classList.contains('on') || !p.contains(document.activeElement)) return;
+  if (e.key === 'Escape') { e.preventDefault(); hideTerm(); return; }
+  if (e.key === 'Tab') { const f = [...p.querySelectorAll('a,button')]; if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); const b = TERM_BTN; hideTerm(); if (b) b.focus(); } } });
 function showTerm(btn){
   const e = GLOSS.find(x => gid(x) === btn.dataset.term); if (!e) return;
   if (TERM_BTN === btn) { hideTerm(); return; }
@@ -5200,6 +5456,9 @@ function showTerm(btn){
   pop.style.left = Math.max(12, Math.min(innerWidth - w - 12, r.left + r.width / 2 - w / 2)) + 'px';
   const h = pop.offsetHeight, below = r.bottom + 8;
   pop.style.top = (below + h > innerHeight - 96 && r.top - h - 8 > 64 ? r.top - h - 8 : Math.min(below, innerHeight - h - 12)) + 'px';
+  /* opened from the keyboard: move focus into the popover so its text and links are reached next, not after the whole page */
+  btn.setAttribute('aria-controls', 'term-pop');
+  if (btn.matches(':focus-visible')) { pop.setAttribute('tabindex', '-1'); pop.focus({preventScroll:true}); }
 }
 function glossShell(){
   const U = GLOSS_UI;
@@ -5304,6 +5563,15 @@ function openGloss(focusId){
   }
 }
 document.addEventListener('input', e => { if (e.target.matches && e.target.matches('[data-gloss-q]')) { GL_Q = e.target.value; renderGlossList(); } });
+/* Quiz answers are radio groups: one Tab stop per question, arrow keys move between its answers, Space or Enter picks one. */
+document.addEventListener('keydown', e => {
+  const r = e.target.closest && e.target.closest('[role="radio"]'); if (!r) return;
+  const d = {ArrowDown:1, ArrowRight:1, ArrowUp:-1, ArrowLeft:-1}[e.key]; if (!d) return;
+  const all = [...r.parentElement.querySelectorAll('[role="radio"]')], i = all.indexOf(r), n = all[(i + d + all.length) % all.length];
+  e.preventDefault(); all.forEach(x => x.tabIndex = x === n ? 0 : -1); n.focus(); n.click();   /* standard radio pattern: the arrow also chooses */
+});
+/* the glossary group row on phones: drop the right-edge fade once it is scrolled to its end */
+document.addEventListener('scroll', e => { const t = e.target; if (t && t.classList && t.classList.contains('gl-cats')) t.classList.toggle('at-end', t.scrollLeft + t.clientWidth >= t.scrollWidth - 4); }, true);
 let TERM_Y = 0;   /* close the popover only after a real scroll, not a leftover smooth-scroll nudge */
 window.addEventListener('scroll', () => { if (TERM_BTN && Math.abs(scrollY - TERM_Y) > 40) hideTerm(); }, {passive:true});
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && TERM_BTN) hideTerm(); });
@@ -5336,10 +5604,15 @@ function focusTitle(){
   const h = document.querySelector('#app h1'); if (!h) return;
   h.setAttribute('tabindex', '-1'); h.focus({preventScroll:true});
 }
+let POPPING = false;   /* true while Back or Forward is switching the page, so that switch is not recorded again */
 function render(keepScroll){
   if (MAP) { try { MAP.stop(); } catch (e) {} }
+  /* leaving Cities: take the map down cleanly so no pending animation frame reaches its removed elements */
+  if (MAP && S.tab !== 'cities') { try { MAPVIEW = {c:MAP.getCenter(), z:MAP.getZoom()}; MAP.off(); MAP.remove(); } catch (e) {} MAP = null; MARKERS = {}; THAIM = []; }
   if (S.tab !== 'budget') LAST_GOAL = null;   /* a map still flying when the page redraws threw "_leaflet_pos" */
   if (!VIEWS[S.tab]) S.tab = 'ready';
+  /* each page has its own address (#budget, #prep...): a new page adds a history entry, so Back returns to the last page */
+  if (!POPPING && location.hash.slice(1) !== S.tab) { try { history[isView(location.hash.slice(1)) ? 'pushState' : 'replaceState'](null, '', '#' + S.tab); } catch (e) {} }
   document.documentElement.lang = S.lang;
   document.title = S.lang === 'th' ? 'คู่มือ Work & Study สู่ PR แคนาดา 2027 ถึง 2033' : 'Canada Work & Study to PR Guide 2027 to 2033';
   document.getElementById('brand').textContent = T(UI.brand);
@@ -5355,7 +5628,7 @@ function render(keepScroll){
   tb.setAttribute('aria-label', T(dark ? {en:'Switch to light theme', th:'เปลี่ยนเป็นธีมสว่าง'} : {en:'Switch to dark theme', th:'เปลี่ยนเป็นธีมมืด'}));
   tb.title = tb.getAttribute('aria-label');
   const gb = document.getElementById('gloss-btn');
-  gb.innerHTML = ic('book-search'); gb.setAttribute('aria-label', T(GLOSS_UI.btn)); gb.title = T(GLOSS_UI.btn);
+  gb.innerHTML = ic('book-search') + `<span class="gl-word">${T({en:'Glossary', th:'คำศัพท์'})}</span>`; gb.setAttribute('aria-label', T(GLOSS_UI.btn)); gb.title = T(GLOSS_UI.btn);
   hideTerm();
   /* the dock is page navigation (26 Nov 2026): aria-current marks the open page; labels follow the language */
   const nav = document.getElementById('btabs'); nav.setAttribute('aria-label', T(A11Y.nav));
@@ -5403,10 +5676,12 @@ window.addEventListener('resize', () => { SIDE.off = null; SIDE.y = window.scrol
 /* After a button switches tabs, land on the section it names instead of the top of the page.
    Checked again once late layout (icons, glossary links, embeds) has settled. */
 function goAnchor(id){
-  const jump = () => { const t = document.getElementById(id); if (t) { if (t.tagName === 'DETAILS' && !t.open) t.open = true; t.scrollIntoView({block:'start', behavior:'instant'}); } return t; };
+  const jump = () => { const t = document.getElementById(id); if (t) { if (t.tagName === 'DETAILS' && !t.open) t.open = true;
+    for (let d = t.closest('details:not([open])'); d; d = d.parentElement && d.parentElement.closest('details:not([open])')) d.open = true;
+    t.scrollIntoView({block:'start', behavior:'instant'}); } return t; };
   const t = jump(); if (!t) return;
   setTimeout(() => { if (Math.abs(t.getBoundingClientRect().top - 80) > 12) jump(); }, 300);
-  if (t.matches('label.check')) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); }
+  if (t.matches('.check')) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); }
 }
 
 document.addEventListener('click', e => {
@@ -5440,7 +5715,7 @@ document.addEventListener('click', e => {
   else if (act === 'quizreset') { if (Object.keys(S.quiz || {}).length && !confirm(T({en:'Clear all 10 answers and start the self-assessment again?', th:'ล้างคำตอบทั้ง 10 ข้อ และเริ่มแบบประเมินใหม่ใช่ไหม'}))) return; S.quiz = {}; render(true); }
   else if (act === 'quiztype') {
     /* open the Budget on the recommended type; a type already chosen keeps your own amounts */
-    if (S.sim.type !== v && SIMC.types[v]) { const ty = SIMC.types[v]; S.sim.type = v; S.sim.tuition = ty.def; S.sim.coopWage = ty.coopWage; S.sim.coopHours = ty.coopH; S.sim.fees = ty.fees; if (v === 'private') S.sim.hasCoop = true; }
+    if (S.sim.type !== v && SIMC.types[v]) setSimType(v);
     if (b.dataset.years) S.sim.years = +b.dataset.years;   /* the length the result advises (B: 2 years) */
     S.tab = 'budget'; LIST_EDIT = COST_EDIT = false; render(false); focusTitle();
   }
@@ -5451,8 +5726,8 @@ document.addEventListener('click', e => {
   else if (act === 'city') { selectCity(v, b.dataset.fly === '1'); }
   else if (act === 'csort') { S.csort = v; render(true); }
   else if (act === 'scenario') { S.scenario = v; render(true); }
-  else if (act === 'sim-type') { S.sim.type = v; S.sim.tuition = SIMC.types[v].def; S.sim.coopWage = SIMC.types[v].coopWage; S.sim.coopHours = SIMC.types[v].coopH; S.sim.fees = SIMC.types[v].fees; if (v === 'private') S.sim.hasCoop = true; render(true); }
-  else if (act === 'sim-intake') { S.sim.intake = +v; render(true); }
+  else if (act === 'sim-type') { setSimType(v); render(true); }
+  else if (act === 'sim-intake') { setIntakeYear(+v); render(true); }
   else if (act === 'sim-years') { S.sim.years = +v; render(true); }
   else if (act === 'sim-pgwp') { S.sim.pgwp = v === 'yes'; render(true); }
   else if (act === 'sim-coop') { S.sim.hasCoop = v === 'yes'; render(true); }
@@ -5463,7 +5738,10 @@ document.addEventListener('click', e => {
     if (nb) nb.focus({preventScroll:true});
     announce(T(A11Y.ckDone)(c.done, c.total));
   }
-  else if (act === 'jump') { const t = document.getElementById(v); if (t) { t.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'}); if (t.dataset.flash) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1800); }
+  else if (act === 'jump') { const t = document.getElementById(v); if (t) {
+    /* a target inside a folded section: unfold it first */
+    for (let d = t.closest('details:not([open])'); d; d = d.parentElement && d.parentElement.closest('details:not([open])')) d.open = true;
+    t.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'}); if (t.dataset.flash) { t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1800); }
     /* keyboard users land where they jumped: the target itself if it can take focus, else its first heading */
     const f = t.hasAttribute('tabindex') ? t : t.querySelector('h2[tabindex], h3[tabindex]'); if (f) f.focus({preventScroll:true}); } }
   else if (act === 'sim-living') { S.sim.living = v; S.sim.rentC = S.sim.foodC = S.sim.otherC = null; render(true); }
@@ -5484,6 +5762,8 @@ document.addEventListener('click', e => {
   else if (act === 'refresh') { loadFx(true); loadLive(true); }
   else if (act === 'gloss-open') { openGloss(v); }
   else if (act === 'gloss-close') { const d = document.getElementById('gloss-dlg'); if (d && d.open) d.close(); }
+  else if (act === 'cityrent') { const v2 = cityRentFor(S.city); if (v2 != null) { S.sim.rentC = v2; render(true); announce(T({en:'Rent updated for the city you picked.', th:'ปรับค่าเช่าตามเมืองที่เลือกแล้ว'})); } }
+  else if (act === 'fields-clear') { S.filter = 'all'; S.fstat = null; render(true); const g = document.querySelector('[data-sel="field-g"]'); if (g) g.focus({preventScroll:true}); }
   else if (act === 'gloss-clear') { GL_Q = ''; const q = document.querySelector('[data-gloss-q]'); renderGlossList(); if (q) { q.value = ''; q.focus(); } }
   else if (act === 'gloss-cat') { GL_CAT = v; document.querySelectorAll('.gl-cats button').forEach(x => { x.classList.toggle('on', x.dataset.v === v); x.setAttribute('aria-pressed', x.dataset.v === v); }); renderGlossList(); const gl = document.getElementById('gloss-list'); if (gl) gl.scrollTop = 0; }
   else if (act === 'term-close') { hideTerm(); }
@@ -5503,6 +5783,10 @@ document.addEventListener('click', e => {
     const st = planStore(), it = planItem(v); if (!it || st.added[v]) return;
     window.open(gcalUrl(it.title, it.date, it.details), '_blank', 'noopener');
     st.added[v] = {date:it.date, at:Date.now()}; render(true);
+  }
+  else if (act === 'g-open') {   /* open the same pre-filled event again, for when Save was not pressed in Google */
+    const st = planStore(), it = planItem(v); if (!it || !st.added[v]) return;
+    window.open(gcalUrl(it.title, st.added[v].date || it.date, it.details), '_blank', 'noopener');
   }
   else if (act === 'g-del') {
     const st = planStore(), it = planItem(v); if (!it || !st.added[v]) return;
@@ -5546,7 +5830,10 @@ document.addEventListener('input', e => {
 window.addEventListener('storage', e => {
   if (e.key !== KEY || !e.newValue) return;
   let o; try { o = JSON.parse(e.newValue); } catch (err) { return; }
+  /* take the other tab's settings and amounts, but stay on the page this tab is showing */
+  const here = S.tab;
   S = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), o, {sim:Object.assign({}, DEFAULTS.sim, o.sim || {})});
+  S.tab = here;
   const a = document.activeElement; if (a && a.matches && a.matches('input, textarea, select')) return;   /* do not yank a box being typed in */
   SYNC_IN = true; try { render(true); } finally { SYNC_IN = false; }
 });
@@ -5556,8 +5843,9 @@ document.addEventListener('change', e => {
   const v = e.target.value;
   /* the city menu redraws only the city panels and moves the map, never the page, so arrow keys can step through cities */
   if (k === 'city') { if (cityOf(v)) selectCity(v, 'map'); return; }
-  if (k === 'sim-intake') S.sim.intake = +v;
-  else if (k === 'plan-y') { S.plan = S.plan || {}; S.plan.y = +v; if (!S.plan.m) S.plan.m = planIntake().getMonth() + 1; S.plan.dates = {}; }
+  if (k === 'agent-city') S.agentCity = v;
+  else if (k === 'sim-intake') setIntakeYear(+v);
+  else if (k === 'plan-y') { S.plan = S.plan || {}; S.plan.y = +v; if (!S.plan.m) S.plan.m = planIntake().getMonth() + 1; S.plan.dates = {}; setIntakeYear(+v); }
   else if (k === 'field-g') S.filter = v;
   else if (k === 'field-s') S.fstat = v === 'none' ? null : v;
   else return;
@@ -5572,6 +5860,8 @@ document.addEventListener('input', e => {
   const hi = haveInfo(simCalc()), out = document.getElementById('have-out'), bar = document.getElementById('have-bar');
   if (out) { out.textContent = hi ? hi.text : ''; out.classList.toggle('pos', !!(hi && hi.ok)); }
   if (bar) { bar.style.display = hi ? '' : 'none'; const i = bar.querySelector('i'); if (i) i.style.width = (hi ? hi.pct : 0) + '%'; }
+  const al = document.getElementById('have-alt'); if (al) { al.style.display = hi && hi.alt ? '' : 'none'; al.innerHTML = hi && hi.alt ? hi.alt : ''; }
+  const pl = document.getElementById('have-plan'); if (pl) { pl.style.display = hi && hi.plan ? '' : 'none'; const sp = pl.querySelector('span'); if (sp) sp.textContent = hi && hi.plan ? hi.plan : ''; }
 });
 /* The converter's result written out with thousands separators, since number boxes cannot show them. */
 function convOut(){
@@ -5609,6 +5899,9 @@ document.addEventListener('click', e => {
   if (t) t.focus();
 });
 
+/* open the page the address names (a shared link such as ...#budget), and follow Back and Forward between pages */
+{ const h = location.hash.slice(1); if (isView(h)) S.tab = h; }
+window.addEventListener('popstate', () => { const h = location.hash.slice(1); if (!isView(h) || h === S.tab) return; POPPING = true; S.tab = h; try { render(false); } finally { POPPING = false; } focusTitle(); });
 applyFunds();
 render(false);
 loadFx();
