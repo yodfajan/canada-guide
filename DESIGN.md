@@ -285,14 +285,14 @@ Tactile glass pills that press in slightly.
 - **Glass (default):** Glass Dense background, Glass Edge 1px rim, Ink text, raised-control shadow; 14px medium text, 4px 16px padding, 6px gap to an optional 14px icon.
 - **Primary:** System Blue fill that shades slightly darker toward the bottom (never lighter than the blue behind the white text, so it stays at 4.8:1), the 1px white top rim, white text, accent lift shadow. One primary per card at most.
 - **Press:** scales to 0.97 and dims slightly (180ms, `cubic-bezier(.2,.8,.2,1)`).
-- **Focus:** 3px outline in the focus ring blue (`rgba(0,122,255,.5)`), 1px offset.
+- **Focus:** 3px solid outline in System Blue (`#007AFF`, dark theme `#0A84FF`), 1px offset, on buttons, links, inputs, pop-up menus and disclosure summaries. Solid so it keeps 3:1 or more on white (4.0:1) and on the window gray (3.6:1); the earlier 50% blue was about 2.0:1.
 - **Link button:** unstyled text in Link Blue, medium weight, underline on hover, for inline actions such as "Use default".
 
 ### Segmented controls
 The main choice control for two to four short options (language, currency, program type, intake month, scenario).
 - **Track:** Gray Wash pill with a hairline inset ring, 3px padding.
 - **Segments:** transparent pills, 13.5px medium text; the selected segment becomes Glass Dense with a raised shadow. In the toolbar the whole control is glass.
-- **Never wraps:** a choice with more options (start year, Checklist intake year, Fields group and status filters, the city on Cities) uses the pop-up menu instead.
+- **Never wraps:** a choice with more options (start year, Checklist intake year, Fields group and status filters, the city on Cities, the agents' branch city) uses the pop-up menu instead. Under 520px a control whose labels are long switches to short names (`.seg-l` full, `.seg-s` short: "เอกชน / วิทยาลัยรัฐ / ป.โท", "1: ลองแบบปลอดภัย", "Google ของฉัน").
 
 ### Pop-up menu
 A native select drawn as an AppKit pop-up button: Glass Dense pill, Glass Edge rim, raised-control shadow, 15px semibold text (16px and 44px tall on touch), a 14px chevron on the right in Ink Tertiary, focus ring as for buttons. A Checklist year not yet chosen shows a disabled "Choose a year" first option.
@@ -329,13 +329,27 @@ The Calendar card switches between two views with a segmented control. "My Googl
 An item not yet added shows a glass "Add to Google Calendar" button; once added it becomes a green "Added to Google" badge with a Remove link (an amber badge appears if the planned date changed since).
 
 ### Tables on phones
-Under 640px no table asks for sideways scrolling. The example programs table stacks each school into a block: school and program on top, then one row per value with its column name as a 12.5px Label on the left and the value on the right. The Budget compare table keeps its three program types as columns and puts each row name on its own full-width line above the three values, at 13.5px. Both keep `role` attributes (table, row, columnheader, rowheader, cell) so screen readers still read a table after CSS changes the display.
+Under 640px no table asks for sideways scrolling. The example programs table stacks each school into a block: school and program on top, then one row per value with its column name as a 12.5px Label on the left and the value on the right. The Budget compare table keeps its three program types as columns and puts each row name on its own full-width line above the three values, at 13.5px, with 8px padding inside the tinted current column. The Cities table stacks each city: the name (a button that picks the city) on top, then its four values in two named columns, and the header row turns into "Sort by" pill buttons. All three keep `role` attributes (table, row, columnheader, rowheader, cell) so screen readers still read a table after CSS changes the display.
 
 ### Charts
 Line, bar and stacked bar charts drawn as inline SVG: 1px grid lines in a faint ink, 12px tabular axis labels in Ink Tertiary, a 2px series line with a 10% area fill, glass tooltips (10px radius, blur 20px), legends with 10px rounded swatches, and every chart offering a "show as a table" fallback.
 
 ### Money ladder
 The one way the app names money before the trip, on the All Costs and Budget pages, the Start page and the quiz hint. Three amounts, always in this order and colour: prep and visa costs (series 1), money to show (series 2), setup reserve (series 3), adding up to the total savings goal. A 10px proportion strip (2px gaps, 3px radius, 6px minimum segment) sits under the goal figure with no text inside the colours; each amount is labelled beside a 10px swatch. On the Budget list the money-to-show parts are indented 18px above their subtotal. Amounts keep to one line (no wrap inside a figure).
+
+**Budget goal card.** Holds only: the goal figure, its basis line, a one-line verdict (24px tinted icon tile, the verdict words, a "Why" link down to the verdict card), the strip, a legend naming each part with its amount (13px), and the money-you-have box. The itemised list, its notes and the live-update line fold under a blue disclosure, "Each amount, one by one (and edit them)", which opens by itself in edit mode and remembers its state. The verdict card leads with three stat tiles (money at the end, lowest point or the month money runs out, break-even hours against the 24-hour limit) and folds its numbered reasons.
+
+### Checklist row
+Only the checkbox and the step title (a `<label for>`) tick a row; the description, the date box, the Google control and the links sit outside the label. A step sent to Google shows a green "Sent to Google" badge with "Not saved there? Open again" and "Remove", because the page cannot know whether the event was saved in Google.
+
+### Control notes and citations
+Each Budget control keeps its label and value in view; its explanation folds under a 13px Ink Tertiary "About this" disclosure with an info icon (the program type keeps its description open). Citation numbers stay clickable but are out of the Tab order; every page's numbered reference list carries the same sources as links.
+
+### Page addresses
+Each page has its own address (`#start`, `#budget`, `#prep`...). Opening a page adds a history entry, Back and Forward switch pages, and a link with an address opens that page.
+
+### Quiz answers
+Each question's answers are a radio group: radio-styled option buttons with `role="radio"` and `aria-checked`, one Tab stop per question (the chosen answer, or the first), arrow keys to move between answers, Space or Enter to choose.
 
 ### Glossary term and popover
 Known terms in body text get a 1.5px dotted Link Blue underline; tapping opens a 16px-radius glass popover (max 360px wide) with the term, full name, plain explanation, an official link and a link to the full glossary sheet (22px radius, full screen on phones).
