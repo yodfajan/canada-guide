@@ -224,6 +224,8 @@
   /* a checklist row: only the box and the title tick it, so reading the description, picking a date or opening a link never does */
   .check{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
   .check label.ct{cursor:pointer}
+  .ck-more.later{display:none} .ck-more.later.open{display:block}
+  .ck-tog{display:inline-flex;align-items:center;min-height:32px} @media (pointer:coarse){.ck-tog{min-height:44px}}
   .check:first-child{border-top:0}
   .check input{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:4px;flex:none;margin:4px 0 0;cursor:pointer;position:relative;
     background:var(--ctl);box-shadow:inset 0 0 0 1px var(--ctl-border),inset 0 1px 1.5px rgba(0,0,0,.08)}
@@ -750,6 +752,11 @@ function money(a, b, unit){
     ? {cad:rangeStr(rnd(a/r,5), rnd(b/r,5)), thb:rangeStr(a,b)}
     : {cad:rangeStr(a,b), thb:rangeStr(rnd(a*r,100), rnd(b*r,100))};
 }
+/* a tuition range in today's prices, raised to the shared start year like the Budget (tuition about 4% a year) */
+function stackY(a, b){
+  const n = Math.max(0, (S.sim.intake || SIMC.base + 1) - (SIMC.base + 1)), f = Math.pow(1 + SIMC.growth.tuition, n), r = v => Math.round(v * f / 500) * 500;
+  return stack(r(a), r(b)) + (n ? `<span class="stat-sub">${T({en:y => `Projected for a ${y} start`, th:y => `คาดการณ์สำหรับเริ่มเรียนปี ${y}`})(S.sim.intake)}</span>` : '');
+}
 function stack(a, b){
   const m = money(a, b, 'cad');
   return `CAD ${m.cad}<span class="stat-sub num">${S.lang === 'th' ? `ประมาณ ${m.thb} บาท` : `about THB ${m.thb}`}</span>`;
@@ -1031,8 +1038,17 @@ function haveInfo(c){
   /* an out-of-reach monthly figure is not the headline: the reachable later start leads, the current-year figure follows as context */
   const a = tooMuch ? altStart(h) : null, n = monthsToApply(), m = d > 0 ? thb(Math.ceil(d / n / 100) * 100) : '';
   const alt = a ? `${T({en:'A reachable plan: ', th:'แผนที่ทำได้จริง: '})}${altLine(a).replace(/^(Or start|หรือเริ่มเรียน)/, (x) => x === 'Or start' ? 'Start' : 'เริ่มเรียน')}` : '';
-  const plan = d <= 0 ? '' : (a ? T({en:(m, n, y) => `Keeping the ${y} start would need about ${m} a month for ${n} months, more than most people can save.`, th:(m, n, y) => `ถ้ายังเริ่มปี ${y} ต้องเก็บเดือนละประมาณ ${m} อีก ${n} เดือน ซึ่งสูงเกินกว่าที่คนส่วนใหญ่เก็บได้`})(m, n, S.sim.intake) : savePlan(d));
-  return {pct:Math.min(100, Math.floor(h / g * 100)), text:d > 0 ? T(HAVE.short)(thb(d), Math.floor(h / g * 100)) : T(HAVE.ok)(thb(-d)), ok:d <= 0, plan, alt};
+  const plan = d <= 0 ? '' : (a ? T({en:(m, n, y) => `Keeping the ${y} start would need about ${m} a month for ${n} months, more than most people can save.`, th:(m, n, y) => `ถ้ายังเริ่มปี ${y} ต้องเก็บเดือนละประมาณ ${m} อีก ${n} เดือน ซึ่งสูงเกินกว่าที่คนส่วนใหญ่เก็บได้`})(m, n, S.sim.intake) : (tooMuch ? T({en:(m, n) => `This needs about ${m} a month for ${n} months, more than most people can save, and no start up to 2033 brings it under about THB 30,000 a month.`, th:(m, n) => `แผนนี้ต้องเก็บเดือนละประมาณ ${m} อีก ${n} เดือน ซึ่งสูงเกินกว่าที่คนส่วนใหญ่เก็บได้ และไม่มีปีเริ่มเรียนไหนจนถึง 2033 ที่ทำให้ต่ำกว่าเดือนละราว 30,000 บาท`})(m, n) : savePlan(d)));
+  /* when no later start helps, offer the other levers that lower the goal */
+  const lev = tooMuch && !a ? levers() : '';
+  return {pct:Math.min(100, Math.floor(h / g * 100)), text:d > 0 ? T(HAVE.short)(thb(d), Math.floor(h / g * 100)) : T(HAVE.ok)(thb(-d)), ok:d <= 0, plan, alt:alt || lev, short:d > 0 ? d : 0};
+}
+/* ways to bring the goal down when no later start is enough: a shorter program, a cheaper type, a sponsor */
+function levers(){
+  const s = S.sim, b = [];
+  if ((s.years || 1) > 1) b.push(`<button class="linkbtn" data-act="sim-years" data-v="1">${T({en:'Try a 1-year program', th:'ลองหลักสูตร 1 ปี'})}</button>`);
+  if (s.type !== 'private') b.push(`<button class="linkbtn" data-act="sim-type" data-v="${s.type === 'masters' ? 'public' : 'private'}">${T(s.type === 'masters' ? {en:'Try a public college', th:'ลองวิทยาลัยรัฐ'} : {en:'Try a private Co-op', th:'ลอง Co-op เอกชน'})}</button>`);
+  return `${T({en:'Ways to lower the goal: ', th:'ทางลดเป้าเงิน: '})}${b.join(' · ')}${b.length ? ' · ' : ''}${T({en:'or plan with a sponsor (parents can show money for you).', th:'หรือวางแผนร่วมกับสปอนเซอร์ (พ่อแม่แสดงเงินแทนได้)'})}`;
 }
 function haveBlock(c){
   const hi = haveInfo(c);
@@ -1256,6 +1272,7 @@ function quizNeeds(k){
       if (tooMuch) for (const yy of SIMC.intakes.filter(v => v > S.sim.intake)) { const o = {intake:yy}; if (qYearsOf(k)) o.years = qYearsOf(k);
         const d = typeCalc(QTYPE[k], o).total * r - have, n = Math.max(1, (yy - now.getFullYear()) * 12 + 8 - now.getMonth() - 8);
         if (d <= 0 || d / n <= SAVE_CAP) { alt = ' ' + altLine({y:yy, n, m:Math.max(0, Math.ceil(d / n / 100) * 100)}); break; } }
+      if (tooMuch && !alt) alt = ' ' + T({en:'No start up to 2033 brings this under about THB 30,000 a month: consider a cheaper path, a shorter program, or a sponsor.', th:'ไม่มีปีเริ่มเรียนไหนจนถึง 2033 ที่ทำให้ต่ำกว่าเดือนละราว 30,000 บาท ลองพิจารณาทางที่ถูกกว่า หลักสูตรที่สั้นกว่า หรือวางแผนกับสปอนเซอร์'});
       add('block', T(N.haveShort)(thb(g), thb(have), thb(g - have), y) + ' ' + savePlan(g - have) + alt, 'money'); } }
     else if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget]), bandMin[A.budget] ? thb(g - bandMin[A.budget]) : '', y) + (+S.have > 0 ? ` <button class="linkbtn" data-act="quizband" data-v="0">${T({en:x => `Use the ${x} on the Budget page instead`, th:x => `ใช้เงินที่มีตอนนี้ ${x} จากหน้างบแทน`})(thb(+S.have))}</button>` : ''), 'money');
     else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band, thb(g - bandMin[A.budget]), y) + (+S.have > 0 ? ` <button class="linkbtn" data-act="quizband" data-v="0">${T({en:x => `Use the ${x} on the Budget page instead`, th:x => `ใช้เงินที่มีตอนนี้ ${x} จากหน้างบแทน`})(thb(+S.have))}</button>` : ''), 'money');
@@ -1610,7 +1627,7 @@ const ROAD = {
     safe:{
       l:{en:'Scenario 1: Safe Test', th:'สถานการณ์ 1: ลองแบบปลอดภัย'},
       flow:{en:'1-year private Co-op → public PG diploma or master\'s → PGWP → PR', th:'Co-op เอกชน 1 ปี → PG Diploma หรือปริญญาโทที่สถาบันรัฐ → PGWP → PR'},
-      stats:{time:{en:'About 5 to 6 years', th:'ประมาณ 5 ถึง 6 ปี'}, tuition:() => stack(47000,62000), permits:{en:'2 applications', th:'ยื่น 2 ครั้ง'}, risk:{en:'Second study permit may be refused', th:'Study Permit รอบสองอาจถูกปฏิเสธ'}},
+      stats:{time:{en:'About 5 to 6 years', th:'ประมาณ 5 ถึง 6 ปี'}, tuition:() => stackY(47000,62000), permits:{en:'2 applications', th:'ยื่น 2 ครั้ง'}, risk:{en:'Second study permit may be refused', th:'Study Permit รอบสองอาจถูกปฏิเสธ'}},
       best:{en:'People who are unsure about living abroad, have lower savings today, or need time on the ground to raise their English.', th:'ผู้ที่ยังไม่แน่ใจเรื่องการใช้ชีวิตต่างประเทศ มีเงินเก็บน้อยกว่าในตอนนี้ หรือต้องการเวลาในพื้นที่จริงเพื่อพัฒนาภาษาอังกฤษ'},
       steps:[
         
@@ -1641,7 +1658,7 @@ const ROAD = {
     one:{
       l:{en:'Scenario 2: One-Shot', th:'สถานการณ์ 2: ไปทางตรงทีเดียว'},
       flow:{en:'Public Co-op PG diploma or master\'s → 3-year PGWP → CEC or PNP → PR', th:'PG Diploma พร้อม Co-op หรือปริญญาโทที่สถาบันรัฐ → PGWP 3 ปี → CEC หรือ PNP → PR'},
-      stats:{time:{en:'About 3.5 to 4.5 years', th:'ประมาณ 3.5 ถึง 4.5 ปี'}, tuition:() => stack(36000,48000), permits:{en:'1 application', th:'ยื่น 1 ครั้ง'}, risk:{en:'Larger sunk cost if Canada does not suit you', th:'เสียเงินมากกว่าถ้าแคนาดาไม่เหมาะกับคุณ'}},
+      stats:{time:{en:'About 3.5 to 4.5 years', th:'ประมาณ 3.5 ถึง 4.5 ปี'}, tuition:() => stackY(36000,48000), permits:{en:'1 application', th:'ยื่น 1 ครั้ง'}, risk:{en:'Larger sunk cost if Canada does not suit you', th:'เสียเงินมากกว่าถ้าแคนาดาไม่เหมาะกับคุณ'}},
       best:{en:'People with IELTS 6.5 within reach, a data or tech background, a sponsor who can show the higher funds, and a clear PR goal.', th:'ผู้ที่ IELTS 6.5 อยู่ไม่ไกล มีพื้นฐานดาต้าหรือเทค มีสปอนเซอร์ที่แสดงเงินจำนวนสูงกว่าได้ และมีเป้าหมาย PR ชัดเจน'},
       steps:[
         
@@ -3358,6 +3375,12 @@ function ladderBar(c){
   const parts = [[MONEY.prep, c.prep, 's1'], [MONEY.show, c.show, 's2'], [MONEY.setup, c.setup, 's3']].concat(c.extra > 0 ? [[MONEY.extra, c.extra, 's4']] : []), tot = c.total || 1;
   return `<div class="lbar" role="img" aria-label="${esc(parts.map(p => T(p[0]) + ' ' + Math.round(p[1] / tot * 100) + '%').join(', '))}">${parts.map(p => `<div class="${p[2]}" style="flex:${Math.max(p[1], 0)}"></div>`).join('')}</div>`;
 }
+/* Budget prep line: say when it includes amounts typed on Costs, and carry any "far above the estimate" warning over */
+function prepOwnNote(){
+  const its = COSTS.secs.filter(s => s.prep).flatMap(s => s.items), own = its.filter(it => costOwn(it) != null), odd = its.filter(it => costOdd(it));
+  if (!own.length) return '';
+  return `<span class="badge b-blue" style="margin-right:6px">${T({en:n => `Includes ${n} amount${n > 1 ? 's' : ''} you typed`, th:n => `รวมยอดที่คุณใส่เอง ${n} รายการ`})(own.length)}</span>` + (odd.length ? `<span style="color:var(--warn)">${T({en:n => `${n} of them far above the estimate: check on the Costs page. `, th:n => `${n} รายการสูงกว่าค่าประมาณมาก ตรวจในหน้าค่าใช้จ่าย `})(odd.length)}</span>` : '');
+}
 /* a typed cost far above its estimate (over 3 times the high end) gets the same gentle note as the Budget amounts */
 function costOdd(it){
   const o = costOwn(it), hi = it.cad ? it.cad[1] : it.thb[1]; if (o == null || !(hi > 0) || o <= hi * 3) return '';
@@ -3616,10 +3639,10 @@ function viewQuiz(){
     <section class="card mt-4" id="quiz-result" aria-labelledby="quiz-res-h">
       <h3 id="quiz-res-h" tabindex="-1" class="text-[20px] font-semibold">${blocks ? T(Q.fitsIf)(T(NM[k1])) : T(rec.t)}</h3>
       ${quizAfford(k1)}
-      <p class="qlead qlead-${lvl}" style="max-width:72ch">${ic(lvl === 'clear' ? 'circle-check' : 'scale','icon-sm')}<span>${T(Q.lead[lvl])(T(NM[k2]), gap, r.pct[k1], r.pct[k2])}</span></p>
+      <p class="qlead qlead-${lvl}" style="max-width:72ch">${ic(lvl === 'clear' ? 'circle-check' : 'scale','icon-sm')}<span>${needs.some(x => x.kind === 'money' && x.lv === 'block') ? T({en:'Apart from money: ', th:'นอกจากเรื่องเงิน: '}) : ''}${T(Q.lead[lvl])(T(NM[k2]), gap, r.pct[k1], r.pct[k2])}</span></p>
       <p class="muted mt-3 text-[15px]" style="max-width:72ch">${T(rec.d)}</p>
       <div class="grid md:grid-cols-2 gap-x-8">
-        ${why.length ? `<div class="qsec"><h4>${T(Q.whyT)}</h4><ul class="qwhy">${why.map(x => `<li><span class="muted">${T(x.q.cat)}:</span> "${strip(T(x.o.l))}"</li>`).join('')}</ul></div>` : ''}
+        ${why.length ? `<div class="qsec"><h4>${T(Q.whyT)}</h4><ul class="qwhy">${why.filter(x => !(x.q.id === 'budget' && needs.some(n => n.kind === 'money' && n.lv === 'block'))).map(x => `<li><span class="muted">${T(x.q.cat)}:</span> "${strip(T(x.o.l))}"</li>`).join('')}</ul></div>` : ''}
         <div class="qsec"><h4>${T(Q.needT)}</h4>
           ${needs.length ? `<ul class="qneed">${needs.map(x => `<li class="n-${x.lv}">${ic(x.lv === 'block' ? 'circle-alert' : 'triangle-alert','icon-sm')}<span><b>${T(x.lv === 'block' ? Q.blockL : Q.checkL)}:</b> ${x.t}</span></li>`).join('')}</ul>` : `<p class="qnone">${ic('circle-check','icon-sm')}<span>${T(Q.needNone)}</span></p>`}
           ${alt ? `<p class="muted text-[14px] mt-2">${T(Q.alt)(T(NM[k2]))}</p>` : ''}
@@ -4205,6 +4228,8 @@ function viewPrep(){
         ${nx.anchor ? `<button class="btn btn-ghost" data-act="jump" data-v="${nx.anchor}">${T(C.see)}${ic('arrow-down','icon-sm')}</button>` : ''}
       </div>
     </div>` : `<div class="card mb-4 flex gap-3 items-start"><span style="color:var(--green)">${ic('party-popper')}</span><p class="text-[15px]">${T(C.allDone)}</p></div>`;
+  /* only the next three open steps show their date box, Google button and links; later steps fold them (fewer Tab stops) */
+  const SOON = C.items.filter(x => !S.check[x.id]).slice(0, 3).map(x => x.id);
   const list = C.phases.map((ph, pi) => {
     const its = C.items.map((it, i) => ({it, i})).filter(x => x.it.ph === pi);
     return `<div class="mb-6" id="ckph-${pi}">
@@ -4224,13 +4249,13 @@ function viewPrep(){
             ${it.live === 'proc' && LIVE.pt ? `<span class="badge b-green mt-1">${ic('timer','icon-sm')}${T(LIVE_UI.proc)}: ${esc(ptText(LIVE.pt.study))}</span>` : ''}
         
             <span class="flex items-start gap-1.5 faint text-[13.5px] mt-1"><span style="margin-top:3px">${ic('lightbulb','icon-sm')}</span><span>${T(it.why)}</span></span>
-            ${ckLinks(it.id)}
+            ${SOON.includes(it.id) || S.check[it.id] ? '' : `<button class="linkbtn text-[13.5px] mt-1 ck-tog" data-act="ck-more" aria-expanded="false">${T({en:'Dates and official links', th:'วันที่และลิงก์ทางการ'})}<span class="sr-only">: ${esc(T(it.t))}</span></button>`}<span class="ck-more${SOON.includes(it.id) || S.check[it.id] ? '' : ' later'}">${ckLinks(it.id)}
             ${S.check[it.id] ? (planStore().added[it.id] ? `<span class="flex flex-wrap items-center gap-2 mt-2">${gcalControls(it.id)}</span>` : '') : `<span class="flex flex-wrap items-center gap-2 mt-2">
               <span class="faint text-[13px] inline-flex items-center gap-1">${ic('calendar','icon-sm')}<span>${T(U.planned)}</span></span>
               <input type="date" class="numin" style="width:150px" data-plan="${it.id}" value="${pd[it.id].date}" aria-label="${esc(T(U.planned) + ': ' + T(it.t))}">
               ${pd[it.id].late ? `<span class="badge b-amber">${T(U.late)}</span>` : ''}${pd[it.id].custom ? `<span class="badge b-blue">${T(U.mine)}</span>` : ''}
               ${gcalControls(it.id)}
-            </span>`}</span>
+            </span>`}</span></span>
 
         </div>`).join('')}</div>
     </div>`;
@@ -4723,7 +4748,7 @@ const verdictLevel = c => c.runOutY1 ? 'crit' : (c.extra > 0 ? 'need' : (c.end <
 function verdictLine(c){
   const level = verdictLevel(c), V = SIM_UI.verdict[level];
   /* the verdict judges money during the program, assuming the goal is saved; say so, so it never reads as "you have enough" */
-  return `<div class="vline v-${level}"><span class="vicon-sm">${ic(V.icon,'icon-sm')}</span><span class="font-semibold">${T(V.l)}</span>${level === 'good' || level === 'warn' ? `<span class="muted text-[14px]">${T({en:'during the program, once the goal is saved', th:'ระหว่างเรียน เมื่อเก็บเงินครบเป้าแล้ว'})}</span>` : ''}<button class="linkbtn" data-act="jump" data-v="sim-verdict">${T({en:'Why', th:'ดูเหตุผล'})}${ic('arrow-down','icon-sm')}</button></div>`;
+  return `<div class="vline v-${level}"><span class="vicon-sm">${ic(V.icon,'icon-sm')}</span><span class="font-semibold">${T(V.l)}</span>${level === 'good' || level === 'warn' ? `<span class="muted text-[14px]">${T({en:'during the program, once the goal is saved', th:'ระหว่างเรียน เมื่อเก็บเงินครบเป้าแล้ว'})}</span>` : ''}${(() => { const hi = haveInfo(c); return hi && hi.short ? `<span class="text-[14px] font-semibold" style="color:var(--warn)">${T({en:x => `but the goal is not saved yet (short ${x})`, th:x => `แต่ยังเก็บไม่ครบเป้า (ขาด ${x})`})(thb(hi.short))}</span>` : ''; })()}<button class="linkbtn" data-act="jump" data-v="sim-verdict">${T({en:'Why', th:'ดูเหตุผล'})}${ic('arrow-down','icon-sm')}</button></div>`;
 }
 /* names and amounts of the goal's parts, in the strip's colours and order */
 function ladderLegend(c, one){
@@ -4927,7 +4952,7 @@ function cashList(c){
         ${LIST_EDIT ? `<p class="text-[13.5px] muted" style="max-width:52ch">${T(M.editHint)}</p>` : '<span></span>'}
         <button class="btn btn-ghost" style="padding:4px 10px;font-size:14px" data-act="listedit" aria-pressed="${LIST_EDIT}">${ic(LIST_EDIT ? 'check' : 'pencil','icon-sm')}${T(LIST_EDIT ? M.editDone : M.editL)}</button>
       </div>
-      <div class="row font-semibold"><span class="min-w-0"><span class="lname"><i class="sw s1"></i>${T(MONEY.prep)}</span><span class="block faint text-[12.5px] font-normal">${c.prepR[1] - c.prepR[0] > 1 ? T(MONEY.prepR)(thb(c.prepR[0] * r), thb(c.prepR[1] * r)) + ' ' : ''}<button class="linkbtn" data-act="tab" data-v="costs" data-anchor="cost-items">${T(MONEY.editPrep)}</button></span></span><span class="num">${mny(c.prep, {stack:true})}</span></div>
+      <div class="row font-semibold"><span class="min-w-0"><span class="lname"><i class="sw s1"></i>${T(MONEY.prep)}</span><span class="block faint text-[12.5px] font-normal">${prepOwnNote()}${c.prepR[1] - c.prepR[0] > 1 ? T(MONEY.prepR)(thb(c.prepR[0] * r), thb(c.prepR[1] * r)) + ' ' : ''}<button class="linkbtn" data-act="tab" data-v="costs" data-anchor="cost-items">${T(MONEY.editPrep)}</button></span></span><span class="num">${mny(c.prep, {stack:true})}</span></div>
       ${line('tuition', T(M.lTuY), c.tuY, '', true)}
       ${line('fees', T(M.lFeesY), c.fees, '', true)}
       ${line('proof', T(M.lProof), c.proof, liveBadge, true)}
@@ -5794,6 +5819,7 @@ document.addEventListener('click', e => {
   else if (act === 'gloss-open') { openGloss(v); }
   else if (act === 'gloss-close') { const d = document.getElementById('gloss-dlg'); if (d && d.open) d.close(); }
   else if (act === 'cityrent') { const v2 = cityRentFor(S.city); if (v2 != null) { S.sim.rentC = v2; render(true); announce(T({en:'Rent updated for the city you picked.', th:'ปรับค่าเช่าตามเมืองที่เลือกแล้ว'})); } }
+  else if (act === 'ck-more') { const m = b.nextElementSibling; if (m) { const open = m.classList.toggle('open'); b.setAttribute('aria-expanded', open); } }
   else if (act === 'quizband') { S.quizBand = v === '1'; render(true); }
   else if (act === 'fields-clear') { S.filter = 'all'; S.fstat = null; render(true); const g = document.querySelector('[data-sel="field-g"]'); if (g) g.focus({preventScroll:true}); }
   else if (act === 'gloss-clear') { GL_Q = ''; const q = document.querySelector('[data-gloss-q]'); renderGlossList(); if (q) { q.value = ''; q.focus(); } }
