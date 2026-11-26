@@ -169,6 +169,8 @@
   /* touch: every fold, segment, chip and lone link button reaches 44px */
   @media (pointer:coarse){details>summary{min-height:44px;display:flex;align-items:center}.seg button{min-height:44px}.noc{min-height:44px;align-items:center}.cpick{display:inline-flex;align-items:center;min-height:44px}.ctbl th .linkbtn,.ctbl td .linkbtn{min-height:44px;display:inline-flex;align-items:center}}
   details>summary{min-height:32px}
+  /* the money remedies inline in the goal card are primary actions: 44px tall on touch */
+  @media (pointer:coarse){.gbasis .linkbtn,.vline .linkbtn,#have-alt .linkbtn,.qneed .linkbtn,.qlead .linkbtn,#cash-list .linkbtn{min-height:44px;display:inline-flex;align-items:center}}
   .noc i{font-style:normal;color:var(--ink3);font-size:12px}
   /* Field cards */
   details.fcard>summary{list-style:none;cursor:pointer}
@@ -451,6 +453,7 @@
   .term.rep{text-decoration:none}
   @media (hover:hover){.term:hover{background:var(--blue-soft)}}
   .term:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+  #term-pop:focus{outline:none} #term-pop:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
   #term-pop{position:fixed;z-index:120;display:none;padding:14px 16px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--glass-border);
     box-shadow:var(--glass-shadow),var(--specular);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);color:var(--ink);line-height:1.55}
   #term-pop.on{display:block}
@@ -1025,7 +1028,11 @@ const altLine = a => a ? `${T({en:(y, m, n) => `Or start in ${y}: about ${m} a m
 function haveInfo(c){
   const h = +S.have; if (!(h > 0)) return null;
   const g = c.total * (S.sim.rate || 24), d = g - h, tooMuch = d > 0 && d / monthsToApply() > SAVE_CAP;
-  return {pct:Math.min(100, Math.floor(h / g * 100)), text:d > 0 ? T(HAVE.short)(thb(d), Math.floor(h / g * 100)) : T(HAVE.ok)(thb(-d)), ok:d <= 0, plan:d > 0 ? savePlan(d) : '', alt:tooMuch ? altLine(altStart(h)) : ''};
+  /* an out-of-reach monthly figure is not the headline: the reachable later start leads, the current-year figure follows as context */
+  const a = tooMuch ? altStart(h) : null, n = monthsToApply(), m = d > 0 ? thb(Math.ceil(d / n / 100) * 100) : '';
+  const alt = a ? `${T({en:'A reachable plan: ', th:'แผนที่ทำได้จริง: '})}${altLine(a).replace(/^(Or start|หรือเริ่มเรียน)/, (x) => x === 'Or start' ? 'Start' : 'เริ่มเรียน')}` : '';
+  const plan = d <= 0 ? '' : (a ? T({en:(m, n, y) => `Keeping the ${y} start would need about ${m} a month for ${n} months, more than most people can save.`, th:(m, n, y) => `ถ้ายังเริ่มปี ${y} ต้องเก็บเดือนละประมาณ ${m} อีก ${n} เดือน ซึ่งสูงเกินกว่าที่คนส่วนใหญ่เก็บได้`})(m, n, S.sim.intake) : savePlan(d));
+  return {pct:Math.min(100, Math.floor(h / g * 100)), text:d > 0 ? T(HAVE.short)(thb(d), Math.floor(h / g * 100)) : T(HAVE.ok)(thb(-d)), ok:d <= 0, plan, alt};
 }
 function haveBlock(c){
   const hi = haveInfo(c);
@@ -1036,8 +1043,8 @@ function haveBlock(c){
         <span id="have-out" class="text-[14px] font-semibold ${hi && hi.ok ? 'pos' : ''}" aria-live="polite">${hi ? hi.text : ''}</span>
       </div>
       <div class="bar mt-2" id="have-bar" style="display:${hi ? '' : 'none'}"><i style="width:${hi ? hi.pct : 0}%;background:var(--s3)"></i></div>
+      <p class="text-[15px] font-semibold mt-1" id="have-alt" style="display:${hi && hi.alt ? '' : 'none'}">${hi && hi.alt ? hi.alt : ''}</p>
       <p class="text-[14px] mt-1 flex gap-2" id="have-plan" style="display:${hi && hi.plan ? '' : 'none'}">${ic('piggy-bank','icon-sm')}<span>${hi && hi.plan ? hi.plan : ''}</span></p>
-      <p class="text-[14px] mt-1" id="have-alt" style="display:${hi && hi.alt ? '' : 'none'}">${hi && hi.alt ? hi.alt : ''}</p>
       <p class="faint text-[12.5px] mt-1">${T(HAVE.note)}</p>
     </div>`;
 }
@@ -1092,7 +1099,7 @@ const QUIZ = [
    q:{en:'How much can you (or your sponsor) show and commit for year one, tuition plus living?', th:'คุณ (หรือสปอนเซอร์) แสดงเงินและพร้อมใช้ในปีแรกได้เท่าไร รวมค่าเรียนและค่าครองชีพ'},
    /* the same goals, for the same program lengths, that the verdict will measure against (option B is advised as 2 years) */
    hint:() => { const r = S.sim.rate || 24, sh = q => { const y = qYearsOf(q); return `${thb(typeCalc(QTYPE[q], y ? {years:y} : null).total * r)} (${T(MONEY.yrs)(y || S.sim.years || 1)})`; }, c = simCalc(), b = [T(MONEY.startY)(intakeText()), houseText(c)].join(' · '), h = +S.have > 0 ? thb(+S.have) : '';
-     return {en:`For comparison, the total savings goal on the Budget page (it includes the money to show) is ${sh('a')} for a private Co-op, ${sh('b')} for a public college and ${sh('c')} for a master's (${b}).` + (h ? ` You entered ${h} as money you have now, so the result counts from that.` : ''), th:`เทียบ: เป้าเงินเก็บทั้งหมดในหน้างบ (รวมเงินที่ต้องแสดงแล้ว) คือ ${sh('a')} สำหรับ Co-op เอกชน ${sh('b')} สำหรับวิทยาลัยรัฐ และ ${sh('c')} สำหรับปริญญาโท (${b})` + (h ? ` คุณกรอกเงินที่มีตอนนี้ไว้ ${h} ผลจะคิดจากยอดนั้น` : '')}; },
+     return {en:`For comparison, the total savings goal on the Budget page (it includes the money to show) is ${sh('a')} for a private Co-op, ${sh('b')} for a public college and ${sh('c')} for a master's (${b}).` + (h ? (S.quizBand ? ` The result uses the range you pick here, not the ${h} you entered on the Budget page.` : ` You entered ${h} as money you have now, so the result counts from that.`) : ''), th:`เทียบ: เป้าเงินเก็บทั้งหมดในหน้างบ (รวมเงินที่ต้องแสดงแล้ว) คือ ${sh('a')} สำหรับ Co-op เอกชน ${sh('b')} สำหรับวิทยาลัยรัฐ และ ${sh('c')} สำหรับปริญญาโท (${b})` + (h ? (S.quizBand ? ` ผลคิดจากช่วงที่เลือกในข้อนี้ ไม่ใช่เงิน ${h} ที่กรอกในหน้างบ` : ` คุณกรอกเงินที่มีตอนนี้ไว้ ${h} ผลจะคิดจากยอดนั้น`) : '')}; },   /* the hint follows whichever money source the result uses */
    o:[
      {a:3,b:0,c:0,l:{en:'Under THB 900,000', th:'ต่ำกว่า 900,000 บาท'}},
      {a:1,b:2,c:1,l:{en:'THB 900,000 to 1,300,000', th:'900,000 ถึง 1,300,000 บาท'}},
@@ -1100,7 +1107,7 @@ const QUIZ = [
    ]},
   {id:'english', icon:'languages', cat:{en:'English', th:'ภาษาอังกฤษ'},
    q:{en:'Where is your English today?', th:'ระดับภาษาอังกฤษของคุณตอนนี้'},
-   hint:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall. Private Co-op colleges often accept their own placement test. Later, the PGWP and PR need a second, different test (IELTS General Training, CELPIP or PTE Core).', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 ส่วนวิทยาลัย Co-op เอกชนมักใช้ข้อสอบวัดระดับของสถาบันเองแทนได้ ภายหลัง PGWP และ PR ต้องใช้ข้อสอบอีกแบบ (IELTS General Training, CELPIP หรือ PTE Core)'},
+   hint:{en:'Most public colleges and universities ask for IELTS Academic 6.5 overall; some also accept the Duolingo English Test. Private Co-op colleges often accept their own placement test. Later, the PGWP and PR need a second, different test (IELTS General Training, CELPIP or PTE Core).', th:'วิทยาลัยรัฐและมหาวิทยาลัยส่วนใหญ่ขอ IELTS Academic รวม 6.5 บางแห่งรับ Duolingo English Test ด้วย ส่วนวิทยาลัย Co-op เอกชนมักใช้ข้อสอบวัดระดับของสถาบันเองแทนได้ ภายหลัง PGWP และ PR ต้องใช้ข้อสอบอีกแบบ (IELTS General Training, CELPIP หรือ PTE Core)'},
    o:[
      {a:3,b:0,c:0,l:{en:'Below IELTS 6.0, or never tested', th:'ต่ำกว่า IELTS 6.0 หรือยังไม่เคยสอบ'}},
      {a:1,b:2,c:1,l:{en:'Around 6.0. I can reach 6.5 with a few months of prep.', th:'ประมาณ 6.0 เตรียมตัวอีกไม่กี่เดือนน่าจะถึง 6.5'}},
@@ -1196,9 +1203,10 @@ const QUIZ_UI = {
 Object.assign(QUIZ_UI, {
   lead:{
     /* one unit only: the two fit percentages (the gap in "points" read as a second scale) */
-    clear:{en:(n, g, p1, p2) => `Clear lead: ${p1}% fit, against ${p2}% for ${n}.`, th:(n, g, p1, p2) => `ผลชัดเจน: เหมาะ ${p1}% ส่วน${n} ${p2}%`},
-    some:{en:(n, g, p1, p2) => `Moderate lead: ${p1}% fit, against ${p2}% for ${n}. Read that option's card too.`, th:(n, g, p1, p2) => `นำไม่มาก: เหมาะ ${p1}% ส่วน${n} ${p2}% ควรอ่านการ์ดของทางนั้นประกอบด้วย`},
-    close:{en:(n, g, p1, p2) => `Close call: ${p1}% fit, against ${p2}% for ${n}. Compare both cards above before deciding.`, th:(n, g, p1, p2) => `สูสีมาก: เหมาะ ${p1}% ส่วน${n} ${p2}% ควรเปรียบเทียบทั้งสองการ์ดด้านบนก่อนตัดสินใจ`}
+    /* words only: the fit scores are relative to the other paths, so no percent is shown */
+    clear:{en:(n) => `Clear lead over ${n}.`, th:(n) => `ผลชัดเจน: นำ${n} ห่างพอสมควร`},
+    some:{en:(n) => `Moderate lead over ${n}. Read that option's card too.`, th:(n) => `นำ${n} ไม่มาก ควรอ่านการ์ดของทางนั้นประกอบด้วย`},
+    close:{en:(n) => `Close call with ${n}. Compare both cards above before deciding.`, th:(n) => `สูสีกับ${n} มาก ควรเปรียบเทียบทั้งสองการ์ดด้านบนก่อนตัดสินใจ`}
   },
   fitsIf:{en:n => `${n} fits best, once the blocking items are cleared`, th:n => `${n} เหมาะที่สุด เมื่อจัดการเรื่องที่ขวางอยู่ได้`},
   doneS:{en:'Your best fit', th:'ทางที่เหมาะกับคุณที่สุด'}, seeRes:{en:'See the result', th:'ดูผลแบบประเมิน'},
@@ -1239,11 +1247,18 @@ function quizNeeds(k){
     /* option B is advised as a 2-year program, so its goal is worked out for 2 years */
     const yrs = qYearsOf(k) || S.sim.years || 1, g = typeCalc(QTYPE[k], qYearsOf(k) ? {years:qYearsOf(k)} : null).total * r;
     /* the verdict names the start it was worked out for, so a change of year on the Budget explains a changed gap */
-    const band = T(QUIZ.find(q => q.id === 'budget').o[A.budget].l), y = T(MONEY.yrs)(yrs) + ', ' + T(MONEY.startY)(intakeText()), have = +S.have > 0 ? +S.have : 0;
+    const band = T(QUIZ.find(q => q.id === 'budget').o[A.budget].l), y = T(MONEY.yrs)(yrs) + ', ' + T(MONEY.startY)(intakeText()), have = +S.have > 0 && !S.quizBand ? +S.have : 0;
     /* the money the user typed on the Budget page beats the band: one exact shortfall instead of a guess */
-    if (have) { if (g > have) add('block', T(N.haveShort)(thb(g), thb(have), thb(g - have), y) + ' ' + savePlan(g - have), 'money'); }
-    else if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget]), bandMin[A.budget] ? thb(g - bandMin[A.budget]) : '', y), 'money');
-    else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band, thb(g - bandMin[A.budget]), y));
+    if (have) { if (g > have) {
+      /* the same way out the Budget offers: when the monthly saving is out of reach, the first later start that brings it under */
+      const tooMuch = (g - have) / monthsToApply() > SAVE_CAP, now = new Date();
+      let alt = '';
+      if (tooMuch) for (const yy of SIMC.intakes.filter(v => v > S.sim.intake)) { const o = {intake:yy}; if (qYearsOf(k)) o.years = qYearsOf(k);
+        const d = typeCalc(QTYPE[k], o).total * r - have, n = Math.max(1, (yy - now.getFullYear()) * 12 + 8 - now.getMonth() - 8);
+        if (d <= 0 || d / n <= SAVE_CAP) { alt = ' ' + altLine({y:yy, n, m:Math.max(0, Math.ceil(d / n / 100) * 100)}); break; } }
+      add('block', T(N.haveShort)(thb(g), thb(have), thb(g - have), y) + ' ' + savePlan(g - have) + alt, 'money'); } }
+    else if (g > bandMax[A.budget]) add('block', T(N.budShort)(thb(g), band, thb(g - bandMax[A.budget]), bandMin[A.budget] ? thb(g - bandMin[A.budget]) : '', y) + (+S.have > 0 ? ` <button class="linkbtn" data-act="quizband" data-v="0">${T({en:x => `Use the ${x} on the Budget page instead`, th:x => `ใช้เงินที่มีตอนนี้ ${x} จากหน้างบแทน`})(thb(+S.have))}</button>` : ''), 'money');
+    else if (g > bandMin[A.budget]) add('check', T(N.budIn)(thb(g), band, thb(g - bandMin[A.budget]), y) + (+S.have > 0 ? ` <button class="linkbtn" data-act="quizband" data-v="0">${T({en:x => `Use the ${x} on the Budget page instead`, th:x => `ใช้เงินที่มีตอนนี้ ${x} จากหน้างบแทน`})(thb(+S.have))}</button>` : ''), 'money');
   }
   if (k !== 'a') { if (A.english === 0) add('block', T(N.en0)); else if (A.english === 1) add('check', T(N.en1)); }
   if (k === 'c') { if (A.edu === 0) add('block', T(N.noDegC)); else if (A.edu === 1) add('block', T(N.gpaLowC)); else if (A.edu === 2) add('check', T(N.gpaMidC)); }
@@ -1252,19 +1267,24 @@ function quizNeeds(k){
   if (A.family === 1) add(k === 'c' ? 'check' : 'block', T(k === 'c' ? N.spouseC : N.spouseAB));
   return out.sort((x, y) => (x.lv === 'block' ? 0 : 1) - (y.lv === 'block' ? 0 : 1));
 }
+/* Fit as a rank, not a percent: the scores are relative to the other two paths, so "100%" read as a perfect fit. */
+function fitWord(k, r){
+  const i = r.rank.indexOf(k), lead = r.pct[r.rank[0]] - r.pct[k];
+  return i === 0 ? T({en:'Best match', th:'ตรงที่สุด'}) : (lead <= 10 ? T({en:'Close second', th:'ใกล้เคียง'}) : T({en:'Weaker match', th:'ตรงน้อยกว่า'}));
+}
 /* When the money chosen (or typed on the Budget) is below every option's goal, say so first: fit ranks paths, money decides them. */
 function quizAfford(k1){
   const A = S.quiz; if (A.budget == null) return '';
-  const r = S.sim.rate || 24, usesHave = +S.have > 0, cap = usesHave ? +S.have : [900000, 1300000, Infinity][A.budget];
+  const r = S.sim.rate || 24, usesHave = +S.have > 0 && !S.quizBand, cap = usesHave ? +S.have : [900000, 1300000, Infinity][A.budget];
   const gs = ['a','b','c'].map(k => ({k, g:typeCalc(QTYPE[k], qYearsOf(k) ? {years:qYearsOf(k)} : null).total * r}));
   if (gs.some(x => x.g <= cap)) return '';
   const near = gs.sort((x, y) => x.g - y.g)[0], NM = {a:QUIZ_UI.nA, b:QUIZ_UI.nB, c:QUIZ_UI.nC};
   /* one gap figure per card: when the closest path is the recommended one, its own blocker below carries the number */
   const txt = near.k === k1
-    ? T({en:'With the money you chose, no option fits yet; the gap for this path is below. The fit percentages rank the paths on everything except money.', th:'ด้วยเงินที่เลือก ยังไม่มีทางไหนพอ เงินที่ขาดของทางนี้อยู่ด้านล่าง เปอร์เซ็นต์ความเหมาะจัดอันดับจากทุกเรื่องยกเว้นเงิน'})
-    : T({en:(n, x) => `With the money you chose, no option fits yet. The closest in money is ${n}, short by at least ${x}. The fit percentages rank the paths on everything except money.`, th:(n, x) => `ด้วยเงินที่เลือก ยังไม่มีทางไหนพอ ทางที่ใช้เงินใกล้ที่สุดคือ${n} ขาดอย่างน้อย ${x} เปอร์เซ็นต์ความเหมาะจัดอันดับจากทุกเรื่องยกเว้นเงิน`})(T(NM[near.k]), thb(near.g - cap));
+    ? T({en:'With the money you chose, no option fits yet; the gap for this path is below. The match ranking compares the paths on everything except money.', th:'ด้วยเงินที่เลือก ยังไม่มีทางไหนพอ เงินที่ขาดของทางนี้อยู่ด้านล่าง การจัดอันดับความตรงเทียบจากทุกเรื่องยกเว้นเงิน'})
+    : T({en:(n, x) => `With the money you chose, no option fits yet. The closest in money is ${n}, short by at least ${x}. The match ranking compares the paths on everything except money.`, th:(n, x) => `ด้วยเงินที่เลือก ยังไม่มีทางไหนพอ ทางที่ใช้เงินใกล้ที่สุดคือ${n} ขาดอย่างน้อย ${x} การจัดอันดับความตรงเทียบจากทุกเรื่องยกเว้นเงิน`})(T(NM[near.k]), thb(near.g - cap));
   /* name the money being judged: the amount typed on the Budget replaces the quiz's band answer */
-  const src = usesHave ? T({en:x => `Judged against the ${x} you typed as money you have now on the Budget page, not your answer to question 2. `, th:x => `คิดจากเงินที่มีตอนนี้ ${x} ที่คุณกรอกในหน้างบ ไม่ใช่คำตอบข้อ 2 `})(thb(+S.have)) : '';
+  const src = usesHave ? T({en:x => `Judged against the ${x} you typed as money you have now on the Budget page, not your answer to question 2. `, th:x => `คิดจากเงินที่มีตอนนี้ ${x} ที่คุณกรอกในหน้างบ ไม่ใช่คำตอบข้อ 2 `})(thb(+S.have)) + `<button class="linkbtn" data-act="quizband" data-v="1">${T({en:'Use my answer instead', th:'ใช้คำตอบข้อ 2 แทน'})}</button> ` : '';
   return `<p class="qlead qlead-close" style="max-width:72ch">${ic('wallet','icon-sm')}<span>${src}${txt}</span></p>`;
 }
 /* Up to three answers that favoured path k most over the other two. */
@@ -2496,6 +2516,8 @@ const START = {
      d:[{en:'Book IELTS Academic with IDP or the British Council in Thailand. Target 6.5 overall with no band under 6.0 for public programs.', th:'จองสอบ IELTS Academic กับ IDP หรือ British Council ในไทย ตั้งเป้ารวม 6.5 ไม่มีทักษะใดต่ำกว่า 6.0 สำหรับสถาบันรัฐ'},
         
         {en:'Private Co-op colleges often accept their own online placement test instead.', th:'วิทยาลัย Co-op เอกชนมักใช้ข้อสอบวัดระดับออนไลน์ของสถาบันเองแทนได้'},
+        /* a cheaper admission-only option; it never counts for the PGWP or PR */
+        {en:'Some schools also accept the Duolingo English Test (about USD 70, taken online at home) for admission. Check the program page first: IRCC does not accept it for the PGWP or Express Entry. [[det]]', th:'บางสถาบันรับ Duolingo English Test (ประมาณ USD 70 สอบออนไลน์ที่บ้าน) สำหรับสมัครเรียนด้วย ควรเช็กหน้าหลักสูตรก่อน และ IRCC ไม่รับข้อสอบนี้สำหรับ PGWP หรือ Express Entry [[det]]'},
         
         {en:'Allow 2 to 3 months of preparation and time for one retake.', th:'เผื่อเวลาเตรียมตัว 2 ถึง 3 เดือน และเผื่อสอบซ้ำ 1 ครั้ง'},
 
@@ -3496,6 +3518,8 @@ function viewReady(){
         
         </div>
       </div>
+      <details class="vwhy" data-field="opt${o.key}" ${(S.open && S.open['opt' + o.key]) ? 'open' : ''}><summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span>${T({en:'Details, pros and cons', th:'รายละเอียด ข้อดี และข้อควรระวัง'})}<span class="sr-only">: ${T(o.t)}</span></span></summary>
+      <div class="grid gap-5 mt-3">
       <div>${o.rows.map(r => `<div class="row" style="display:block"><div class="eyebrow">${T(r.k)}</div><div class="text-[15px] mt-1">${T(r.v)}</div></div>`).join('')}</div>
       <div>
         
@@ -3509,6 +3533,7 @@ function viewReady(){
         
         <ul class="clean">${o.cons.map(x => `<li><span style="color:var(--red)">${ic('triangle-alert','icon-sm')}</span><span>${T(x)}</span></li>`).join('')}</ul>
       </div>
+      </div></details>
     </div>`).join('');
   return `
     <section class="mb-10 sm:mb-14" style="max-width:820px">
@@ -3586,7 +3611,7 @@ function viewQuiz(){
     /* fit bars: one neutral colour, the leader in the first data colour and labelled, so colour is not the only cue */
     /* fit and money are separate: when no path is affordable, each bar says so beside its fit */
     const noMoney = !!quizAfford(k1);
-    const bars = ['a', 'b', 'c'].map(k => { const lead = k === k1; return `<div class="flex flex-col justify-between"><div class="flex justify-between items-baseline gap-2 text-[14px] mb-1"><span class="${lead ? 'font-semibold' : ''}">${T(NM[k])}${lead ? ` <span class="badge b-blue">${T(Q.bestB)}</span>` : ''}</span><span class="num font-semibold">${T({en:'fit', th:'เหมาะ'})} ${r.pct[k]}%${noMoney ? ` <span class="font-normal" style="color:var(--warn)">· ${T({en:'money short', th:'เงินยังไม่พอ'})}</span>` : ''}</span></div><div class="bar"><i class="${lead ? 'fit-lead' : 'fit-n'}" style="width:${r.pct[k]}%"></i></div></div>`; }).join('');
+    const bars = ['a', 'b', 'c'].map(k => { const lead = k === k1; return `<div class="flex flex-col justify-between"><div class="flex justify-between items-baseline gap-2 text-[14px] mb-1"><span class="${lead ? 'font-semibold' : ''}">${T(NM[k])}${lead ? ` <span class="badge b-blue">${T(Q.bestB)}</span>` : ''}</span><span class="num font-semibold">${fitWord(k, r)}${noMoney ? ` <span class="font-normal" style="color:var(--warn)">· ${T({en:'money short', th:'เงินยังไม่พอ'})}</span>` : ''}</span></div><div class="bar"><i class="${lead ? 'fit-lead' : 'fit-n'}" style="width:${r.pct[k]}%"></i></div></div>`; }).join('');
     res = `
     <section class="card mt-4" id="quiz-result" aria-labelledby="quiz-res-h">
       <h3 id="quiz-res-h" tabindex="-1" class="text-[20px] font-semibold">${blocks ? T(Q.fitsIf)(T(NM[k1])) : T(rec.t)}</h3>
@@ -3638,7 +3663,8 @@ function viewFields(){
   const match = f => (S.filter==='all' || f.g===S.filter) && stat(f);
   const list = FIELDS.filter(match);
   const card = f => {
-    const pg = PG[f.pg], tint = f.warn ? 'red' : 'blue';
+    /* the tile matches the PGWP badge's severity: red only when the field is not eligible, amber for a caution */
+    const pg = PG[f.pg], tint = f.pg === 'no' ? 'red' : (f.warn ? 'amber' : 'blue');
     const nocs = f.noc.length ? f.noc.map(c => `<a class="noc" href="${nocUrl(c)}" target="_blank" rel="noopener noreferrer"><b>${c}</b><span>${T(NOCT[c])}</span><i>TEER ${c[1]}</i></a>`).join('')
       : `<p class="text-[15px] muted">${T(F.nocNone)} [[noc]]</p>`;
     return `
@@ -3699,9 +3725,9 @@ function viewFields(){
     </section>
     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3">
       <label class="flex items-center gap-2 text-[14px] font-medium">${T({en:'Group', th:'หมวด'})}
-        <span class="sel-wrap"><select class="sel" data-sel="field-g">${FILTERS.filter(x => !['pgwp','cat','warn'].includes(x.id)).map(x => `<option value="${x.id}" ${S.filter === x.id ? 'selected' : ''}>${T(x.l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
+        <span class="sel-wrap"><select class="sel" data-sel="field-g" aria-label="${esc(T({en:'Group', th:'หมวด'}))}">${FILTERS.filter(x => !['pgwp','cat','warn'].includes(x.id)).map(x => `<option value="${x.id}" ${S.filter === x.id ? 'selected' : ''}>${T(x.l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
       <label class="flex items-center gap-2 text-[14px] font-medium">${T({en:'Show only', th:'แสดงเฉพาะ'})}
-        <span class="sel-wrap"><select class="sel" data-sel="field-s"><option value="none" ${!S.fstat ? 'selected' : ''}>${T({en:'Everything', th:'ทั้งหมด'})}</option>${FILTERS.filter(x => ['pgwp','cat','warn'].includes(x.id)).map(x => `<option value="${x.id}" ${S.fstat === x.id ? 'selected' : ''}>${T(x.l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
+        <span class="sel-wrap"><select class="sel" data-sel="field-s" aria-label="${esc(T({en:'Show only', th:'แสดงเฉพาะ'}))}"><option value="none" ${!S.fstat ? 'selected' : ''}>${T({en:'Everything', th:'ทั้งหมด'})}</option>${FILTERS.filter(x => ['pgwp','cat','warn'].includes(x.id)).map(x => `<option value="${x.id}" ${S.fstat === x.id ? 'selected' : ''}>${T(x.l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span></label>
       <span class="faint text-[13.5px] num" aria-live="polite">${T({en:n => `${n} fields`, th:n => `${n} สาขา`})(list.length)}</span>
     </div>
     <p class="text-[14px] muted mb-2 flex gap-2">${ic('graduation-cap','icon-sm')}<span>${T(F.degree)}</span></p>
@@ -4315,7 +4341,7 @@ function agentListCard(){
       <h3 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('messages-square')}</span>${T(U.listT)}</h3>
       <p class="muted text-[14px] mt-1">${T(U.listSub)}</p>
       <div class="text-[13.5px] mt-2 flex gap-2" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px"><span style="color:var(--amber)">${ic('triangle-alert','icon-sm')}</span><span>${T(U.listWarn)}</span></div>
-      ${cityKeys.length > 1 ? `<label class="flex flex-wrap items-center gap-2 mt-3 text-[14px] font-medium">${T(U.cityL)}<span class="sel-wrap"><select class="sel" data-sel="agent-city">${[['all', T(U.cityAll)], ...cityKeys.map(k => [k, cityName(k)])].map(([k, l]) => `<option value="${esc(k)}" ${cur === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span><span class="faint text-[13px] num" aria-live="polite">${T({en:n => `${n} agencies`, th:n => `${n} แห่ง`})(rows.length)}</span></label>` : ''}
+      ${cityKeys.length > 1 ? `<label class="flex flex-wrap items-center gap-2 mt-3 text-[14px] font-medium">${T(U.cityL)}<span class="sel-wrap"><select class="sel" data-sel="agent-city" aria-label="${esc(T(U.cityL))}">${[['all', T(U.cityAll)], ...cityKeys.map(k => [k, cityName(k)])].map(([k, l]) => `<option value="${esc(k)}" ${cur === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${ic('chevron-down','icon-sm')}</span><span class="faint text-[13px] num" aria-live="polite">${T({en:n => `${n} agencies`, th:n => `${n} แห่ง`})(rows.length)}</span></label>` : ''}
       <div class="mt-3">${rows.map(a => `
         <div class="py-3" style="border-top:1px solid var(--line)">
           <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -4500,11 +4526,12 @@ function viewBudget(){
     <div>
       <div class="flex justify-between items-baseline gap-3"><label for="sim-${key}" class="font-medium text-[15px]">${label}</label><span id="lab-${key}" class="num font-semibold text-[15px] whitespace-nowrap"></span></div>
       <input type="range" id="sim-${key}" data-sim="${key}" min="${lo}" max="${hi}" step="${step}" value="${q(val(s[key], def) * F)}">
-      ${noteFold(note)}
+      ${noteFold(note, label)}
     </div>`; };
   /* every control's explanation folds under "About this" (the program type keeps its description in view) */
-  const noteFold = note => note ? `<details class="cnote"><summary>${ic('info','icon-sm')}<span>${T({en:'About this', th:'ดูคำอธิบาย'})}</span></summary><div class="faint text-[13px] mt-1">${note}</div></details>` : '';
-  const field = (label, body, note, open) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? (open ? `<div class="faint text-[13px] mt-2">${note}</div>` : noteFold(note)) : ''}</div>`;
+  /* each fold names its control for screen readers ("About this: Tuition") */
+  const noteFold = (note, lbl) => note ? `<details class="cnote"><summary>${ic('info','icon-sm')}<span>${T({en:'About this', th:'ดูคำอธิบาย'})}${lbl ? `<span class="sr-only">: ${plainT(lbl)}</span>` : ''}</span></summary><div class="faint text-[13px] mt-1">${note}</div></details>` : '';
+  const field = (label, body, note, open) => `<div><div class="font-medium text-[15px] mb-2">${label}</div>${body}${note ? (open ? `<div class="faint text-[13px] mt-2">${note}</div>` : noteFold(note, label)) : ''}</div>`;
   const plan = planOf(s), hasFT = plan.some(p => p !== 'S'), hasC = plan.includes('C'), hasG = plan.includes('G');
   /* how many of the folded settings differ from their defaults, so a closed "fine-tune" section never hides a change */
   const advN = advCount();
@@ -4634,7 +4661,8 @@ function chartTerms(c){
 }
 function chartSplit(c){
   const M = SIM_UI, s = S.sim, N = c.N;
-  const parts = [[T(M.lTuitionFees), c.tuTotal, 's1'], [T(M.rent), c.lv.rent*N, 's2'], [T(M.food), c.lv.food*N, 's3'], [T(M.other), c.lv.other*N, 's4'], [T(M.health), c.lv.health*N, 's5'], [T(M.lTravelSetup), c.setup + c.travel, 's6']];
+  /* c.tuTotal covers every year of the program, so a 2-year plan must not be labelled "year 1" */
+  const parts = [[N > 12 ? T({en:'Tuition and compulsory fees, whole program', th:'ค่าเล่าเรียนและค่าธรรมเนียมบังคับ ตลอดหลักสูตร'}) : T(M.lTuitionFees), c.tuTotal, 's1'], [T(M.rent), c.lv.rent*N, 's2'], [T(M.food), c.lv.food*N, 's3'], [T(M.other), c.lv.other*N, 's4'], [T(M.health), c.lv.health*N, 's5'], [T(M.lTravelSetup), c.setup + c.travel, 's6']];
   const tot = parts.reduce((a, p) => a + p[1], 0);
   return `
   <figure class="viz">
@@ -4694,7 +4722,8 @@ const verdictLevel = c => c.runOutY1 ? 'crit' : (c.extra > 0 ? 'need' : (c.end <
    its basis, this line, the parts of the goal and the money you have; the itemised list folds away). */
 function verdictLine(c){
   const level = verdictLevel(c), V = SIM_UI.verdict[level];
-  return `<div class="vline v-${level}"><span class="vicon-sm">${ic(V.icon,'icon-sm')}</span><span class="font-semibold">${T(V.l)}</span><button class="linkbtn" data-act="jump" data-v="sim-verdict">${T({en:'Why', th:'ดูเหตุผล'})}${ic('arrow-down','icon-sm')}</button></div>`;
+  /* the verdict judges money during the program, assuming the goal is saved; say so, so it never reads as "you have enough" */
+  return `<div class="vline v-${level}"><span class="vicon-sm">${ic(V.icon,'icon-sm')}</span><span class="font-semibold">${T(V.l)}</span>${level === 'good' || level === 'warn' ? `<span class="muted text-[14px]">${T({en:'during the program, once the goal is saved', th:'ระหว่างเรียน เมื่อเก็บเงินครบเป้าแล้ว'})}</span>` : ''}<button class="linkbtn" data-act="jump" data-v="sim-verdict">${T({en:'Why', th:'ดูเหตุผล'})}${ic('arrow-down','icon-sm')}</button></div>`;
 }
 /* names and amounts of the goal's parts, in the strip's colours and order */
 function ladderLegend(c, one){
@@ -5638,10 +5667,11 @@ function render(keepScroll){
   document.getElementById('skip-nav').textContent = T(A11Y.skipNav);
   document.getElementById('lang-seg').setAttribute('aria-label', T(A11Y.lang));
   document.getElementById('disclaimer').textContent = T(UI.disclaimer);
+  /* the same 16 official links end every page, so they fold to one line until opened (state remembered) */
   document.getElementById('links').innerHTML = `
-    <h2 class="text-[17px] font-semibold flex items-center gap-2"><span style="color:var(--blue)">${ic('refresh-cw')}</span>${T(LINKS.title)}</h2>
+    <details class="vwhy" data-field="linksOpen" ${S.open && S.open.linksOpen ? 'open' : ''}><summary><span class="chev">${ic('chevron-right','icon-sm')}</span><span class="text-[17px] font-semibold" style="color:var(--ink)">${T(LINKS.title)}</span></summary>
     <p class="muted text-[14px] mt-1 mb-3">${T(LINKS.sub)}</p>
-    <div class="grid sm:grid-cols-2 gap-x-8">${LINKS.items.map(x => `<a href="${x.u}" target="_blank" rel="noopener noreferrer" class="tap flex items-start gap-2 py-3 text-[15px] hover:underline" style="color:var(--blue);border-top:1px solid var(--line);align-items:flex-start">${ic('external-link','icon-sm')}<span style="margin-top:-3px">${T(x.l)}</span></a>`).join('')}</div>`;
+    <div class="grid sm:grid-cols-2 gap-x-8">${LINKS.items.map(x => `<a href="${x.u}" target="_blank" rel="noopener noreferrer" class="tap flex items-start gap-2 py-3 text-[15px] hover:underline" style="color:var(--blue);border-top:1px solid var(--line);align-items:flex-start">${ic('external-link','icon-sm')}<span style="margin-top:-3px">${T(x.l)}</span></a>`).join('')}</div></details>`;
   const y = window.scrollY;
   const app = document.getElementById('app');
   PAGE_USED = [];
@@ -5706,7 +5736,8 @@ document.addEventListener('click', e => {
   else if (act === 'tab') { S.tab = v; LIST_EDIT = COST_EDIT = false; render(false); if (b.dataset.anchor) goAnchor(b.dataset.anchor); else focusTitle(); }
   else if (act === 'quiz') {
     const was = quizScore().done, q = b.dataset.q, o = b.dataset.o;
-    S.quiz[q] = +o; render(true);
+    S.quiz[q] = +o; if (q === 'budget') S.quizBand = true;   /* the money answer just given wins over an older Budget amount */
+    render(true);
     /* the answer that completes the quiz takes you to the result; any other keeps focus on the option just chosen */
     const head = !was && quizScore().done && document.getElementById('quiz-res-h');
     if (head) { goAnchor('quiz-result'); head.focus({preventScroll:true}); }
@@ -5763,6 +5794,7 @@ document.addEventListener('click', e => {
   else if (act === 'gloss-open') { openGloss(v); }
   else if (act === 'gloss-close') { const d = document.getElementById('gloss-dlg'); if (d && d.open) d.close(); }
   else if (act === 'cityrent') { const v2 = cityRentFor(S.city); if (v2 != null) { S.sim.rentC = v2; render(true); announce(T({en:'Rent updated for the city you picked.', th:'ปรับค่าเช่าตามเมืองที่เลือกแล้ว'})); } }
+  else if (act === 'quizband') { S.quizBand = v === '1'; render(true); }
   else if (act === 'fields-clear') { S.filter = 'all'; S.fstat = null; render(true); const g = document.querySelector('[data-sel="field-g"]'); if (g) g.focus({preventScroll:true}); }
   else if (act === 'gloss-clear') { GL_Q = ''; const q = document.querySelector('[data-gloss-q]'); renderGlossList(); if (q) { q.value = ''; q.focus(); } }
   else if (act === 'gloss-cat') { GL_CAT = v; document.querySelectorAll('.gl-cats button').forEach(x => { x.classList.toggle('on', x.dataset.v === v); x.setAttribute('aria-pressed', x.dataset.v === v); }); renderGlossList(); const gl = document.getElementById('gloss-list'); if (gl) gl.scrollTop = 0; }
@@ -5835,7 +5867,10 @@ window.addEventListener('storage', e => {
   S = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), o, {sim:Object.assign({}, DEFAULTS.sim, o.sim || {})});
   S.tab = here;
   const a = document.activeElement; if (a && a.matches && a.matches('input, textarea, select')) return;   /* do not yank a box being typed in */
+  /* keep keyboard focus on the same control through the redraw */
+  const fk = typeof focusKey === 'function' ? focusKey(document.activeElement) : '';
   SYNC_IN = true; try { render(true); } finally { SYNC_IN = false; }
+  if (fk) { const n = document.querySelector(fk); if (n) n.focus({preventScroll:true}); }
 });
 /* Pop-up menus (start year, Checklist intake year, Fields filters): apply, redraw, keep focus on the same menu. */
 document.addEventListener('change', e => {
@@ -5856,7 +5891,7 @@ document.addEventListener('change', e => {
 document.addEventListener('input', e => {
   if (!e.target.matches || !e.target.matches('[data-have]')) return;
   let v = parseFloat(e.target.value); if (!isFinite(v) || v < 0) v = 0;
-  S.have = v || null; saveSoon();
+  S.have = v || null; S.quizBand = false; saveSoon();   /* a newly typed amount is the latest word on money */
   const hi = haveInfo(simCalc()), out = document.getElementById('have-out'), bar = document.getElementById('have-bar');
   if (out) { out.textContent = hi ? hi.text : ''; out.classList.toggle('pos', !!(hi && hi.ok)); }
   if (bar) { bar.style.display = hi ? '' : 'none'; const i = bar.querySelector('i'); if (i) i.style.width = (hi ? hi.pct : 0) + '%'; }
@@ -5888,7 +5923,10 @@ document.addEventListener('click', e => {
   const sel = '[data-act="' + b.dataset.act + '"]' + q('data-v', b.dataset.v) + q('data-q', b.dataset.q) + q('data-o', b.dataset.o);
   setTimeout(() => {
     const a = document.activeElement; if (a && a !== document.body && document.contains(a)) return;
-    const n = document.querySelector(sel); if (n && n.getClientRects().length) n.focus({preventScroll:true});
+    /* a button that removed itself (such as "Use 2029" or "Clear my amounts") hands focus to the control it changed */
+    const near = {'sim-intake':'[data-sel="sim-intake"]', 'costreset':'[data-act="costedit"]', 'cityrent':'#sim-hero .gbasis [data-act="jump"]', 'quizband':'#quiz-res-h', 'fields-clear':'[data-sel="field-g"]', 'gloss-clear':'[data-gloss-q]'}[b.dataset.act];
+    const n = [sel, near].filter(Boolean).map(s => document.querySelector(s)).find(x => x && x.getClientRects().length);
+    if (n) n.focus({preventScroll:true});
   }, 0);
 });
 /* Skip links: the menu link lands on the open page's dock button. */
